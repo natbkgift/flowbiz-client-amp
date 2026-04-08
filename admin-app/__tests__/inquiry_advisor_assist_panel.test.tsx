@@ -35,11 +35,11 @@ describe('InquiryAdvisorAssistPanel', () => {
             signal_level: 'high',
             projects: ['grand-solaire', 'copacabana-beach-jomtien'],
             primary_project: 'grand-solaire',
-            response_channel: 'on_page_confirmation',
+            response_channel: 'phone_priority_if_connected',
             response_sla_seconds: 5,
             auto_response_message: 'Got it — you\'re comparing multiple projects.',
             confirmation_title: 'We received your request about Grand Solaire',
-            confirmation_body: 'Our advisor will contact you shortly about Grand Solaire.',
+            confirmation_body: 'Our advisor will prioritize a phone or WhatsApp follow-up shortly about Grand Solaire.',
             recommended_approach: 'Push toward conversion: confirm live availability, key terms, and the fastest next step.',
             suggested_first_reply: 'There are current options matching Grand Solaire right now. Shall I send the details now?',
             priority_label: 'high',
@@ -64,7 +64,8 @@ describe('InquiryAdvisorAssistPanel', () => {
 
     expect(screen.getByRole('heading', { name: /advisor assist/i })).toBeTruthy();
     expect(screen.getByText(/grand solaire, copacabana beach jomtien/i)).toBeTruthy();
-    expect(screen.getByText(/our advisor will contact you shortly/i)).toBeTruthy();
+    expect(screen.getByText(/prioritize a phone or whatsapp follow-up shortly/i)).toBeTruthy();
+    expect(screen.getByText(/phone \/ whatsapp first/i)).toBeTruthy();
     expect(screen.getByText(/push toward conversion/i)).toBeTruthy();
     expect(screen.getByText(/shall i send the details now/i)).toBeTruthy();
     expect(screen.getByText(/i can break down the key differences/i)).toBeTruthy();

@@ -13,6 +13,8 @@ function humanizeToken(locale: InquiryLocale, value: string | null | undefined):
     senior: { en: "Senior queue", th: "คิว senior" },
     default: { en: "Default queue", th: "คิวปกติ" },
     email_if_connected: { en: "Email when connected", th: "อีเมลเมื่อระบบส่งเชื่อมต่อแล้ว" },
+    email_and_whatsapp_if_connected: { en: "Email + WhatsApp available", th: "อีเมลและ WhatsApp พร้อมใช้งาน" },
+    phone_priority_if_connected: { en: "Phone / WhatsApp first", th: "โทรหรือ WhatsApp ก่อน" },
     whatsapp_or_line_if_connected: { en: "WhatsApp / LINE when connected", th: "WhatsApp / LINE เมื่อระบบส่งเชื่อมต่อแล้ว" },
     on_page_confirmation: { en: "On-page confirmation", th: "ข้อความยืนยันบนหน้าเว็บ" },
     project_consultation: { en: "Project consultation", th: "คุยต่อจากหน้าโครงการ" },

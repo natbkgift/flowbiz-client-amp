@@ -408,12 +408,68 @@ def _priority_score(intent: str, signal_level: str, lead_score: int) -> int:
     return max(0, min(int(base), 100))
 
 
-def _response_channel(email: str | None, phone: str | None) -> str:
-    if normalize_text(email):
+def _call_requested(tags: list[str] | None) -> bool:
+    return normalize_token(_pick_tag_value(tags, "call_requested:")) == "yes"
+
+
+def _response_channel(email: str | None, phone: str | None, *, call_requested: bool) -> str:
+    has_email = bool(normalize_text(email))
+    has_phone = bool(normalize_text(phone))
+    if call_requested and has_phone:
+        return "phone_priority_if_connected"
+    if has_email and has_phone:
+        return "email_and_whatsapp_if_connected"
+    if has_email:
         return "email_if_connected"
-    if normalize_text(phone):
+    if has_phone:
         return "whatsapp_or_line_if_connected"
     return "on_page_confirmation"
+
+
+def _confirmation_body(
+    locale: Locale,
+    primary_label: str | None,
+    response_channel: str,
+) -> str:
+    if locale == "th":
+        if response_channel == "phone_priority_if_connected":
+            return (
+                f"ที่ปรึกษาจะโทรหรือทัก WhatsApp พร้อมบริบทของ {primary_label} ในไม่ช้า"
+                if primary_label
+                else "ที่ปรึกษาจะโทรหรือทัก WhatsApp พร้อมขั้นตอนถัดไปในไม่ช้า"
+            )
+        if response_channel == "email_and_whatsapp_if_connected":
+            return (
+                f"ที่ปรึกษาจะ follow up ทางอีเมลหรือ WhatsApp พร้อมบริบทของ {primary_label} ในไม่ช้า"
+                if primary_label
+                else "ที่ปรึกษาจะ follow up ทางอีเมลหรือ WhatsApp พร้อมขั้นตอนถัดไปในไม่ช้า"
+            )
+        return (
+            f"ที่ปรึกษาจะติดต่อกลับพร้อมบริบทของ {primary_label} ในไม่ช้า"
+            if primary_label
+            else "ที่ปรึกษาจะติดต่อกลับพร้อมขั้นตอนถัดไปในไม่ช้า"
+        )
+
+    if response_channel == "phone_priority_if_connected":
+        return (
+            (
+                "Our advisor will prioritize a phone or WhatsApp "
+                f"follow-up shortly about {primary_label}."
+            )
+            if primary_label
+            else "Our advisor will prioritize a phone or WhatsApp follow-up shortly."
+        )
+    if response_channel == "email_and_whatsapp_if_connected":
+        return (
+            f"Our advisor will follow up by email or WhatsApp shortly about {primary_label}."
+            if primary_label
+            else "Our advisor will follow up by email or WhatsApp shortly."
+        )
+    return (
+        f"Our advisor will contact you shortly about {primary_label}."
+        if primary_label
+        else "Our advisor will contact you shortly."
+    )
 
 
 def build_sales_automation_snapshot(
@@ -442,7 +498,11 @@ def build_sales_automation_snapshot(
     )
     buyer_fit = context["buyer_fit"] if isinstance(context["buyer_fit"], str) else None
     source = context["source"] if isinstance(context["source"], str) else None
-    response_channel = _response_channel(email, phone)
+    response_channel = _response_channel(
+        email,
+        phone,
+        call_requested=_call_requested(tags),
+    )
     priority_score = _priority_score(normalized_intent, signal_level, lead_score)
     priority_label = _priority_label(normalized_intent, signal_level, priority_score)
     route_hint: RouteHint = "senior" if priority_label == "high" else "default"
@@ -483,13 +543,7 @@ def build_sales_automation_snapshot(
         else "We received your request"
     )
     confirmation_body = (
-        f"ที่ปรึกษาจะติดต่อกลับพร้อมบริบทของ {primary_label} ในไม่ช้า"
-        if locale == "th" and primary_label
-        else "ที่ปรึกษาจะติดต่อกลับพร้อมขั้นตอนถัดไปในไม่ช้า"
-        if locale == "th"
-        else f"Our advisor will contact you shortly about {primary_label}."
-        if primary_label
-        else "Our advisor will contact you shortly."
+        _confirmation_body(locale, primary_label, response_channel)
     )
     return SalesAutomationSnapshot(
         locale=locale,
@@ -528,14 +582,19 @@ def build_sales_automation_snapshot(
 
 def build_advisor_summary_note(snapshot: SalesAutomationSnapshot) -> str:
     project_line = ", ".join(_decode_slug(item) or item for item in snapshot.projects) or "-"
+    next_follow_up = snapshot.next_follow_up_at.isoformat() if snapshot.next_follow_up_at else "-"
     if snapshot.locale == "th":
         return "\n".join(
             [
                 "Advisor Summary:",
                 f"- Project: {project_line}",
                 f"- Intent: {snapshot.intent}",
+                f"- Source: {snapshot.source or '-'}",
                 f"- Buyer Fit: {snapshot.buyer_fit or '-'}",
                 f"- Signal Level: {snapshot.signal_level}",
+                f"- Response Channel: {snapshot.response_channel}",
+                f"- Priority: {snapshot.priority_label} ({snapshot.priority_score})",
+                f"- Next Follow-up: {next_follow_up}",
                 "",
                 "Recommended Approach:",
                 f"- {snapshot.recommended_approach}",
@@ -552,8 +611,12 @@ def build_advisor_summary_note(snapshot: SalesAutomationSnapshot) -> str:
             "Lead Summary:",
             f"- Project: {project_line}",
             f"- Intent: {snapshot.intent}",
+            f"- Source: {snapshot.source or '-'}",
             f"- Buyer Fit: {snapshot.buyer_fit or '-'}",
             f"- Signal Level: {snapshot.signal_level}",
+            f"- Response Channel: {snapshot.response_channel}",
+            f"- Priority: {snapshot.priority_label} ({snapshot.priority_score})",
+            f"- Next Follow-up: {next_follow_up}",
             "",
             "Recommended Approach:",
             f"- {snapshot.recommended_approach}",
@@ -646,6 +709,8 @@ def build_follow_up_execution_note(snapshot: SalesAutomationSnapshot, stage: Fol
                 "Follow-up Trigger:",
                 f"- Stage: {stage}",
                 f"- Message: {message}",
+                f"- Response Channel: {snapshot.response_channel}",
+                f"- Priority: {snapshot.priority_label} ({snapshot.priority_score})",
                 f"- Stop if: {', '.join(snapshot.stop_conditions)}",
             ]
         )
@@ -654,6 +719,8 @@ def build_follow_up_execution_note(snapshot: SalesAutomationSnapshot, stage: Fol
             "Follow-up Trigger:",
             f"- Stage: {stage}",
             f"- Message: {message}",
+            f"- Response Channel: {snapshot.response_channel}",
+            f"- Priority: {snapshot.priority_label} ({snapshot.priority_score})",
             f"- Stop if: {', '.join(snapshot.stop_conditions)}",
         ]
     )

@@ -273,10 +273,14 @@ export function LeadForm({
     if (!value) return null;
     if (locale === 'th') {
       if (value === 'email_if_connected') return 'ทีมจะเริ่มจากอีเมลก่อนหากช่องทางส่งอัตโนมัติพร้อมใช้งาน';
+      if (value === 'email_and_whatsapp_if_connected') return 'ทีมสามารถ follow up ต่อได้ทั้งทางอีเมลและ WhatsApp เมื่อช่องทางส่งอัตโนมัติพร้อมใช้งาน';
+      if (value === 'phone_priority_if_connected') return 'ทีมจะให้ความสำคัญกับการโทรหรือ WhatsApp ก่อนเมื่อช่องทางส่งอัตโนมัติพร้อมใช้งาน';
       if (value === 'whatsapp_or_line_if_connected') return 'ทีมจะเริ่มจาก WhatsApp หรือ LINE หากช่องทางส่งอัตโนมัติพร้อมใช้งาน';
       if (value === 'on_page_confirmation') return 'ตอนนี้การยืนยันแรกเกิดขึ้นบนหน้านี้ทันที';
     }
     if (value === 'email_if_connected') return 'The team will start with email when the automated sender is connected.';
+    if (value === 'email_and_whatsapp_if_connected') return 'The team can continue on email and WhatsApp when the automated sender is connected.';
+    if (value === 'phone_priority_if_connected') return 'The team will prioritize a phone call or WhatsApp when the automated sender is connected.';
     if (value === 'whatsapp_or_line_if_connected') return 'The team will start with WhatsApp or LINE when the automated sender is connected.';
     if (value === 'on_page_confirmation') return 'The first response is confirmed on this page immediately.';
     return value;

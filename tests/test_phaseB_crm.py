@@ -6,6 +6,10 @@ from sqlalchemy import func, select
 from apps.api.routes.admin_crm import _spam_filter_clause
 from packages.core.database import SessionLocal
 from packages.core.models import AuditLog, Inquiry, Property
+from packages.core.sales_automation import (
+    build_advisor_summary_note,
+    build_sales_automation_snapshot,
+)
 from scripts.process_sales_followups import run_follow_up_processor
 
 
@@ -432,6 +436,7 @@ def test_sales_automation_snapshot_is_returned_and_seeded_into_timeline(client):
 
     assert body["sales_automation"]["intent"] == "project_compare"
     assert body["sales_automation"]["priority_label"] == "high"
+    assert body["sales_automation"]["response_channel"] == "email_if_connected"
     assert body["sales_automation"]["response_sla_seconds"] == 5
     assert body["sales_automation"]["projects"] == ["grand-solaire", "copacabana-beach-jomtien"]
     assert body["sales_automation"]["follow_up_plan"][0]["stage"] == "t5m"
@@ -441,6 +446,29 @@ def test_sales_automation_snapshot_is_returned_and_seeded_into_timeline(client):
     notes = [event.get("note") or "" for event in timeline.json()["data"]]
     assert any("Lead Summary:" in note for note in notes)
     assert any("Suggested First Reply:" in note for note in notes)
+
+
+def test_sales_automation_summary_note_includes_handoff_channel_and_priority():
+    snapshot = build_sales_automation_snapshot(
+        intent="project_compare",
+        source_page="/en/contact",
+        email="automation@example.com",
+        phone="+66881234567",
+        tags=[
+            "locale:en",
+            "lead_source:compare_hero",
+            "project_scope:grand-solaire",
+            "buyer_fit:investor_compare",
+            "call_requested:yes",
+        ],
+        lead_score=82,
+    )
+
+    note = build_advisor_summary_note(snapshot)
+
+    assert "Response Channel: phone_priority_if_connected" in note
+    assert "Priority: high" in note
+    assert "Next Follow-up:" in note
 
 
 def test_inquiry_lead_tier_backfills_signal_level_when_entry_point_hint_is_missing(client):
@@ -469,6 +497,33 @@ def test_inquiry_lead_tier_backfills_signal_level_when_entry_point_hint_is_missi
     assert body["sales_automation"]["signal_level"] == "medium"
     assert body["sales_automation"]["priority_label"] == "medium"
     assert body["sales_automation"]["priority_score"] >= 65
+
+
+def test_inquiry_call_requested_prioritizes_phone_handoff_and_notification_copy(client):
+    inquiry_resp = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Call Requested Lead",
+            "email": "call-requested@example.com",
+            "phone": "+66881234567",
+            "message": "Please call me back with the best options.",
+            "source_page": "/en/contact",
+            "intent": "project_consultation",
+            "tags": [
+                "locale:en",
+                "lead_source:contact_form",
+                "project_scope:grand-solaire",
+            ],
+            "lead_score": 72,
+            "call_requested": True,
+        },
+    )
+    assert inquiry_resp.status_code == 201, inquiry_resp.text
+    body = inquiry_resp.json()
+
+    assert body["sales_automation"]["response_channel"] == "phone_priority_if_connected"
+    assert "phone or WhatsApp" in body["sales_automation"]["confirmation_body"]
+    assert body["whatsapp_url"] == "https://wa.me/66881234567"
 
 
 def test_follow_up_processor_advances_sales_sequence_and_writes_timeline(client):

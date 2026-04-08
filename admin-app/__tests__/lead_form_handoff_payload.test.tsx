@@ -19,9 +19,9 @@ describe('LeadForm handoff payload', () => {
         id: 'inq-1',
         sales_automation: {
           confirmation_title: 'We received your request about Alpha Residence',
-          confirmation_body: 'Our advisor will contact you shortly about Alpha Residence.',
+          confirmation_body: 'Our advisor will follow up by email or WhatsApp shortly about Alpha Residence.',
           auto_response_message: 'Got it — you\'re comparing multiple projects. I\'ll prepare a clear side-by-side recommendation for you.',
-          response_channel: 'on_page_confirmation',
+          response_channel: 'email_and_whatsapp_if_connected',
           response_sla_seconds: 5,
         },
       }),
@@ -46,6 +46,7 @@ describe('LeadForm handoff payload', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Your name'), { target: { value: 'Alex' } });
     fireEvent.change(screen.getByPlaceholderText('Email (optional if phone provided)'), { target: { value: 'alex@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Phone (optional if email provided)'), { target: { value: '+66891234567' } });
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     const calls = fetchMock.mock.calls as unknown as Array<[unknown, unknown?]>;
@@ -74,6 +75,7 @@ describe('LeadForm handoff payload', () => {
     expect(body.message).toContain('Lead context:');
     expect(body.message).toContain('Projects in scope: Alpha Residence, Beta Bay');
     expect(screen.getByText(/we received your request about alpha residence/i)).toBeTruthy();
+    expect(screen.getByText(/email and whatsapp/i)).toBeTruthy();
     expect(screen.getByText(/side-by-side recommendation/i)).toBeTruthy();
     expect(screen.getByText(/5-second sales-layer sla/i)).toBeTruthy();
     expect(screen.getByRole('link', { name: /browse matching listings/i })).toHaveAttribute('href', '/en/buy');
