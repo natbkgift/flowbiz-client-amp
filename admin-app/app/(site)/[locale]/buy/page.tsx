@@ -89,7 +89,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     : 'The team uses this brief to return with a shortlist framed around quota, transfer costs, and the checks worth covering on the next call without restarting the conversation.';
 
   return (
-    <main id="main-content" className="buy-page decision-page--confidence">
+    <main id="main-content" className="page-template--catalogue buy-page decision-page--confidence">
       <Breadcrumbs
         items={[
           { label: dict.nav.home, href: `/${locale}` },

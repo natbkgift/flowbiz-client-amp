@@ -27,7 +27,7 @@ export default async function PrivacyPage(
   const isTh = locale === 'th';
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--narrative">
       <section className="hero hero--page">
         <Container variant="readable">
           <h1 className="headline">{isTh ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}</h1>

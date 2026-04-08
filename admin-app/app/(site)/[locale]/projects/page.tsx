@@ -255,7 +255,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
     );
 
     return (
-      <main id="main-content" className="projects-page decision-page--confidence">
+      <main id="main-content" className="page-template--catalogue projects-page decision-page--confidence">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <PublicAdvisoryHero
           eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
@@ -372,7 +372,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
   );
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--catalogue projects-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
         eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}

@@ -88,7 +88,7 @@ export default async function BlogArticlePage(
 
   if (!post) {
     return (
-      <main className="section" id="main-content">
+      <main className="section page-template--narrative" id="main-content">
         <Container variant="readable">
           <h1 className="section-title">{locale === 'th' ? 'ไม่พบบทความ' : 'Article not found'}</h1>
           <p className="section-subtitle">
@@ -138,7 +138,7 @@ export default async function BlogArticlePage(
   ];
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--narrative">
       <PublicAdvisoryHero
         eyebrow={category || dict.advisory.heroEyebrow}
         title={title}

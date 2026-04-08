@@ -100,6 +100,7 @@ describe('public design system contract', () => {
     expect(foundationSpec).toContain('## Surface And Elevation');
     expect(foundationSpec).toContain('## Controls And CTA Hierarchy');
     expect(foundationSpec).toContain('## Responsive Component Patterns');
+    expect(foundationSpec).toContain('## Page Templates And Implementation Rules');
     expect(foundationSpec).toContain('Home final CTA may use an `h2` element with the `type-h1` class');
     expect(foundationSpec).toContain('Long-form routes that keep a supporting rail may keep the outer section shell at `default`, but the narrative column itself should still respect the readable measure.');
   });
@@ -201,14 +202,22 @@ describe('public design system contract', () => {
 
     expect(blogArticle).toContain('detail-stack detail-stack--readable');
     expect(blogArticle.match(/variant="readable"/g)?.length).toBe(1);
+    expect(blogArticle).toContain('page-template--narrative');
 
     expect(aboutPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(aboutPage).toContain('page-template--narrative');
     expect(howWeWorkPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(howWeWorkPage).toContain('page-template--narrative');
     expect(termsPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(termsPage).toContain('page-template--narrative');
     expect(privacyPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(privacyPage).toContain('page-template--narrative');
 
     expect(buyPage.match(/variant="wide"/g)?.length).toBe(6);
+    expect(buyPage).toContain('page-template--catalogue');
     expect(rentPage.match(/variant="wide"/g)?.length).toBe(7);
+    expect(rentPage).toContain('page-template--catalogue');
     expect(projectsPage.match(/variant="wide"/g)?.length).toBe(2);
+    expect(projectsPage).toContain('page-template--catalogue');
   });
 });

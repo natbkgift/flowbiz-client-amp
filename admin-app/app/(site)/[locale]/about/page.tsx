@@ -123,7 +123,7 @@ export default async function AboutPage(
   ];
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--narrative">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
         title={aboutInfo?.title || dict.about.heroTitle}

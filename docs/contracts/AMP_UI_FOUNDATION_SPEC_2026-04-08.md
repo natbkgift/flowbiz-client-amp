@@ -179,6 +179,22 @@ Rules:
 - Prefer `PublicActionRow` with `stackOnMobile` before creating a new action-stacking rule for a hero, CTA block, or closing panel.
 - When a responsive behavior is reused across more than one public component, promote it to a named shared pattern before adding more local breakpoint overrides.
 
+## Page Templates And Implementation Rules
+
+Public route work should declare which template it belongs to and then reuse the matching foundation contracts.
+
+| Template | Marker | Required contract |
+| --- | --- | --- |
+| Narrative / support | `page-template--narrative` | readable narrative blocks, content-flow prose, support CTA shell, and no catalogue-style wide inventory framing |
+| Catalogue / inventory | `page-template--catalogue` | wide section shells, inline controls where needed, card grids, and catalogue-safe closing CTA usage |
+| Decision detail | existing `decision-page--confidence` plus route-specific detail marker | `PublicAdvisoryHero`, decision detail rail/layout pattern, and mobile CTA pattern when the route owns a fixed mobile action bar |
+
+Rules:
+
+- New public routes should choose one of the template markers above instead of inventing an unnamed hybrid layout.
+- If a route legitimately combines two template modes, keep one primary template marker and document the exception in this spec.
+- Template markers are implementation guardrails: contract tests should be able to verify them directly from route files.
+
 ## Page Template Rules For This Slice
 
 These rules are enforced starting now even before the rest of Phase 0 lands:

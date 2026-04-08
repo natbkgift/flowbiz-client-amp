@@ -78,7 +78,7 @@ export default async function HowWeWorkPage(
   ];
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--narrative">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
         title={processInfo?.title || (locale === 'th' ? 'How we work' : 'How we work')}

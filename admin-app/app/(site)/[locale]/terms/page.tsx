@@ -27,7 +27,7 @@ export default async function TermsPage(
   const isTh = locale === 'th';
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--narrative">
       <section className="hero hero--page">
         <Container variant="readable">
           <h1 className="headline">{isTh ? 'ข้อกำหนดการใช้บริการ' : 'Terms of Service'}</h1>

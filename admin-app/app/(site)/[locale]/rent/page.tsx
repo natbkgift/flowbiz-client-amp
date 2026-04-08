@@ -38,7 +38,7 @@ export default async function RentPage(props: { params: Promise<{ locale: string
   }
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="page-template--catalogue">
       <Breadcrumbs
         items={[
             { label: dict.nav.home, href: `/${locale}` },
