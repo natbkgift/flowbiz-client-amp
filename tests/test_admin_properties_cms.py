@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -272,6 +272,83 @@ def test_patch_active_requires_listing_quality_gate(client: TestClient) -> None:
     assert ok.json()["status"] == "active"
 
 
+def test_create_rejects_invalid_canonical_property_fields(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+
+    blocked = client.post(
+        "/admin/properties",
+        headers=headers,
+        json={
+            "source_id": f"src-{uuid4()}",
+            "slug": f"create-invalid-{uuid4()}",
+            "title": "Invalid Canonical Property",
+            "type": "lease",
+            "property_type": "castle",
+            "status": "inactive",
+            "price": 1500000,
+            "currency": "THBA",
+            "price_period": "quarterly",
+            "bedrooms": 21,
+            "bathrooms": 21,
+            "size_sqm": 35,
+            "floor": 9,
+            "floors": 3,
+            "furnishing": "luxury",
+            "view": "mountain",
+            "address": "Test Address",
+            "city": "Pattaya",
+            "cover_image": cover,
+            "local_images": [cover],
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    errors = blocked.json()["detail"]["errors"]
+    assert "property_type must be one of condo, villa, house, land, hotel, shop, office" in errors
+    assert "type must be one of new, resale, rent" in errors
+    assert "currency must be a 3-letter ISO code" in errors
+    assert "price_period must be one of day, week, month, or year" in errors
+    assert "bedrooms must be between 0 and 20" in errors
+    assert "bathrooms must be between 0 and 20" in errors
+    assert "floor cannot exceed floors" in errors
+    assert "furnishing must be one of unfurnished, partial, or fully_furnished" in errors
+    assert "view must be a supported view token" in errors
+
+
+def test_patch_rejects_invalid_canonical_property_fields(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+    created = _create_property(client, headers, slug=f"patch-invalid-{uuid4()}", cover=cover)
+
+    blocked = client.patch(
+        f"/admin/properties/{created['id']}",
+        headers=headers,
+        json={
+            "currency": "TH1",
+            "price_period": "quarterly",
+            "bedrooms": 21,
+            "bathrooms": 21,
+            "floor": 12,
+            "floors": 2,
+            "furnishing": "luxury",
+            "view": "mountain",
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    errors = blocked.json()["detail"]["errors"]
+    assert "currency must be a 3-letter ISO code" in errors
+    assert "price_period must be one of day, week, month, or year" in errors
+    assert "bedrooms must be between 0 and 20" in errors
+    assert "bathrooms must be between 0 and 20" in errors
+    assert "floor cannot exceed floors" in errors
+    assert "furnishing must be one of unfurnished, partial, or fully_furnished" in errors
+    assert "view must be a supported view token" in errors
+
+
 def test_publish_quality_gate_blocks_price_media_and_location_failures(client: TestClient) -> None:
     headers = _make_admin_headers()
     cover = f"/media/library/{uuid4()}.jpg"
@@ -280,49 +357,124 @@ def test_publish_quality_gate_blocks_price_media_and_location_failures(client: T
     created = _create_property(client, headers, slug=f"gate-{uuid4()}", cover=cover)
     property_id = created["id"]
 
-    bad_price = client.patch(
-        f"/admin/properties/{property_id}",
-        headers=headers,
-        json={"price": 0},
-    )
-    assert bad_price.status_code == 200, bad_price.text
+    with SessionLocal() as db:
+        row = db.get(Property, UUID(property_id))
+        assert row is not None
+        row.price = 0
+        db.add(row)
+        db.commit()
+
     publish_bad_price = client.post(f"/admin/properties/{property_id}/publish", headers=headers)
     assert publish_bad_price.status_code == 422, publish_bad_price.text
     assert "price must be greater than zero" in str(publish_bad_price.json())
 
-    restore_price = client.patch(
-        f"/admin/properties/{property_id}",
-        headers=headers,
-        json={"price": 1200000},
-    )
-    assert restore_price.status_code == 200, restore_price.text
+    with SessionLocal() as db:
+        row = db.get(Property, UUID(property_id))
+        assert row is not None
+        row.price = 1200000
+        row.cover_image = None
+        row.cover_image_url = None
+        row.local_images = []
+        row.images = []
+        db.add(row)
+        db.commit()
 
-    bad_media = client.patch(
-        f"/admin/properties/{property_id}",
-        headers=headers,
-        json={"cover_image": None, "cover_image_url": None, "local_images": [], "images": []},
-    )
-    assert bad_media.status_code == 200, bad_media.text
     publish_bad_media = client.post(f"/admin/properties/{property_id}/publish", headers=headers)
     assert publish_bad_media.status_code == 422, publish_bad_media.text
     assert "cover media is required and must use local /media path" in str(publish_bad_media.json())
 
-    restore_media = client.patch(
-        f"/admin/properties/{property_id}",
-        headers=headers,
-        json={"cover_image": cover, "cover_image_url": cover, "local_images": [cover]},
-    )
-    assert restore_media.status_code == 200, restore_media.text
+    with SessionLocal() as db:
+        row = db.get(Property, UUID(property_id))
+        assert row is not None
+        row.cover_image = cover
+        row.cover_image_url = cover
+        row.local_images = [cover]
+        row.images = []
+        row.address = ""
+        row.city = ""
+        row.project_id = None
+        row.area_id = None
+        db.add(row)
+        db.commit()
 
-    bad_location = client.patch(
-        f"/admin/properties/{property_id}",
-        headers=headers,
-        json={"address": "", "city": "", "project_id": None, "area_id": None},
-    )
-    assert bad_location.status_code == 200, bad_location.text
     publish_bad_location = client.post(f"/admin/properties/{property_id}/publish", headers=headers)
     assert publish_bad_location.status_code == 422, publish_bad_location.text
     assert "location context is required" in str(publish_bad_location.json())
+
+
+def test_publish_and_bulk_status_reject_db_seeded_invalid_property_fields(
+    client: TestClient,
+) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+
+    publish_created = _create_property(client, headers, slug=f"publish-invalid-{uuid4()}", cover=cover)
+    bulk_created = _create_property(client, headers, slug=f"bulk-status-invalid-{uuid4()}", cover=cover)
+
+    with SessionLocal() as db:
+        publish_row = db.get(Property, UUID(publish_created["id"]))
+        assert publish_row is not None
+        publish_row.currency = "TH1"
+        publish_row.floor = 10
+        publish_row.floors = 2
+        db.add(publish_row)
+
+        bulk_row = db.get(Property, UUID(bulk_created["id"]))
+        assert bulk_row is not None
+        bulk_row.furnishing = "luxury"
+        bulk_row.view = "mountain"
+        db.add(bulk_row)
+        db.commit()
+
+    publish = client.post(f"/admin/properties/{publish_created['id']}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    assert publish.json()["detail"]["code"] == "property_structured_validation_failed"
+    publish_errors = publish.json()["detail"]["errors"]
+    assert "currency must be a 3-letter ISO code" in publish_errors
+    assert "floor cannot exceed floors" in publish_errors
+
+    bulk = client.post(
+        "/admin/properties/bulk/status",
+        headers=headers,
+        json={"property_ids": [bulk_created["id"]], "status": "active"},
+    )
+    assert bulk.status_code == 422, bulk.text
+    assert bulk.json()["detail"]["code"] == "property_structured_validation_failed"
+    bulk_errors = bulk.json()["detail"]["errors"]
+    assert "furnishing must be one of unfurnished, partial, or fully_furnished" in bulk_errors
+    assert "view must be a supported view token" in bulk_errors
+
+
+def test_bulk_update_rejects_invalid_canonical_property_fields(client: TestClient) -> None:
+    headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
+    created = _create_property(client, headers, slug=f"bulk-update-invalid-{uuid4()}", cover=cover)
+
+    blocked = client.post(
+        "/admin/properties/bulk/update",
+        headers=headers,
+        json={
+            "property_ids": [created["id"]],
+            "fields": {
+                "currency": "TH1",
+                "price_period": "quarterly",
+                "floor": 10,
+                "floors": 2,
+                "furnishing": "luxury",
+                "view": "mountain",
+            },
+        },
+    )
+    assert blocked.status_code == 422, blocked.text
+    assert blocked.json()["detail"]["code"] == "property_structured_validation_failed"
+    errors = blocked.json()["detail"]["errors"]
+    assert "currency must be a 3-letter ISO code" in errors
+    assert "price_period must be one of day, week, month, or year" in errors
+    assert "floor cannot exceed floors" in errors
+    assert "furnishing must be one of unfurnished, partial, or fully_furnished" in errors
+    assert "view must be a supported view token" in errors
 
 
 def test_property_canonical_fields_precede_legacy_without_breaking_compat(

@@ -1290,17 +1290,22 @@ def create_property(
         cover_image_url=payload.cover_image_url,
     )
     next_status = payload.status.value if hasattr(payload.status, "value") else str(payload.status)
+    validation_errors = validate_property_fields(
+        property_type=payload.property_type,
+        transaction_type=payload.type,
+        price=float(payload.price) if isinstance(payload.price, Decimal) else payload.price,
+        currency=payload.currency,
+        price_period=payload.price_period,
+        bedrooms=payload.bedrooms,
+        bathrooms=payload.bathrooms,
+        size_sqm=payload.size_sqm if payload.size_sqm is not None else payload.size,
+        floor=payload.floor,
+        floors=payload.floors,
+        furnishing=payload.furnishing,
+        view=payload.view,
+        features=features or None,
+    )
     if next_status == PropertyStatus.ACTIVE.value:
-        validation_errors = validate_property_fields(
-            property_type=payload.property_type,
-            transaction_type=payload.type,
-            price=float(payload.price) if isinstance(payload.price, Decimal) else payload.price,
-            price_period=payload.price_period,
-            bedrooms=payload.bedrooms,
-            bathrooms=payload.bathrooms,
-            size_sqm=payload.size_sqm if payload.size_sqm is not None else payload.size,
-            features=features or None,
-        )
         validation_errors.extend(
             _listing_quality_gate_errors(
                 cover_image=normalized_cover_image,
@@ -1311,14 +1316,14 @@ def create_property(
                 project_id=payload.project_id,
             )
         )
-        if validation_errors:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail={
-                    "code": "property_structured_validation_failed",
-                    "errors": validation_errors,
-                },
-            )
+    if validation_errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "property_structured_validation_failed",
+                "errors": validation_errors,
+            },
+        )
 
     prop = Property(
         source_id=payload.source_id,
@@ -1402,27 +1407,30 @@ def update_property(
     next_status = (
         next_status_raw.value if hasattr(next_status_raw, "value") else str(next_status_raw)
     )
+    validation_errors = validate_property_fields(
+        property_type=data.get("property_type", prop.property_type),
+        transaction_type=data.get("type", prop.type),
+        price=data.get("price", float(prop.price) if isinstance(prop.price, Decimal) else prop.price),
+        currency=data.get("currency", prop.currency),
+        price_period=data.get("price_period", prop.price_period),
+        bedrooms=data.get("bedrooms", prop.bedrooms),
+        bathrooms=data.get("bathrooms", prop.bathrooms),
+        size_sqm=(
+            data.get("size_sqm")
+            if data.get("size_sqm") is not None
+            else data.get("size")
+            if data.get("size") is not None
+            else float(prop.size_sqm or prop.size)
+            if (prop.size_sqm or prop.size)
+            else None
+        ),
+        floor=data.get("floor", prop.floor),
+        floors=data.get("floors", prop.floors),
+        furnishing=data.get("furnishing", prop.furnishing),
+        view=data.get("view", prop.view),
+        features=data.get("features", prop.features),
+    )
     if next_status == PropertyStatus.ACTIVE.value:
-        validation_errors = validate_property_fields(
-            property_type=data.get("property_type", prop.property_type),
-            transaction_type=data.get("type", prop.type),
-            price=data.get(
-                "price", float(prop.price) if isinstance(prop.price, Decimal) else prop.price
-            ),
-            price_period=data.get("price_period", prop.price_period),
-            bedrooms=data.get("bedrooms", prop.bedrooms),
-            bathrooms=data.get("bathrooms", prop.bathrooms),
-            size_sqm=(
-                data.get("size_sqm")
-                if data.get("size_sqm") is not None
-                else data.get("size")
-                if data.get("size") is not None
-                else float(prop.size_sqm or prop.size)
-                if (prop.size_sqm or prop.size)
-                else None
-            ),
-            features=prop.features,
-        )
         validation_errors.extend(
             _listing_quality_gate_errors(
                 cover_image=data.get("cover_image", prop.cover_image),
@@ -1433,14 +1441,14 @@ def update_property(
                 project_id=data.get("project_id", prop.project_id),
             )
         )
-        if validation_errors:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail={
-                    "code": "property_structured_validation_failed",
-                    "errors": validation_errors,
-                },
-            )
+    if validation_errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "property_structured_validation_failed",
+                "errors": validation_errors,
+            },
+        )
 
     if "tags" in data:
         features = dict(prop.features or {})
@@ -1521,10 +1529,15 @@ def publish_property(
         property_type=prop.property_type,
         transaction_type=prop.type,
         price=float(prop.price) if isinstance(prop.price, Decimal) else prop.price,
+        currency=prop.currency,
         price_period=prop.price_period,
         bedrooms=prop.bedrooms,
         bathrooms=prop.bathrooms,
         size_sqm=float(prop.size_sqm or prop.size) if (prop.size_sqm or prop.size) else None,
+        floor=prop.floor,
+        floors=prop.floors,
+        furnishing=prop.furnishing,
+        view=prop.view,
         features=prop.features,
     )
     validation_errors.extend(
@@ -1601,10 +1614,15 @@ def bulk_update_property_status(
                 property_type=row.property_type,
                 transaction_type=row.type,
                 price=float(row.price) if isinstance(row.price, Decimal) else row.price,
+                currency=row.currency,
                 price_period=row.price_period,
                 bedrooms=row.bedrooms,
                 bathrooms=row.bathrooms,
                 size_sqm=float(row.size_sqm or row.size) if (row.size_sqm or row.size) else None,
+                floor=row.floor,
+                floors=row.floors,
+                furnishing=row.furnishing,
+                view=row.view,
                 features=row.features,
             )
             validation_errors.extend(
@@ -1716,6 +1734,9 @@ def bulk_update_properties(
         "bathrooms",
         "size",
         "size_sqm",
+        "floor",
+        "floors",
+        "furnishing",
         "view",
         "address",
         "city",
@@ -1775,27 +1796,32 @@ def bulk_update_properties(
         )
 
         next_status = data.get("status", row.status)
+        validation_errors = validate_property_fields(
+            property_type=data.get("property_type", row.property_type),
+            transaction_type=data.get("type", row.type),
+            price=data.get(
+                "price", float(row.price) if isinstance(row.price, Decimal) else row.price
+            ),
+            currency=data.get("currency", row.currency),
+            price_period=data.get("price_period", row.price_period),
+            bedrooms=data.get("bedrooms", row.bedrooms),
+            bathrooms=data.get("bathrooms", row.bathrooms),
+            size_sqm=(
+                data.get("size_sqm")
+                if data.get("size_sqm") is not None
+                else data.get("size")
+                if data.get("size") is not None
+                else float(row.size_sqm or row.size)
+                if (row.size_sqm or row.size)
+                else None
+            ),
+            floor=data.get("floor", row.floor),
+            floors=data.get("floors", row.floors),
+            furnishing=data.get("furnishing", row.furnishing),
+            view=data.get("view", row.view),
+            features=data.get("features", row.features),
+        )
         if next_status == PropertyStatus.ACTIVE.value:
-            validation_errors = validate_property_fields(
-                property_type=data.get("property_type", row.property_type),
-                transaction_type=data.get("type", row.type),
-                price=data.get(
-                    "price", float(row.price) if isinstance(row.price, Decimal) else row.price
-                ),
-                price_period=data.get("price_period", row.price_period),
-                bedrooms=data.get("bedrooms", row.bedrooms),
-                bathrooms=data.get("bathrooms", row.bathrooms),
-                size_sqm=(
-                    data.get("size_sqm")
-                    if data.get("size_sqm") is not None
-                    else data.get("size")
-                    if data.get("size") is not None
-                    else float(row.size_sqm or row.size)
-                    if (row.size_sqm or row.size)
-                    else None
-                ),
-                features=data.get("features", row.features),
-            )
             validation_errors.extend(
                 _listing_quality_gate_errors(
                     cover_image=data.get("cover_image", row.cover_image),
@@ -1806,14 +1832,14 @@ def bulk_update_properties(
                     project_id=data.get("project_id", row.project_id),
                 )
             )
-            if validation_errors:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                    detail={
-                        "code": "property_structured_validation_failed",
-                        "errors": validation_errors,
-                    },
-                )
+        if validation_errors:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "code": "property_structured_validation_failed",
+                    "errors": validation_errors,
+                },
+            )
 
         if "tags" in data:
             features = dict(row.features or {})
