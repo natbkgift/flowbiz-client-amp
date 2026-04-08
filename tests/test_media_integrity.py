@@ -19,13 +19,23 @@ from packages.core.media_integrity import (
     IntegrityReport,
     run_scan,
 )
-from packages.core.models import Area, Developer, MediaAsset, Project, Property, TeamMember, User
+from packages.core.models import (
+    Area,
+    Article,
+    Developer,
+    MediaAsset,
+    Project,
+    Property,
+    TeamMember,
+    User,
+)
 
 
 @pytest.fixture(autouse=True)
 def _cleanup_tables() -> Generator[None, None, None]:
     init_db()
     with SessionLocal() as db:
+        db.query(Article).delete()
         db.query(Property).delete()
         db.query(Project).delete()
         db.query(Area).delete()
@@ -36,6 +46,7 @@ def _cleanup_tables() -> Generator[None, None, None]:
         db.commit()
     yield
     with SessionLocal() as db:
+        db.query(Article).delete()
         db.query(Property).delete()
         db.query(Project).delete()
         db.query(Area).delete()
@@ -207,6 +218,158 @@ def test_run_scan_flags_invalid_media_asset_storage_path(tmp_path: Path) -> None
     )
     assert finding is not None
     assert report.summary.invalid_path_format_count >= 1
+
+
+def test_run_scan_flags_non_library_local_entity_path(tmp_path: Path) -> None:
+    media_root = tmp_path / "media"
+    media_root.mkdir(parents=True, exist_ok=True)
+    bad_path = f"/media/uploads/noncanonical-{uuid4()}.jpg"
+
+    with SessionLocal() as db:
+        prop = _make_property(cover_image=bad_path, local_images=[bad_path])
+        db.add(prop)
+        db.commit()
+        source_id = prop.source_id
+
+        report = run_scan(db, media_root=media_root, media_public_prefix="/media")
+
+    finding = next(
+        (
+            item
+            for item in report.findings
+            if item.category == "invalid_path_format"
+            and item.record_id == source_id
+            and item.entity == "properties.cover_image"
+            and item.value == bad_path
+        ),
+        None,
+    )
+    assert finding is not None
+    assert report.summary.invalid_path_format_count >= 1
+
+
+def test_run_scan_detects_article_hero_hotlink_leakage(tmp_path: Path) -> None:
+    media_root = tmp_path / "media"
+    media_root.mkdir(parents=True, exist_ok=True)
+
+    with SessionLocal() as db:
+        article = Article(
+            slug=f"article-hotlink-{uuid4()}",
+            category="guide",
+            status="draft",
+            title={"en": "Guide", "th": "ไกด์"},
+            excerpt={"en": "x", "th": "y"},
+            body_md={"en": "body", "th": "เนื้อหา"},
+            hero_image_url="https://cdn.example.test/article-hero.jpg",
+        )
+        db.add(article)
+        db.commit()
+
+        report = run_scan(db, media_root=media_root, media_public_prefix="/media")
+
+    finding = next(
+        (
+            item
+            for item in report.findings
+            if item.category == "external_leakage"
+            and item.entity == "articles.hero_image_url"
+            and item.value == "https://cdn.example.test/article-hero.jpg"
+        ),
+        None,
+    )
+    assert finding is not None
+
+
+def test_run_scan_warns_on_missing_relation_hint_and_usage_scope(tmp_path: Path) -> None:
+    media_root = tmp_path / "media"
+    target = media_root / "library" / f"{uuid4()}.jpg"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = b"project-cover"
+    target.write_bytes(payload)
+
+    with SessionLocal() as db:
+        asset = MediaAsset(
+            storage_path=f"/media/library/{target.name}",
+            kind="image",
+            mime_type="image/jpeg",
+            file_size_bytes=len(payload),
+            checksum_sha256=hashlib.sha256(payload).hexdigest(),
+            status="active",
+        )
+        project = Project(
+            slug=f"linked-project-{uuid4()}",
+            name="Linked Project",
+            status="published",
+            property_type="condo",
+            cover_image_url=asset.storage_path,
+            summary={"en": {"title": "ok"}, "th": {"title": "ตกลง"}},
+        )
+        db.add(asset)
+        db.add(project)
+        db.commit()
+        db.refresh(asset)
+
+        report = run_scan(db, media_root=media_root, media_public_prefix="/media")
+
+    missing_hint = next(
+        (
+            item
+            for item in report.findings
+            if item.category == "missing_relation_hint" and item.value == asset.storage_path
+        ),
+        None,
+    )
+    missing_scope = next(
+        (
+            item
+            for item in report.findings
+            if item.category == "missing_usage_scope" and item.value == asset.storage_path
+        ),
+        None,
+    )
+    assert missing_hint is not None
+    assert missing_scope is not None
+
+
+def test_run_scan_warns_on_variant_path_mismatch(tmp_path: Path) -> None:
+    media_root = tmp_path / "media"
+    target = media_root / "library" / f"{uuid4()}.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = b"variant-check"
+    target.write_bytes(payload)
+
+    with SessionLocal() as db:
+        asset = MediaAsset(
+            storage_path=f"/media/library/{target.name}",
+            kind="image",
+            mime_type="image/png",
+            file_size_bytes=len(payload),
+            checksum_sha256=hashlib.sha256(payload).hexdigest(),
+            status="active",
+        )
+        db.add(asset)
+        db.commit()
+        db.refresh(asset)
+
+        with patch(
+            "packages.core.media_integrity.read_sidecar",
+            return_value={
+                "variants": {
+                    "webp": {
+                        "available": True,
+                        "path": f"/media/library/variants/not-{asset.id}.webp",
+                        "error": None,
+                    }
+                }
+            },
+        ):
+            report = run_scan(db, media_root=media_root, media_public_prefix="/media")
+
+    finding = next(
+        (item for item in report.findings if item.category == "variant_path_mismatch"),
+        None,
+    )
+    assert finding is not None
 
 
 def test_run_scan_detects_orphan_files(tmp_path: Path) -> None:

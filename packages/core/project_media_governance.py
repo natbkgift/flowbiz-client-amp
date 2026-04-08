@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from packages.core.media_path_policy import is_library_media_path, is_local_media_path
 from packages.core.models import MediaAsset
 
 
@@ -34,7 +35,24 @@ def evaluate_project_media_governance(db: Session, *, paths: list[str]) -> Media
         if not item or item in seen:
             continue
         seen.add(item)
-        if not item.startswith("/media/"):
+        if not is_local_media_path(item):
+            errors.append(
+                MediaGovernanceIssue(
+                    level="error",
+                    path=item,
+                    detail="media path must use local /media/library/ path",
+                )
+            )
+            continue
+
+        if not is_library_media_path(item):
+            errors.append(
+                MediaGovernanceIssue(
+                    level="error",
+                    path=item,
+                    detail="media path must use local /media/library/ path",
+                )
+            )
             continue
 
         asset = db.scalar(select(MediaAsset).where(MediaAsset.storage_path == item))

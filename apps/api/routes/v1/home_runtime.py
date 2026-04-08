@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.routes.home_composer_contract import normalize_home_config, resolve_home_runtime
 from packages.core.database import get_db
+from packages.core.media_path_policy import DEFAULT_LOCAL_MEDIA_FALLBACK
 from packages.core.models import (
     Area,
     AreaStatistic,
@@ -66,7 +67,7 @@ _PUBLIC_ROUTE_SUFFIXES = {
     "/foreign-buyer-hub",
     "/market-intelligence",
 }
-_DEFAULT_MEDIA_FALLBACK = "/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp"
+_DEFAULT_MEDIA_FALLBACK = DEFAULT_LOCAL_MEDIA_FALLBACK
 _MEDIA_ROOTS = [
     Path("storage/media"),
     Path("admin-app/public/media"),

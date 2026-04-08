@@ -17,6 +17,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from packages.core.database import SessionLocal
+from packages.core.media_path_policy import linked_entity_hint, usage_scope_for
 from packages.core.models import MediaAsset, Project
 from packages.core.source_rights_registry import (
     normalize_approval_status,
@@ -88,10 +89,8 @@ def _normalize_row(src: dict[str, Any]) -> dict[str, Any]:
         "license_evidence_url": src.get("source_page_url"),
         "is_exception": is_exception,
         "exception_reason": exception_reason,
-        "usage_scope": "project-card",
-        "linked_entity_hint": f"project:{src.get('project_slug')}"
-        if src.get("project_slug")
-        else None,
+        "usage_scope": usage_scope_for("project", "cover_image_url"),
+        "linked_entity_hint": linked_entity_hint("project", src.get("project_slug")),
     }
 
 

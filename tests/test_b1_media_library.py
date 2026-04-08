@@ -9,6 +9,20 @@ import pytest
 
 from packages.core.auth import create_access_token, hash_password
 from packages.core.database import SessionLocal, init_db
+from packages.core.media_path_policy import (
+    DEFAULT_LOCAL_MEDIA_FALLBACK,
+    MediaUsageRef,
+    canonical_cover_media,
+    canonical_gallery_media,
+    default_media_fallback,
+    is_library_media_path,
+    is_local_media_path,
+    is_variant_media_path,
+    linked_entity_hint,
+    relation_hints_from_usages,
+    usage_scope_for,
+    usage_scopes_from_usages,
+)
 from packages.core.models import (
     Area,
     AreaStatistic,
@@ -132,6 +146,60 @@ def test_media_upload_validation_type_and_size(client) -> None:
         files={"file": ("too-large.jpg", huge_payload, "image/jpeg")},
     )
     assert too_large.status_code == 413, too_large.text
+
+
+def test_media_policy_helpers_identify_library_and_variant_paths() -> None:
+    assert is_local_media_path(DEFAULT_LOCAL_MEDIA_FALLBACK)
+    assert is_library_media_path(DEFAULT_LOCAL_MEDIA_FALLBACK)
+    assert is_variant_media_path(DEFAULT_LOCAL_MEDIA_FALLBACK)
+    assert default_media_fallback() == DEFAULT_LOCAL_MEDIA_FALLBACK
+
+
+def test_media_policy_helpers_prefer_canonical_cover_and_gallery_sources() -> None:
+    assert (
+        canonical_cover_media(
+            cover_image_url="/media/library/canonical-cover.webp",
+            cover_image="/media/library/legacy-cover.jpg",
+        )
+        == "/media/library/canonical-cover.webp"
+    )
+    assert (
+        canonical_cover_media(
+            cover_image_url=None,
+            cover_image="/media/library/legacy-cover.jpg",
+        )
+        == "/media/library/legacy-cover.jpg"
+    )
+    assert canonical_cover_media(cover_image_url=None, cover_image=None) is None
+
+    assert canonical_gallery_media(
+        local_images=["/media/library/a.jpg", "", "/media/library/a.jpg"],
+        images=["/media/library/b.jpg"],
+    ) == ["/media/library/a.jpg"]
+    assert canonical_gallery_media(
+        local_images=[],
+        images=["/media/library/b.jpg", "/media/library/c.jpg"],
+    ) == ["/media/library/b.jpg", "/media/library/c.jpg"]
+
+
+def test_media_policy_helpers_map_relation_hints_and_usage_scopes() -> None:
+    usages = [
+        MediaUsageRef(entity="project", identifier="demo-project", field="cover_image_url"),
+        MediaUsageRef(entity="project", identifier="demo-project", field="images"),
+        MediaUsageRef(entity="property", identifier="demo-property", field="local_images"),
+    ]
+
+    assert linked_entity_hint("project", "demo-project") == "project:demo-project"
+    assert relation_hints_from_usages(usages) == {
+        "project:demo-project",
+        "property:demo-property",
+    }
+    assert usage_scope_for("project", "cover_image_url") == "project-card"
+    assert usage_scopes_from_usages(usages) == {
+        "project-card",
+        "project-gallery",
+        "property-gallery",
+    }
 
 
 def test_media_patch_archive_restore_and_usage(client) -> None:

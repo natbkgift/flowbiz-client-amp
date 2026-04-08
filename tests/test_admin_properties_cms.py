@@ -181,6 +181,30 @@ def test_flow_c_restricted_blocked_pending_warning(client: TestClient) -> None:
     assert blocked.status_code == 422, blocked.text
     assert "property_media_governance_blocked" in str(blocked.json())
 
+    noncanonical_local = client.post(
+        "/admin/properties",
+        headers=headers,
+        json={
+            "source_id": f"src-{uuid4()}",
+            "slug": f"flow-c-local-{uuid4()}",
+            "title": "Noncanonical Local Property",
+            "type": "new",
+            "property_type": "condo",
+            "status": "inactive",
+            "price": 888888,
+            "currency": "THB",
+            "bedrooms": 1,
+            "bathrooms": 1,
+            "size_sqm": 35,
+            "address": "Blocked",
+            "city": "Pattaya",
+            "cover_image": "/media/uploads/cover.jpg",
+            "local_images": ["/media/uploads/cover.jpg"],
+        },
+    )
+    assert noncanonical_local.status_code == 422, noncanonical_local.text
+    assert "local /media/library/ path" in str(noncanonical_local.json())
+
     allowed = _create_property(client, headers, slug=f"flow-c-pending-{uuid4()}", cover=pending)
     assert len(allowed.get("media_warnings", [])) >= 1
 

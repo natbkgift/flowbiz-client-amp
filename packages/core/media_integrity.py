@@ -12,6 +12,21 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from packages.core.media_library import read_sidecar
+from packages.core.media_path_policy import (
+    MediaUsageRef,
+    is_library_media_path,
+    is_variant_media_path,
+    media_library_prefix,
+    media_variant_prefix,
+    normalize_media_public_prefix,
+    relation_hints_from_usages,
+    usage_scopes_from_usages,
+)
+from packages.core.media_path_policy import (
+    is_local_media_path as is_local_media_path_policy,
+)
+
 SEVERITY_ERROR = "error"
 SEVERITY_WARN = "warn"
 SEVERITY_INFO = "info"
@@ -25,10 +40,19 @@ ENTITY_IMAGE_FIELDS: list[tuple[str, str, str, str]] = [
     ("projects", "slug", "cover_image_url", "scalar"),
     ("projects", "slug", "hero_image_url", "scalar"),
     ("projects", "slug", "images", "json_list"),
+    ("articles", "slug", "hero_image_url", "scalar"),
     ("areas", "slug", "hero_image_url", "scalar"),
     ("developers", "slug", "logo_url", "scalar"),
     ("team", "name", "photo_url", "scalar"),
 ]
+_ENTITY_NAME_BY_TABLE = {
+    "properties": "property",
+    "projects": "project",
+    "articles": "article",
+    "areas": "area",
+    "developers": "developer",
+    "team": "team",
+}
 
 # These should always be local /media/... paths.
 _EXTERNAL_ERROR_FIELDS = {"cover_image", "local_images"}
@@ -93,10 +117,7 @@ class IntegrityReport:
 
 
 def _normalize_prefix(prefix: str) -> str:
-    value = str(prefix or "").strip() or "/media"
-    if not value.startswith("/"):
-        value = f"/{value}"
-    return value.rstrip("/")
+    return normalize_media_public_prefix(prefix)
 
 
 def _is_external_url(value: str) -> bool:
@@ -104,7 +125,7 @@ def _is_external_url(value: str) -> bool:
 
 
 def _is_local_media_path(value: str, *, prefix: str) -> bool:
-    return value == prefix or value.startswith(f"{prefix}/")
+    return is_local_media_path_policy(value, media_public_prefix=prefix)
 
 
 def _local_path_to_disk(value: str, *, prefix: str, media_root: Path) -> Path:
@@ -152,20 +173,23 @@ def run_scan(
     root = Path(media_root or "storage/media").resolve()
     prefix = _normalize_prefix(media_public_prefix)
     referenced_local_paths: set[str] = set()
+    usage_map: dict[str, list[MediaUsageRef]] = defaultdict(list)
 
-    _scan_media_assets(
-        db,
-        report,
-        media_root=root,
-        media_public_prefix=prefix,
-        referenced_local_paths=referenced_local_paths,
-    )
     _scan_entity_image_fields(
         db,
         report,
         media_root=root,
         media_public_prefix=prefix,
         referenced_local_paths=referenced_local_paths,
+        usage_map=usage_map,
+    )
+    _scan_media_assets(
+        db,
+        report,
+        media_root=root,
+        media_public_prefix=prefix,
+        referenced_local_paths=referenced_local_paths,
+        usage_map=usage_map,
     )
     _scan_orphan_files(
         report,
@@ -184,10 +208,11 @@ def _scan_media_assets(
     media_root: Path,
     media_public_prefix: str,
     referenced_local_paths: set[str],
+    usage_map: dict[str, list[MediaUsageRef]],
 ) -> None:
     rows = db.execute(
         text(
-            "SELECT id, storage_path, mime_type, file_size_bytes, checksum_sha256 "
+            "SELECT id, storage_path, mime_type, file_size_bytes, checksum_sha256, usage_scope, linked_entity_hint "
             "FROM media_assets ORDER BY created_at"
         )
     ).fetchall()
@@ -231,6 +256,39 @@ def _scan_media_assets(
             report.summary.invalid_path_format_count += 1
             continue
 
+        if not is_library_media_path(path_val, media_public_prefix=media_public_prefix):
+            report.summary.invalid_path_format_count += 1
+            report.add(
+                IntegrityFinding(
+                    severity=SEVERITY_ERROR,
+                    category="invalid_path_format",
+                    entity="media_assets.storage_path",
+                    record_id=asset_id,
+                    value=path_val,
+                    detail=(
+                        "storage_path must use the canonical "
+                        f"'{media_library_prefix(media_public_prefix)}/' prefix"
+                    ),
+                    suggestion="move asset into the canonical media library path before publishing",
+                )
+            )
+            continue
+
+        if is_variant_media_path(path_val, media_public_prefix=media_public_prefix):
+            report.summary.invalid_path_format_count += 1
+            report.add(
+                IntegrityFinding(
+                    severity=SEVERITY_ERROR,
+                    category="invalid_path_format",
+                    entity="media_assets.storage_path",
+                    record_id=asset_id,
+                    value=path_val,
+                    detail="primary media assets must not point at generated variant paths",
+                    suggestion="store the original asset under /media/library/ and keep variants in sidecar metadata",
+                )
+            )
+            continue
+
         referenced_local_paths.add(path_val)
         disk_path = _local_path_to_disk(path_val, prefix=media_public_prefix, media_root=media_root)
         exists, actual_size = _check_disk_file(disk_path)
@@ -265,6 +323,22 @@ def _scan_media_assets(
             continue
 
         report.summary.local_paths_ok += 1
+        _scan_variant_policy(
+            report,
+            media_id=row.id,
+            asset_id=asset_id,
+            storage_path=path_val,
+            media_root=media_root,
+            media_public_prefix=media_public_prefix,
+        )
+        _scan_relation_mapping_policy(
+            report,
+            asset_id=asset_id,
+            storage_path=path_val,
+            linked_entity_hint=str(getattr(row, "linked_entity_hint", "") or "").strip() or None,
+            usage_scope=str(getattr(row, "usage_scope", "") or "").strip() or None,
+            usages=usage_map.get(path_val, []),
+        )
 
         if checksum:
             checksum_map[checksum].append(asset_id)
@@ -322,6 +396,7 @@ def _scan_entity_image_fields(
     media_root: Path,
     media_public_prefix: str,
     referenced_local_paths: set[str],
+    usage_map: dict[str, list[MediaUsageRef]],
 ) -> None:
     for table, id_col, field_name, field_type in ENTITY_IMAGE_FIELDS:
         try:
@@ -346,6 +421,7 @@ def _scan_entity_image_fields(
             raw_value = getattr(row, "field_value", None)
             if raw_value is None:
                 continue
+            entity_name = _ENTITY_NAME_BY_TABLE.get(table, table.rstrip("s"))
 
             values: list[str] = []
             if field_type == "json_list":
@@ -386,7 +462,32 @@ def _scan_entity_image_fields(
                     continue
 
                 if _is_local_media_path(item, prefix=media_public_prefix):
+                    if not is_library_media_path(item, media_public_prefix=media_public_prefix):
+                        report.summary.invalid_path_format_count += 1
+                        report.add(
+                            IntegrityFinding(
+                                severity=SEVERITY_ERROR,
+                                category="invalid_path_format",
+                                entity=f"{table}.{field_name}",
+                                record_id=record_id,
+                                value=item,
+                                detail=(
+                                    "local media references must use the canonical "
+                                    f"'{media_library_prefix(media_public_prefix)}/' prefix"
+                                ),
+                                suggestion="rewrite the field to a canonical /media/library/... path",
+                            )
+                        )
+                        continue
+
                     referenced_local_paths.add(item)
+                    usage_ref = MediaUsageRef(
+                        entity=entity_name,
+                        identifier=record_id,
+                        field=field_name,
+                    )
+                    if usage_ref not in usage_map[item]:
+                        usage_map[item].append(usage_ref)
                     disk_path = _local_path_to_disk(
                         item, prefix=media_public_prefix, media_root=media_root
                     )
@@ -406,6 +507,185 @@ def _scan_entity_image_fields(
                         )
                     else:
                         report.summary.local_paths_ok += 1
+
+
+def _scan_variant_policy(
+    report: IntegrityReport,
+    *,
+    media_id: Any,
+    asset_id: str,
+    storage_path: str,
+    media_root: Path,
+    media_public_prefix: str,
+) -> None:
+    sidecar = read_sidecar(media_id)
+    if not sidecar:
+        return
+
+    variants = sidecar.get("variants")
+    if not isinstance(variants, dict):
+        report.add(
+            IntegrityFinding(
+                severity=SEVERITY_WARN,
+                category="variant_metadata_missing",
+                entity="media_assets.sidecar",
+                record_id=asset_id,
+                value=storage_path,
+                detail="sidecar metadata is missing the variants map",
+                suggestion="regenerate sidecar metadata so format variants remain predictable",
+            )
+        )
+        return
+
+    variant_prefix = media_variant_prefix(media_public_prefix)
+    for variant_name, suffix in (("webp", ".webp"), ("avif", ".avif")):
+        entry = variants.get(variant_name)
+        if not isinstance(entry, dict):
+            continue
+        available = bool(entry.get("available"))
+        variant_path = str(entry.get("path") or "").strip() or None
+        expected_path = f"{variant_prefix}/{media_id}{suffix}"
+
+        if available and variant_path != expected_path:
+            report.add(
+                IntegrityFinding(
+                    severity=SEVERITY_WARN,
+                    category="variant_path_mismatch",
+                    entity="media_assets.sidecar",
+                    record_id=asset_id,
+                    value=variant_path or "",
+                    detail=f"{variant_name} variant should be stored at {expected_path}",
+                    suggestion="rewrite sidecar metadata to the canonical variant path",
+                )
+            )
+            continue
+
+        if available and variant_path:
+            disk_path = _local_path_to_disk(
+                variant_path,
+                prefix=media_public_prefix,
+                media_root=media_root,
+            )
+            exists, actual_size = _check_disk_file(disk_path)
+            if not exists or actual_size == 0:
+                report.summary.missing_file_count += 1
+                report.add(
+                    IntegrityFinding(
+                        severity=SEVERITY_ERROR,
+                        category="missing_variant_file",
+                        entity="media_assets.sidecar",
+                        record_id=asset_id,
+                        value=variant_path,
+                        detail=f"declared {variant_name} variant is missing on disk: {disk_path}",
+                        suggestion="regenerate the variant file or mark the variant unavailable",
+                    )
+                )
+        elif not available and variant_path:
+            report.add(
+                IntegrityFinding(
+                    severity=SEVERITY_WARN,
+                    category="variant_path_without_availability",
+                    entity="media_assets.sidecar",
+                    record_id=asset_id,
+                    value=variant_path,
+                    detail=f"{variant_name} variant path is set even though availability is false",
+                    suggestion="clear stale variant paths or mark the variant available after regeneration",
+                )
+            )
+
+
+def _scan_relation_mapping_policy(
+    report: IntegrityReport,
+    *,
+    asset_id: str,
+    storage_path: str,
+    linked_entity_hint: str | None,
+    usage_scope: str | None,
+    usages: list[MediaUsageRef],
+) -> None:
+    if not usages:
+        return
+
+    expected_hints = relation_hints_from_usages(usages)
+    expected_scopes = usage_scopes_from_usages(usages)
+    actual_hint = str(linked_entity_hint or "").strip() or None
+    actual_scope = str(usage_scope or "").strip() or None
+
+    if len(expected_hints) == 1:
+        expected_hint = next(iter(expected_hints))
+        if actual_hint is None:
+            report.add(
+                IntegrityFinding(
+                    severity=SEVERITY_WARN,
+                    category="missing_relation_hint",
+                    entity="media_assets.linked_entity_hint",
+                    record_id=asset_id,
+                    value=storage_path,
+                    detail=f"linked_entity_hint should be set to {expected_hint}",
+                    suggestion="write the canonical linked_entity_hint so asset ownership stays traceable",
+                )
+            )
+        elif actual_hint != expected_hint:
+            report.add(
+                IntegrityFinding(
+                    severity=SEVERITY_WARN,
+                    category="relation_hint_mismatch",
+                    entity="media_assets.linked_entity_hint",
+                    record_id=asset_id,
+                    value=actual_hint,
+                    detail=f"linked_entity_hint should match {expected_hint}",
+                    suggestion="realign linked_entity_hint with the published entity using this asset",
+                )
+            )
+    elif len(expected_hints) > 1 and actual_hint is None:
+        report.add(
+            IntegrityFinding(
+                severity=SEVERITY_WARN,
+                category="ambiguous_relation_hint",
+                entity="media_assets.linked_entity_hint",
+                record_id=asset_id,
+                value=storage_path,
+                detail="asset is referenced by multiple entities and should carry an explicit linked_entity_hint",
+                suggestion="set linked_entity_hint to the primary owner before reuse proliferates further",
+            )
+        )
+    elif len(expected_hints) > 1 and actual_hint not in expected_hints:
+        report.add(
+            IntegrityFinding(
+                severity=SEVERITY_WARN,
+                category="relation_hint_mismatch",
+                entity="media_assets.linked_entity_hint",
+                record_id=asset_id,
+                value=actual_hint or "",
+                detail="linked_entity_hint does not match any of the entities currently referencing this asset",
+                suggestion="update linked_entity_hint to one of the active entity owners or split the asset usage",
+            )
+        )
+
+    if expected_scopes and actual_scope is None:
+        report.add(
+            IntegrityFinding(
+                severity=SEVERITY_WARN,
+                category="missing_usage_scope",
+                entity="media_assets.usage_scope",
+                record_id=asset_id,
+                value=storage_path,
+                detail=f"usage_scope should be one of {', '.join(sorted(expected_scopes))}",
+                suggestion="set usage_scope to the canonical field-level intent for this asset",
+            )
+        )
+    elif expected_scopes and actual_scope not in expected_scopes:
+        report.add(
+            IntegrityFinding(
+                severity=SEVERITY_WARN,
+                category="usage_scope_mismatch",
+                entity="media_assets.usage_scope",
+                record_id=asset_id,
+                value=actual_scope or "",
+                detail=f"usage_scope should be one of {', '.join(sorted(expected_scopes))}",
+                suggestion="align usage_scope with the field(s) that currently reference this asset",
+            )
+        )
 
 
 def _scan_orphan_files(

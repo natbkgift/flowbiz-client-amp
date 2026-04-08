@@ -15,6 +15,14 @@ from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from packages.core.media_path_policy import (
+    MEDIA_PUBLIC_PREFIX,
+    is_library_media_path,
+    media_variant_prefix,
+)
+from packages.core.media_path_policy import (
+    is_local_media_path as is_local_media_path_policy,
+)
 from packages.core.models import Area, Article, Developer, MediaAsset, Project, Property
 
 try:
@@ -53,17 +61,16 @@ def ensure_media_dirs() -> None:
 
 
 def is_local_media_path(path: str | None) -> bool:
-    value = str(path or "").strip()
-    return bool(value) and value.startswith("/media/") and "://" not in value
+    return is_local_media_path_policy(path)
 
 
 def require_local_media_path(path: str | None, *, field_name: str) -> str:
     value = str(path or "").strip()
-    if is_local_media_path(value):
+    if is_library_media_path(value):
         return value
     raise HTTPException(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-        detail=f"{field_name} must be local /media/ path",
+        detail=f"{field_name} must be local /media/library/ path",
     )
 
 
@@ -144,7 +151,7 @@ def _variant_file_path(media_id: UUID, suffix: str) -> Path:
 
 
 def _variant_public_path(media_id: UUID, suffix: str) -> str:
-    return f"/media/library/variants/{media_id}{suffix}"
+    return f"{media_variant_prefix()}/{media_id}{suffix}"
 
 
 def _serialize_decimal(value: Decimal | None) -> float | None:
@@ -214,7 +221,7 @@ def _create_variants(media_id: UUID, original_file: Path) -> dict[str, Any]:
 
 
 def _public_media_path(relative: Path) -> str:
-    return f"/media/{relative.as_posix()}"
+    return f"{MEDIA_PUBLIC_PREFIX}/{relative.as_posix()}"
 
 
 def _disk_path_from_public(path: str) -> Path:

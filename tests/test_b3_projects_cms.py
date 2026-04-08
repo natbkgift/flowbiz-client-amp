@@ -504,6 +504,20 @@ def test_b3_media_governance_local_path_validation(client) -> None:
     )
     assert external_create.status_code == 422, external_create.text
 
+    noncanonical_local = client.post(
+        "/admin/projects",
+        headers=headers,
+        json={
+            "slug": f"b3-media-local-{uuid4()}",
+            "name": "Noncanonical Local Image",
+            "status": "draft",
+            "property_type": "condo",
+            "cover_image_url": "/media/uploads/cover.jpg",
+        },
+    )
+    assert noncanonical_local.status_code == 422, noncanonical_local.text
+    assert "local /media/library/ path" in str(noncanonical_local.json())
+
     cover = f"/media/library/{uuid4()}.jpg"
     _add_media_asset(path=cover)
     created = client.post(

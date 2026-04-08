@@ -10,6 +10,8 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from packages.core.media_path_policy import DEFAULT_LOCAL_MEDIA_FALLBACK
+
 
 @dataclass
 class HeaderCheckResult:
@@ -26,7 +28,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--base-url", required=True, help="Base site URL, e.g. https://example.com")
     parser.add_argument(
         "--webp-path",
-        default="/media/library/variants/05032d16-54ae-45f4-bb89-3ae1fc2fa52f.webp",
+        default=DEFAULT_LOCAL_MEDIA_FALLBACK,
         help="Public .webp path to verify",
     )
     parser.add_argument(
