@@ -608,6 +608,30 @@ def test_phase_d_video_full_crud(client) -> None:
     assert missing.status_code == 404, missing.text
 
 
+def test_phase_d_video_publish_blocks_missing_required_en_title(client) -> None:
+    headers = _make_admin_headers()
+    slug = f"phase-d-video-missing-en-{uuid4()}"
+
+    created = client.post(
+        "/admin/content/videos",
+        headers=headers,
+        json={
+            "slug": slug,
+            "status": "draft",
+            "title": {"th": "วิดีโอไม่มี EN"},
+            "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        },
+    )
+    _assert_201(created)
+
+    published = client.post(f"/admin/content/videos/{slug}/publish", headers=headers)
+    assert published.status_code == 422, published.text
+    detail = published.json()["detail"]
+    assert detail["message"] == "Publish checklist failed"
+    assert "title.en is required" in detail["blocking"]
+    assert "thumbnail_path is recommended before publish" in detail["warnings"]
+
+
 def test_phase_d_logo_endpoint_updates_site_layout_record(client) -> None:
     headers = _make_admin_headers()
     put_resp = client.put(
@@ -795,7 +819,7 @@ def test_phase_d_article_restore_rejects_external_hero_image_url(client) -> None
         headers=headers,
     )
     assert restored.status_code == 422, restored.text
-    assert restored.json()["detail"] == "hero_image_url must be local /media/ path"
+    assert restored.json()["detail"] == "hero_image_url must be local /media/library/ path"
 
 
 def test_phase_d_article_restore_requires_admin_role(client) -> None:

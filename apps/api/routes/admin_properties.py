@@ -19,6 +19,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
+from packages.core.data_cleanup_utilities import (
+    apply_property_canonical_legacy_alignment,
+    normalize_property_cover_fields,
+)
 from packages.core.database import get_db
 from packages.core.media_library import require_local_media_path
 from packages.core.models import (
@@ -370,38 +374,14 @@ def _extract_view_label(features: dict | None) -> str | None:
 def _normalize_cover_fields(
     *, cover_image: str | None, cover_image_url: str | None
 ) -> tuple[str | None, str | None]:
-    legacy_cover = (cover_image or "").strip() or None
-    canonical_cover = (cover_image_url or "").strip() or None
-
-    if canonical_cover is None:
-        canonical_cover = legacy_cover
-    if legacy_cover is None:
-        legacy_cover = canonical_cover
-
-    return legacy_cover, canonical_cover
+    return normalize_property_cover_fields(
+        cover_image=cover_image,
+        cover_image_url=cover_image_url,
+    )
 
 
 def _apply_canonical_legacy_alignment(prop: Property) -> None:
-    # Canonical precedence contract:
-    # - cover_image_url > cover_image
-    # - size_sqm > size
-    # - floor > floor_number
-    legacy_cover, canonical_cover = _normalize_cover_fields(
-        cover_image=prop.cover_image,
-        cover_image_url=prop.cover_image_url,
-    )
-    prop.cover_image = legacy_cover
-    prop.cover_image_url = canonical_cover
-
-    if prop.size_sqm is None and prop.size is not None:
-        prop.size_sqm = prop.size
-    if prop.size is None and prop.size_sqm is not None:
-        prop.size = prop.size_sqm
-
-    if prop.floor is None and prop.floor_number is not None:
-        prop.floor = prop.floor_number
-    if prop.floor_number is None and prop.floor is not None:
-        prop.floor_number = prop.floor
+    apply_property_canonical_legacy_alignment(prop)
 
 
 def _is_local_media_path(value: str) -> bool:
