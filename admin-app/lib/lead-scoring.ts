@@ -167,6 +167,11 @@ export interface LeadFormData {
   phone?: string;
   message?: string;
   propertyId?: string | null;
+  budgetBand?: string | null;
+  purpose?: string | null;
+  timeframe?: string | null;
+  preferredArea?: string | null;
+  inquiryIntent?: string | null;
 }
 
 /**
@@ -202,8 +207,7 @@ export function calculateLeadScore(
   const funnel = getFunnelStage();
 
   // --- Dimension 1: Intent Clarity (0–100) ---
-  const intentResult = profile ? computeIntentScore(profile) : null;
-  const intentClarity = intentResult?.intentScore ?? 10;
+  const intentClarity = scoreIntentClarity(profile, formData);
 
   // --- Dimension 2: Engagement Depth (0–100) ---
   const engagementDepth = profile ? SEGMENT_SCORE[profile.segment] : 10;
@@ -262,7 +266,66 @@ function scoreFormCompleteness(data: LeadFormData): number {
     score += wordCount >= 10 ? 25 : wordCount >= 3 ? 15 : 5;
   }
   if (data.propertyId) score += 10;
+  const budgetBand = normalizeToken(data.budgetBand);
+  if (budgetBand) score += budgetBand === 'not_sure' ? 3 : 8;
+  if (normalizeToken(data.purpose)) score += 10;
+  const timeframe = normalizeToken(data.timeframe);
+  if (timeframe) score += timeframe === 'flexible' ? 4 : 8;
+  if (data.preferredArea?.trim()) score += 7;
   return Math.min(score, 100);
+}
+
+function scoreIntentClarity(profile: VisitorProfile | null, data: LeadFormData): number {
+  const behavioralScore = profile ? computeIntentScore(profile).intentScore : 0;
+  const declaredScore = scoreDeclaredIntent(data);
+
+  if (behavioralScore <= 0 && declaredScore <= 0) return 10;
+  if (behavioralScore <= 0) return Math.max(declaredScore, 10);
+  if (declaredScore <= 0) return behavioralScore;
+
+  return Math.min(100, Math.round(behavioralScore * 0.55 + declaredScore * 0.45));
+}
+
+function scoreDeclaredIntent(data: LeadFormData): number {
+  const declaredIntent =
+    normalizeToken(data.inquiryIntent) ?? normalizeToken(data.purpose);
+
+  let score =
+    declaredIntent && declaredIntent in DECLARED_INTENT_SCORE
+      ? DECLARED_INTENT_SCORE[declaredIntent as keyof typeof DECLARED_INTENT_SCORE]
+      : 0;
+
+  if (score <= 0) return 0;
+
+  const timeframe = normalizeToken(data.timeframe);
+  if (timeframe) {
+    score += DECLARED_TIMEFRAME_BONUS[timeframe] ?? 0;
+  }
+
+  const budgetBand = normalizeToken(data.budgetBand);
+  if (budgetBand) {
+    score += budgetBand === 'not_sure' ? 2 : 6;
+  }
+
+  if (data.preferredArea?.trim()) score += 4;
+  if (hasUrgencySignal(data.message)) score += 6;
+
+  return Math.min(score, 100);
+}
+
+function hasUrgencySignal(message: string | undefined): boolean {
+  const text = String(message || '').toLowerCase();
+  if (!text.trim()) return false;
+  return /\b(today|urgent|ready|schedule|viewing|visit|book|availability|available|compare|shortlist|roi|return)\b/i.test(
+    text,
+  );
+}
+
+function normalizeToken(value: string | null | undefined): string | null {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) return null;
+
+  return text.replace(/[\s-]+/g, '_').replace(/[^a-z0-9_]/g, '') || null;
 }
 
 /** Score recency of last visit (0–100). More recent = higher. */
@@ -290,3 +353,24 @@ function deriveTier(total: number): LeadScoreResult['tier'] {
   if (total >= TIER_COOL) return 'cool';
   return 'cold';
 }
+
+const DECLARED_INTENT_SCORE = {
+  invest: 90,
+  buy: 82,
+  rent: 68,
+  sell: 76,
+  project_consultation: 85,
+  project_availability_check: 86,
+  project_investment_check: 90,
+  project_shortlist: 90,
+  project_compare: 88,
+  general: 35,
+  general_inquiry: 35,
+} as const;
+
+const DECLARED_TIMEFRAME_BONUS: Record<string, number> = {
+  '0_3m': 12,
+  '3_6m': 8,
+  '6m_plus': 4,
+  flexible: 2,
+};

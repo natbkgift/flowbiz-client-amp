@@ -364,6 +364,11 @@ export function LeadForm({
       phone: phone.trim() || undefined,
       message,
       propertyId: propertyId ?? undefined,
+      budgetBand: budgetBand || undefined,
+      purpose: purpose || resolvedDefaultPurpose || undefined,
+      timeframe: timeframe || undefined,
+      preferredArea: preferredArea.trim() || undefined,
+      inquiryIntent: effectiveInquiryIntent,
     });
 
     trackEvent('form_submit', pathname, {

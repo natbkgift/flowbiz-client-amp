@@ -443,6 +443,34 @@ def test_sales_automation_snapshot_is_returned_and_seeded_into_timeline(client):
     assert any("Suggested First Reply:" in note for note in notes)
 
 
+def test_inquiry_lead_tier_backfills_signal_level_when_entry_point_hint_is_missing(client):
+    inquiry_resp = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Tiered Lead",
+            "email": "tiered@example.com",
+            "message": "I want to compare live options this week.",
+            "source_page": "/en/contact",
+            "intent": "project_compare",
+            "tags": [
+                "locale:en",
+                "lead_source:contact_form",
+                "project_scope:grand-solaire",
+                "buyer_fit:investor_compare",
+            ],
+            "lead_score": 44,
+            "lead_tier": "warm",
+        },
+    )
+    assert inquiry_resp.status_code == 201, inquiry_resp.text
+    body = inquiry_resp.json()
+
+    assert "lead_tier:warm" in (body["tags"] or [])
+    assert body["sales_automation"]["signal_level"] == "medium"
+    assert body["sales_automation"]["priority_label"] == "medium"
+    assert body["sales_automation"]["priority_score"] >= 65
+
+
 def test_follow_up_processor_advances_sales_sequence_and_writes_timeline(client):
     created = client.post(
         "/v1/inquiries",

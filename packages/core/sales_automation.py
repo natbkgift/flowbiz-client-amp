@@ -133,6 +133,28 @@ def extract_sales_locale(tags: list[str] | None) -> Locale:
     return "th" if locale == "th" else "en"
 
 
+def _score_to_signal_level(score: int) -> str:
+    if score >= 75:
+        return "high"
+    if score >= 45:
+        return "medium"
+    return "low"
+
+
+def _signal_level_rank(signal_level: str | None) -> int:
+    return {"low": 0, "medium": 1, "high": 2}.get(str(signal_level or ""), -1)
+
+
+def _signal_level_from_lead_tier(lead_tier: str | None) -> str | None:
+    if lead_tier == "hot":
+        return "high"
+    if lead_tier == "warm":
+        return "medium"
+    if lead_tier in {"cool", "cold"}:
+        return "low"
+    return None
+
+
 def extract_sales_context(
     *,
     intent: str | None,
@@ -144,17 +166,16 @@ def extract_sales_context(
     source = normalize_text(_pick_tag_value(tags, "lead_source:")) or normalize_text(source_page)
     buyer_fit = normalize_text(_pick_tag_value(tags, "buyer_fit:"))
     signal_level = normalize_token(_pick_tag_value(tags, "signal_level:"))
+    lead_tier = normalize_token(_pick_tag_value(tags, "lead_tier:"))
     project_values = _pick_tag_values(tags, "project_scope:")
     single_project = normalize_text(_pick_tag_value(tags, "project:"))
     if single_project and single_project.lower() not in {item.lower() for item in project_values}:
         project_values.insert(0, single_project)
     if signal_level not in {"high", "medium", "low"}:
-        if score >= 75:
-            signal_level = "high"
-        elif score >= 45:
-            signal_level = "medium"
-        else:
-            signal_level = "low"
+        signal_level = _score_to_signal_level(score)
+        tier_signal_level = _signal_level_from_lead_tier(lead_tier)
+        if _signal_level_rank(tier_signal_level) > _signal_level_rank(signal_level):
+            signal_level = str(tier_signal_level)
     return {
         "intent": normalized_intent,
         "source": source,

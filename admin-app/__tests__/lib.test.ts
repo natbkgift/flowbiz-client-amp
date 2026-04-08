@@ -176,6 +176,55 @@ describe('lead-scoring', () => {
     expect(full.total).toBeGreaterThan(minimal.total);
   });
 
+  it('calculateLeadScore raises intent clarity from declared qualification', async () => {
+    const { calculateLeadScore } = await import('@/lib/lead-scoring');
+    const exploratory = calculateLeadScore({
+      name: 'Taylor',
+      email: 'taylor@example.com',
+      message: 'I am exploring options.',
+    });
+    const qualified = calculateLeadScore({
+      name: 'Taylor',
+      email: 'taylor@example.com',
+      phone: '+66891234567',
+      message: 'I want to compare live units and schedule a viewing this week.',
+      purpose: 'buy',
+      inquiryIntent: 'project_compare',
+      budgetBand: '6m_10m',
+      timeframe: '0_3m',
+      preferredArea: 'Jomtien',
+    });
+
+    expect(qualified.dimensions.intentClarity).toBeGreaterThan(exploratory.dimensions.intentClarity);
+    expect(qualified.dimensions.formCompleteness).toBeGreaterThan(exploratory.dimensions.formCompleteness);
+    expect(qualified.total).toBeGreaterThan(exploratory.total);
+  });
+
+  it('calculateLeadScore treats committed qualification stronger than flexible placeholders', async () => {
+    const { calculateLeadScore } = await import('@/lib/lead-scoring');
+    const flexible = calculateLeadScore({
+      name: 'Morgan',
+      email: 'morgan@example.com',
+      message: 'Need advice on the right fit.',
+      purpose: 'buy',
+      budgetBand: 'not_sure',
+      timeframe: 'flexible',
+    });
+    const committed = calculateLeadScore({
+      name: 'Morgan',
+      email: 'morgan@example.com',
+      message: 'Need advice on the right fit and want to move quickly.',
+      purpose: 'buy',
+      budgetBand: '6m_10m',
+      timeframe: '0_3m',
+      preferredArea: 'Pratumnak',
+    });
+
+    expect(committed.dimensions.intentClarity).toBeGreaterThan(flexible.dimensions.intentClarity);
+    expect(committed.dimensions.formCompleteness).toBeGreaterThan(flexible.dimensions.formCompleteness);
+    expect(committed.total).toBeGreaterThan(flexible.total);
+  });
+
   it('calculateLeadScore returns all dimension scores', async () => {
     const { calculateLeadScore } = await import('@/lib/lead-scoring');
     const result = calculateLeadScore({ name: 'Test' });
