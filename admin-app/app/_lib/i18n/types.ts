@@ -207,6 +207,10 @@ export type Dictionary = {
   areaGuide: {
     title: string;
     subtitle: string;
+    confidenceTitle: string;
+    confidenceSubtitle: string;
+    processTitle: string;
+    processSubtitle: string;
     areasTitle: string;
     areasSubtitle: string;
     mapTitle: string;
@@ -230,6 +234,7 @@ export type Dictionary = {
     formTitle: string;
     trustTitle: string;
     trustBullets: string[];
+    responseTitle: string;
     channelsTitle: string;
   };
   sell: {
@@ -431,6 +436,10 @@ export type Dictionary = {
     invalidLink: string;
     backToAreaGuide: string;
     heroSubtitle: string;
+    confidenceTitle: string;
+    confidenceSubtitle: string;
+    processTitle: string;
+    processSubtitle: string;
     priceTrend: string;
     priceTrendHasData: string;
     priceTrendNoData: string;

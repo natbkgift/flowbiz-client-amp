@@ -68,11 +68,14 @@ describe('developers page', () => {
     render(await DevelopersPage({ params: Promise.resolve({ locale: 'en' }) }));
 
     expect(screen.getByRole('heading', { name: /snapshot for developer-led buyers/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /how to read developer credibility/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /what should happen before inquiry/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /developer watchlist/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /the riviera group/i })).toBeTruthy();
     expect(screen.getByText(/live brands/i)).toBeTruthy();
     expect(screen.getByText(/visible pricing starts from THB/i)).toBeTruthy();
-    expect(screen.getByText(/live projects now: the riviera monaco/i)).toBeTruthy();
+    expect(screen.getAllByText(/credibility here is backed by 1 published project/i)).toHaveLength(2);
+    expect(screen.getByText(/proof projects now: the riviera monaco/i)).toBeTruthy();
     expect(
       screen
         .getAllByRole('link', { name: /review live project/i })
@@ -128,8 +131,8 @@ describe('developers page', () => {
 
     render(await DevelopersPage({ params: Promise.resolve({ locale: 'en' }) }));
 
-    expect(screen.getByText(/live in areas: /i)).toBeTruthy();
     expect(screen.getByText(/luxury • 1 published projects/i)).toBeTruthy();
+    expect(screen.getByText(/published footprint now: jomtien/i)).toBeTruthy();
     expect(screen.getByRole('link', { name: 'https://riviera.example' }).getAttribute('href')).toBe('https://riviera.example');
     expect(screen.getByText(/visible pricing starts from THB/i)).toBeTruthy();
     expect(screen.getByRole('link', { name: /review live project/i }).getAttribute('href')).toBe('/en/projects/the-riviera-jomtien');
@@ -167,7 +170,7 @@ describe('developers page', () => {
     render(await DevelopersPage({ params: Promise.resolve({ locale: 'en' }) }));
 
     expect(screen.getByText(/luxury • 3 published projects/i)).toBeTruthy();
-    expect(screen.getByText(/live in areas: jomtien/i)).toBeTruthy();
+    expect(screen.getByText(/published footprint now: jomtien/i)).toBeTruthy();
     expect(screen.getByText(/visible pricing starts from THB/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /review live project/i })).toBeNull();
   });

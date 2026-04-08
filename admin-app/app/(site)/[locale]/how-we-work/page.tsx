@@ -28,6 +28,38 @@ export async function generateMetadata(
   );
 }
 
+function buildHowWeWorkClarifyLines(locale: 'en' | 'th'): string[] {
+  return [
+    locale === 'th'
+      ? 'งบ เป้าหมาย ทำเล และ timeframe ควรถูกล็อกก่อนทุกครั้ง ก่อนที่ shortlist จะถูกขยายหรือพาไปดูยูนิต'
+      : 'Budget, goal, area, and timeframe should be locked before the shortlist widens or the conversation moves into units.',
+    locale === 'th'
+      ? 'trade-offs ต้องถูกอธิบายตรงไปตรงมา เพื่อให้คุณรู้ว่ากำลังยอมอะไร ไม่ใช่เห็นแต่สิ่งที่ดูน่าสนใจ'
+      : 'Trade-offs should be named plainly so you know what you are accepting, not just what looks attractive.',
+    locale === 'th'
+      ? 'ขั้นถัดไปควรแคบลงเป็น compare, viewing, หรือ advisor review ที่ชัดขึ้น ไม่ใช่การ browse กว้าง ๆ อีกครั้ง'
+      : 'The next step should tighten into compare, viewing, or a sharper advisor review, not another broad browse.',
+  ];
+}
+
+function buildHowWeWorkReplyLines(locale: 'en' | 'th', liveTeamCount: number): string[] {
+  return [
+    locale === 'th'
+      ? 'brief เดียวควรพาบริบทเดิมไปต่อได้ในทุกช่องทาง โดยไม่ต้องเล่าโจทย์ใหม่ทุกครั้ง'
+      : 'One brief should carry the same context forward across channels so you do not have to rebuild the story each time.',
+    liveTeamCount > 0
+      ? (locale === 'th'
+        ? `ตอนนี้มี ${liveTeamCount} โปรไฟล์ทีมที่เผยแพร่แล้วรองรับ route นี้ ดังนั้นการตอบกลับควรเป็น owned handoff ที่ชัด ไม่ใช่ข้อความกลาง ๆ`
+        : `${liveTeamCount} live team profile${liveTeamCount === 1 ? '' : 's'} currently back this route, so the reply should feel like a clearly owned handoff rather than generic copy.`)
+      : (locale === 'th'
+        ? 'แม้โปรไฟล์ทีมบน public จะยังบาง การตอบกลับก็ควรยังเป็น owned handoff ที่ชัด ไม่ใช่ข้อความกลาง ๆ'
+        : 'Even when public team coverage is still thin, the reply should still feel like a clearly owned handoff rather than generic copy.'),
+    locale === 'th'
+      ? 'ถ้า brief ยังไม่พร้อม ทีมควรบอกให้ชัดว่าต้องยืนยันอะไรต่อก่อนเสียเวลาไปกับ viewing หรือ negotiation'
+      : 'If the brief is not ready yet, the team should say exactly what needs verification before you spend time on viewings or negotiations.',
+  ];
+}
+
 export default async function HowWeWorkPage(
   props: {
     params: Promise<{ locale: string }>;
@@ -76,6 +108,8 @@ export default async function HowWeWorkPage(
         : 'Once the shortlist is shaped, the flow moves into compare, viewing, or a tighter consultation step.',
     },
   ];
+  const clarifyLines = buildHowWeWorkClarifyLines(locale);
+  const replyLines = buildHowWeWorkReplyLines(locale, teamMembers.length);
 
   return (
     <main id="main-content" className="page-template--narrative">
@@ -155,6 +189,44 @@ export default async function HowWeWorkPage(
                 <p className="card-subtitle">{card.body}</p>
               </article>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="section">
+        <Container>
+          <div id="how-we-work-confidence-grid" className="signal-grid signal-grid--two-up reveal">
+            <article className="authority-card">
+              <h2 className="card-title">{locale === 'th' ? 'อะไรควรถูกเคลียร์ก่อน shortlist จะขยับต่อ' : 'What gets clarified before the shortlist moves'}</h2>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'ใช้ชั้นนี้เพื่อดูว่าทีมควรทำให้โจทย์นิ่งลงตรงไหน ก่อนจะพาไปยัง compare, viewing, หรือ inquiry ที่จริงจังขึ้น'
+                  : 'Use this layer to see which parts of the brief should become clearer before the flow moves into compare, viewing, or a more serious inquiry.'}
+              </p>
+              <div className="insight-list mt-3">
+                {clarifyLines.map((item) => (
+                  <div key={item} className="insight-list__item">
+                    <span className="insight-list__body">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="authority-card">
+              <h2 className="card-title">{locale === 'th' ? 'คำตอบกลับที่ดีควรให้ความรู้สึกแบบไหน' : 'What the reply should feel like'}</h2>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'เป้าหมายของ flow นี้คือให้คำตอบกลับเป็น next step ที่ใช้ต่อได้จริง ไม่ใช่วงสนทนาที่กว้างขึ้นแต่ไม่คมขึ้น'
+                  : 'The goal of this flow is a reply you can act on immediately, not a wider conversation that still feels vague.'}
+              </p>
+              <div className="insight-list mt-3">
+                {replyLines.map((item) => (
+                  <div key={item} className="insight-list__item">
+                    <span className="insight-list__body">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
           </div>
         </Container>
       </section>

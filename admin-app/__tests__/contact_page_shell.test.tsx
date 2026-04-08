@@ -17,6 +17,8 @@ describe('contact page shell', () => {
     expect(screen.queryByRole('link', { name: /use smart finder/i })).toBeNull();
     expect(container.querySelector('.public-hero__action--secondary')).toBeNull();
     expect(container.querySelector('.public-hero__action--tertiary')).toBeNull();
+    expect(screen.getByRole('heading', { name: /what happens after you send the brief/i })).toBeTruthy();
+    expect(screen.getByText(/the reply should come back as a tighter shortlist or the clearest next step/i)).toBeTruthy();
     expect(screen.getByRole('link', { name: /open investment route/i }).getAttribute('href')).toBe('/en/contact?topic=investment_plan');
     expect(container.querySelector('.split.split--form-priority')).not.toBeNull();
   });
@@ -40,6 +42,8 @@ describe('contact page shell', () => {
     expect(container.querySelector('.public-hero__action--secondary')).toBeNull();
     expect(container.querySelector('.public-hero__action--tertiary')).toBeNull();
     expect(screen.getByRole('heading', { name: /lead handoff summary/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /what happens after you send the brief/i })).toBeTruthy();
+    expect(screen.getByText(/the same compare context should stay attached to the reply/i)).toBeTruthy();
   });
 
   it('keeps the Thai generic contact route fully localized above the fold', async () => {
@@ -52,6 +56,7 @@ describe('contact page shell', () => {
 
     expect(screen.getByRole('heading', { name: /คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /เริ่มจากเส้นทางที่ตรงกับโจทย์/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /หลังส่ง brief แล้วจะเกิดอะไรขึ้น/i })).toBeTruthy();
     expect(screen.getByText('แผนลงทุน')).toBeTruthy();
     expect(screen.getByText('Shortlist ที่คัดตามโจทย์')).toBeTruthy();
   });

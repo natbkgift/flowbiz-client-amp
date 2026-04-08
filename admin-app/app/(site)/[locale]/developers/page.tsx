@@ -230,6 +230,49 @@ function buildDeveloperPresenceCards(
   });
 }
 
+function compactLines(items: Array<string | null>): string[] {
+  return items.filter((item): item is string => Boolean(item));
+}
+
+function buildDeveloperCredibilityLines(
+  locale: 'en' | 'th',
+  liveBrandCount: number,
+  pricedBrandCount: number,
+  topBrands: string[],
+): string[] {
+  return compactLines([
+    liveBrandCount > 0
+      ? locale === 'th'
+        ? `หน้านี้มี ${liveBrandCount} แบรนด์ที่อ้างอิงจากโครงการที่เผยแพร่อยู่จริง จึงใช้ดูความน่าเชื่อถือจากสิ่งที่ยัง live อยู่ตอนนี้ได้`
+        : `This page is backed by ${liveBrandCount} brands with live published project coverage, so credibility starts from what is actually on the market now.`
+      : null,
+    pricedBrandCount > 0
+      ? locale === 'th'
+        ? `มี ${pricedBrandCount} แบรนด์ที่เห็นราคาเริ่มต้นได้ทันที ส่วนที่เหลือควรถูกมองว่าอยู่ในขั้นยืนยัน ไม่ใช่เดาความแข็งแรงจากชื่อแบรนด์อย่างเดียว`
+        : `${pricedBrandCount} brands already show visible starting prices; treat the remainder as verify-next cases instead of assuming strength from the brand name alone.`
+      : null,
+    topBrands.length > 0
+      ? locale === 'th'
+        ? `แบรนด์ที่ active ที่สุดตอนนี้คือ ${topBrands.join(', ')} และควรถูกอ่านต่อผ่าน project pages ไม่ใช่ตัดสินจาก tier อย่างเดียว`
+        : `The most active brands right now are ${topBrands.join(', ')}; read them through live project pages, not through tier labels alone.`
+      : null,
+  ]);
+}
+
+function buildDeveloperProcessLines(locale: 'en' | 'th'): string[] {
+  return [
+    locale === 'th'
+      ? 'เริ่มจากชื่อผู้พัฒนาเมื่อมันช่วยให้คุณคัด project set ได้ชัดขึ้น ไม่ใช่เพียงเพราะแบรนด์ดูคุ้นตา'
+      : 'Start from the developer only when it sharpens the project set, not just because the brand feels familiar.',
+    locale === 'th'
+      ? 'เมื่อเหลือ 1-2 แบรนด์ที่ใช่แล้ว ให้ขยับไปเช็กราคา ทำเล และกำหนดส่งมอบในหน้าโครงการต่อทันที'
+      : 'Once one or two brands survive, move into project pages to test price fit, area fit, and delivery timing immediately.',
+    locale === 'th'
+      ? 'ถ้าชื่อแบรนด์ดูน่าสนใจแต่ live project proof ยังบาง ให้ส่งต่อหา advisor จากหน้านี้แทนการเดาว่าความน่าเชื่อถือเพียงพอแล้ว'
+      : 'If the brand looks promising but the live project proof is still thin, use the advisor handoff from this page instead of assuming the credibility case is already closed.',
+  ];
+}
+
 function pageCopy(locale: 'en' | 'th'): { title: string; subtitle: string; description: string } {
   if (locale === 'th') {
     return {
@@ -338,6 +381,8 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
         : `${pricedBrandCount} of ${liveBrandCount} brands show visible starting prices right now; the remainder still needs advisor-confirmed pricing.`
       : null,
   ].filter((item): item is string => Boolean(item));
+  const developerCredibilityLines = buildDeveloperCredibilityLines(locale, liveBrandCount, pricedBrandCount, topBrands);
+  const developerProcessLines = buildDeveloperProcessLines(locale);
   const lowerCtaTitle = locale === 'th'
     ? 'เปลี่ยน watchlist นี้ให้เป็น shortlist ที่พร้อมใช้งาน'
     : 'Turn this watchlist into a shortlist you can act on';
@@ -432,6 +477,40 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
               </div>
             ) : null}
           </div>
+
+          <div id="developer-confidence-grid" className="signal-grid signal-grid--two-up mt-6">
+            <div id="developer-credibility-read" className="authority-card">
+              <h3 className="card-title">{locale === 'th' ? 'วิธีอ่านความน่าเชื่อถือของผู้พัฒนา' : 'How to read developer credibility'}</h3>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'ใช้โครงการที่เผยแพร่อยู่จริง ราคาเริ่มต้น และ footprint ของทำเลเป็นหลักฐานก่อนกด inquiry'
+                  : 'Use live projects, visible pricing, and area footprint as the credibility proof before you send an inquiry.'}
+              </p>
+              <div className="insight-list mt-3">
+                {developerCredibilityLines.map((item) => (
+                  <div key={item} className="insight-list__item">
+                    <span className="insight-list__body">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div id="developer-process-read" className="authority-card">
+              <h3 className="card-title">{locale === 'th' ? 'ก่อนส่ง inquiry ควรเกิดอะไรขึ้นบ้าง' : 'What should happen before inquiry'}</h3>
+              <p className="card-subtitle">
+                {locale === 'th'
+                  ? 'ผู้พัฒนาควรช่วยให้เส้นทางไปสู่ shortlist แคบลง ไม่ใช่เพิ่ม noise ของแบรนด์หรือโครงการ'
+                  : 'A developer-first read should narrow the shortlist path, not add more brand or project noise.'}
+              </p>
+              <div className="insight-list mt-3">
+                {developerProcessLines.map((item) => (
+                  <div key={item} className="insight-list__item">
+                    <span className="insight-list__body">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </Container>
       </section>
       <section className="section">
@@ -470,24 +549,31 @@ export default async function DevelopersPage(props: { params: Promise<{ locale: 
                       : (locale === 'th' ? 'ใช้หน้านี้เป็นจุดเริ่มต้นก่อนคุย shortlist' : 'Use this page as the starting point before a shortlist review')}
                 </p>
                 <div className="catalogue-card__meta">
-                  {card.projectNames.length ? (
+                  {card.projectCount > 0 ? (
                     <span>
                       {locale === 'th'
-                        ? `โครงการที่ live อยู่ตอนนี้: ${card.projectNames.join(', ')}`
-                        : `Live projects now: ${card.projectNames.join(', ')}`}
+                        ? `ความน่าเชื่อถือรอบนี้ยึดจาก ${card.projectCount} โครงการที่เผยแพร่แล้ว`
+                        : `Credibility here is backed by ${card.projectCount} published project${card.projectCount === 1 ? '' : 's'}.`}
                     </span>
                   ) : (
                     <span>
                       {locale === 'th'
-                        ? 'ใช้ข้อมูลผู้พัฒนาเป็นจุดเริ่มต้นก่อนขอดู shortlist โครงการที่ตรงกลยุทธ์'
-                        : 'Use developer context as the starting point before requesting a project shortlist.'}
+                        ? 'ยังไม่มี live project proof มากพอ จึงควรใช้หน้านี้เป็นจุดเริ่มต้นก่อนขอ shortlist จากทีม'
+                        : 'Live project proof is still thin here, so use this as a starting point before requesting a shortlist from the team.'}
                     </span>
                   )}
+                  {card.projectNames.length ? (
+                    <span>
+                      {locale === 'th'
+                        ? `โครงการที่ใช้เป็น proof ตอนนี้: ${card.projectNames.join(', ')}`
+                        : `Proof projects now: ${card.projectNames.join(', ')}`}
+                    </span>
+                  ) : null}
                   {card.areaNames.length ? (
                     <span>
                       {locale === 'th'
-                        ? `ทำเลที่มีโครงการ live: ${card.areaNames.join(', ')}`
-                        : `Live in areas: ${card.areaNames.join(', ')}`}
+                        ? `published footprint ตอนนี้อยู่ที่: ${card.areaNames.join(', ')}`
+                        : `Published footprint now: ${card.areaNames.join(', ')}`}
                     </span>
                   ) : null}
                   {card.minStartingPrice != null ? (

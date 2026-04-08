@@ -277,6 +277,89 @@ function inferSourceRoute(source: string | null | undefined): LeadHandoff['sourc
   if (normalized.includes('project')) return 'project';
   return 'contact';
 }
+
+function buildContactResponseBullets(
+  locale: 'en' | 'th',
+  params: {
+    isPrivateTourTopic: boolean;
+    isInvestmentPlanTopic: boolean;
+    source: string | null | undefined;
+    intent: string;
+  },
+): string[] {
+  const source = String(params.source || '').toLowerCase();
+  const isCompareFlow = source === 'compare_recovery' || params.intent === 'project_compare';
+  const isShortlistFlow = source === 'shortlist_shared' || params.intent === 'project_shortlist';
+
+  if (params.isPrivateTourTopic) {
+    return [
+      locale === 'th'
+        ? 'คำตอบกลับควรมาในรูปของ shortlist สำหรับนัดดูจริง ไม่ใช่เพียงลิงก์รายการกว้าง ๆ เพิ่มอีกชุด'
+        : 'The reply should come back as a viewing shortlist you can act on, not just another wide catalogue link.',
+      locale === 'th'
+        ? 'เรื่องเวลา ความเป็นส่วนตัว และโซนที่สนใจควรถูกพกต่อไปใน handoff โดยไม่ต้องอธิบายซ้ำ'
+        : 'Timing, privacy, and area preferences should carry forward in the handoff without forcing you to restate the brief.',
+      locale === 'th'
+        ? 'ถ้ายูนิตใดไม่เหมาะแล้ว ทีมควรชี้ตัวแทนที่ใกล้เคียงที่สุดทันที'
+        : 'If a unit is no longer suitable, the team should point to the clearest next-best viewing option immediately.',
+    ];
+  }
+
+  if (params.isInvestmentPlanTopic) {
+    return [
+      locale === 'th'
+        ? 'คำตอบกลับควรมาเป็น shortlist ที่ใช้ลงทุนได้ พร้อม downside checks ไม่ใช่เพียงการพูดถึง yield ในมุมบวก'
+        : 'The reply should come back as an investable shortlist with downside checks, not just optimistic yield language.',
+      locale === 'th'
+        ? 'งบ ผลตอบแทนที่คาดหวัง และ thesis การลงทุนควรถูกพกต่อไปใน handoff แบบไม่ drift'
+        : 'Budget, return targets, and the investment thesis should stay attached to the handoff without drifting.',
+      locale === 'th'
+        ? 'ถ้าโจทย์ยังบาง ทีมควรบอกให้ชัดว่าต้องยืนยันสมมติฐานข้อไหนก่อนคุยต่อ'
+        : 'If the brief is still thin, the team should say which assumption needs to be clarified before the investment conversation moves.',
+    ];
+  }
+
+  if (isCompareFlow) {
+    return [
+      locale === 'th'
+        ? 'บริบท compare เดิมควรถูกพกต่อไปในคำตอบกลับ โดยไม่ต้องให้คุณเริ่มเล่ารายการที่กำลังเทียบใหม่อีกครั้ง'
+        : 'The same compare context should stay attached to the reply so you do not need to restate the projects in scope.',
+      locale === 'th'
+        ? 'ถ้า live availability เปลี่ยนไป คำตอบกลับควรอธิบายให้ชัดว่าอะไรหายไปและอะไรควรถูกแทน'
+        : 'If live availability shifted, the reply should explain what changed and what should replace it.',
+      locale === 'th'
+        ? 'ขั้นถัดไปควรจบลงที่การตัดสินใจ shortlist, viewing plan, หรือ advisor call ที่คมขึ้น'
+        : 'The next step should tighten into a shortlist decision, a viewing plan, or a sharper advisor call.',
+    ];
+  }
+
+  if (isShortlistFlow) {
+    return [
+      locale === 'th'
+        ? 'บริบท shortlist เดิมควรถูกพกต่อไปในคำตอบกลับ โดยไม่ต้องเริ่ม brief ใหม่จากศูนย์'
+        : 'The existing shortlist context should carry into the reply so the brief does not restart from zero.',
+      locale === 'th'
+        ? 'คำตอบกลับควรชี้ให้ชัดว่าควรเก็บ ตัด หรือยืนยันอะไรต่อจากรายการที่มีอยู่'
+        : 'The reply should say clearly what to keep, cut, or verify next from the current shortlist.',
+      locale === 'th'
+        ? 'ถ้าสต็อกขยับไปแล้ว ทีมควรชี้ตัวแทนที่ใกล้ที่สุด แทนการวนกลับไป browse กว้าง ๆ อีกครั้ง'
+        : 'If stock has moved, the team should point to the nearest replacement instead of sending you back into a broad browse again.',
+    ];
+  }
+
+  return [
+    locale === 'th'
+      ? 'คำตอบกลับควรมาเป็น shortlist ที่แคบลงหรือ next step ที่ชัด ไม่ใช่ listing dump แบบกว้าง ๆ'
+      : 'The reply should come back as a tighter shortlist or the clearest next step, not another generic listing dump.',
+    locale === 'th'
+      ? 'งบ ทำเล และเวลา ควรถูกพกต่อไปใน handoff เพื่อไม่ให้คุณต้องเริ่มอธิบาย brief ใหม่ภายหลัง'
+      : 'Budget, area, and timing should stay attached to the handoff so you do not restart the brief later.',
+    locale === 'th'
+      ? 'ถ้าเส้นทางยังไม่ชัด ทีมควรบอกให้ชัดว่าควร compare, verify, หรือนัดอะไรเป็นขั้นถัดไป'
+      : 'If the route is still ambiguous, the team should tell you what to compare, verify, or schedule next.',
+  ];
+}
+
 export default async function ContactPage(
   props: {
     params: Promise<{ locale: string }>;
@@ -605,6 +688,12 @@ export default async function ContactPage(
         : hasLeadCaptureContext || hasInvestorContext || hasBuyingCostContext
           ? (locale === 'th' ? 'ส่งบรีฟต่อจากบริบทนี้' : 'Continue with this brief')
           : dict.contact.formTitle;
+  const contactResponseBullets = buildContactResponseBullets(locale, {
+    isPrivateTourTopic,
+    isInvestmentPlanTopic,
+    source: leadCaptureContext.source ?? null,
+    intent: leadCaptureContext.intent,
+  });
 
   return (
     <main id="main-content">
@@ -727,6 +816,15 @@ export default async function ContactPage(
                   </ul>
                 </div>
               ) : null}
+
+              <div id="contact-response-standard" className="trust-box contact-concierge-box">
+                <h3 className="trust-box__title">{dict.contact.responseTitle}</h3>
+                <ul className="bullet-list">
+                  {contactResponseBullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+              </div>
 
               <div className="contact-support-actions">
                 <div className="cta-row">

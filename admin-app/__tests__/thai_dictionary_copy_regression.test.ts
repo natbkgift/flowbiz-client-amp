@@ -17,6 +17,8 @@ describe('Thai dictionary public copy regression', () => {
     expect(th.compare.browseProjects).toBe('ดูโครงการ');
     expect(th.compare.priceRange).toBe('ช่วงราคา');
     expect(th.compare.expectedYield).toBe('ผลตอบแทนที่คาดได้');
+    expect(th.areaGuide.confidenceTitle).toBe('วิธีใช้ area guide แบบมั่นใจกว่าเดิม');
+    expect(th.contact.responseTitle).toBe('หลังส่ง brief แล้วจะเกิดอะไรขึ้น');
     expect(th.property.similarComingSoonText).not.toContain('brief');
     expect(th.property.highlightsTitle).toBe('จุดเด่นระดับยูนิต');
     expect(th.property.localContextTitle).toBe('อ่านทำเลนี้อย่างไร');

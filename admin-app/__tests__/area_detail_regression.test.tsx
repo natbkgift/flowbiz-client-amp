@@ -83,8 +83,11 @@ describe('area detail flat-payload regression', () => {
     expect(markup).toContain(flatAreaPayload.slug);
     expect(markup).toContain('area_consultation_primary');
     expect(markup).toContain('area-authority-snapshot');
+    expect(markup).toContain('area-confidence-grid');
     expect(markup).toContain('สรุปข้อมูลทำเล');
     expect(markup).toContain('ความเหมาะกับผู้ซื้อ');
+    expect(markup).toContain('เหตุผลที่ทำเลนี้ช่วยลดความลังเลได้');
+    expect(markup).toContain('ถ้าเรื่องทำเลเริ่มนิ่งแล้วแต่ยังติดใจเรื่องแบรนด์ ให้ไปต่อที่หน้า developers ก่อนค่อยตัดสินใจส่ง inquiry');
     expect(markup).toContain('สรุปทำเลของพื้นที่นี้');
     expect(markup).not.toContain('btn btn-tertiary');
     expect(markup).not.toContain('buyer fit');

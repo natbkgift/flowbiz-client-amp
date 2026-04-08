@@ -115,7 +115,7 @@ describe('i18n dictionaries', () => {
 
   it('area has all required keys', () => {
     const requiredKeys: (keyof Dictionary['area'])[] = [
-      'notFound', 'invalidLink', 'backToAreaGuide', 'priceTrend',
+      'notFound', 'invalidLink', 'backToAreaGuide', 'confidenceTitle', 'confidenceSubtitle', 'processTitle', 'processSubtitle', 'priceTrend',
       'rentalDemand', 'suitableBuyer', 'nextStep',
       'goToSmartFinder', 'browseProjects',
       'fallbackTitle', 'metaDescription', 'avgPrice', 'asOf', 'avgRent', 'roiPercent',
@@ -174,6 +174,7 @@ describe('i18n dictionaries', () => {
 
   it('areaGuide has area-specific content keys', () => {
     const requiredKeys: (keyof Dictionary['areaGuide'])[] = [
+      'confidenceTitle', 'confidenceSubtitle', 'processTitle', 'processSubtitle',
       'centralTitle', 'centralLifestyle', 'centralInvestment',
       'jomtienTitle', 'jomtienLifestyle', 'jomtienInvestment',
       'pratumnakTitle', 'pratumnakLifestyle', 'pratumnakInvestment',
@@ -181,6 +182,16 @@ describe('i18n dictionaries', () => {
     for (const key of requiredKeys) {
       expect(en.areaGuide[key]).toBeTruthy();
       expect(th.areaGuide[key]).toBeTruthy();
+    }
+  });
+
+  it('contact has trust and response copy keys', () => {
+    const requiredKeys: (keyof Dictionary['contact'])[] = [
+      'title', 'subtitle', 'advisoryTitle', 'advisoryBody', 'formTitle', 'trustTitle', 'responseTitle', 'channelsTitle',
+    ];
+    for (const key of requiredKeys) {
+      expect(en.contact[key]).toBeTruthy();
+      expect(th.contact[key]).toBeTruthy();
     }
   });
 

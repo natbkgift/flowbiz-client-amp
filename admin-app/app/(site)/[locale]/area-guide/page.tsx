@@ -89,22 +89,41 @@ async function buildAreaGuideCards(locale: 'en' | 'th', dict: ReturnType<typeof 
   }
 }
 
+function buildAreaGuideConfidenceLines(locale: 'en' | 'th', areaCount: number): string[] {
+  return [
+    locale === 'th'
+      ? `ตอนนี้มี ${areaCount} ทำเลที่เผยแพร่อยู่บนหน้านี้ ซึ่งเพียงพอให้ตัดสินใจเรื่องโซนก่อนขยับไปที่โครงการ`
+      : `There are ${areaCount} published areas on this page right now, enough to decide the zone before you move into projects.`,
+    locale === 'th'
+      ? 'การเลือกทำเลควรช่วยลดความไม่แน่ใจเรื่องไลฟ์สไตล์ แรงกดดันด้านงบ และประเภท shortlist ที่คุณควรขอต่อ'
+      : 'Area choice should reduce uncertainty around lifestyle fit, budget pressure, and the kind of shortlist you should ask for next.',
+    locale === 'th'
+      ? 'ถ้ายังลังเลระหว่างสองโซน ให้พกทั้งคู่ไปต่อใน Smart Finder แทนการฝืนเลือกโครงการเร็วเกินไป'
+      : 'If two zones still feel close, carry both into Smart Finder instead of forcing a project decision too early.',
+  ];
+}
+
+function buildAreaGuideProcessLines(locale: 'en' | 'th'): string[] {
+  return [
+    locale === 'th'
+      ? 'เปิด area brief ก่อน แล้วค่อยไปต่อที่ projects, compare, หรือ advisor handoff โดยไม่ต้องรีเซ็ตบริบทใหม่'
+      : 'Open the area brief first, then move into projects, compare, or an advisor handoff without rebuilding the context.',
+    locale === 'th'
+      ? 'ใช้หน้านี้เมื่อสิ่งที่ยังบล็อกการตัดสินใจคือโซน ไม่ใช่อาคารหรือยูนิตเฉพาะ'
+      : 'Use this page when the blocker is still the zone, not the exact building or unit.',
+    locale === 'th'
+      ? 'เมื่อโซนเริ่มชัด ขั้นถัดไปควรเป็นรายการโครงการที่แคบลง ไม่ใช่การ browse ที่กว้างขึ้นอีก'
+      : 'Once the zone is clearer, the next step should be a shorter project list, not a wider browse again.',
+  ];
+}
+
 export default async function AreaGuidePage(props: { params: Promise<{ locale: string }> }) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const areas = await buildAreaGuideCards(locale, dict);
-  const confidenceLines = locale === 'th'
-    ? [
-        'เริ่มจากการเลือกทำเลที่ใช่ก่อน แล้วค่อยคัดโครงการในพื้นที่นั้น',
-        'แต่ละ area brief จะต่อเข้ากับ Smart Finder, compare, และ contact flow เดิมได้โดยไม่เสียบริบท',
-        'หน้านี้ควรทำหน้าที่เป็นแผนที่การตัดสินใจ ไม่ใช่แค่รายชื่อทำเลไม่กี่แห่ง',
-      ]
-    : [
-        'Choose the right zone first, then narrow projects inside that area.',
-        'Each area brief should hand cleanly into the existing Smart Finder, compare, and contact flows.',
-        'This page should work like a decision map, not just a short list of neighborhoods.',
-      ];
+  const confidenceLines = buildAreaGuideConfidenceLines(locale, areas.length);
+  const processLines = buildAreaGuideProcessLines(locale);
 
   return (
     <main id="main-content" className="decision-page decision-page--area-guide">
@@ -161,19 +180,27 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
 
       <section id="area-guide-confidence-pack" className="section">
         <Container>
-          <section className="authority-card area-guide-guidance reveal">
-            <h2 className="card-title">{locale === 'th' ? 'วิธีใช้หน้า area guide' : 'How to use this area guide'}</h2>
-            <p className="card-subtitle">
-              {locale === 'th'
-                ? 'อ่านบริบทของทำเลให้ชัดก่อน แล้วค่อยเปิด area brief, compare, หรือคุยกับทีมต่อจากหน้าชุดเดียวกัน'
-                : 'Read the location context first, then move into the area brief, compare, or advisor handoff from the same decision path.'}
-            </p>
-            <ul className="bullet-list mt-4">
-              {confidenceLines.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          </section>
+          <div className="signal-grid signal-grid--two-up">
+            <section className="authority-card area-guide-guidance reveal">
+              <h2 className="card-title">{dict.areaGuide.confidenceTitle}</h2>
+              <p className="card-subtitle">{dict.areaGuide.confidenceSubtitle}</p>
+              <ul className="bullet-list mt-4">
+                {confidenceLines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="authority-card area-guide-guidance reveal" id="area-guide-process-read">
+              <h2 className="card-title">{dict.areaGuide.processTitle}</h2>
+              <p className="card-subtitle">{dict.areaGuide.processSubtitle}</p>
+              <ul className="bullet-list mt-4">
+                {processLines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </section>
+          </div>
         </Container>
       </section>
 

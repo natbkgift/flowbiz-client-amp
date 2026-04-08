@@ -73,7 +73,7 @@ function buildAreaMarketRead(locale: 'en' | 'th', areaName: string, hasStats: bo
       roiPercent
         ? `หากคุณมองเชิงลงทุน ค่า ROI snapshot ปัจจุบันอยู่ที่ ${roiPercent}`
         : 'หากโฟกัสผลตอบแทน ควรใช้พื้นที่นี้เป็นจุดเริ่มต้นก่อนไปดูโครงการระดับยูนิต',
-      'พื้นที่ที่เหมาะควรชนะทั้งเรื่องการใช้ชีวิตและความชัดเจนของ next step ไม่ใช่แค่ตัวเลขบนกระดาษ',
+      'พื้นที่ที่เหมาะควรชนะทั้งเรื่องการใช้ชีวิตและความชัดเจนของขั้นถัดไป ไม่ใช่แค่ตัวเลขบนกระดาษ',
     ];
   }
 
@@ -85,6 +85,38 @@ function buildAreaMarketRead(locale: 'en' | 'th', areaName: string, hasStats: bo
       ? `If yield matters, the current ROI snapshot reads ${roiPercent}.`
       : 'If yield is part of the brief, use this area as a filter before drilling into project-level options.',
     'The right area should reduce uncertainty around lifestyle, ownership fit, and the next decision step all at once.',
+  ];
+}
+
+function buildAreaConfidenceLines(locale: 'en' | 'th', areaName: string, hasStats: boolean): string[] {
+  return [
+    hasStats
+      ? (locale === 'th'
+        ? `${areaName} มีทั้งบริบทราคาและค่าเช่าที่พอช่วยลดความลังเลรอบแรก ก่อนคุณจะขอรายการโครงการหรือยูนิตต่อ`
+        : `${areaName} already carries enough pricing and rent context to reduce first-pass hesitation before you request projects or units.`)
+      : (locale === 'th'
+        ? `${areaName} ยังทำหน้าที่เป็นสรุปทำเลตั้งต้นที่ดีได้ แม้ snapshot เชิงตัวเลขจะบาง เพราะมันช่วยกันไม่ให้คุณขอรายการในโซนที่ผิดตั้งแต่ต้น`
+        : `${areaName} still works as a useful location brief even when the numeric snapshot is thin, because it stops the shortlist from starting in the wrong zone.`),
+    locale === 'th'
+      ? `ความเหมาะกับผู้ซื้อใน ${areaName} จะชัดขึ้นเมื่ออ่าน logic ของย่านก่อนคำสัญญาระดับอาคารหรือยูนิต`
+      : `Buyer fit in ${areaName} gets clearer when you read the district logic before individual building promises.`,
+    locale === 'th'
+      ? 'ใช้ทำเลนี้เป็นตัวกรอง shortlist ก่อน ไม่ใช่ข้อสรุปสุดท้ายของดีล'
+      : 'Use this area as a shortlist filter first, not as a final deal conclusion.',
+  ];
+}
+
+function buildAreaProcessLines(locale: 'en' | 'th', areaName: string): string[] {
+  return [
+    locale === 'th'
+      ? 'เริ่มจาก area brief ก่อน แล้วค่อยเปิดโครงการที่เดินไปใน logic เดียวกันของไลฟ์สไตล์หรือการลงทุน'
+      : 'Start with the area brief, then open projects that follow the same lifestyle or investment logic.',
+    locale === 'th'
+      ? `ถ้า ${areaName} ดูใช่แต่ project set ยังบาง ให้ส่ง advisor brief จากหน้านี้แทนการกระโดดไปยัง listing แบบสุ่ม`
+      : `If ${areaName} feels right but the project set is still thin, send the advisor brief from this page instead of jumping into random listings.`,
+    locale === 'th'
+      ? 'ถ้าเรื่องทำเลเริ่มนิ่งแล้วแต่ยังติดใจเรื่องแบรนด์ ให้ไปต่อที่หน้า developers ก่อนค่อยตัดสินใจส่ง inquiry'
+      : 'If the location logic is settling but brand credibility is still the blocker, move to the developers page before sending the inquiry.',
   ];
 }
 
@@ -181,6 +213,7 @@ export default async function AreaPage(
   const hasStats = Boolean(stats?.statistics);
   const publishedBlogPosts = await withTimeout(fetchBlogPosts(), []);
   const marketRead = buildAreaMarketRead(locale, title, hasStats, stats?.statistics?.roi_percent);
+  const areaConfidenceLines = buildAreaConfidenceLines(locale, title, hasStats);
   const metricCards = [
     { label: dict.area.avgPrice, value: formatStat(stats?.statistics?.avg_price) },
     { label: dict.area.avgRent, value: formatStat(stats?.statistics?.avg_rent) },
@@ -205,6 +238,7 @@ export default async function AreaPage(
       return titleText.toLowerCase().includes(title.toLowerCase()) || excerptText.toLowerCase().includes(title.toLowerCase()) || titleText.toLowerCase().includes(params.slug.toLowerCase());
     })
     .slice(0, 3);
+  const areaProcessLines = buildAreaProcessLines(locale, title);
 
   return (
     <main id="main-content">
@@ -314,6 +348,32 @@ export default async function AreaPage(
                     <Link className="btn btn-secondary" href={withLocale(locale, '/projects')}>
                       {dict.area.browseProjects}
                     </Link>
+                  </div>
+                </div>
+              </section>
+
+              <section className="signal-grid signal-grid--two-up reveal" id="area-confidence-grid">
+                <div className="authority-card">
+                  <h2 className="card-title">{dict.area.confidenceTitle}</h2>
+                  <p className="card-subtitle">{dict.area.confidenceSubtitle}</p>
+                  <div className="insight-list mt-3">
+                    {areaConfidenceLines.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="authority-card">
+                  <h2 className="card-title">{dict.area.processTitle}</h2>
+                  <p className="card-subtitle">{dict.area.processSubtitle}</p>
+                  <div className="insight-list mt-3">
+                    {areaProcessLines.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </section>

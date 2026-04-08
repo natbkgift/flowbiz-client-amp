@@ -38,6 +38,9 @@ describe('area guide page', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: /area guide/i })).toBeTruthy();
     expect(container.querySelector('#area-guide-confidence-pack')).not.toBeNull();
+    expect(container.querySelector('#area-guide-process-read')).not.toBeNull();
+    expect(screen.getByRole('heading', { name: /how area choice should lead the next step/i })).toBeTruthy();
+    expect(screen.getByText(/there are 2 published areas on this page right now/i)).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Jomtien' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Wongamat' })).toBeTruthy();
     expect(screen.getAllByRole('link', { name: /open area brief/i }).map((link) => link.getAttribute('href'))).toEqual([
