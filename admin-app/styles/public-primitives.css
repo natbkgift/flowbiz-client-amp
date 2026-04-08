@@ -459,6 +459,90 @@ html[lang='th'] .decision-page--project .public-hero__subtitle {
   max-width: 33ch;
 }
 
+.decision-page--project .project-gallery__lead-frame {
+  position: relative;
+}
+
+.decision-page--project .project-gallery__lead-meta {
+  position: absolute;
+  inset: auto 18px 18px 18px;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(7, 19, 39, 0.16), rgba(7, 19, 39, 0.72));
+  box-shadow: 0 18px 36px rgba(7, 19, 39, 0.16);
+  pointer-events: none;
+}
+
+.decision-page--project .project-gallery__lead-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.decision-page--project .project-gallery__lead-caption {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.42;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.decision-page--project .project-gallery__status {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+  padding: clamp(18px, 2vw, 22px);
+  border-radius: 24px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background:
+    radial-gradient(circle at 12% 10%, rgba(232, 199, 141, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(248, 244, 238, 0.976));
+  box-shadow: 0 20px 40px rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--project .project-gallery__status-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.decision-page--project .project-gallery__status-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(120, 92, 47, 0.88);
+}
+
+.decision-page--project .project-gallery__status-title {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.26;
+  color: rgba(7, 19, 39, 0.96);
+}
+
+.decision-page--project .project-gallery__status-body {
+  margin: 0;
+  max-width: 60ch;
+  color: rgba(51, 65, 85, 0.92);
+  line-height: 1.64;
+}
+
+.decision-page--project .project-gallery__status-list {
+  gap: 10px;
+}
+
+.decision-page--project .project-gallery__status-list .insight-list__item {
+  padding: 14px 15px;
+  border-radius: 17px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 246, 240, 0.86));
+  border-color: rgba(7, 19, 39, 0.06);
+}
+
 .decision-page--project .project-confidence-facts {
   gap: 10px;
 }
@@ -674,6 +758,16 @@ html[lang='th'] .decision-page--project .public-hero__subtitle {
   align-items: flex-start;
 }
 
+.decision-page--project .project-cta-row {
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.decision-page--project .project-cta-row > .btn,
+.decision-page--project .project-cta-row > a {
+  flex: 1 1 100%;
+}
+
 .decision-page--project .project-unit-inventory-grid .property-card {
   min-height: 100%;
 }
@@ -694,6 +788,21 @@ html[lang='th'] .decision-page--project .public-hero__subtitle {
 }
 
 @media (min-width: 768px) {
+  .decision-page--project .project-gallery__status {
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 1.18fr);
+    align-items: start;
+  }
+
+  .decision-page--project .project-cta-row > .btn,
+  .decision-page--project .project-cta-row > a {
+    flex: 1 1 calc(50% - 6px);
+  }
+
+  .decision-page--project .project-cta-row > .btn-tertiary,
+  .decision-page--project .project-cta-row > a.btn-tertiary {
+    flex-basis: 100%;
+  }
+
   .home-page[data-locale='th'] .section-title {
     font-size: clamp(1.74rem, 2.7vw, 2.36rem);
     line-height: 1.12;

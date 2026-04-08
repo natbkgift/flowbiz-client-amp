@@ -28,6 +28,9 @@ vi.mock('@/app/_lib/public-api-server', async () => {
       location: { district: 'Jomtien' },
       area: { id: 'area-1', slug: 'jomtien', name: 'Jomtien' },
       developer: { name: 'AMP Developments' },
+      hero_image_url: '/images/alpha-residence-hero.jpg',
+      cover_image_url: '/images/alpha-residence-cover.jpg',
+      images: ['/images/alpha-residence-lobby.jpg', '/images/alpha-residence-pool.jpg'],
       delivery_date: '2027-03-01',
       starting_price: 5200000,
       unit_count: 180,
@@ -112,6 +115,10 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project_self_serve_secondary')).toHaveAttribute('href', '/en/compare');
     expect(container.textContent ?? '').toContain('Market snapshot available');
     expect(container.querySelector('#project-confidence-pack')).not.toBeNull();
+    expect(container.querySelector('#project-gallery-section')).not.toBeNull();
+    expect(container.querySelector('#project-gallery-status')).not.toBeNull();
+    expect(container.querySelectorAll('#project-gallery-section [data-media-kind="local"]')).toHaveLength(4);
+    expect(container.textContent ?? '').toContain('4 published local-media project visuals are confirmed on this route.');
     expect(container.querySelector('#project-brief-section')).not.toBeNull();
     expect(container.querySelector('#project-why-framework')).not.toBeNull();
     expect(container.querySelector('#project-unit-inventory')).not.toBeNull();
@@ -145,6 +152,7 @@ describe('project detail shell', () => {
     expect(markup).toContain('เหตุผลที่โครงการนี้ควรอยู่ต่อใน shortlist');
     expect(markup).toContain('ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยัง active');
     expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
+    expect(markup).toContain('สถานะภาพโครงการที่ยืนยันได้');
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
     expect(markup).toContain('จังหวะถัดไปจากหน้าโครงการนี้');

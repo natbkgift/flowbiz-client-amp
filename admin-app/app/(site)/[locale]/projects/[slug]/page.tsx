@@ -6,6 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
+import { resolveRenderableLocalMediaPath } from '@/app/_lib/local-media';
 import { resolveLocalizedText } from '@/app/_lib/public-content';
 import { fetchProjectBySlug, fetchProjectEvaluation, fetchBlogPosts, fetchProperties } from '@/app/_lib/public-api-server';
 import type { PropertyListItem } from '@/app/public/_shared/types';
@@ -583,6 +584,46 @@ function buildProjectInventoryFlowLines(
   ]).slice(0, 3);
 }
 
+function buildRenderableProjectMedia(project: ProjectDetailRecord): string[] {
+  return [...new Set([
+    project.hero_image_url,
+    project.cover_image_url,
+    ...(project.images ?? []),
+  ].map((item) => resolveRenderableLocalMediaPath(item)).filter((item): item is string => Boolean(item)))];
+}
+
+function buildProjectGalleryStatusLines(
+  locale: 'en' | 'th',
+  mediaCount: number,
+  areaName: string | null | undefined,
+  startingPriceLabel: string | null,
+  deliveryLabel: string | null,
+): string[] {
+  return uniqueItems([
+    mediaCount > 0
+      ? (locale === 'th'
+        ? `route นี้ยืนยันภาพ local media ของโครงการได้ ${mediaCount} ภาพ`
+        : `${mediaCount} published local-media project visual${mediaCount === 1 ? '' : 's'} are confirmed on this route.`)
+      : (locale === 'th'
+        ? 'route นี้กำลังใช้ภาพ overview สำรอง เพราะ photo pack แบบ local media ที่เผยแพร่ยังบางอยู่'
+        : 'This route is currently using the fallback overview image because the published local-media photo pack is still thin.'),
+    locale === 'th'
+      ? 'หน้านี้แสดงเฉพาะไฟล์ local media ที่เผยแพร่แล้วเท่านั้น เพื่อไม่ดึงภาพภายนอกหรือภาพที่ยังไม่พร้อมใช้งาน'
+      : 'This route only renders published local-media assets, so external or stale files do not leak into the project brief.',
+    mediaCount > 0
+      ? (locale === 'th'
+        ? 'ใช้ภาพชุดนี้เพื่ออ่านตัวอาคารและบรรยากาศก่อน แล้วค่อยยืนยันภาพส่วนกลาง ยูนิต และความคืบหน้าล่าสุดในรอบถัดไป'
+        : 'Use this gallery to read the building and atmosphere first, then confirm the latest shared-area, unit, and site updates in the next step.')
+      : areaName
+        ? (locale === 'th'
+          ? `แม้ภาพจะยังบาง คุณยังใช้บริบทของ ${areaName}${startingPriceLabel ? ` และราคาเริ่มต้น ${startingPriceLabel}` : ''}${deliveryLabel ? ` พร้อมกำหนดส่งมอบ ${deliveryLabel}` : ''} เพื่อคัดต่อได้ก่อนค่อยขอภาพล่าสุดจากทีม`
+          : `Even with a thin photo pack, you can still use the ${areaName}${startingPriceLabel ? ` entry point of ${startingPriceLabel}` : ''}${deliveryLabel ? ` and the published ${deliveryLabel} delivery timing` : ''} before you request fresher visuals from the team.`)
+        : (locale === 'th'
+          ? 'หากจะใช้โครงการนี้ต่อใน shortlist ให้ส่งต่อเพื่อขอภาพล่าสุดและสถานะหน้างานก่อนตัดสินใจ'
+          : 'If this project stays in the shortlist, request the latest visuals and site status before moving further.'),
+  ]).slice(0, 3);
+}
+
 export async function generateMetadata(
   props: {
     params: Promise<{ locale: string; slug: string }>;
@@ -758,11 +799,7 @@ export default async function ProjectDetailPage(
   );
   const summary = resolveLocalizedText(project.summary, locale);
   const description = resolveLocalizedText(project.description ?? null, locale);
-  const projectMedia = [...new Set([
-    project.hero_image_url,
-    project.cover_image_url,
-    ...(project.images ?? []),
-  ].filter((item): item is string => typeof item === 'string' && item.trim().length > 0))];
+  const projectMedia = buildRenderableProjectMedia(project);
   const deliveryLabel = formatDateLabel(locale, project.delivery_date);
   const startingPriceLabel = formatCurrency(locale, project.starting_price);
   const investmentFacts = toKeyValueList(project.investment_snapshot);
@@ -949,6 +986,33 @@ export default async function ProjectDetailPage(
     locale,
     linkedProjectProperties,
     linkedInventoryCount,
+  );
+  const projectGalleryLead = projectMedia[0] ?? null;
+  const projectGalleryTiles = projectMedia.slice(1, 5);
+  const projectGalleryLeadKicker = projectMedia.length > 0
+    ? (locale === 'th' ? 'ภาพโครงการที่ยืนยันแล้ว' : 'Confirmed project visual')
+    : (locale === 'th' ? 'ภาพ overview สำรอง' : 'Fallback overview');
+  const projectGalleryLeadCaption = projectMedia.length > 1
+    ? (locale === 'th' ? `${projectMedia.length} ภาพที่ยืนยันได้ใน route นี้` : `${projectMedia.length} visuals confirmed on this route`)
+    : projectMedia.length === 1
+      ? (locale === 'th' ? 'มี 1 ภาพ local media ที่ยืนยันได้บน route นี้' : '1 confirmed local-media visual on this route')
+      : (locale === 'th' ? 'ใช้ภาพ overview สำรองจนกว่าจะมี photo pack ที่เผยแพร่ครบขึ้น' : 'Using the fallback overview until a fuller published photo pack is available.');
+  const projectGalleryStatusTitle = projectMedia.length > 0
+    ? (locale === 'th' ? 'สถานะภาพโครงการที่ยืนยันได้' : 'Confirmed project visual status')
+    : (locale === 'th' ? 'photo pack ของโครงการยังบางใน route นี้' : 'The project photo pack is still thin on this route');
+  const projectGalleryStatusBody = projectMedia.length > 0
+    ? (locale === 'th'
+      ? 'ใช้แกลเลอรีนี้เป็น visual brief ระดับโครงการก่อน แล้วค่อยยืนยันภาพส่วนกลาง ความคืบหน้า และยูนิตล่าสุดในรอบถัดไป'
+      : 'Use this gallery as the project-level visual brief first, then confirm the latest shared-area, progress, and unit-specific visuals in the next step.')
+    : (locale === 'th'
+      ? 'ถึงภาพจะยังไม่ครบ หน้านี้ยังคงใช้บริบทของโครงการและ fallback overview เพื่อไม่ให้การตัดสินใจหลุดจากเส้นทาง'
+      : 'Even when the photo pack is thin, this page keeps the project context grounded with a fallback overview so the decision path does not break.');
+  const projectGalleryStatusLines = buildProjectGalleryStatusLines(
+    locale,
+    projectMedia.length,
+    project.area?.name,
+    startingPriceLabel,
+    deliveryLabel,
   );
   const projectInventoryFlowLines = buildProjectInventoryFlowLines(
     locale,
@@ -1209,35 +1273,59 @@ export default async function ProjectDetailPage(
           </div>
         </section>
 
-        {projectMedia.length > 0 ? (
-          <section className="project-gallery mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
-            <div className="project-gallery__grid grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+        <section id="project-gallery-section" className="project-gallery mt-6 reveal" aria-label={locale === 'th' ? 'แกลเลอรีโครงการ' : 'Project gallery'}>
+          <div className="project-gallery__grid grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+            <div className="project-gallery__lead-frame">
               <LocalMediaImage
-                media={{ image_url: projectMedia[0] }}
+                media={{ image_url: projectGalleryLead }}
                 alt={project.name}
+                altFallback={locale === 'th' ? 'ภาพรวมโครงการ' : 'Project overview'}
+                fallbackSrc="/images/project-overview.png"
                 className="project-gallery__lead media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
                 imageClassName="media-shell__img"
                 aspectRatio="16 / 10"
                 priority
                 loading="eager"
+                ssrStartWithPrimary={Boolean(projectGalleryLead)}
               />
-              {projectMedia.length > 1 ? (
-                <div className="project-gallery__rail grid grid-cols-2 gap-4">
-                  {projectMedia.slice(1, 5).map((item, index) => (
-                    <LocalMediaImage
-                      key={`${project.id}-media-${index + 1}`}
-                      media={{ image_url: item }}
-                      alt={`${project.name} ${index + 2}`}
-                      className="project-gallery__tile media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
-                      imageClassName="media-shell__img"
-                      aspectRatio="4 / 3"
-                    />
-                  ))}
-                </div>
-              ) : null}
+              <div className="project-gallery__lead-meta">
+                <span className="project-gallery__lead-kicker">{projectGalleryLeadKicker}</span>
+                <p className="project-gallery__lead-caption">{projectGalleryLeadCaption}</p>
+              </div>
             </div>
-          </section>
-        ) : null}
+            {projectGalleryTiles.length > 0 ? (
+              <div className="project-gallery__rail grid grid-cols-2 gap-4">
+                {projectGalleryTiles.map((item, index) => (
+                  <LocalMediaImage
+                    key={`${project.id}-media-${index + 1}`}
+                    media={{ image_url: item }}
+                    alt={`${project.name} ${index + 2}`}
+                    altFallback={locale === 'th' ? `ภาพโครงการ ${index + 2}` : `Project visual ${index + 2}`}
+                    fallbackSrc="/images/project-overview.png"
+                    className="project-gallery__tile media-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm"
+                    imageClassName="media-shell__img"
+                    aspectRatio="4 / 3"
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div id="project-gallery-status" className="project-gallery__status">
+            <div className="project-gallery__status-copy">
+              <p className="project-gallery__status-kicker">{locale === 'th' ? 'Media status' : 'Media status'}</p>
+              <h2 className="project-gallery__status-title">{projectGalleryStatusTitle}</h2>
+              <p className="project-gallery__status-body">{projectGalleryStatusBody}</p>
+            </div>
+            <div className="insight-list project-gallery__status-list">
+              {projectGalleryStatusLines.map((item) => (
+                <div key={item} className="insight-list__item">
+                  <span className="insight-list__body">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         <div className="detail-layout advisory-detail-layout mt-6">
           <div className="detail-stack">
             <section id="project-brief-section" className="authority-card reveal project-brief-section">

@@ -251,6 +251,21 @@ describe('public design system contract', () => {
     expect(primitives).toContain('.decision-page--project .project-cta-row > .btn-tertiary');
   });
 
+  it('keeps the project gallery on renderable local media plus an explicit fallback status layer', () => {
+    const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
+    const primitives = read('styles/public-primitives.css');
+
+    expect(projectDetail).toContain('resolveRenderableLocalMediaPath');
+    expect(projectDetail).toContain('buildRenderableProjectMedia(project)');
+    expect(projectDetail).toContain('id="project-gallery-section"');
+    expect(projectDetail).toContain('id="project-gallery-status"');
+    expect(projectDetail).toContain('fallbackSrc="/images/project-overview.png"');
+
+    expect(primitives).toContain('.decision-page--project .project-gallery__lead-meta');
+    expect(primitives).toContain('.decision-page--project .project-gallery__status');
+    expect(primitives).toContain('.decision-page--project .project-gallery__status-list .insight-list__item');
+  });
+
   it('locks audited route container intent for narrative and inventory shells', () => {
     const blogArticle = read('app/(site)/[locale]/blog/[slug]/page.tsx');
     const aboutPage = read('app/(site)/[locale]/about/page.tsx');

@@ -133,6 +133,9 @@ describe('project detail trust integration', () => {
     expect(screen.getAllByText(/area context: central pattaya/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/published developer: beta developments/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/check live availability around this project/i)).toBeTruthy();
+    expect(container.querySelector('#project-gallery-status')).not.toBeNull();
+    expect(container.querySelector('#project-gallery-section [data-media-kind="fallback"]')).not.toBeNull();
+    expect(screen.getByText(/fallback overview image because the published local-media photo pack is still thin/i)).toBeTruthy();
     expect(screen.getByText(/confirm current rental demand and buyer fit around central pattaya/i)).toBeTruthy();
     expect(screen.getByText(/confirm which unit mix and active availability still match beta tower/i)).toBeTruthy();
     expect(container.querySelector('#project_consultation_primary')).toHaveAttribute(
