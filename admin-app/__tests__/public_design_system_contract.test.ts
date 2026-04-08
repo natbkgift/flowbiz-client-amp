@@ -34,6 +34,10 @@ describe('public design system contract', () => {
     expect(tokens).toContain('--public-type-body-line: 1.76;');
     expect(tokens).toContain('--public-type-label-track: 0.14em;');
     expect(tokens).toContain('--public-type-flow-paragraph-gap: 16px;');
+    expect(tokens).toContain('--public-panel-padding-fluid: clamp(20px, 3vw, 36px);');
+    expect(tokens).toContain('--public-radius-panel: 22px;');
+    expect(tokens).toContain('--public-surface-panel-showcase:');
+    expect(tokens).toContain('--public-shadow-showcase: 0 42px 94px rgba(3, 8, 18, 0.34);');
     expect(tokens).toContain("html[lang='th'] {");
     expect(tokens).toContain('--public-space-1: 8px;');
     expect(tokens).toContain('--public-space-4: 24px;');
@@ -58,12 +62,18 @@ describe('public design system contract', () => {
     expect(globals).toContain('font-size: var(--public-type-h1-size);');
     expect(globals).toContain('.container--readable');
     expect(globals).toContain('.detail-stack--readable');
+    expect(globals).toContain('padding: var(--public-panel-padding-fluid);');
+    expect(globals).toContain('border-radius: var(--public-radius-showcase);');
+    expect(globals).toContain('box-shadow: var(--public-shadow-showcase);');
     expect(globals).toContain('padding: var(--public-section-space-desktop) 0;');
 
     expect(primitives).toContain('.type-h1');
     expect(primitives).toContain('.type-caption');
     expect(primitives).toContain('.content-flow > * + *');
     expect(primitives).toContain('.form-helper--muted');
+    expect(primitives).toContain('gap: var(--public-stack-gap-compact);');
+    expect(primitives).toContain('padding: var(--public-hero-content-padding);');
+    expect(primitives).toContain('background: var(--public-surface-signal);');
     expect(primitives).toContain('.public-section-header');
     expect(primitives).toContain('.public-surface-card');
     expect(primitives).toContain('.public-chip');
@@ -75,6 +85,7 @@ describe('public design system contract', () => {
 
     expect(foundationSpec).toContain('## Typography');
     expect(foundationSpec).toContain('## Content Rhythm');
+    expect(foundationSpec).toContain('## Surface And Elevation');
     expect(foundationSpec).toContain('Home final CTA may use an `h2` element with the `type-h1` class');
     expect(foundationSpec).toContain('Long-form routes that keep a supporting rail may keep the outer section shell at `default`, but the narrative column itself should still respect the readable measure.');
   });
@@ -118,6 +129,10 @@ describe('public design system contract', () => {
     expect(homeBottomCta).toContain('type-h1');
     expect(homeBottomCta).toContain('type-body');
     expect(homeBottomCta).toContain('type-caption');
+    expect(homeBottomCta).toContain('className="home-bottom-cta__panel"');
+    expect(homeBottomCta).not.toContain('rounded-2xl');
+    expect(homeBottomCta).not.toContain('shadow-2xl');
+    expect(homeBottomCta).not.toContain('p-5 md:p-8');
 
     expect(homeVideoCard).toContain('type-h3');
     expect(homeVideoCard).toContain('type-small');

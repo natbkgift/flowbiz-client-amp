@@ -142,6 +142,18 @@ Rules:
 - Section heading composition is `kicker -> title -> subtitle` and should prefer `PublicSectionHeader`.
 - When `PublicSectionHeader` is not used, the replacement must still use the same `type-label`, heading, and body-copy contract.
 
+## Surface And Elevation
+
+Shared public surfaces must source panel padding, radius, border, background, and shadow from the token layer.
+
+Rules:
+
+- Reuse `public-surface-card` for standard light, warm, and deep panels before creating page-specific surface treatments.
+- Reuse tokenized shells such as `authority-card`, `page-rail-card`, `editorial-card`, and `cta-panel` before introducing new card languages.
+- Showcase variants such as the home final CTA panel and buy closing CTA may use named showcase or feature tokens, but not ad-hoc `rounded-*`, `shadow-*`, or raw utility surface overrides inside JSX.
+- Shared panel padding and stack gaps must come from named panel and stack tokens rather than repeated local pixel values.
+- When a component already uses `PublicSurfaceCard`, its radius, fill, and elevation should be controlled by shared CSS tokens or classes, not local utility overrides.
+
 ## Page Template Rules For This Slice
 
 These rules are enforced starting now even before the rest of Phase 0 lands:

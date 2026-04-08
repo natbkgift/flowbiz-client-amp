@@ -102,7 +102,7 @@ export function HomeBottomCta({
             <p className="home-bottom-trust-note type-caption mt-4 text-white/70 max-w-xl">{trustNote}</p>
           </div>
           <div className="reveal home-bottom-cta__form-wrap">
-            <PublicSurfaceCard as="div" tone="warm" className="bg-white p-5 md:p-8 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">
+            <PublicSurfaceCard as="div" tone="warm" className="home-bottom-cta__panel" aria-label="consultation-form-panel">
               {formSlot}
             </PublicSurfaceCard>
           </div>

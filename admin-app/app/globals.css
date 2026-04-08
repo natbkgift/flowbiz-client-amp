@@ -2931,12 +2931,13 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .cta-panel {
   display: grid;
-  gap: var(--space-5);
-  padding: var(--space-6);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  gap: var(--public-stack-gap-relaxed);
+  padding: var(--public-panel-padding-relaxed);
+  border-radius: var(--public-radius-card-lg);
+  background: var(--public-surface-panel);
   color: var(--color-text);
-  border: 1px solid var(--color-gray-200);
+  border: 1px solid var(--public-border-soft);
+  box-shadow: var(--public-shadow-soft);
 }
 
 @media (min-width: 1024px) {
@@ -5892,12 +5893,12 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 }
 
 .home-bottom-cta__panel {
-  border: 1px solid rgba(7, 19, 39, 0.08);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at top right, rgba(226, 187, 130, 0.18), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(250, 247, 242, 0.98));
-  box-shadow: 0 42px 94px rgba(3, 8, 18, 0.34);
+  padding: var(--public-panel-padding-showcase);
+  border: 1px solid var(--public-border-soft);
+  border-radius: var(--public-radius-showcase);
+  background: var(--public-surface-panel-showcase);
+  box-shadow: var(--public-shadow-showcase);
+  color: var(--color-text);
 }
 
 .home-bottom-cta__panel .form-input,
@@ -5905,7 +5906,7 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 .home-bottom-cta__panel .form-textarea {
   border-color: rgba(10, 77, 140, 0.12);
   border-width: 1px;
-  border-radius: 14px;
+  border-radius: var(--public-radius-control);
   background: rgba(248, 250, 253, 0.96);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
@@ -7251,15 +7252,15 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 .authority-card,
 .page-rail-card,
 .editorial-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 249, 252, 0.94) 100%);
-  border: 1px solid rgba(10, 77, 140, 0.08);
-  border-radius: 22px;
-  box-shadow: var(--shadow-card);
+  background: var(--public-surface-panel);
+  border: 1px solid var(--public-border-soft);
+  border-radius: var(--public-radius-panel);
+  box-shadow: var(--public-shadow-soft);
 }
 
 .authority-card,
 .page-rail-card {
-  padding: clamp(20px, 3vw, 36px);
+  padding: var(--public-panel-padding-fluid);
 }
 
 .editorial-grid {
@@ -9617,17 +9618,12 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 .buy-closing-cta-panel {
   position: relative;
   overflow: hidden;
-  gap: clamp(20px, 3vw, 30px);
-  padding: clamp(22px, 3vw, 32px);
-  border-radius: 28px;
-  border: 1px solid rgba(7, 19, 39, 0.08);
-  background:
-    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.18), transparent 24%),
-    radial-gradient(circle at 14% 84%, rgba(10, 77, 140, 0.08), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 244, 238, 0.982));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    0 24px 54px rgba(7, 19, 39, 0.08);
+  gap: var(--public-panel-gap-feature);
+  padding: var(--public-panel-padding-feature);
+  border-radius: var(--public-radius-feature);
+  border: 1px solid var(--public-border-soft);
+  background: var(--public-surface-panel-feature);
+  box-shadow: var(--public-shadow-feature);
 }
 
 .buy-closing-cta-panel::before {
@@ -9648,7 +9644,7 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .buy-closing-cta-panel__copy {
   display: grid;
-  gap: 14px;
+  gap: var(--public-stack-gap-default);
   align-content: start;
   max-width: 40rem;
 }
@@ -9680,8 +9676,8 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 .buy-closing-cta-panel__note {
   max-width: 46ch;
   margin: 0;
-  padding-top: 14px;
-  border-top: 1px solid rgba(7, 19, 39, 0.08);
+  padding-top: var(--public-space-3);
+  border-top: 1px solid var(--public-border-soft);
   color: rgba(7, 19, 39, 0.68);
   font-size: 0.84rem;
   line-height: 1.64;

@@ -38,14 +38,59 @@
   --public-space-8: 80px;
   --public-space-9: 96px;
 
+  --public-stack-gap-compact: var(--public-space-2);
+  --public-stack-gap-default: var(--public-space-3);
+  --public-stack-gap-relaxed: var(--public-space-5);
+
+  --public-panel-padding-compact: var(--public-space-3);
+  --public-panel-padding-default: var(--public-space-4);
+  --public-panel-padding-relaxed: var(--public-space-5);
+  --public-panel-padding-fluid: clamp(20px, 3vw, 36px);
+  --public-panel-padding-showcase: clamp(20px, 4vw, 32px);
+  --public-panel-padding-feature: clamp(22px, 3vw, 32px);
+  --public-panel-gap-feature: clamp(20px, 3vw, 30px);
+
+  --public-kicker-height: 32px;
+  --public-chip-height: 28px;
+  --public-chip-height-sm: 24px;
+  --public-chip-padding-inline: 12px;
+  --public-chip-padding-inline-sm: 10px;
+
+  --public-hero-content-padding: clamp(1.35rem, 1.9vw, 1.8rem);
+  --public-hero-rail-padding: clamp(1.1rem, 1.8vw, 1.55rem);
+
   --public-radius-chip: 999px;
+  --public-radius-control: 14px;
   --public-radius-card-sm: 18px;
   --public-radius-card-md: 24px;
   --public-radius-card-lg: 32px;
+  --public-radius-panel: 22px;
+  --public-radius-feature: 28px;
+  --public-radius-showcase: 34px;
 
   --public-border-soft: rgba(7, 19, 39, 0.08);
   --public-border-strong: rgba(7, 19, 39, 0.14);
   --public-border-inverse: rgba(255, 255, 255, 0.14);
+
+  --public-surface-panel: var(--public-surface-light);
+  --public-surface-panel-feature:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.18), transparent 24%),
+    radial-gradient(circle at 14% 84%, rgba(10, 77, 140, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(248, 244, 238, 0.982));
+  --public-surface-panel-showcase:
+    radial-gradient(circle at top right, rgba(226, 187, 130, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(250, 247, 242, 0.98));
+  --public-surface-kicker: rgba(255, 255, 255, 0.78);
+  --public-surface-kicker-border: rgba(10, 77, 140, 0.12);
+  --public-surface-kicker-text: rgba(7, 19, 39, 0.7);
+  --public-surface-chip: rgba(247, 249, 252, 0.98);
+  --public-surface-chip-text: rgba(7, 19, 39, 0.72);
+  --public-surface-chip-accent: rgba(176, 141, 87, 0.12);
+  --public-surface-chip-accent-border: rgba(176, 141, 87, 0.22);
+  --public-surface-chip-deep: rgba(7, 19, 39, 0.78);
+  --public-surface-chip-deep-border: rgba(255, 255, 255, 0.14);
+  --public-surface-signal: rgba(255, 255, 255, 0.05);
+  --public-surface-signal-border: rgba(255, 255, 255, 0.08);
 
   --public-surface-light:
     linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 253, 0.98));
@@ -61,6 +106,8 @@
   --public-shadow-soft: 0 18px 40px rgba(7, 19, 39, 0.07);
   --public-shadow-lift: 0 24px 56px rgba(7, 19, 39, 0.1);
   --public-shadow-deep: 0 32px 80px rgba(3, 8, 18, 0.2);
+  --public-shadow-feature: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 24px 54px rgba(7, 19, 39, 0.08);
+  --public-shadow-showcase: 0 42px 94px rgba(3, 8, 18, 0.34);
   --public-shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.78);
 
   --public-motion-fast: 180ms;
