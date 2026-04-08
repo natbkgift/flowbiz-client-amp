@@ -86,7 +86,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
                   : 'Scan the cards first. Open details when a unit survives the first pass, then save it to the shortlist.'}
               </p>
             </div>
-            <div className="results-header__controls flex gap-2 items-center">
+            <div className="results-header__controls pattern-inline-controls">
               <label className="form-label form-label--compact">{dict.listing.sort}</label>
               <select
                 className="form-select"

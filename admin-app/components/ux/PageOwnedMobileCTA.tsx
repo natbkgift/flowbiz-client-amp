@@ -30,7 +30,7 @@ export function PageOwnedMobileCTA({
   secondaryAction,
   variant,
 }: PageOwnedMobileCTAProps) {
-  const className = variant ? `detail-mobile-cta detail-mobile-cta--${variant}` : 'detail-mobile-cta';
+  const className = variant ? `detail-mobile-cta detail-mobile-cta--${variant} pattern-mobile-bar` : 'detail-mobile-cta pattern-mobile-bar';
 
   return (
     <div id={id} className={className} role="region" aria-label={title}>
@@ -40,10 +40,10 @@ export function PageOwnedMobileCTA({
         <p className="detail-mobile-cta__description">{description}</p>
       </div>
 
-      <div className="detail-mobile-cta__actions">
+      <div className="detail-mobile-cta__actions pattern-mobile-bar__actions">
         <TrackedLink
           id={primaryAction.id}
-          className="btn btn-cta detail-mobile-cta__btn detail-mobile-cta__btn--primary"
+          className="btn btn-cta detail-mobile-cta__btn detail-mobile-cta__btn--primary pattern-mobile-bar__btn"
           href={primaryAction.href}
           eventType="cta_click"
           eventPayload={primaryAction.eventPayload}
@@ -55,7 +55,7 @@ export function PageOwnedMobileCTA({
           isExternalHref(secondaryAction.href) ? (
             <a
               id={secondaryAction.id}
-              className="btn btn-secondary detail-mobile-cta__btn"
+              className="btn btn-secondary detail-mobile-cta__btn pattern-mobile-bar__btn"
               href={secondaryAction.href}
               target={secondaryAction.href.startsWith('http') ? '_blank' : undefined}
               rel={secondaryAction.href.startsWith('http') ? 'noreferrer' : undefined}
@@ -65,7 +65,7 @@ export function PageOwnedMobileCTA({
           ) : (
             <TrackedLink
               id={secondaryAction.id}
-              className="btn btn-secondary detail-mobile-cta__btn"
+              className="btn btn-secondary detail-mobile-cta__btn pattern-mobile-bar__btn"
               href={secondaryAction.href}
               eventType="cta_click"
               eventPayload={secondaryAction.eventPayload}

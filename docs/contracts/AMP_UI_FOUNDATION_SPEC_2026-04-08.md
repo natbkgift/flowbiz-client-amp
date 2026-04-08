@@ -167,6 +167,18 @@ Rules:
 - `form-input`, `form-select`, `form-textarea`, consent checkboxes, and `btn-block` submits must use the shared field and control tokens for height, padding, radius, border, and focus state.
 - Do not rebuild button or field styling with local utility stacks when the shared control classes already cover the role.
 
+## Responsive Component Patterns
+
+Shared responsive behavior should come from a small set of reusable patterns rather than page-local breakpoint chains.
+
+Rules:
+
+- Split panels should collapse to one column below laptop and expand to a balanced two-column shell at laptop and above.
+- Inline control clusters should wrap cleanly on narrow widths while keeping label and control pairing stable.
+- Fixed mobile action bars should reuse the shared mobile-bar shell, action grid, and button sizing pattern.
+- Prefer `PublicActionRow` with `stackOnMobile` before creating a new action-stacking rule for a hero, CTA block, or closing panel.
+- When a responsive behavior is reused across more than one public component, promote it to a named shared pattern before adding more local breakpoint overrides.
+
 ## Page Template Rules For This Slice
 
 These rules are enforced starting now even before the rest of Phase 0 lands:

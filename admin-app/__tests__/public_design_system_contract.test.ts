@@ -41,6 +41,7 @@ describe('public design system contract', () => {
     expect(tokens).toContain('--public-control-height: 44px;');
     expect(tokens).toContain('--public-field-border-focus: rgba(10, 77, 140, 0.28);');
     expect(tokens).toContain('--public-cta-row-gap: var(--public-space-3);');
+    expect(tokens).toContain('--public-pattern-split-gap: clamp(40px, 5vw, 64px);');
     expect(tokens).toContain("html[lang='th'] {");
     expect(tokens).toContain('--public-space-1: 8px;');
     expect(tokens).toContain('--public-space-4: 24px;');
@@ -72,6 +73,9 @@ describe('public design system contract', () => {
     expect(globals).toContain('gap: var(--public-cta-row-gap);');
     expect(globals).toContain('min-height: var(--public-field-min-height);');
     expect(globals).toContain('box-shadow: var(--public-field-shadow-focus);');
+    expect(globals).toContain('.pattern-split-grid');
+    expect(globals).toContain('.pattern-inline-controls');
+    expect(globals).toContain('.pattern-mobile-bar');
     expect(globals).toContain('padding: var(--public-section-space-desktop) 0;');
 
     expect(primitives).toContain('.type-h1');
@@ -95,6 +99,7 @@ describe('public design system contract', () => {
     expect(foundationSpec).toContain('## Content Rhythm');
     expect(foundationSpec).toContain('## Surface And Elevation');
     expect(foundationSpec).toContain('## Controls And CTA Hierarchy');
+    expect(foundationSpec).toContain('## Responsive Component Patterns');
     expect(foundationSpec).toContain('Home final CTA may use an `h2` element with the `type-h1` class');
     expect(foundationSpec).toContain('Long-form routes that keep a supporting rail may keep the outer section shell at `default`, but the narrative column itself should still respect the readable measure.');
   });
@@ -112,6 +117,8 @@ describe('public design system contract', () => {
     const sellerForm = read('components/forms/SellerForm.tsx');
     const sidebarFilter = read('components/listing/SidebarFilter.tsx');
     const listingGrid = read('components/listing/ListingGrid.tsx');
+    const stickyMobileCta = read('components/ux/StickyMobileCTA.tsx');
+    const pageOwnedMobileCta = read('components/ux/PageOwnedMobileCTA.tsx');
 
     expect(homePage).toContain('PublicSectionHeader');
     expect(homePage).toContain('PublicSurfaceCard');
@@ -139,6 +146,7 @@ describe('public design system contract', () => {
     expect(homeBottomCta).toContain('type-body');
     expect(homeBottomCta).toContain('type-caption');
     expect(homeBottomCta).toContain('className="home-bottom-cta__panel"');
+    expect(homeBottomCta).toContain('pattern-split-grid');
     expect(homeBottomCta).not.toContain('rounded-2xl');
     expect(homeBottomCta).not.toContain('shadow-2xl');
     expect(homeBottomCta).not.toContain('p-5 md:p-8');
@@ -164,6 +172,9 @@ describe('public design system contract', () => {
     expect(sellerForm).toContain('form-note-box');
     expect(sidebarFilter).toContain('form-label form-label--compact');
     expect(listingGrid).toContain('form-label form-label--compact');
+    expect(listingGrid).toContain('pattern-inline-controls');
+    expect(stickyMobileCta).toContain('pattern-mobile-bar');
+    expect(pageOwnedMobileCta).toContain('pattern-mobile-bar');
   });
 
   it('keeps decision detail routes on the shared public hero system', () => {

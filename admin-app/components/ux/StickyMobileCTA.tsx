@@ -20,21 +20,21 @@ export function StickyMobileCTA() {
 
   return (
     <div
-      className="mobile-cta mobile-cta--visible"
+      className="mobile-cta mobile-cta--visible pattern-mobile-bar"
       role="region"
       aria-label={dict.common.ctaRegion}
     >
-      <div className="mobile-cta__primary">
+      <div className="mobile-cta__primary pattern-mobile-bar__actions">
         <Link
-          className="btn btn-cta mobile-cta__btn mobile-cta__btn--primary"
+          className="btn btn-cta mobile-cta__btn mobile-cta__btn--primary pattern-mobile-bar__btn"
           href={withLocale(locale, '/contact?topic=private_tour')}
         >
           {dict.cta.bookPrivateTour}
         </Link>
       </div>
-      <div className="mobile-cta__secondary">
+      <div className="mobile-cta__secondary pattern-mobile-bar__actions">
         <Link
-          className="btn btn-secondary mobile-cta__btn"
+          className="btn btn-secondary mobile-cta__btn pattern-mobile-bar__btn"
           href={withLocale(locale, '/contact?topic=investment_plan')}
         >
           {dict.cta.getInvestmentPlan}

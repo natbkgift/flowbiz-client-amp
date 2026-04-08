@@ -50,7 +50,7 @@ export function HomeBottomCta({
       aria-labelledby={headingId}
     >
       <Container variant="wide">
-        <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-center home-bottom-cta__grid">
+        <div className="home-bottom-cta__grid pattern-split-grid">
           <div className="reveal home-bottom-cta__content">
             <div className="home-bottom-cta__topline">
               <PublicChip as="span" tone="accent" size="sm" className="home-bottom-cta__eyebrow">
