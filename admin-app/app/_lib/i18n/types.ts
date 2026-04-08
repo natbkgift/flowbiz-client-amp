@@ -236,6 +236,24 @@ export type Dictionary = {
     trustBullets: string[];
     responseTitle: string;
     channelsTitle: string;
+    handoffLabels: {
+      compare_hero: string;
+      compare_review: string;
+      compare_recovery: string;
+      shortlist_compare: string;
+      shortlist_contact: string;
+      shortlist_shared: string;
+      project_detail: string;
+      project_investment_check: string;
+      project_availability_check: string;
+      project_timeout: string;
+      high: string;
+      medium: string;
+      low: string;
+      investor_compare: string;
+      shortlist_narrowing: string;
+      project_first_buyer: string;
+    };
   };
   sell: {
     eyebrow: string;
@@ -497,6 +515,14 @@ export type Dictionary = {
     roiMissing: string;
     coverImageMissing: string;
     metaDescription: string;
+  };
+  shortlist: {
+    loadError: string;
+    removeError: string;
+    shareError: string;
+    locationPending: string;
+    sharedUnavailableTitle: string;
+    sharedUnavailableBody: string;
   };
   common: {
     language: string;

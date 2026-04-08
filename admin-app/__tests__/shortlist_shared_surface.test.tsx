@@ -125,6 +125,23 @@ describe('ShortlistSharedSurface', () => {
     expect(screen.queryByRole('link', { name: /view listing details/i })).toBeNull();
   });
 
+  it('uses recovery-focused copy when the shared shortlist cannot be reopened', async () => {
+    const fetchMock = vi.fn(async () => {
+      throw new Error('Network down');
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<ShortlistSharedSurface locale="en" shareToken="token-network" />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/this shared shortlist could not be reopened/i)).toBeTruthy();
+    });
+
+    expect(screen.getByText(/start your own shortlist from the live listings, or ask the sender for a fresh link/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: /start your own shortlist/i }).getAttribute('href')).toBe('/en/buy');
+  });
+
   it('clears stale shared shortlist content before loading a new share token', async () => {
     const firstDeferred = createDeferred<Response>();
     const secondDeferred = createDeferred<Response>();

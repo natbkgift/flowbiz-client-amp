@@ -432,6 +432,71 @@ describe('ShortlistListSurface', () => {
     );
   });
 
+  it('replaces thin shortlist placeholders with project-and-location context guidance', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/v1/shortlists/current?')) {
+        return {
+          ok: true,
+          json: async () => ({
+            shortlist: {
+              id: 'shortlist-1',
+              owner_type: 'session',
+              owner_key: 'owner-12345678',
+              status: 'active',
+              title: null,
+              intent: null,
+              share_mode: null,
+              source_context: null,
+              created_at: '2026-03-15T00:00:00Z',
+              updated_at: '2026-03-15T00:00:00Z',
+              last_viewed_at: null,
+              item_count: 1,
+              items: [
+                {
+                  property_id: 'property-1',
+                  slug: 'alpha-residence',
+                  title: 'Alpha Residence',
+                  project: null,
+                  location: null,
+                  price: 6200000,
+                  size: 56,
+                  bedrooms: 2,
+                  bathrooms: 2,
+                  image: null,
+                  status: 'published',
+                  foreign_quota: false,
+                  position: 0,
+                  added_at: '2026-03-15T00:00:00Z',
+                  source_surface: 'property_detail',
+                },
+              ],
+            },
+          }),
+        };
+      }
+
+      if (url.includes('/api/v1/properties/property-1?')) {
+        return {
+          ok: true,
+          json: async () => ({ project_id: 'project-1' }),
+        };
+      }
+
+      throw new Error(`Unexpected fetch ${url}`);
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<ShortlistListSurface locale="en" />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Alpha Residence' })).toBeTruthy();
+    });
+
+    expect(screen.getByText(/project and location context still being verified/i)).toBeTruthy();
+  });
+
   it('syncs shortlist items from storage updates across tabs', async () => {
     const fetchMock = vi.fn(async () => ({
       ok: true,

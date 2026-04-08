@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { getDictionary } from '@/app/_lib/i18n/get-dictionary';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
@@ -47,6 +48,10 @@ function getShortlistAdvisorLabel(locale: 'en' | 'th', compareReady: boolean): s
   }
 
   return locale === 'th' ? 'รีวิว shortlist นี้กับที่ปรึกษา' : 'Review this shortlist with an advisor';
+}
+
+function buildShortlistItemContext(item: ShortlistPropertyItem, locationPending: string): string {
+  return [item.project, item.location].filter(Boolean).join(' • ') || locationPending;
 }
 
 function getShortlistSummaryContent(input: {
@@ -260,6 +265,7 @@ function buildShortlistConversionPack(input: {
 }
 
 export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
+  const shortlistCopy = getDictionary(locale).shortlist;
   const [items, setItems] = useState<ShortlistPropertyItem[]>([]);
   const [compareProjects, setCompareProjects] = useState<ShortlistCompareProject[]>([]);
   const [isResolvingCompare, setIsResolvingCompare] = useState(false);
@@ -293,7 +299,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       })
       .catch(() => {
         if (!isActive) return;
-        setError(locale === 'th' ? 'ยังโหลด shortlist ไม่สำเร็จ' : 'Unable to load the shortlist right now.');
+        setError(shortlistCopy.loadError);
       })
       .finally(() => {
         if (!isActive) return;
@@ -303,7 +309,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     return () => {
       isActive = false;
     };
-  }, [locale]);
+  }, [locale, shortlistCopy]);
 
   useEffect(() => {
     const w = window;
@@ -389,7 +395,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       });
       syncFromShortlist(response.shortlist);
     } catch {
-      setError(locale === 'th' ? 'นำรายการออกจาก shortlist ไม่สำเร็จ' : 'Unable to remove the listing from shortlist.');
+      setError(shortlistCopy.removeError);
     } finally {
       setPendingPropertyId(null);
     }
@@ -426,7 +432,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
         setShareNotice(locale === 'th' ? 'สร้างลิงก์แชร์แล้ว คัดลอกต่อได้ด้านล่าง ลิงก์นี้เปิดแบบดูอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link created. Copy it below. This link stays read-only and hides owner identity.');
       }
     } catch {
-      setError(locale === 'th' ? 'สร้างลิงก์แชร์ shortlist ไม่สำเร็จ' : 'Unable to create a shortlist share link.');
+      setError(shortlistCopy.shareError);
     } finally {
       setIsSharing(false);
     }
@@ -735,7 +741,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                 <div>
                   <h3 className="card-title">{item.title}</h3>
                   <p className="card-subtitle mb-0">
-                    {[item.project, item.location].filter(Boolean).join(' • ') || (locale === 'th' ? 'กำลังรอรายละเอียดทำเล' : 'Location details pending')}
+                    {buildShortlistItemContext(item, shortlistCopy.locationPending)}
                   </p>
                 </div>
 

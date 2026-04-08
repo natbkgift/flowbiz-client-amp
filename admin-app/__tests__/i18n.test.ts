@@ -195,6 +195,30 @@ describe('i18n dictionaries', () => {
     }
   });
 
+  it('contact handoff labels stay available in both locales', () => {
+    const requiredKeys: (keyof Dictionary['contact']['handoffLabels'])[] = [
+      'compare_hero', 'compare_review', 'compare_recovery',
+      'shortlist_compare', 'shortlist_contact', 'shortlist_shared',
+      'project_detail', 'project_investment_check', 'project_availability_check', 'project_timeout',
+      'high', 'medium', 'low',
+      'investor_compare', 'shortlist_narrowing', 'project_first_buyer',
+    ];
+    for (const key of requiredKeys) {
+      expect(en.contact.handoffLabels[key]).toBeTruthy();
+      expect(th.contact.handoffLabels[key]).toBeTruthy();
+    }
+  });
+
+  it('shortlist has fallback and recovery copy keys', () => {
+    const requiredKeys: (keyof Dictionary['shortlist'])[] = [
+      'loadError', 'removeError', 'shareError', 'locationPending', 'sharedUnavailableTitle', 'sharedUnavailableBody',
+    ];
+    for (const key of requiredKeys) {
+      expect(en.shortlist[key]).toBeTruthy();
+      expect(th.shortlist[key]).toBeTruthy();
+    }
+  });
+
   it('home has featured area and WhatsApp keys', () => {
     const requiredKeys: (keyof Dictionary['home'])[] = [
       'featuredCentralTitle', 'featuredCentralSubtitle',

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { getDictionary } from '@/app/_lib/i18n/get-dictionary';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -86,7 +87,12 @@ function parseSharedShortlistError(error: unknown): { title: string; body: strin
   return null;
 }
 
+function buildShortlistItemContext(item: ShortlistPropertyItem, locationPending: string): string {
+  return [item.project, item.location].filter(Boolean).join(' • ') || locationPending;
+}
+
 export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 'th'; shareToken: string }) {
+  const shortlistCopy = getDictionary(locale).shortlist;
   const [shortlist, setShortlist] = useState<SharedShortlistDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ title: string; body: string; tone: 'error' | 'info' } | null>(null);
@@ -132,10 +138,8 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
 
         setError({
           tone: 'error',
-          title: locale === 'th' ? 'ไม่สามารถเปิด shortlist ที่แชร์ไว้ได้' : 'This shared shortlist is unavailable',
-          body: locale === 'th'
-            ? 'ลองใหม่อีกครั้ง หรือกลับไปดูรายการหลักเพื่อเริ่ม shortlist ใหม่'
-            : 'Try again later, or return to the listings overview to start a fresh shortlist.',
+          title: shortlistCopy.sharedUnavailableTitle,
+          body: shortlistCopy.sharedUnavailableBody,
         });
       })
       .finally(() => {
@@ -146,7 +150,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
     return () => {
       isActive = false;
     };
-  }, [locale, shareToken]);
+  }, [locale, shareToken, shortlistCopy]);
 
   if (isLoading) {
     return <LoadingCardGrid cards={3} />;
@@ -271,7 +275,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
                 <div>
                   <h3 className="card-title">{item.title}</h3>
                   <p className="card-subtitle mb-0">
-                    {[item.project, item.location].filter(Boolean).join(' • ') || (locale === 'th' ? 'กำลังรอรายละเอียดทำเล' : 'Location details pending')}
+                    {buildShortlistItemContext(item, shortlistCopy.locationPending)}
                   </p>
                 </div>
 

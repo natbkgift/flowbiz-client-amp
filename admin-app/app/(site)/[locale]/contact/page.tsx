@@ -130,28 +130,9 @@ function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): s
   const text = String(value || '').trim();
   if (!text) return null;
 
-  const knownLabels: Record<string, { en: string; th: string }> = {
-    compare_hero: { en: 'Compare page', th: 'หน้าเปรียบเทียบ' },
-    compare_review: { en: 'Compare review', th: 'รีวิวจากหน้าเปรียบเทียบ' },
-    compare_recovery: { en: 'Compare recovery page', th: 'หน้า compare โหมดกู้คืน' },
-    shortlist_compare: { en: 'Shortlist compare flow', th: 'เส้นทาง compare จาก shortlist' },
-    shortlist_contact: { en: 'Shortlist page', th: 'หน้า shortlist' },
-    shortlist_shared: { en: 'Shared shortlist link', th: 'ลิงก์ shortlist ที่แชร์' },
-    project_detail: { en: 'Project detail page', th: 'หน้าโครงการ' },
-    project_investment_check: { en: 'Project investment snapshot', th: 'snapshot การลงทุนของโครงการ' },
-    project_availability_check: { en: 'Project availability review', th: 'การเช็ก availability ของโครงการ' },
-    project_timeout: { en: 'Project timeout fallback', th: 'หน้าโครงการโหมด fallback' },
-    high: { en: 'High', th: 'สูง' },
-    medium: { en: 'Medium', th: 'กลาง' },
-    low: { en: 'Low', th: 'ต่ำ' },
-    investor_compare: { en: 'Investor compare review', th: 'รีวิว compare สำหรับนักลงทุน' },
-    shortlist_narrowing: { en: 'Shortlist narrowing', th: 'การบีบ shortlist ให้แคบลง' },
-    project_first_buyer: { en: 'Project-first buyer', th: 'ผู้ซื้อที่เริ่มจากโครงการก่อน' },
-  };
-
-  const known = knownLabels[text.toLowerCase()];
+  const known = (getDictionary(locale).contact.handoffLabels as Record<string, string>)[text.toLowerCase()];
   if (known) {
-    return locale === 'th' ? known.th : known.en;
+    return known;
   }
 
   return text

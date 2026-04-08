@@ -111,4 +111,21 @@ describe('contact page shell', () => {
     expect(screen.getByRole('link', { name: /continue with this compare recovery brief/i }).getAttribute('href')).toBe('#contact-form');
     expect(screen.getByText(/handoff source: compare recovery page/i)).toBeTruthy();
   });
+
+  it('humanizes project recovery handoff context on the contact route', async () => {
+    render(
+      await ContactPage({
+        params: Promise.resolve({ locale: 'en' }),
+        searchParams: Promise.resolve({
+          intent: 'project_consultation',
+          source: 'project_timeout',
+          project: 'Beta Tower',
+        }),
+      }),
+    );
+
+    expect(screen.queryByRole('heading', { name: /start from the route that fits/i })).toBeNull();
+    expect(screen.getByText(/handoff source: project recovery snapshot/i)).toBeTruthy();
+    expect(screen.getByText(/project in focus: beta tower/i)).toBeTruthy();
+  });
 });
