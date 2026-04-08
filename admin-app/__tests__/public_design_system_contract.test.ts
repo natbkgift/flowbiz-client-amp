@@ -176,6 +176,10 @@ describe('public design system contract', () => {
     expect(sidebarFilter).toContain('form-label form-label--compact');
     expect(listingGrid).toContain('form-label form-label--compact');
     expect(listingGrid).toContain('pattern-inline-controls');
+    expect(listingGrid).toContain('PublicChip');
+    expect(listingGrid).toContain('results-header__summary-chips');
+    expect(sidebarFilter).toContain('filter-sidebar__summary');
+    expect(sidebarFilter).toContain('listing-filter-backdrop');
     expect(stickyMobileCta).toContain('pattern-mobile-bar');
     expect(pageOwnedMobileCta).toContain('pattern-mobile-bar');
   });

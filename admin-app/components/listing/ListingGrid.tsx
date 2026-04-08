@@ -11,6 +11,7 @@ import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname } from '../../app/_lib/i18n/routing';
 import { ShortlistStateHydrator } from '../shortlist/ShortlistStateHydrator';
+import { PublicChip } from '../public/PublicChip';
 
 type SortKey = 'newest' | 'price_asc' | 'price_desc';
 
@@ -19,6 +20,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
   const [sort, setSort] = useState<SortKey>('newest');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [activeFilterSummary, setActiveFilterSummary] = useState<string[]>([]);
   const filterTriggerRef = useRef<HTMLButtonElement | null>(null);
   const wasFiltersOpenRef = useRef(false);
 
@@ -26,9 +28,10 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
   const locale = localeFromPathname(pathname);
   const dict = locale === 'th' ? th : en;
 
-  const handleFilterApply = useCallback((next: PropertyListItem[], count: number) => {
+  const handleFilterApply = useCallback((next: PropertyListItem[], count: number, summary: string[]) => {
     setFiltered(next);
     setActiveFilterCount(count);
+    setActiveFilterSummary(summary);
   }, []);
 
   useEffect(() => {
@@ -45,6 +48,20 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
     if (sort === 'price_desc') out.sort((a, b) => Number(b.price) - Number(a.price));
     return out;
   }, [filtered, sort]);
+  const sortLabel = sort === 'newest'
+    ? dict.listing.newest
+    : sort === 'price_asc'
+      ? dict.listing.priceLowToHigh
+      : dict.listing.priceHighToLow;
+  const headerSummaryChips = [
+    locale === 'th' ? `จัดเรียง: ${sortLabel}` : `Sort: ${sortLabel}`,
+    ...activeFilterSummary,
+  ];
+  const filterTriggerMeta = activeFilterSummary.length
+    ? `${activeFilterSummary.join(' • ')} • ${sortLabel}`
+    : locale === 'th'
+      ? `ยังไม่ได้ใช้ตัวกรอง • ${sortLabel}`
+      : `No filters applied • ${sortLabel}`;
 
   return (
     <>
@@ -61,11 +78,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
         <span className="listing-filter-trigger__label">
           <IconFilter size="sm" /> {dict.listing.filtersAndSort}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </span>
-        <span className="listing-filter-trigger__meta">
-          {locale === 'th'
-            ? 'ปรับผลลัพธ์เมื่อคุณเริ่มเห็นยูนิตที่น่ากลับมาดูจริง'
-            : 'Refine results only when a few units are worth a closer look.'}
-        </span>
+        <span className="listing-filter-trigger__meta">{filterTriggerMeta}</span>
       </button>
 
       <div className="listing-layout">
@@ -85,6 +98,15 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
                   ? 'สแกนการ์ดก่อน เปิดรายละเอียดเมื่อยูนิตนั้นผ่าน first pass แล้วค่อยบันทึกลง shortlist'
                   : 'Scan the cards first. Open details when a unit survives the first pass, then save it to the shortlist.'}
               </p>
+              <div className="results-header__summary" aria-label={locale === 'th' ? 'สรุปผลลัพธ์ปัจจุบัน' : 'Current result summary'}>
+                <div className="results-header__summary-chips">
+                  {headerSummaryChips.map((chip) => (
+                    <PublicChip key={chip} className="results-header__summary-chip" size="sm">
+                      {chip}
+                    </PublicChip>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="results-header__controls pattern-inline-controls">
               <label className="form-label form-label--compact">{dict.listing.sort}</label>

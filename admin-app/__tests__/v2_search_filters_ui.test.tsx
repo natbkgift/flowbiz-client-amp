@@ -65,6 +65,7 @@ describe('V2 search filters UI', () => {
     render(<ListingGrid items={[...items]} />);
 
     expectResultsCount(2);
+    expect(screen.getByText('Sort: Newest')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: '2' }));
 
@@ -76,6 +77,7 @@ describe('V2 search filters UI', () => {
 
     expectResultsCount(1);
     expect(screen.getByRole('button', { name: /filters & sort \(1\)/i })).toBeTruthy();
+    expect(screen.getByText('2 BR')).toBeTruthy();
     expect(screen.queryByRole('heading', { name: '1 Bedroom Alpha Residence' })).toBeNull();
     expect(screen.getByRole('heading', { name: '2 Bedroom Beta Residence' })).toBeTruthy();
   });
@@ -113,6 +115,7 @@ describe('V2 search filters UI', () => {
 
     expect(screen.getByText(/scan the cards first/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /filters & sort/i })).toHaveClass('listing-filter-trigger');
+    expect(screen.getByText(/no filters applied • newest/i)).toBeTruthy();
   });
 
   it('blocks invalid price ranges and explains the issue before apply', () => {
