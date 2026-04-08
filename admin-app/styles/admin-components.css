@@ -336,18 +336,30 @@
     gap: var(--admin-space-2);
   }
 
+  .admin-shell-nav-section-head {
+    display: grid;
+    gap: 4px;
+    padding: 0 var(--admin-space-2);
+  }
+
   .admin-shell-nav-section.is-active h2 {
     color: var(--admin-color-primary-700);
   }
 
   .admin-shell-nav-section h2 {
     margin: 0;
-    padding: 0 var(--admin-space-2);
     color: var(--admin-text-soft);
     font-size: var(--admin-font-size-xs);
     font-weight: var(--admin-font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
+  }
+
+  .admin-shell-nav-section-head p {
+    margin: 0;
+    color: var(--admin-text-soft);
+    font-size: 11px;
+    line-height: 1.45;
   }
 
   .admin-shell-nav-section ul,

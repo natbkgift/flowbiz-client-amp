@@ -11,8 +11,9 @@ export type AdminNavItem = {
 };
 
 export type AdminNavGroup = {
-  key: "dashboard" | "data" | "projects" | "content" | "system";
+  key: "operations" | "records" | "publishing" | "system";
   label: AdminNavText;
+  description: AdminNavText;
   items: AdminNavItem[];
 };
 
@@ -118,7 +119,7 @@ const MEDIA_NAV: AdminNavItem = {
   href: "/admin/media",
   icon: "media",
   label: { en: "Media Library", th: "คลังสื่อ" },
-  description: { en: "Upload, integrity, replace", th: "อัปโหลด ตรวจสอบ และแทนที่ไฟล์" },
+  description: { en: "Local upload, rights, replace", th: "อัปโหลดไฟล์โลคัล ตรวจสิทธิ์ และแทนที่" },
 };
 
 const IMPORTS_NAV: AdminNavItem = {
@@ -156,70 +157,68 @@ const SEO_NAV: AdminNavItem = {
   description: { en: "Search metadata, redirects, broken links", th: "เมทาดาทา การส่งต่อ และลิงก์เสีย" },
 };
 
-export const ADMIN_PRIMARY_NAV: AdminNavItem[] = [
-  DASHBOARD_NAV,
-  USERS_NAV,
-  CRM_NAV,
-  PROJECTS_NAV,
-  PROPERTIES_NAV,
-  AREAS_NAV,
-  DEVELOPERS_NAV,
-  COMPANY_NAV,
-  TEAM_MEMBERS_NAV,
-  TESTIMONIALS_NAV,
-  BLOG_NAV,
-  REVIEW_QUEUE_NAV,
-  VIDEOS_NAV,
-  TAXONOMY_NAV,
-  MEDIA_NAV,
-  IMPORTS_NAV,
-];
-
-export const ADMIN_SECONDARY_NAV: AdminNavItem[] = [
-  LAYOUT_NAV,
-  HOME_COMPOSER_NAV,
-  SEO_NAV,
-];
-
 export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
-    key: "dashboard",
+    key: "operations",
     label: { en: "Operations", th: "ปฏิบัติการ" },
-    items: [DASHBOARD_NAV],
+    description: {
+      en: "Handle queue health, lead follow-up, approvals, and import exceptions.",
+      th: "จัดการสุขภาพคิว งานติดตามลีด การอนุมัติ และความผิดปกติของการนำเข้า",
+    },
+    items: [DASHBOARD_NAV, CRM_NAV, REVIEW_QUEUE_NAV, IMPORTS_NAV],
   },
   {
-    key: "data",
-    label: { en: "Data", th: "ข้อมูล" },
-    items: [IMPORTS_NAV, MEDIA_NAV, CRM_NAV],
-  },
-  {
-    key: "projects",
-    label: { en: "Projects", th: "โครงการ" },
-    items: [PROJECTS_NAV, PROPERTIES_NAV],
-  },
-  {
-    key: "content",
-    label: { en: "Content", th: "เนื้อหา" },
+    key: "records",
+    label: { en: "Core Records", th: "ข้อมูลหลัก" },
+    description: {
+      en: "Edit projects, listings, and supporting records before they move into publish review.",
+      th: "แก้โครงการ รายการทรัพย์ และข้อมูลประกอบก่อนส่งต่อไปขั้นตอนตรวจเผยแพร่",
+    },
     items: [
+      PROJECTS_NAV,
+      PROPERTIES_NAV,
       AREAS_NAV,
       DEVELOPERS_NAV,
       COMPANY_NAV,
       TEAM_MEMBERS_NAV,
       TESTIMONIALS_NAV,
       BLOG_NAV,
-      REVIEW_QUEUE_NAV,
       VIDEOS_NAV,
       TAXONOMY_NAV,
+    ],
+  },
+  {
+    key: "publishing",
+    label: { en: "Publishing", th: "การเผยแพร่" },
+    description: {
+      en: "Manage media, page composition, and search visibility for go-live readiness.",
+      th: "จัดการสื่อ องค์ประกอบหน้า และความพร้อมด้านการค้นหาก่อนขึ้นใช้งานจริง",
+    },
+    items: [
+      MEDIA_NAV,
       LAYOUT_NAV,
       HOME_COMPOSER_NAV,
+      SEO_NAV,
     ],
   },
   {
     key: "system",
     label: { en: "System", th: "ระบบ" },
-    items: [USERS_NAV, SEO_NAV],
+    description: {
+      en: "Session, access, and operator account controls.",
+      th: "ควบคุมเซสชัน สิทธิ์ และบัญชีผู้ปฏิบัติงาน",
+    },
+    items: [USERS_NAV],
   },
 ];
+
+function flattenAdminNavItems(groupKeys: AdminNavGroup["key"][]): AdminNavItem[] {
+  return ADMIN_NAV_GROUPS.flatMap((group) => (groupKeys.includes(group.key) ? group.items : []));
+}
+
+export const ADMIN_PRIMARY_NAV: AdminNavItem[] = flattenAdminNavItems(["operations", "records"]);
+
+export const ADMIN_SECONDARY_NAV: AdminNavItem[] = flattenAdminNavItems(["publishing", "system"]);
 
 export function getAdminNavText(value: AdminNavText, locale: AdminLocale): string {
   return value[locale] || value.en;

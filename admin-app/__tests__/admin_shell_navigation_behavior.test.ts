@@ -22,6 +22,7 @@ describe("admin shell navigation behavior", () => {
     const shell = read("components/layout/AdminShell.tsx");
 
     expect(shell).toContain("ADMIN_NAV_GROUPS");
+    expect(shell).toContain("admin-shell-nav-section-head");
     expect(shell).toContain("admin-shell-sidebar");
     expect(shell).toContain("admin-shell-sidebar-scroll");
     expect(shell).toContain("admin-shell-topbar");
@@ -57,6 +58,7 @@ describe("admin shell navigation behavior", () => {
     const shell = read("components/layout/AdminShell.tsx");
     const css = readAdminStyles();
 
+    expect(css).toContain(".admin-shell-nav-section-head {");
     expect(css).toContain(".admin-shell-toggle");
     expect(css).toContain(".admin-shell-sidebar {");
     expect(css).toContain(".admin-shell-topbar {");

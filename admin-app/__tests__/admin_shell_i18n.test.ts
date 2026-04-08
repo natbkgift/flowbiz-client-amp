@@ -25,10 +25,23 @@ describe("Admin shell i18n", () => {
     }
   });
 
+  it("keeps workflow-level EN/TH labels and descriptions for each nav group", async () => {
+    const { ADMIN_NAV_GROUPS } = await import("@/app/_lib/admin-nav");
+
+    expect(ADMIN_NAV_GROUPS.length).toBe(4);
+    for (const group of ADMIN_NAV_GROUPS) {
+      expect(group.label.en.trim().length).toBeGreaterThan(0);
+      expect(group.label.th.trim().length).toBeGreaterThan(0);
+      expect(group.description.en.trim().length).toBeGreaterThan(0);
+      expect(group.description.th.trim().length).toBeGreaterThan(0);
+    }
+  });
+
   it("admin shell renders localized nav, breadcrumb and aria labels", () => {
     const shell = read("components/layout/AdminShell.tsx");
     expect(shell).toContain("getAdminNavText(item.label, locale)");
     expect(shell).toContain("getAdminNavText(item.description, locale)");
+    expect(shell).toContain("getAdminNavText(entry.description, locale)");
     expect(shell).toContain("aria-label={ui.workspaceNavigation}");
     expect(shell).toContain("aria-label={ui.pageTitle}");
     expect(shell).toContain("aria-label={ui.breadcrumb}");

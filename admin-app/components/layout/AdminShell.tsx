@@ -70,6 +70,7 @@ function resolveNavHref(href: string, locale: AdminLocale): string {
 
 function renderNavGroup(
   title: string,
+  description: string,
   items: AdminNavItem[],
   pathname: string,
   locale: AdminLocale,
@@ -79,7 +80,10 @@ function renderNavGroup(
 
   return (
     <section className={groupActive ? "admin-shell-nav-section is-active" : "admin-shell-nav-section"} aria-label={title}>
-      <h2>{title}</h2>
+      <div className="admin-shell-nav-section-head">
+        <h2>{title}</h2>
+        <p>{description}</p>
+      </div>
       <ul>
         {items.map((item) => {
           const active = isActiveAdminNav(pathname, item.href);
@@ -229,7 +233,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="admin-shell-sidebar-scroll">
           {ADMIN_NAV_GROUPS.map((entry) => (
             <div key={entry.key}>
-              {renderNavGroup(getAdminNavText(entry.label, locale), entry.items, pathname, locale)}
+              {renderNavGroup(
+                getAdminNavText(entry.label, locale),
+                getAdminNavText(entry.description, locale),
+                entry.items,
+                pathname,
+                locale,
+              )}
             </div>
           ))}
         </div>
@@ -331,7 +341,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <div className="admin-shell-mobile-drawer-sections">
             {ADMIN_NAV_GROUPS.map((entry) => (
               <div key={entry.key}>
-                {renderNavGroup(getAdminNavText(entry.label, locale), entry.items, pathname, locale, closeMobileNav)}
+                {renderNavGroup(
+                  getAdminNavText(entry.label, locale),
+                  getAdminNavText(entry.description, locale),
+                  entry.items,
+                  pathname,
+                  locale,
+                  closeMobileNav,
+                )}
               </div>
             ))}
           </div>
