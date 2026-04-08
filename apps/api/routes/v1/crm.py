@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import re
 from datetime import UTC, datetime, timedelta
+from urllib.parse import parse_qs, urlparse
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -89,6 +90,7 @@ _ALLOWED_OFFER_FAMILIES = {
 _ALLOWED_INVENTORY_SOURCES = {"developer_new", "owner_resale", "owner_rental", "unknown"}
 _ALLOWED_SOURCE_PLATFORMS = {"fb", "ig", "wa", "google", "website", "other"}
 _ALLOWED_LOCALES = {"th", "en"}
+_ALLOWED_LEAD_TIERS = {"hot", "warm", "cool", "cold"}
 
 
 def _normalize_token(value: str | None) -> str | None:
@@ -122,6 +124,218 @@ def _normalize_call_requested(value: str | bool | None) -> str | None:
     return None
 
 
+def _extract_tag_value(tags: list[str] | None, prefix: str) -> str | None:
+    for raw in tags or []:
+        text = str(raw or "").strip()
+        if not text.startswith(prefix):
+            continue
+        value = text.split(":", 1)[1].strip()
+        return value or None
+    return None
+
+
+def _normalize_source_page(value: str | None) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+
+    parsed = urlparse(text)
+    path = parsed.path or text
+    query = parsed.query
+
+    if not path.startswith("/"):
+        path = f"/{path}"
+
+    normalized = path
+    if query:
+        normalized = f"{normalized}?{query}"
+
+    return normalized[:500]
+
+
+def _source_query_params(source_page: str | None) -> dict[str, str]:
+    normalized = _normalize_source_page(source_page)
+    if not normalized:
+        return {}
+
+    query = parse_qs(urlparse(normalized).query)
+    return {
+        key: values[0]
+        for key, values in query.items()
+        if values and str(values[0] or "").strip()
+    }
+
+
+def _normalize_route_path(source_page: str | None) -> str | None:
+    normalized = _normalize_source_page(source_page)
+    if not normalized:
+        return None
+
+    path = urlparse(normalized).path or "/"
+    path = re.sub(r"^/(en|th)(?=/|$)", "", path.lower())
+    return path or "/"
+
+
+def _infer_lead_source(source_page: str | None) -> str | None:
+    route_path = _normalize_route_path(source_page)
+    if not route_path:
+        return None
+
+    if route_path == "/":
+        return "home_form"
+    if route_path == "/contact":
+        return "contact_form"
+    if route_path == "/buy":
+        return "buy_form"
+    if route_path == "/rent":
+        return "rent_form"
+    if route_path == "/area-guide":
+        return "area_guide_form"
+    if route_path.startswith("/areas/"):
+        return "area_detail_form"
+    if route_path.startswith("/projects/"):
+        return "project_detail_form"
+    if route_path.startswith("/property/"):
+        return "property_detail_form"
+    if route_path.startswith("/blog/"):
+        return "blog_form"
+
+    segments = [segment for segment in route_path.split("/") if segment]
+    if not segments:
+        return None
+
+    first_segment = _normalize_token(segments[0])
+    return f"{first_segment}_form" if first_segment else None
+
+
+def _infer_locale(source_page: str | None) -> str | None:
+    normalized = _normalize_source_page(source_page)
+    if not normalized:
+        return None
+
+    path = urlparse(normalized).path or "/"
+    match = re.match(r"^/(en|th)(?=/|$)", path.lower())
+    if not match:
+        return None
+    return match.group(1)
+
+
+def _normalize_source_platform_hint(value: str | None) -> str | None:
+    token = _normalize_token(value)
+    if not token:
+        return None
+    if token in {"fb", "facebook", "meta"}:
+        return "fb"
+    if token in {"ig", "instagram"}:
+        return "ig"
+    if token in {"wa", "whatsapp"}:
+        return "wa"
+    if token in {"google", "google_ads", "gads", "adwords", "sem"}:
+        return "google"
+    if token in {"website", "web", "organic", "direct"}:
+        return "website"
+    return "other"
+
+
+def _normalize_intent(value: str | None) -> str:
+    token = _normalize_token(value)
+    if token in {"project_availability_check", "project_investment_check"}:
+        return "project_consultation"
+    if token == "shortlist_review":
+        return "project_compare"
+    return token or "general"
+
+
+def _infer_lead_type(payload: InquiryCreate) -> str:
+    purpose = _normalize_token(_extract_tag_value(payload.tags, "purpose:"))
+    user_intent = _normalize_token(_extract_tag_value(payload.tags, "user_intent:"))
+    intent = _normalize_token(payload.intent)
+
+    if purpose == "rent" or user_intent == "rent" or intent == "rent":
+        return "renter"
+    if purpose == "invest" or user_intent == "invest" or intent == "invest":
+        return "investor"
+    if purpose == "sell" or user_intent == "sell" or intent == "sell":
+        return "owner"
+    if purpose == "buy" or user_intent == "buy" or intent in {"buy", "project_consultation", "project_shortlist", "project_compare", "viewing"}:
+        return "buyer"
+    return "undecided"
+
+
+def _infer_offer_family(payload: InquiryCreate, property_row: Property | None) -> str:
+    if property_row is not None:
+        if property_row.type == "new":
+            return "new_project"
+        if property_row.type == "resale":
+            return "resale"
+        if property_row.type == "rent":
+            return "rental"
+
+    purpose = _normalize_token(_extract_tag_value(payload.tags, "purpose:"))
+    entity_type = _normalize_token(_extract_tag_value(payload.tags, "entity_type:"))
+    source_route = _normalize_token(_extract_tag_value(payload.tags, "source_route:"))
+    has_project_scope = bool(_extract_tag_value(payload.tags, "project:")) or bool(_extract_tag_value(payload.tags, "project_scope:"))
+
+    if purpose == "rent":
+        return "rental"
+    if entity_type == "project" or source_route == "project" or has_project_scope:
+        return "new_project"
+    if entity_type in {"shortlist", "recommendation", "area", "route"} or source_route in {"compare", "shortlist", "contact", "shared", "area_guide"}:
+        return "discovery"
+    return "discovery"
+
+
+def _infer_inventory_source(offer_family: str | None, property_row: Property | None) -> str:
+    if property_row is not None:
+        if property_row.type == "new":
+            return "developer_new"
+        if property_row.type == "resale":
+            return "owner_resale"
+        if property_row.type == "rent":
+            return "owner_rental"
+
+    normalized_offer_family = _normalize_token(offer_family)
+    if normalized_offer_family == "new_project":
+        return "developer_new"
+    if normalized_offer_family == "resale":
+        return "owner_resale"
+    if normalized_offer_family == "rental":
+        return "owner_rental"
+    return "unknown"
+
+
+def _enrich_inquiry_payload(payload: InquiryCreate, property_row: Property | None) -> InquiryCreate:
+    payload.source_page = _normalize_source_page(payload.source_page)
+    payload.intent = _normalize_intent(payload.intent)
+
+    query_params = _source_query_params(payload.source_page)
+    lead_source = _normalize_token(_extract_tag_value(payload.tags, "lead_source:")) or _infer_lead_source(payload.source_page)
+    locale = _normalize_token(payload.locale) or _infer_locale(payload.source_page)
+    lead_type = _normalize_token(payload.lead_type) or _infer_lead_type(payload)
+    offer_family = _normalize_token(payload.offer_family) or _infer_offer_family(payload, property_row)
+    inventory_source = _normalize_token(payload.inventory_source) or _infer_inventory_source(offer_family, property_row)
+    source_platform = _normalize_source_platform_hint(payload.source_platform)
+    if source_platform is None:
+        source_platform = _normalize_source_platform_hint(
+            query_params.get("utm_source") or query_params.get("source")
+        ) or "website"
+    campaign_name = payload.campaign_name or query_params.get("utm_campaign") or query_params.get("campaign")
+
+    normalized_tags = list(payload.tags or [])
+    if lead_source and not _extract_tag_value(normalized_tags, "lead_source:"):
+        normalized_tags.append(f"lead_source:{lead_source}")
+
+    payload.tags = normalized_tags or None
+    payload.locale = locale if locale in _ALLOWED_LOCALES else payload.locale
+    payload.lead_type = lead_type if lead_type in _ALLOWED_LEAD_TYPES else payload.lead_type
+    payload.offer_family = offer_family if offer_family in _ALLOWED_OFFER_FAMILIES else payload.offer_family
+    payload.inventory_source = inventory_source if inventory_source in _ALLOWED_INVENTORY_SOURCES else payload.inventory_source
+    payload.source_platform = source_platform if source_platform in _ALLOWED_SOURCE_PLATFORMS else payload.source_platform
+    payload.campaign_name = campaign_name
+
+    return payload
+
+
 def _append_tag(tag_list: list[str], seen: set[str], value: str | None) -> None:
     text = str(value or "").strip()
     if not text or text in seen:
@@ -144,6 +358,7 @@ def _compose_inquiry_tags(payload: InquiryCreate) -> list[str]:
     source_platform = _normalize_token(payload.source_platform)
     campaign_name = _normalize_campaign_name(payload.campaign_name)
     call_requested = _normalize_call_requested(payload.call_requested)
+    lead_tier = _normalize_token(payload.lead_tier)
 
     if locale in _ALLOWED_LOCALES:
         _append_tag(tags, seen, f"locale:{locale}")
@@ -159,6 +374,8 @@ def _compose_inquiry_tags(payload: InquiryCreate) -> list[str]:
         _append_tag(tags, seen, f"campaign:{campaign_name}")
     if call_requested in {"yes", "no"}:
         _append_tag(tags, seen, f"call_requested:{call_requested}")
+    if lead_tier in _ALLOWED_LEAD_TIERS:
+        _append_tag(tags, seen, f"lead_tier:{lead_tier}")
 
     return tags
 
@@ -256,10 +473,13 @@ def create_inquiry(
     response: Response,
     db: Session = Depends(get_db),
 ) -> InquiryItem:
+    property_row: Property | None = None
     if payload.property_id is not None:
-        prop = db.get(Property, payload.property_id)
-        if prop is None or prop.status != "active":
+        property_row = db.get(Property, payload.property_id)
+        if property_row is None or property_row.status != "active":
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
+
+    payload = _enrich_inquiry_payload(payload, property_row)
 
     now = datetime.now(UTC)
     dedupe_since = now - timedelta(minutes=10)

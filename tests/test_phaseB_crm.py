@@ -683,6 +683,86 @@ def test_inquiry_additive_marketing_fields_are_normalized_into_tags(client):
     assert "call_requested:no" in tags
 
 
+def test_inquiry_source_tracking_fields_are_derived_from_source_page_query(client):
+    unique = uuid4().hex
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Source Tracking User",
+            "email": f"source-{unique}@example.com",
+            "message": f"Source tracking payload {unique}",
+            "source_page": "https://amppattaya.com/en/buy?utm_source=google&utm_campaign=amp_search_en_buy",
+            "intent": "buy",
+            "tags": ["purpose:buy"],
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = created.json()["id"]
+
+    with SessionLocal() as db:
+        row = db.get(Inquiry, UUID(inquiry_id))
+        assert row is not None
+        tags = set(row.tags or [])
+
+    assert row.source_page == "/en/buy?utm_source=google&utm_campaign=amp_search_en_buy"
+    assert "lead_source:buy_form" in tags
+    assert "locale:en" in tags
+    assert "lead_type:buyer" in tags
+    assert "source_platform:google" in tags
+    assert "campaign:amp_search_en_buy" in tags
+
+
+def test_inquiry_missing_additive_fields_are_derived_from_property_context(client):
+    with SessionLocal() as db:
+        prop = Property(
+            source_id=f"crm-rental-{uuid4()}",
+            slug=f"crm-rental-{uuid4()}",
+            title="CRM Rental Property",
+            type="rent",
+            property_type="condo",
+            status="active",
+            price=28000,
+            address="CRM Rental Address",
+            city="Pattaya",
+        )
+        db.add(prop)
+        db.commit()
+        db.refresh(prop)
+        property_id = str(prop.id)
+
+    created = client.post(
+        "/v1/inquiries",
+        json={
+            "name": "Rental Context User",
+            "phone": "+66000000001",
+            "message": "Interested in renting this unit.",
+            "property_id": property_id,
+            "source_page": "/en/property/rental-unit",
+            "intent": "general",
+            "tags": [
+                "purpose:rent",
+                "entity_type:property",
+                "lead_source:property_detail_form",
+            ],
+        },
+    )
+    assert created.status_code == 201, created.text
+    inquiry_id = created.json()["id"]
+
+    with SessionLocal() as db:
+        row = db.get(Inquiry, UUID(inquiry_id))
+        assert row is not None
+        tags = set(row.tags or [])
+
+    assert row.source_page == "/en/property/rental-unit"
+    assert "lead_source:property_detail_form" in tags
+    assert "locale:en" in tags
+    assert "lead_type:renter" in tags
+    assert "offer_family:rental" in tags
+    assert "inventory_source:owner_rental" in tags
+    assert "source_platform:website" in tags
+
+
 def test_admin_inquiry_is_spam_filter_has_deterministic_total(client):
     token = _login_token(client)
     headers = {"Authorization": f"Bearer {token}"}
