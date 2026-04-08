@@ -1,5 +1,56 @@
 import type { Dictionary } from './types';
 
+const thMessaging = {
+  valueProposition: {
+    heroEyebrow: 'ที่ปรึกษาอสังหาริมทรัพย์พัทยาสำหรับผู้ซื้อและนักลงทุนต่างชาติ',
+    heroSupportingLine: 'โอกาสในพัทยาที่คัดกรองและตรวจสอบแล้ว พร้อมคำแนะนำจากทีมท้องถิ่น การพาชมแบบส่วนตัว และความชัดเจนด้านการลงทุน',
+    homeHeroTitle: 'เริ่มจาก shortlist พัทยาที่คัดตาม brief ของคุณ',
+    homeHeroSubtitle: 'บอก AMP ว่าคุณจะซื้อ ลงทุน ย้ายมาอยู่ หรือกำลังเทียบทำเล แล้วเราจะช่วยคัดโครงการ ยูนิต และขั้นตอนถัดไปที่ตรงกว่า',
+    shortlistPromise: 'เราเริ่มจาก brief ของคุณก่อน แล้วค่อยคัด shortlist ชุดแรกตามความเหมาะ ความเสี่ยง และจังหวะเวลา',
+    curatedSetPromise: 'ทีมพัทยาจะตอบกลับด้วย shortlist ชุดแรกที่คัดแล้ว ไม่ใช่กองประกาศ',
+  },
+  ctaLanguage: {
+    startShortlist: 'เริ่มทำ Shortlist ของฉัน',
+    reviewProjects: 'ดูโครงการที่ตรวจแล้ว',
+    sendBrief: 'ส่ง brief ของฉัน',
+    speakToAdvisor: 'คุยกับที่ปรึกษา',
+    talkToAdvisoryTeam: 'คุยกับทีมที่ปรึกษา',
+    seeHowAmpWorks: 'ดูวิธีที่ AMP ทำงาน',
+    useSmartFinder: 'ใช้ Smart Finder',
+    compareOpportunities: 'เปรียบเทียบตัวเลือก',
+    getInvestmentPlan: 'ขอแผนการลงทุน',
+  },
+  trustLanguage: {
+    title: 'แถบความน่าเชื่อถือ',
+    proofs: [
+      'รายการคัดสรร',
+      'ข้อมูลตรวจสอบแล้ว',
+      'ทีมท้องถิ่นพัทยา',
+      'พาชมแบบส่วนตัว',
+      'แนะนำผู้ซื้อชาวต่างชาติ',
+      'สอดคล้อง PDPA / GDPR',
+    ],
+    summary: 'รายการที่คัดและตรวจแล้ว พร้อมทีมพัทยาที่ช่วยพาคุณไปยังขั้นถัดไปอย่างชัดเจน',
+  },
+  advisoryTone: {
+    teamCtaTitle: 'ทำงานกับทีมพัทยาที่ช่วยคัดชุดแรกให้คุณ',
+    teamCtaBody: 'ส่ง brief ของคุณมา แล้วทีมจะตอบกลับด้วยโครงการ ยูนิต และขั้นตอนถัดไปที่เหมาะกว่า แทนการส่งกองประกาศที่ไม่เชื่อมกัน',
+    teamCtaTrustNote: 'เราเริ่มจาก brief ของคุณก่อน แล้วค่อยคัด shortlist ชุดแรกตามความเหมาะ ความเสี่ยง และจังหวะเวลา',
+    principles: [
+      'เริ่มจาก brief ของคุณก่อน ไม่ใช่เปิดประกาศให้กว้างขึ้น',
+      'อธิบายข้อแลกเปลี่ยนด้วยภาษาตรงไปตรงมาและบริบทท้องถิ่น',
+      'ทุกขั้นควรจบด้วยขั้นตอนถัดไปที่ชัดกว่า',
+    ],
+  },
+  investmentLanguage: {
+    subtitle: 'ดีมานด์เช่า ผลตอบแทน และความเสี่ยง—อธิบายแบบไม่โฆษณาเกินจริง',
+    yieldFraming: 'ประเมินจากสมมติฐานแบบ net',
+    riskFraming: 'ไม่โฆษณาเกินจริง—ชี้ข้อจำกัดและ trade-off',
+    ownershipFraming: 'เส้นทางถือครอง ค่าธรรมเนียม และขั้นตอนควรถูกทำให้ชัดตั้งแต่ต้น',
+    timingFraming: 'คงเรื่องสภาพคล่อง ระยะถือครอง และจังหวะตัดสินใจไว้ในเฟรม',
+  },
+} satisfies Dictionary['messaging'];
+
 export const th: Dictionary = {
   brand: {
     name: 'AMP Pattaya',
@@ -17,23 +68,16 @@ export const th: Dictionary = {
   },
   cta: {
     exploreInvestment: 'สำรวจโอกาสการลงทุน',
-    speakToAdvisor: 'คุยกับที่ปรึกษา',
+    speakToAdvisor: thMessaging.ctaLanguage.speakToAdvisor,
     bookPrivateTour: 'จองทัวร์ส่วนตัว',
-    getInvestmentPlan: 'ขอแผนการลงทุน',
+    getInvestmentPlan: thMessaging.ctaLanguage.getInvestmentPlan,
     whatsapp: 'WhatsApp',
     line: 'LINE',
   },
   advisory: {
-    heroEyebrow: 'ที่ปรึกษาอสังหาริมทรัพย์พัทยาสำหรับผู้ซื้อและนักลงทุนต่างชาติ',
-    heroSupportingLine: 'โอกาสในพัทยาที่คัดกรองและตรวจสอบแล้ว พร้อมคำแนะนำจากทีมท้องถิ่น การพาชมแบบส่วนตัว และความชัดเจนด้านการลงทุน',
-    trustBar: [
-      'รายการคัดสรร',
-      'ข้อมูลตรวจสอบแล้ว',
-      'ทีมท้องถิ่นพัทยา',
-      'พาชมแบบส่วนตัว',
-      'แนะนำผู้ซื้อชาวต่างชาติ',
-      'สอดคล้อง PDPA / GDPR',
-    ],
+    heroEyebrow: thMessaging.valueProposition.heroEyebrow,
+    heroSupportingLine: thMessaging.valueProposition.heroSupportingLine,
+    trustBar: thMessaging.trustLanguage.proofs,
     accessibility: {
       proofsLabel: 'แถบความน่าเชื่อถือ',
       guidanceLabel: 'คำแนะนำของหน้านี้',
@@ -88,23 +132,23 @@ export const th: Dictionary = {
     nextStep: 'ขั้นตอนถัดไป',
     trustSignal: 'เหตุผลที่เชื่อใจ AMP',
     browseVerifiedInventory: 'ดูรายการที่ตรวจสอบแล้ว',
-    compareOpportunities: 'เปรียบเทียบตัวเลือก',
-    useSmartFinder: 'ใช้ Smart Finder',
-    teamCtaTitle: 'ทำงานกับทีมพัทยาที่ช่วยคัดชุดแรกให้คุณ',
-    teamCtaBody: 'ส่ง brief ของคุณมา แล้วทีมจะตอบกลับด้วยโครงการ ยูนิต และขั้นตอนถัดไปที่เหมาะกว่า แทนการส่งกองประกาศที่ไม่เชื่อมกัน',
-    teamCtaTrustNote: 'เราเริ่มจาก brief ของคุณก่อน แล้วค่อยคัด shortlist ชุดแรกตามความเหมาะ ความเสี่ยง และจังหวะเวลา',
-    teamCtaPrimary: 'คุยกับทีมที่ปรึกษา',
-    teamCtaSecondary: 'ดูวิธีที่ AMP ทำงาน',
+    compareOpportunities: thMessaging.ctaLanguage.compareOpportunities,
+    useSmartFinder: thMessaging.ctaLanguage.useSmartFinder,
+    teamCtaTitle: thMessaging.advisoryTone.teamCtaTitle,
+    teamCtaBody: thMessaging.advisoryTone.teamCtaBody,
+    teamCtaTrustNote: thMessaging.advisoryTone.teamCtaTrustNote,
+    teamCtaPrimary: thMessaging.ctaLanguage.talkToAdvisoryTeam,
+    teamCtaSecondary: thMessaging.ctaLanguage.seeHowAmpWorks,
     noPublishedDataTitle: 'รายการยังไม่พร้อม',
     noPublishedDataBody: 'ถ้ารายการยังไม่ขึ้นครบ คุณยังคุยกับทีมเพื่อเช็กโครงการหรือยูนิตที่สนใจได้',
     verifiedEditorialUpdate: 'อัปเดตบทความที่ตรวจสอบแล้ว',
   },
+  messaging: thMessaging,
   home: {
-    heroTitle: 'เริ่มจาก shortlist พัทยาที่คัดตาม brief ของคุณ',
-    heroSubtitle:
-      'บอก AMP ว่าคุณจะซื้อ ลงทุน ย้ายมาอยู่ หรือกำลังเทียบทำเล แล้วเราจะช่วยคัดโครงการ ยูนิต และขั้นตอนถัดไปที่ตรงกว่า',
-    heroPrimaryCta: 'เริ่มทำ Shortlist ของฉัน',
-    heroSecondaryCta: 'ดูโครงการที่ตรวจแล้ว',
+    heroTitle: thMessaging.valueProposition.homeHeroTitle,
+    heroSubtitle: thMessaging.valueProposition.homeHeroSubtitle,
+    heroPrimaryCta: thMessaging.ctaLanguage.startShortlist,
+    heroSecondaryCta: thMessaging.ctaLanguage.reviewProjects,
     pathInvest: {
       title: 'ลงทุน',
       desc: 'เทียบโครงการเปิดขายและ resale ผ่านราคาเข้า ดีมานด์เช่า และ downside ที่มองเห็นได้',
@@ -141,9 +185,9 @@ export const th: Dictionary = {
     premiumCtaTitle: 'พร้อมส่ง brief เพื่อรับ shortlist ที่ไปต่อได้ในสัปดาห์นี้หรือยัง?',
     premiumCtaBody:
       'บอกงบ ระยะเวลา ทำเล และว่าคุณซื้อเพื่ออยู่เอง ปล่อยเช่า หรือขายต่อ แล้วทีมจะตอบกลับด้วยชุดแรกที่แคบลงและขั้นตอนถัดไปที่ชัดเจน',
-    premiumCtaPrimary: 'ส่ง brief ของฉัน',
+    premiumCtaPrimary: thMessaging.ctaLanguage.sendBrief,
     premiumCtaSecondary: 'ดูโครงการที่ยังเปิดอยู่',
-    premiumCtaTrustNote: 'ทีมพัทยาจะตอบกลับด้วย shortlist ชุดแรกที่คัดแล้ว ไม่ใช่กองประกาศ',
+    premiumCtaTrustNote: thMessaging.valueProposition.curatedSetPromise,
     premiumCtaFormHeading: 'เล่า brief ของคุณให้เราฟัง',
     premiumCtaFormBody: 'ใช้ฟอร์มสั้น ๆ ก็พอให้ทีมเริ่มคัด shortlist ชุดแรกได้',
     pathSectionTitle: 'เริ่มจากเส้นทางที่ตรงกับ brief ของคุณ',
@@ -231,7 +275,7 @@ export const th: Dictionary = {
   },
   invest: {
     title: 'ลงทุนอสังหาฯ ในพัทยา',
-    subtitle: 'ดีมานด์เช่า ผลตอบแทน และความเสี่ยง—อธิบายแบบไม่โฆษณาเกินจริง',
+    subtitle: thMessaging.investmentLanguage.subtitle,
     whyTitle: 'ทำไมพัทยา',
     whySubtitle: 'กรอบภาพรวมสำหรับนักลงทุนต่างชาติ',
     whyCards: [
@@ -243,13 +287,13 @@ export const th: Dictionary = {
     demandSubtitle: 'สิ่งที่เราดูเมื่อประเมินช่วงค่าเช่า',
     demandBullets: ['ความเหมาะสมของยูนิต (แปลน ขนาด เฟอร์ฯ)', 'ข้อจำกัดทำเลและการเข้าถึง', 'ฤดูกาลและสมมติฐานการว่างห้อง'],
     yieldTitle: 'แนวโน้มผลตอบแทน',
-    yieldSubtitle: 'ประเมินจากสมมติฐานแบบ net',
+    yieldSubtitle: thMessaging.investmentLanguage.yieldFraming,
     yieldCards: [
       { title: 'Gross vs net', body: 'แยกค่าเช่าหน้าบ้านออกจากผลตอบแทนจริง' },
       { title: 'เทียบเคียง', body: 'ใช้ comp ที่เป็นจริงมากกว่าตัวเลขโบรชัวร์' },
     ],
     riskTitle: 'ความเสี่ยงและสมมติฐาน',
-    riskSubtitle: 'ไม่โฆษณาเกินจริง—ชี้ข้อจำกัดและ trade-off',
+    riskSubtitle: thMessaging.investmentLanguage.riskFraming,
     riskBullets: ['ความผันผวนเข้าพักและราคาเช่า', 'ค่าซ่อมบำรุงและต่ออายุ', 'สภาพคล่องและข้อจำกัดด้านเวลา'],
     reportCtaTitle: 'ขอรายงานผลตอบแทน',
     reportCtaBody: 'เราจะสรุปสมมติฐาน ตัวอย่างเทียบเคียง และข้อจำกัดที่ควรรู้ พร้อมแนวทางขั้นต่อไป',

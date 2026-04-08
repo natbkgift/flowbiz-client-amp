@@ -84,6 +84,45 @@ export type Dictionary = {
     noPublishedDataBody: string;
     verifiedEditorialUpdate: string;
   };
+  messaging: {
+    valueProposition: {
+      heroEyebrow: string;
+      heroSupportingLine: string;
+      homeHeroTitle: string;
+      homeHeroSubtitle: string;
+      shortlistPromise: string;
+      curatedSetPromise: string;
+    };
+    ctaLanguage: {
+      startShortlist: string;
+      reviewProjects: string;
+      sendBrief: string;
+      speakToAdvisor: string;
+      talkToAdvisoryTeam: string;
+      seeHowAmpWorks: string;
+      useSmartFinder: string;
+      compareOpportunities: string;
+      getInvestmentPlan: string;
+    };
+    trustLanguage: {
+      title: string;
+      proofs: string[];
+      summary: string;
+    };
+    advisoryTone: {
+      teamCtaTitle: string;
+      teamCtaBody: string;
+      teamCtaTrustNote: string;
+      principles: string[];
+    };
+    investmentLanguage: {
+      subtitle: string;
+      yieldFraming: string;
+      riskFraming: string;
+      ownershipFraming: string;
+      timingFraming: string;
+    };
+  };
   home: {
     heroTitle: string;
     heroSubtitle: string;

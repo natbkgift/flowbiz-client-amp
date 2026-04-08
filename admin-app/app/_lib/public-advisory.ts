@@ -324,7 +324,7 @@ export function buildBuyingCostAdvisorQuery(context: BuyingCostAdvisorContext): 
 }
 
 export function getAdvisoryProofs(dict: Dictionary, count = 4): string[] {
-  return dict.advisory.trustBar.slice(0, count);
+  return dict.messaging.trustLanguage.proofs.slice(0, count);
 }
 
 export function getAdvisoryLabels(input: Locale | Dictionary): {

@@ -196,6 +196,39 @@ describe('i18n dictionaries', () => {
     }
   });
 
+  it('messaging hierarchy has all required global copy groups', () => {
+    const valuePropKeys: (keyof Dictionary['messaging']['valueProposition'])[] = [
+      'heroEyebrow', 'heroSupportingLine', 'homeHeroTitle', 'homeHeroSubtitle', 'shortlistPromise', 'curatedSetPromise',
+    ];
+    const ctaKeys: (keyof Dictionary['messaging']['ctaLanguage'])[] = [
+      'startShortlist', 'reviewProjects', 'sendBrief', 'speakToAdvisor', 'talkToAdvisoryTeam', 'seeHowAmpWorks', 'useSmartFinder', 'compareOpportunities', 'getInvestmentPlan',
+    ];
+    const trustKeys: (keyof Dictionary['messaging']['trustLanguage'])[] = ['title', 'proofs', 'summary'];
+    const advisoryToneKeys: (keyof Dictionary['messaging']['advisoryTone'])[] = ['teamCtaTitle', 'teamCtaBody', 'teamCtaTrustNote', 'principles'];
+    const investmentKeys: (keyof Dictionary['messaging']['investmentLanguage'])[] = ['subtitle', 'yieldFraming', 'riskFraming', 'ownershipFraming', 'timingFraming'];
+
+    for (const key of valuePropKeys) {
+      expect(en.messaging.valueProposition[key]).toBeTruthy();
+      expect(th.messaging.valueProposition[key]).toBeTruthy();
+    }
+    for (const key of ctaKeys) {
+      expect(en.messaging.ctaLanguage[key]).toBeTruthy();
+      expect(th.messaging.ctaLanguage[key]).toBeTruthy();
+    }
+    for (const key of trustKeys) {
+      expect(en.messaging.trustLanguage[key]).toBeTruthy();
+      expect(th.messaging.trustLanguage[key]).toBeTruthy();
+    }
+    for (const key of advisoryToneKeys) {
+      expect(en.messaging.advisoryTone[key]).toBeTruthy();
+      expect(th.messaging.advisoryTone[key]).toBeTruthy();
+    }
+    for (const key of investmentKeys) {
+      expect(en.messaging.investmentLanguage[key]).toBeTruthy();
+      expect(th.messaging.investmentLanguage[key]).toBeTruthy();
+    }
+  });
+
   it('common.testimonials has consistent length in both locales', () => {
     expect(en.common.testimonials.length).toBeGreaterThan(0);
     expect(en.common.testimonials.length).toBe(th.common.testimonials.length);

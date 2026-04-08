@@ -20,4 +20,11 @@ describe('Thai dictionary public copy regression', () => {
     expect(th.property.similarComingSoonText).not.toContain('brief');
     expect(th.common.leadForm.detailsHeading).toBe('บรีฟสำหรับรายการคัดไว้');
   });
+
+  it('keeps the shared messaging hierarchy localized in Thai', () => {
+    expect(th.messaging.ctaLanguage.startShortlist).toBe('เริ่มทำ Shortlist ของฉัน');
+    expect(th.messaging.ctaLanguage.talkToAdvisoryTeam).toBe('คุยกับทีมที่ปรึกษา');
+    expect(th.messaging.trustLanguage.summary).not.toContain('verified');
+    expect(th.messaging.investmentLanguage.subtitle).not.toContain('ROI-focused');
+  });
 });

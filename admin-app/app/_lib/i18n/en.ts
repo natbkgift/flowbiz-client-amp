@@ -1,5 +1,56 @@
 import type { Dictionary } from './types';
 
+const enMessaging = {
+  valueProposition: {
+    heroEyebrow: 'Pattaya Property Advisory for International Buyers',
+    heroSupportingLine: 'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
+    homeHeroTitle: 'Get a Pattaya shortlist built around your brief',
+    homeHeroSubtitle: 'Tell AMP whether you are buying, investing, relocating, or comparing areas. We will narrow the right projects, ready units, and next step for you.',
+    shortlistPromise: 'We start from your brief, then narrow the first shortlist around fit, risk, and timing.',
+    curatedSetPromise: 'A Pattaya advisor replies with a curated first set, not a listing dump.',
+  },
+  ctaLanguage: {
+    startShortlist: 'Start My Shortlist',
+    reviewProjects: 'Review Verified Projects',
+    sendBrief: 'Send My Brief',
+    speakToAdvisor: 'Speak to an Advisor',
+    talkToAdvisoryTeam: 'Talk to the advisory team',
+    seeHowAmpWorks: 'See how AMP works',
+    useSmartFinder: 'Use Smart Finder',
+    compareOpportunities: 'Compare opportunities',
+    getInvestmentPlan: 'Get Investment Plan',
+  },
+  trustLanguage: {
+    title: 'Trust bar',
+    proofs: [
+      'Curated listings',
+      'Verified information',
+      'Local Pattaya team',
+      'Private tours available',
+      'Foreign buyer guidance',
+      'PDPA / GDPR aligned',
+    ],
+    summary: 'Curated listings, verified information, and local Pattaya guidance before you commit.',
+  },
+  advisoryTone: {
+    teamCtaTitle: 'Work with a Pattaya team that narrows the first set for you',
+    teamCtaBody: 'Send your brief and we will return with the right projects, ready units, and next step instead of a pile of disconnected listings.',
+    teamCtaTrustNote: 'We start from your brief, then narrow the first shortlist around fit, risk, and timing.',
+    principles: [
+      'Start from the brief before opening more tabs.',
+      'Explain fit, risk, and trade-offs in plain language.',
+      'End every advisory step with a clearer next action.',
+    ],
+  },
+  investmentLanguage: {
+    subtitle: 'Rental demand, yield positioning, and risk explained without hype.',
+    yieldFraming: 'Yield positioning based on net assumptions.',
+    riskFraming: 'No hype—just constraints and trade-offs.',
+    ownershipFraming: 'Ownership route, fees, and timing should be explicit early.',
+    timingFraming: 'Liquidity, hold period, and next-step timing stay in scope.',
+  },
+} satisfies Dictionary['messaging'];
+
 export const en: Dictionary = {
   brand: {
     name: 'AMP Pattaya',
@@ -17,23 +68,16 @@ export const en: Dictionary = {
   },
   cta: {
     exploreInvestment: 'Explore Investment Opportunities',
-    speakToAdvisor: 'Speak to an Advisor',
+    speakToAdvisor: enMessaging.ctaLanguage.speakToAdvisor,
     bookPrivateTour: 'Book Private Tour',
-    getInvestmentPlan: 'Get Investment Plan',
+    getInvestmentPlan: enMessaging.ctaLanguage.getInvestmentPlan,
     whatsapp: 'WhatsApp',
     line: 'LINE',
   },
   advisory: {
-    heroEyebrow: 'Pattaya Property Advisory for International Buyers',
-    heroSupportingLine: 'Curated and verified Pattaya opportunities with local guidance, private tours, and investment clarity.',
-    trustBar: [
-      'Curated listings',
-      'Verified information',
-      'Local Pattaya team',
-      'Private tours available',
-      'Foreign buyer guidance',
-      'PDPA / GDPR aligned',
-    ],
+    heroEyebrow: enMessaging.valueProposition.heroEyebrow,
+    heroSupportingLine: enMessaging.valueProposition.heroSupportingLine,
+    trustBar: enMessaging.trustLanguage.proofs,
     accessibility: {
       proofsLabel: 'Trust bar',
       guidanceLabel: 'Page guidance',
@@ -88,23 +132,23 @@ export const en: Dictionary = {
     nextStep: 'Next step',
     trustSignal: 'Why trust AMP',
     browseVerifiedInventory: 'Browse verified inventory',
-    compareOpportunities: 'Compare opportunities',
-    useSmartFinder: 'Use Smart Finder',
-    teamCtaTitle: 'Work with a Pattaya team that narrows the first set for you',
-    teamCtaBody: 'Send your brief and we will return with the right projects, ready units, and next step instead of a pile of disconnected listings.',
-    teamCtaTrustNote: 'We start from your brief, then narrow the first shortlist around fit, risk, and timing.',
-    teamCtaPrimary: 'Talk to the advisory team',
-    teamCtaSecondary: 'See how AMP works',
+    compareOpportunities: enMessaging.ctaLanguage.compareOpportunities,
+    useSmartFinder: enMessaging.ctaLanguage.useSmartFinder,
+    teamCtaTitle: enMessaging.advisoryTone.teamCtaTitle,
+    teamCtaBody: enMessaging.advisoryTone.teamCtaBody,
+    teamCtaTrustNote: enMessaging.advisoryTone.teamCtaTrustNote,
+    teamCtaPrimary: enMessaging.ctaLanguage.talkToAdvisoryTeam,
+    teamCtaSecondary: enMessaging.ctaLanguage.seeHowAmpWorks,
     noPublishedDataTitle: 'Ask for a curated next step',
     noPublishedDataBody: 'Share your brief and the team will line up the most relevant inventory, market context, or developer options for you.',
     verifiedEditorialUpdate: 'Verified editorial update',
   },
+  messaging: enMessaging,
   home: {
-    heroTitle: 'Get a Pattaya shortlist built around your brief',
-    heroSubtitle:
-      'Tell AMP whether you are buying, investing, relocating, or comparing areas. We will narrow the right projects, ready units, and next step for you.',
-    heroPrimaryCta: 'Start My Shortlist',
-    heroSecondaryCta: 'Review Verified Projects',
+    heroTitle: enMessaging.valueProposition.homeHeroTitle,
+    heroSubtitle: enMessaging.valueProposition.homeHeroSubtitle,
+    heroPrimaryCta: enMessaging.ctaLanguage.startShortlist,
+    heroSecondaryCta: enMessaging.ctaLanguage.reviewProjects,
     pathInvest: {
       title: 'Invest',
       desc: 'Compare launch and resale options through entry price, rental demand, and downside clarity.',
@@ -145,9 +189,9 @@ export const en: Dictionary = {
     premiumCtaTitle: 'Ready for a shortlist you can act on this week?',
     premiumCtaBody:
       'Share budget, timeline, areas, and whether this is for living, yield, or resale. AMP will reply with a tighter first set and the clearest next step.',
-    premiumCtaPrimary: 'Send My Brief',
+    premiumCtaPrimary: enMessaging.ctaLanguage.sendBrief,
     premiumCtaSecondary: 'Browse Live Projects',
-    premiumCtaTrustNote: 'A Pattaya advisor replies with a curated first set, not a listing dump.',
+    premiumCtaTrustNote: enMessaging.valueProposition.curatedSetPromise,
     premiumCtaFormHeading: 'Tell us your brief',
     premiumCtaFormBody: 'A short form is enough for the team to start the first shortlist.',
     pathSectionTitle: 'Start with the route that matches your brief',
@@ -236,7 +280,7 @@ export const en: Dictionary = {
   },
   invest: {
     title: 'Invest in Pattaya Property',
-    subtitle: 'Rental demand, yield positioning, and risk explained without hype.',
+    subtitle: enMessaging.investmentLanguage.subtitle,
     whyTitle: 'Why Pattaya',
     whySubtitle: 'A high-level frame for international investors.',
     whyCards: [
@@ -248,13 +292,13 @@ export const en: Dictionary = {
     demandSubtitle: 'What we look for when modeling rent ranges.',
     demandBullets: ['Unit type fit (layout, size, furnishing)', 'Location constraints and access', 'Seasonality and practical vacancy assumptions'],
     yieldTitle: 'Yield Positioning',
-    yieldSubtitle: 'Yield positioning based on net assumptions.',
+    yieldSubtitle: enMessaging.investmentLanguage.yieldFraming,
     yieldCards: [
       { title: 'Gross vs net', body: 'We separate headline rent from actual net returns.' },
       { title: 'Comparable framing', body: 'Use realistic comps rather than brochure targets.' },
     ],
     riskTitle: 'Risk & Assumptions',
-    riskSubtitle: 'No hype—just constraints and trade-offs.',
+    riskSubtitle: enMessaging.investmentLanguage.riskFraming,
     riskBullets: ['Occupancy and pricing variability', 'Maintenance and renewal costs', 'Liquidity and timeline constraints'],
     reportCtaTitle: 'Request a Yield Report',
     reportCtaBody:
