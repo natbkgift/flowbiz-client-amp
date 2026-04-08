@@ -105,6 +105,7 @@ describe('i18n dictionaries', () => {
     const requiredKeys: (keyof Dictionary['property'])[] = [
       'nextSteps', 'exploreRelated', 'breadcrumbHome',
       'bedrooms', 'bathrooms', 'sqm', 'exploreMore', 'navigateToKeyPages',
+      'highlightsTitle', 'highlightsSubtitle', 'localContextTitle', 'localContextSubtitle', 'shortlistFitTitle', 'shortlistFitSubtitle',
     ];
     for (const key of requiredKeys) {
       expect(en.property[key]).toBeTruthy();

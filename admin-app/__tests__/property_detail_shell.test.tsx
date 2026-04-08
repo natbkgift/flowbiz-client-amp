@@ -96,6 +96,9 @@ describe('property detail shell', () => {
     expect(container.textContent ?? '').toContain('Review this unit with advisor');
     expect(container.querySelector('#property-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#property-trust-cues')).not.toBeNull();
+    expect(container.querySelector('#property-highlights')).not.toBeNull();
+    expect(container.querySelector('#property-local-context')).not.toBeNull();
+    expect(container.querySelector('#property-shortlist-fit')).not.toBeNull();
     expect(container.querySelector('#property-decision-cues')).not.toBeNull();
     expect(container.querySelector('#property-next-tools')).not.toBeNull();
     expect(container.querySelector('#property-action-note')).not.toBeNull();
@@ -121,6 +124,9 @@ describe('property detail shell', () => {
     const markup = container.textContent ?? '';
 
     expect(markup).toContain('สัญญาณช่วยตัดสินใจระดับยูนิต');
+    expect(markup).toContain('จุดเด่นระดับยูนิต');
+    expect(markup).toContain('อ่านทำเลนี้อย่างไร');
+    expect(markup).toContain('เหตุผลที่ยูนิตนี้ควรอยู่ต่อใน shortlist');
     expect(markup).toContain('เครื่องมือช่วยตัดสินใจและทางไปต่อ');
     expect(markup).toContain('คุยต่อเกี่ยวกับยูนิตนี้');
     expect(markup).toContain('ไปหน้าเปรียบเทียบ');
@@ -141,7 +147,8 @@ describe('property detail shell', () => {
 
     expect(container.querySelector('#property-gallery-status')).not.toBeNull();
     expect(container.textContent ?? '').toContain('The photo pack is still limited on this route');
-    expect(container.textContent ?? '').toContain('Azure Condo works as a unit-level fact check');
+    expect(container.textContent ?? '').toContain('Azure Condo is a 2-bedroom resale unit');
+    expect(container.textContent ?? '').toContain('should be read as a unit-level decision point');
     expect(container.textContent ?? '').not.toContain('Description —');
   });
 });

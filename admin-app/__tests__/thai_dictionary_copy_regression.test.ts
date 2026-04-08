@@ -18,6 +18,8 @@ describe('Thai dictionary public copy regression', () => {
     expect(th.compare.priceRange).toBe('ช่วงราคา');
     expect(th.compare.expectedYield).toBe('ผลตอบแทนที่คาดได้');
     expect(th.property.similarComingSoonText).not.toContain('brief');
+    expect(th.property.highlightsTitle).toBe('จุดเด่นระดับยูนิต');
+    expect(th.property.localContextTitle).toBe('อ่านทำเลนี้อย่างไร');
     expect(th.common.leadForm.detailsHeading).toBe('บรีฟสำหรับรายการคัดไว้');
   });
 

@@ -125,6 +125,7 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-decision-lens')).not.toBeNull();
     expect(container.querySelector('#project-related-reads')).not.toBeNull();
     expect(container.querySelector('#project-trust-grid')).not.toBeNull();
+    expect(container.querySelector('#project-location-context')).not.toBeNull();
     expect(container.querySelector('#project-advisor-brief')).not.toBeNull();
     expect(container.querySelector('#project-mobile-cta')).not.toBeNull();
     expect(container.querySelector('.public-hero__content.public-surface-card')).not.toBeNull();
@@ -135,6 +136,10 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project_decision_secondary')).toHaveAttribute('href', '/en/compare');
     expect(container.querySelector('#project_next_steps_utility')).toHaveAttribute('href', '/en/buy');
     expect(container.textContent ?? '').toContain('Browse shortlist-ready listings');
+    expect(container.textContent ?? '').toContain('Keep this project in the shortlist when the');
+    expect(container.textContent ?? '').toContain('Jomtien snapshot still carry more weight than nearby alternatives.');
+    expect(container.textContent ?? '').toContain('District: Jomtien');
+    expect(container.textContent ?? '').toContain('Read Alpha Residence inside the Jomtien district context first');
     expect(container.querySelectorAll('#project-next-steps a')).toHaveLength(3);
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('invest');
   });
@@ -150,6 +155,8 @@ describe('project detail shell', () => {
 
     expect(markup).toContain('สรุปโครงการเพื่อใช้คัดรายการ');
     expect(markup).toContain('เหตุผลที่โครงการนี้ควรอยู่ต่อใน shortlist');
+    expect(markup).toContain('ให้โครงการนี้อยู่ต่อใน shortlist');
+    expect(markup).toContain('อ่าน Alpha Residence ในบริบทของย่าน Jomtien ก่อน');
     expect(markup).toContain('ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยัง active');
     expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
     expect(markup).toContain('สถานะภาพโครงการที่ยืนยันได้');

@@ -134,10 +134,13 @@ describe('project detail trust integration', () => {
     expect(screen.getAllByText(/published developer: beta developments/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/check live availability around this project/i)).toBeTruthy();
     expect(container.querySelector('#project-gallery-status')).not.toBeNull();
+    expect(container.querySelector('#project-location-context')).not.toBeNull();
     expect(container.querySelector('#project-gallery-section [data-media-kind="fallback"]')).not.toBeNull();
     expect(screen.getByText(/fallback overview image because the published local-media photo pack is still thin/i)).toBeTruthy();
     expect(screen.getByText(/confirm current rental demand and buyer fit around central pattaya/i)).toBeTruthy();
     expect(screen.getByText(/confirm which unit mix and active availability still match beta tower/i)).toBeTruthy();
+    expect(screen.getByText(/read beta tower inside the central pattaya district context first/i)).toBeTruthy();
+    expect(screen.getByText(/published developer context from beta developments helps anchor credibility/i)).toBeTruthy();
     expect(container.querySelector('#project_consultation_primary')).toHaveAttribute(
       'href',
       '/en/contact?intent=project_consultation&source=project_availability_check&project=beta-tower&projects=beta-tower&buyer_fit=project_first_buyer&signal_level=medium&msg=I+am+interested+in+Beta+Tower+and+want+to+confirm+live+unit+availability%2C+price+bands%2C+and+nearby+alternatives+still+open+now.',
@@ -164,6 +167,9 @@ describe('project detail trust integration', () => {
     const verifiedList = screen.getByLabelText('Verified now');
     expect(within(verifiedList).getByText(/area context: jomtien/i)).toBeTruthy();
     expect(within(verifiedList).getByText(/entry price: thb 5,200,000/i)).toBeTruthy();
+    expect(container.querySelector('#project-location-context')).not.toBeNull();
+    expect(screen.getByText(/district: jomtien/i)).toBeTruthy();
+    expect(screen.getByText(/read alpha residence inside the jomtien district context first/i)).toBeTruthy();
     expect(within(verifiedList).getByText(/market snapshot: avg price thb 5.2m • avg rent thb 28k • roi 5.8%/i)).toBeTruthy();
     expect(screen.getByText(/compare this project with nearby options/i)).toBeTruthy();
     expect(container.querySelector('#project_consultation_primary')).toHaveAttribute(

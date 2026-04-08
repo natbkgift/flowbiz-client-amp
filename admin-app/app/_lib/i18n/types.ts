@@ -405,6 +405,12 @@ export type Dictionary = {
     navigateToKeyPages: string;
     notFound: string;
     description: string;
+    highlightsTitle: string;
+    highlightsSubtitle: string;
+    localContextTitle: string;
+    localContextSubtitle: string;
+    shortlistFitTitle: string;
+    shortlistFitSubtitle: string;
     similarProperties: string;
     comingSoon: string;
     similarComingSoonText: string;

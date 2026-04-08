@@ -571,6 +571,15 @@ export const en: Dictionary = {
     navigateToKeyPages: 'Navigate to key pages',
     notFound: 'Property not found',
     description: 'Description',
+    highlightsTitle: 'What stands out at the unit level',
+    highlightsSubtitle:
+      'Read the strongest signals of the unit itself before the conversation widens into nearby alternatives.',
+    localContextTitle: 'How to read this location',
+    localContextSubtitle:
+      'Place the unit inside its street and district context so the shortlist is driven by fit, not only by price.',
+    shortlistFitTitle: 'Why this stays in the shortlist',
+    shortlistFitSubtitle:
+      'Use this block to judge whether the listing deserves the next advisor conversation or should stay as a benchmark only.',
     similarProperties: 'Similar Properties',
     comingSoon: 'Available on request',
     similarComingSoonText: 'Additional comparable homes are curated directly through the advisory desk.',

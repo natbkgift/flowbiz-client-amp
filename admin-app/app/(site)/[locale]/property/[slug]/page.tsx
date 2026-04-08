@@ -125,22 +125,55 @@ function hasMeaningfulDescription(value: string | null | undefined): boolean {
   return text.length > 0 && !/^[\-—–]+$/.test(text);
 }
 
+function uniqueItems(items: Array<string | null>): string[] {
+  return [...new Set(items.filter((item): item is string => Boolean(item)).map((item) => item.trim()).filter(Boolean))];
+}
+
+function buildPropertyTypeDescriptor(locale: 'en' | 'th', type: string | null | undefined): string {
+  const normalized = String(type || '').toLowerCase();
+
+  if (normalized === 'rent') return locale === 'th' ? 'รายการเช่า' : 'rental listing';
+  if (normalized === 'resale') return locale === 'th' ? 'ยูนิตขายต่อ' : 'resale unit';
+  if (normalized === 'new') return locale === 'th' ? 'ยูนิตโครงการใหม่' : 'new-launch unit';
+
+  return locale === 'th' ? 'ยูนิตนี้' : 'unit';
+}
+
+function buildPropertyBedroomDescriptor(locale: 'en' | 'th', bedrooms: number | null | undefined): string | null {
+  if (typeof bedrooms !== 'number' || Number.isNaN(bedrooms) || bedrooms < 0) return null;
+  if (bedrooms === 0) return locale === 'th' ? 'สตูดิโอ' : 'studio';
+  return locale === 'th' ? `${bedrooms} ห้องนอน` : `${bedrooms}-bedroom`;
+}
+
 function buildPropertyFallbackDescription(
   locale: 'en' | 'th',
   property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
 ): string[] {
-  return [
+  const priceLabel = Number.isFinite(Number(property.price)) ? formatPriceTHB(Number(property.price)) : null;
+  const typeDescriptor = buildPropertyTypeDescriptor(locale, property.type);
+  const bedroomDescriptor = buildPropertyBedroomDescriptor(locale, property.bedrooms);
+  const sizeLabel = formatPropertyMeasure(locale, property.size, 'sqm');
+  const locationLabel = property.city || (locale === 'th' ? 'พัทยา' : 'Pattaya');
+
+  return uniqueItems([
     locale === 'th'
-      ? `${property.title} ใช้เป็นหน้าเช็กข้อเท็จจริงระดับยูนิตก่อนคุยต่อเรื่องราคา เงื่อนไข และตัวเลือกใกล้เคียง.`
-      : `${property.title} works as a unit-level fact check before you move into pricing, terms, and nearby alternatives.`,
-    property.city
+      ? `${property.title} เป็น${bedroomDescriptor ? `${bedroomDescriptor} ` : ''}${typeDescriptor}${sizeLabel ? ` ขนาด ${sizeLabel}` : ''}ใน ${locationLabel} ที่ควรถูกอ่านแบบตัดสินใจระดับยูนิต ไม่ใช่ปล่อยให้เป็นเพียงรายการ placeholder`
+      : `${property.title} is a ${bedroomDescriptor ? `${bedroomDescriptor} ` : ''}${typeDescriptor}${sizeLabel ? ` with ${sizeLabel}` : ''} in ${locationLabel}, so it should be read as a unit-level decision point instead of a placeholder listing.`,
+    priceLabel
       ? (locale === 'th'
-        ? `รายการนี้อยู่ในโซน ${property.city} และควรอ่านคู่กับบริบทของทำเลและ inventory ที่ยัง active.`
-        : `This listing sits in ${property.city} and should be read together with location context and currently active inventory.`)
+        ? `ใช้ราคา ${priceLabel} เป็น anchor ก่อน แล้วค่อยตัดสินว่ายูนิตนี้ควรอยู่ต่อใน shortlist หรือควรถูกเทียบกับทางเลือกใกล้เคียง`
+        : `Use the ${priceLabel} price point as the anchor, then decide whether this unit keeps a shortlist slot or should be tested against nearby alternatives.`)
       : (locale === 'th'
-        ? 'ใช้รายการนี้เพื่อเช็กว่าควรคุยต่อทันทีหรือเปรียบเทียบกับทางเลือกใกล้เคียงก่อน.'
-        : 'Use this listing to decide whether it deserves an immediate advisor review or a nearby comparison first.'),
-  ];
+        ? 'เริ่มจากข้อเท็จจริงของยูนิตและบริบททำเลก่อน แล้วค่อยขอราคา live หรือเงื่อนไขล่าสุดจากทีม'
+        : 'Start from the unit facts and location context here before you request live pricing or the latest terms from the team.'),
+    property.type === 'rent'
+      ? (locale === 'th'
+        ? 'ถ้าอ่านเป็นเคสเช่า ให้เช็กช่วงย้ายเข้า สัญญา และความพร้อมเข้าอยู่ก่อนทุกครั้ง'
+        : 'If you are reading this as a rental case, confirm move-in timing, lease terms, and readiness before every next step.')
+      : (locale === 'th'
+        ? 'ถ้าอ่านเป็นเคสซื้อ ให้เช็กค่าโอน ownership fit และตัวเลือกงบใกล้เคียงควบคู่กันไป'
+        : 'If you are reading this as a purchase case, confirm transfer costs, ownership fit, and the nearby options in the same budget at the same time.'),
+  ]).slice(0, 3);
 }
 
 function buildPropertyVerifiedLines(
@@ -189,12 +222,104 @@ function buildPropertyConfirmNextLines(
       : `Confirm live availability, furnishing, and the latest deal terms for ${property.title} before going deeper.`,
     property.type === 'rent'
       ? (locale === 'th'
-        ? 'ถ้าใช้เพื่อเช่า ควรเช็กเงื่อนไขสัญญา ระยะเวลา และความพร้อมเข้าอยู่ทันที.'
-        : 'If this is a rental case, confirm contract terms, duration, and move-in readiness next.')
+        ? 'ถ้าใช้เพื่อเช่า ควรเช็กเงื่อนไขสัญญา ระยะเวลา การวางมัดจำ และความพร้อมเข้าอยู่ก่อนให้ยูนิตนี้อยู่ต่อใน shortlist.'
+        : 'If this is a rental case, confirm contract terms, duration, deposit structure, and move-in readiness before this unit keeps its shortlist slot.')
       : (locale === 'th'
-        ? 'ถ้าใช้เพื่อซื้อ ควรเช็กค่าโอน ownership fit และตัวเลือกที่ใกล้เคียงในงบเดียวกันต่อ.'
-        : 'If this is a purchase case, confirm transfer costs, ownership fit, and nearby alternatives in the same budget range next.'),
+        ? 'ถ้าใช้เพื่อซื้อ ควรเช็กค่าโอน ownership fit และตัวเลือกที่ใกล้เคียงในงบเดียวกัน ก่อนพาเรื่องไปสู่การคุยเงื่อนไขต่อ.'
+        : 'If this is a purchase case, confirm transfer costs, ownership fit, and nearby alternatives in the same budget range before you move into deal terms.'),
   ];
+}
+
+function buildPropertyHighlightLines(
+  locale: 'en' | 'th',
+  property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
+  galleryCount: number,
+): string[] {
+  const priceLabel = Number.isFinite(Number(property.price)) ? formatPriceTHB(Number(property.price)) : null;
+  const typeDescriptor = buildPropertyTypeDescriptor(locale, property.type);
+  const bedroomDescriptor = buildPropertyBedroomDescriptor(locale, property.bedrooms);
+  const sizeLabel = formatPropertyMeasure(locale, property.size, 'sqm');
+
+  return uniqueItems([
+    locale === 'th'
+      ? `${property.title} เป็น${bedroomDescriptor ? `${bedroomDescriptor} ` : ''}${typeDescriptor}${priceLabel ? ` ราคา ${priceLabel}` : ''}${sizeLabel ? ` และขนาด ${sizeLabel}` : ''} ซึ่งเพียงพอสำหรับการตัดสินใจรอบแรกแบบจริงจัง`
+      : `${property.title} is a ${bedroomDescriptor ? `${bedroomDescriptor} ` : ''}${typeDescriptor}${priceLabel ? ` at ${priceLabel}` : ''}${sizeLabel ? ` with ${sizeLabel}` : ''}, which is enough for a serious first-pass decision.`,
+    property.type === 'rent'
+      ? (locale === 'th'
+        ? 'จุดแข็งของหน้านี้คือการคัด rental shortlist ที่พร้อมย้ายเข้าได้เร็ว ไม่ใช่การไล่ดูรายการเช่ากว้าง ๆ'
+        : 'This read is strongest when you want a move-in-ready rental shortlist instead of another broad rental scan.')
+      : (locale === 'th'
+        ? 'จุดแข็งของหน้านี้คือการเทียบยูนิตจริงกับตัวเลือกใกล้เคียง โดยไม่ย้อนกลับไปดู marketing ระดับโครงการ'
+        : 'This read is strongest when you want to compare a concrete unit against nearby stock, not go back to project-level marketing.'),
+    galleryCount <= 1
+      ? (locale === 'th'
+        ? 'แม้ภาพจะยังบาง แต่ราคา ขนาด และข้อเท็จจริงระดับยูนิตยังชัดพอให้ใช้คัดกรองต่อได้'
+        : 'Even with a thin media pack, the price, size, and unit facts are already strong enough to filter this listing forward.')
+      : (locale === 'th'
+        ? 'ภาพที่มีอยู่ช่วยเช็กบรรยากาศและสภาพห้องได้ แต่การคัดสินใจยังควรอิง price-fit และ local context ร่วมกัน'
+        : 'The current visuals help confirm layout feel, but the shortlist call should still come from price fit and local context together.'),
+  ]).slice(0, 3);
+}
+
+function buildPropertyLocalContextLines(
+  locale: 'en' | 'th',
+  property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
+  relatedCount: number,
+): string[] {
+  return uniqueItems([
+    property.city
+      ? (locale === 'th'
+        ? `อ่านยูนิตนี้ในบริบทของ ${property.city} และตำแหน่งของอาคารจริง ไม่ใช่ดูเป็นตัวเลขราคาเดี่ยว ๆ`
+        : `Read this unit inside the ${property.city} district context and its exact building position, not as an isolated price point.`)
+      : (locale === 'th'
+        ? 'อ่านยูนิตนี้ในบริบทของทำเลจริงก่อนตัดสินใจเชิงตัวเลข'
+        : 'Read this unit inside its real location context before making a purely numeric decision.'),
+    property.address && property.city
+      ? (locale === 'th'
+        ? `${property.address}, ${property.city} บอกได้ว่าความสะดวกของถนนจริงสำคัญพอ ๆ กับตัวห้องเอง`
+        : `${property.address}, ${property.city} suggests that street-level convenience matters as much as the room itself.`)
+      : null,
+    property.type === 'rent'
+      ? (locale === 'th'
+        ? 'สำหรับเคสเช่า ความเหมาะของทำเลถูกตัดสินจากการเดินทาง ช่วงย้ายเข้า และความเร็วที่ยูนิตแบบเดียวกันหายไปจากตลาด'
+        : 'For rental decisions, location fit is really about commute, move-in timing, and how quickly comparable units disappear from the market.')
+      : (locale === 'th'
+        ? 'สำหรับเคสซื้อ ความเหมาะของทำเลคือการดูว่าราคา ขนาด และ bedroom mix นี้ยังแข่งขันกับยูนิตใกล้เคียงได้หรือไม่'
+        : 'For purchase decisions, location fit means asking whether this price, size, and bedroom mix still competes well against nearby units.'),
+    relatedCount > 0
+      ? (locale === 'th'
+        ? `route นี้มีตัวเทียบใกล้เคียง ${relatedCount} รายการ จึงใช้ตัดสินได้ว่ายูนิตนี้เป็นตัวนำหรือเป็นเพียง benchmark`
+        : `There are ${relatedCount} nearby comparables on this route, so use them to judge whether this unit is the lead candidate or just the benchmark.`)
+      : (locale === 'th'
+        ? 'ถ้าตัวเทียบใกล้เคียงยังบาง ให้ใช้ยูนิตนี้เป็น anchor ของ brief แล้วขอทีมคัดตัวเลือกที่ใกล้กันต่อ'
+        : 'If the nearby compare set is still thin, use this unit as the anchor of the brief and ask the team for tighter alternatives.'),
+  ]).slice(0, 4);
+}
+
+function buildPropertyShortlistFitLines(
+  locale: 'en' | 'th',
+  property: NonNullable<Awaited<ReturnType<typeof fetchPropertyBySlug>>>,
+  relatedCount: number,
+): string[] {
+  return uniqueItems([
+    property.type === 'rent'
+      ? (locale === 'th'
+        ? 'ให้ยูนิตนี้อยู่ต่อใน shortlist เมื่อช่วงย้ายเข้า เงื่อนไขเช่า และความพร้อมของห้องดูสะอาดกว่าตัวเลือกเช่าอื่น'
+        : 'Keep this unit in the shortlist when the move-in timing, lease terms, and room readiness read cleaner than the other rental options.')
+      : (locale === 'th'
+        ? 'ให้ยูนิตนี้อยู่ต่อใน shortlist เมื่อราคา ขนาด และห้องนอนยังมีน้ำหนักกว่าตัวเลือกซื้อใกล้เคียงในงบเดียวกัน'
+        : 'Keep this unit in the shortlist when its price, size, and bedroom mix still hold more weight than nearby purchase options in the same budget.'),
+    relatedCount > 0
+      ? (locale === 'th'
+        ? `ถ้าเทียบกับตัวเลือกใกล้เคียง ${relatedCount} รายการแล้วยูนิตนี้ยังอธิบายโจทย์ของคุณได้ชัดที่สุด ก็สมควรเป็นตัวที่พาไปคุยกับทีมต่อ`
+        : `If this unit still explains your brief better than the ${relatedCount} nearby comparables, it deserves the next advisor conversation.`)
+      : (locale === 'th'
+        ? 'ถ้าตัวเทียบยังไม่พอ ให้ใช้ยูนิตนี้เป็น benchmark แล้วขอทีมคัด shortlist ที่แคบกว่าเดิม'
+        : 'If the compare set is still thin, use this unit as the benchmark and ask the team for a tighter shortlist.'),
+    locale === 'th'
+      ? 'ถ้ายังลังเล ให้ใช้ section นี้ร่วมกับ verified facts และ local context ก่อนคุยเรื่องเงื่อนไขหรือการนัดดู'
+      : 'If the decision is still close, read this together with the verified facts and local context before discussing terms or scheduling.',
+  ]).slice(0, 3);
 }
 
 export default async function PropertyPage(props: PageProps) {
@@ -363,6 +488,9 @@ export default async function PropertyPage(props: PageProps) {
     : buildPropertyFallbackDescription(locale, property);
   const propertyVerifiedLines = buildPropertyVerifiedLines(locale, property);
   const propertyConfirmNextLines = buildPropertyConfirmNextLines(locale, property, gallery.length);
+  const propertyHighlightLines = buildPropertyHighlightLines(locale, property, gallery.length);
+  const propertyLocalContextLines = buildPropertyLocalContextLines(locale, property, relatedProperties.length);
+  const propertyShortlistFitLines = buildPropertyShortlistFitLines(locale, property, relatedProperties.length);
   const priorityInternalLinks = internalLinks.filter((item) => (
     item.href.endsWith('/buy') || item.href.endsWith('/invest') || item.href.endsWith('/contact')
   ));
@@ -650,6 +778,44 @@ export default async function PropertyPage(props: PageProps) {
                 {descriptionParagraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
+              </div>
+            </section>
+
+            <section id="property-narrative-grid" className="signal-grid signal-grid--three-up reveal mb-6">
+              <div id="property-highlights" className="authority-card">
+                <h2 className="card-title">{dict.property.highlightsTitle}</h2>
+                <p className="card-subtitle">{dict.property.highlightsSubtitle}</p>
+                <div className="insight-list mt-3">
+                  {propertyHighlightLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div id="property-local-context" className="authority-card">
+                <h2 className="card-title">{dict.property.localContextTitle}</h2>
+                <p className="card-subtitle">{dict.property.localContextSubtitle}</p>
+                <div className="insight-list mt-3">
+                  {propertyLocalContextLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div id="property-shortlist-fit" className="authority-card">
+                <h2 className="card-title">{dict.property.shortlistFitTitle}</h2>
+                <p className="card-subtitle">{dict.property.shortlistFitSubtitle}</p>
+                <div className="insight-list mt-3">
+                  {propertyShortlistFitLines.map((item) => (
+                    <div key={item} className="insight-list__item">
+                      <span className="insight-list__body">{item}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
 
