@@ -1474,7 +1474,7 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
 }
 
 .home-hero-slider {
-  min-height: clamp(560px, 78vh, 760px);
+  min-height: clamp(620px, 82vh, 820px);
 }
 
 .home-hero-slider__media-stack::after {
@@ -1502,16 +1502,16 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
 
 .home-hero-slider__content {
   align-items: flex-end;
-  padding: clamp(110px, 9vw, 136px) 0 clamp(34px, 3.5vw, 48px);
+  padding: clamp(124px, 10vw, 152px) 0 clamp(52px, 4.2vw, 68px);
 }
 
 .home-hero-slider__panel {
-  width: min(52%, 42rem);
-  gap: var(--public-space-3);
-  padding-inline: clamp(30px, 2.8vw, 44px);
-  padding-block: clamp(26px, 2.5vw, 36px);
-  background: linear-gradient(180deg, rgba(6, 16, 31, 0.44), rgba(6, 16, 31, 0.18));
-  box-shadow: 0 32px 80px rgba(3, 8, 18, 0.24);
+  width: min(54%, 43.5rem);
+  gap: var(--public-space-4);
+  padding-inline: clamp(32px, 3.1vw, 48px);
+  padding-block: clamp(30px, 2.8vw, 40px);
+  background: linear-gradient(180deg, rgba(6, 16, 31, 0.56), rgba(6, 16, 31, 0.22));
+  box-shadow: 0 40px 100px rgba(3, 8, 18, 0.28);
 }
 
 .home-hero-slider__eyebrow {
@@ -1560,7 +1560,7 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
 }
 
 .home-hero-slider__subtitle {
-  max-width: 31rem;
+  max-width: 33rem;
   font-size: 1rem;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.88);
@@ -1674,6 +1674,106 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
 
 .home-bottom-cta {
   margin-top: 0;
+}
+
+.home-pathways-section {
+  z-index: 2;
+  margin-top: calc(var(--public-space-6) * -0.82);
+  padding: 0 0 clamp(24px, 3vw, 40px);
+}
+
+.home-pathways-shell {
+  padding: clamp(1.2rem, 2vw, 1.55rem);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.08);
+}
+
+.home-pathways-grid {
+  gap: clamp(1rem, 1.5vw, 1.2rem);
+}
+
+.home-pathway-card {
+  padding: clamp(1.2rem, 1.75vw, 1.5rem);
+  box-shadow: 0 20px 42px rgba(15, 23, 42, 0.06);
+}
+
+.home-curated-opportunities {
+  padding-block: clamp(48px, 5vw, 76px);
+}
+
+.home-curated-shell {
+  padding: clamp(1.35rem, 2.25vw, 1.85rem);
+  box-shadow:
+    0 32px 72px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+.home-curated-stack {
+  gap: clamp(1.6rem, 2.4vw, 2.1rem);
+}
+
+.home-project-grid-shell {
+  padding: clamp(1.15rem, 1.85vw, 1.45rem);
+}
+
+.home-page .project-grid-premium {
+  gap: clamp(1.55rem, 2.35vw, 2.15rem);
+}
+
+.home-market-section,
+.home-owner-section {
+  padding: clamp(40px, 4.2vw, 68px) 0 0;
+}
+
+.home-trust-layer-section {
+  margin-top: clamp(20px, 2vw, 32px);
+  z-index: 1;
+}
+
+.home-trust-snapshot {
+  padding: clamp(1.55rem, 2.65vw, 2.1rem);
+  box-shadow: 0 26px 58px rgba(7, 19, 39, 0.1);
+}
+
+.home-owner-section--team-cta {
+  padding-top: clamp(32px, 3vw, 44px);
+}
+
+.home-owner-shell--team-cta {
+  background:
+    radial-gradient(circle at top right, rgba(176, 141, 87, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(251, 247, 239, 0.996), rgba(247, 242, 233, 0.99));
+}
+
+.home-owner-grid--team-cta {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.home-owner-card--team-cta {
+  max-width: 58rem;
+  gap: var(--public-space-4);
+  padding: clamp(1.45rem, 2.35vw, 2rem);
+  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.08);
+}
+
+.home-owner-card--team-cta .home-pathways-support {
+  margin-top: var(--public-space-2);
+}
+
+.home-owner-card--team-cta .home-pathways-support__link {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.home-page .home-bottom-cta {
+  margin-top: clamp(36px, 4vw, 60px);
+  padding-block: clamp(54px, 5vw, 74px);
+}
+
+.home-bottom-cta__grid {
+  gap: clamp(2.3rem, 3vw, 3.35rem);
+}
+
+.home-bottom-cta__panel {
+  padding: clamp(1.5rem, 2.65vw, 2.2rem);
 }
 
 .site-footer.footer {
@@ -2059,7 +2159,7 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   }
 
   .home-hero-slider__panel {
-    width: min(62%, 36rem);
+    width: min(68%, 38rem);
   }
 }
 
@@ -2082,6 +2182,10 @@ html[lang='th'] .decision-page .public-hero__signal-title,
 
   .home-owner-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-owner-grid--team-cta {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2129,21 +2233,21 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   }
 
   .home-hero-slider {
-    min-height: 516px;
+    min-height: 568px;
   }
 
   .home-hero-slider__content {
     align-items: flex-start;
-    padding: 74px 0 18px;
+    padding: 82px 0 26px;
   }
 
   .home-hero-slider__panel {
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: 10px;
+    gap: 12px;
     padding-inline: 18px;
-    padding-block: 14px;
+    padding-block: 18px;
   }
 
   .home-hero-slider__eyebrow {
@@ -2223,7 +2327,7 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   }
 
   .home-trust-layer-section {
-    margin-top: -20px;
+    margin-top: 18px;
   }
 
   .home-trust-snapshot {
@@ -2261,6 +2365,15 @@ html[lang='th'] .decision-page .public-hero__signal-title,
     padding: 16px;
   }
 
+  .home-pathways-section {
+    margin-top: -18px;
+    padding-bottom: 20px;
+  }
+
+  .home-curated-opportunities {
+    padding-block: 34px;
+  }
+
   .home-page[data-locale='th'] .home-pathway-card {
     padding: 17px;
   }
@@ -2291,7 +2404,7 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   }
 
   .home-page .home-bottom-cta {
-    margin-top: var(--public-space-3);
+    margin-top: var(--public-space-4);
   }
 
   .home-bottom-cta__panel {

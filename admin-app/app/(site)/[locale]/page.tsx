@@ -1263,9 +1263,9 @@ export default async function HomePage({
 
   function HomeTeamCtaSection() {
     return (
-      <section className="home-owner-section" aria-labelledby="home-team-cta-title">
+      <section className="home-owner-section home-owner-section--team-cta" aria-labelledby="home-team-cta-title">
         <Container variant="wide">
-          <div className="home-owner-shell reveal">
+          <div className="home-owner-shell home-owner-shell--team-cta reveal">
             <PublicSectionHeader
               align="start"
               className="home-owner-shell__header"
@@ -1276,8 +1276,8 @@ export default async function HomePage({
               subtitle={teamCtaSubheading}
             />
 
-            <div className="home-owner-grid">
-              <PublicSurfaceCard as="div" tone="warm" className="home-owner-card">
+            <div className="home-owner-grid home-owner-grid--team-cta">
+              <PublicSurfaceCard as="div" tone="warm" className="home-owner-card home-owner-card--team-cta">
                 <h3 className="home-owner-card__title">
                   {locale === 'th' ? 'คุยกับทีมก่อน แล้วค่อยเปิดเฉพาะสิ่งที่ควรดู' : 'Talk to the team first, then open only what is worth reviewing.'}
                 </h3>
