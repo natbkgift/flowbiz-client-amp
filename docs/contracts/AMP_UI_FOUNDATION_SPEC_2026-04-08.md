@@ -154,6 +154,19 @@ Rules:
 - Shared panel padding and stack gaps must come from named panel and stack tokens rather than repeated local pixel values.
 - When a component already uses `PublicSurfaceCard`, its radius, fill, and elevation should be controlled by shared CSS tokens or classes, not local utility overrides.
 
+## Controls And CTA Hierarchy
+
+Shared public controls must reuse the tokenized control and field system.
+
+Rules:
+
+- `btn-cta` is reserved for conversion-forward contact or closing actions that should clearly outrank adjacent controls.
+- `btn-primary` is the main route-level action inside a local decision surface.
+- `btn-secondary` is the alternate action when the user should stay in the same decision context.
+- `btn-tertiary` is for lower-emphasis browse, share, reveal, or return actions.
+- `form-input`, `form-select`, `form-textarea`, consent checkboxes, and `btn-block` submits must use the shared field and control tokens for height, padding, radius, border, and focus state.
+- Do not rebuild button or field styling with local utility stacks when the shared control classes already cover the role.
+
 ## Page Template Rules For This Slice
 
 These rules are enforced starting now even before the rest of Phase 0 lands:

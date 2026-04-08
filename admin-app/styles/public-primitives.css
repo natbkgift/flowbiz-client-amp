@@ -270,12 +270,16 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
 .header-cta,
 .mobile-nav__cta,
 .property-card__secondary-action {
-  min-height: 44px;
-  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--public-control-height);
+  padding: 0 var(--public-control-padding-inline);
+  border: 1px solid transparent;
   border-radius: var(--public-radius-chip);
-  font-size: 0.92rem;
+  font-size: var(--public-control-font-size);
   font-weight: var(--public-font-weight-semibold);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--public-control-letter-spacing);
   transition:
     transform var(--public-motion-fast) var(--public-ease-standard),
     box-shadow var(--public-motion-fast) var(--public-ease-standard),
@@ -299,37 +303,47 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
   box-shadow: var(--public-shadow-soft);
 }
 
+.btn-cta {
+  background: var(--public-control-surface-cta);
+  color: var(--color-white);
+}
+
+.btn-cta:hover {
+  background: var(--public-control-surface-cta-hover);
+  color: var(--color-white);
+}
+
 .btn-primary {
-  background: linear-gradient(145deg, #071327 0%, #103055 100%);
+  background: var(--public-control-surface-primary);
   color: var(--color-white);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(145deg, #08192f 0%, #15395f 100%);
+  background: var(--public-control-surface-primary-hover);
   color: var(--color-white);
 }
 
 .btn-secondary {
-  border-color: var(--public-border-soft);
-  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--public-control-border-secondary);
+  background: var(--public-control-surface-secondary);
   color: var(--color-ink);
 }
 
 .btn-secondary:hover {
-  border-color: var(--public-border-strong);
-  background: rgba(255, 255, 255, 1);
+  border-color: var(--public-control-border-secondary-strong);
+  background: var(--public-control-surface-secondary-hover);
   color: var(--color-ink);
 }
 
 .btn-tertiary {
-  border-color: var(--public-border-soft);
-  background: rgba(247, 249, 252, 0.96);
+  border-color: var(--public-control-border-tertiary);
+  background: var(--public-control-surface-tertiary);
   color: rgba(7, 19, 39, 0.72);
 }
 
 .btn-tertiary:hover {
-  border-color: var(--public-border-strong);
-  background: rgba(255, 255, 255, 0.98);
+  border-color: var(--public-control-border-secondary-strong);
+  background: var(--public-control-surface-tertiary-hover);
   color: var(--color-ink);
 }
 
