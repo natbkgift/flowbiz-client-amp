@@ -63,6 +63,54 @@ describe('analytics – getOrCreateSessionId', () => {
   });
 });
 
+/* ---------- conversion.ts ---------- */
+describe('conversion – lead analytics payload', () => {
+  it('builds a reporting-safe lead payload without direct contact fields', async () => {
+    const { buildLeadAnalyticsPayload, inferSourceRouteFromPath } = await import('@/lib/conversion');
+
+    expect(inferSourceRouteFromPath('/en/buy')).toBe('buy');
+
+    const payload = buildLeadAnalyticsPayload(
+      'en',
+      {
+        sourceRoute: 'project',
+        ctaType: 'primary',
+        ctaLabel: 'Compare now',
+        entityType: 'project',
+        entityId: 'project-1',
+        entityName: 'Alpha Residence',
+        userIntent: 'invest',
+        budgetRange: '6m_10m',
+        location: 'Jomtien',
+      },
+      {
+        propertyId: 'prop-1',
+        leadSource: 'compare_hero',
+        leadTier: 'hot',
+        leadScore: 82,
+        purpose: 'invest',
+        timeframe: '0_3m',
+        preferredArea: 'Jomtien',
+        inquiryIntent: 'project_compare',
+        hasEmail: true,
+        hasPhone: true,
+      },
+    );
+
+    expect(payload.source_route).toBe('project');
+    expect(payload.lead_source).toBe('compare_hero');
+    expect(payload.lead_tier).toBe('hot');
+    expect(payload.lead_score).toBe(82);
+    expect(payload.has_email).toBe(true);
+    expect(payload.has_phone).toBe(true);
+    expect(payload.contact_channel).toBe('email_and_phone');
+    expect(payload.contact).toBeUndefined();
+    expect(payload.qualification_fields).toEqual(
+      expect.arrayContaining(['budget_range', 'purpose', 'timeframe', 'preferred_area']),
+    );
+  });
+});
+
 /* ---------- attribution.ts ---------- */
 describe('attribution', () => {
   beforeEach(() => {

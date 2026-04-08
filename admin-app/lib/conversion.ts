@@ -7,6 +7,10 @@ export type ConversionSourceRoute =
   | 'area-guide'
   | 'estimator'
   | 'contact'
+  | 'buy'
+  | 'rent'
+  | 'sell'
+  | 'home'
   | 'shared';
 
 export type ConversionCtaType = 'primary' | 'secondary' | 'tertiary';
@@ -71,6 +75,26 @@ export type LeadHandoff = {
   context?: ConversionContext;
 };
 
+export type LeadAnalyticsOptions = {
+  sourceRoute?: ConversionSourceRoute;
+  propertyId?: string | null;
+  leadSource?: string | null;
+  leadTier?: string | null;
+  leadScore?: number | null;
+  budgetRange?: string | null;
+  purpose?: string | null;
+  timeframe?: string | null;
+  preferredArea?: string | null;
+  inquiryIntent?: string | null;
+  responseChannel?: string | null;
+  responseSlaSeconds?: number | null;
+  hasEmail?: boolean;
+  hasPhone?: boolean;
+  hasLine?: boolean;
+  formType?: string | null;
+  errorMessage?: string | null;
+};
+
 function cleanValue(value: unknown): unknown {
   if (value == null) return undefined;
   if (typeof value === 'string') {
@@ -98,6 +122,26 @@ export function sanitizeConversionPayload<T extends Record<string, unknown>>(pay
 
 export function inferLocaleFromPath(pathname: string): 'en' | 'th' {
   return pathname.startsWith('/th') ? 'th' : 'en';
+}
+
+export function inferSourceRouteFromPath(pathname: string): ConversionSourceRoute {
+  const normalized = pathname.trim().toLowerCase();
+
+  if (!normalized || normalized === '/' || normalized === '/en' || normalized === '/th') {
+    return 'home';
+  }
+  if (/(^|\/)buy(\/|$)/.test(normalized)) return 'buy';
+  if (/(^|\/)rent(\/|$)/.test(normalized)) return 'rent';
+  if (/(^|\/)sell(\/|$)/.test(normalized)) return 'sell';
+  if (/(^|\/)contact(\/|$)/.test(normalized)) return 'contact';
+  if (/(^|\/)compare(\/|$)/.test(normalized)) return 'compare';
+  if (/(^|\/)shortlist(\/|$)/.test(normalized)) return 'shortlist';
+  if (/(^|\/)smart-finder(\/|$)/.test(normalized)) return 'smart-finder';
+  if (/(^|\/)area-guide(\/|$)/.test(normalized)) return 'area-guide';
+  if (/(^|\/)(buying-cost-estimator|calculator)(\/|$)/.test(normalized)) return 'estimator';
+  if (/(^|\/)property(\/|$)/.test(normalized)) return 'property';
+  if (/(^|\/)projects?(\/|$)/.test(normalized)) return 'project';
+  return 'shared';
 }
 
 export function inferDeviceType(width: number | null | undefined): ConversionDevice {
@@ -228,5 +272,60 @@ export function buildLeadTrackingPayload(
     locale,
     context: handoff.context,
     contact,
+  });
+}
+
+function inferContactChannel(options: LeadAnalyticsOptions): string | undefined {
+  const channels = [
+    options.hasEmail ? 'email' : null,
+    options.hasPhone ? 'phone' : null,
+    options.hasLine ? 'line' : null,
+  ].filter((item): item is string => Boolean(item));
+
+  return channels.length ? channels.join('_and_') : undefined;
+}
+
+export function buildLeadAnalyticsPayload(
+  locale: 'en' | 'th',
+  handoff: LeadHandoff | undefined,
+  options: LeadAnalyticsOptions = {},
+): ConversionPayload {
+  const qualificationFields = [
+    options.budgetRange ?? handoff?.budgetRange ? 'budget_range' : null,
+    options.purpose ? 'purpose' : null,
+    options.timeframe ? 'timeframe' : null,
+    options.preferredArea ? 'preferred_area' : null,
+  ].filter((item): item is string => Boolean(item));
+
+  return sanitizeConversionPayload({
+    source_route: options.sourceRoute ?? handoff?.sourceRoute ?? 'shared',
+    cta_type: handoff?.ctaType,
+    cta_label: handoff?.ctaLabel,
+    entity_type: handoff?.entityType,
+    entity_id: handoff?.entityId ?? undefined,
+    entity_name: handoff?.entityName ?? undefined,
+    user_intent: handoff?.userIntent,
+    budget_range: options.budgetRange ?? handoff?.budgetRange ?? undefined,
+    bedroom: handoff?.bedroom ?? undefined,
+    location: handoff?.location ?? options.preferredArea ?? undefined,
+    locale,
+    context: handoff?.context,
+    property_id: options.propertyId ?? undefined,
+    lead_source: options.leadSource ?? undefined,
+    lead_tier: options.leadTier ?? undefined,
+    lead_score: options.leadScore ?? undefined,
+    purpose: options.purpose ?? undefined,
+    timeline: options.timeframe ?? undefined,
+    preferred_area: options.preferredArea ?? undefined,
+    intent: options.inquiryIntent ?? undefined,
+    has_email: options.hasEmail ? true : undefined,
+    has_phone: options.hasPhone ? true : undefined,
+    has_line: options.hasLine ? true : undefined,
+    contact_channel: inferContactChannel(options),
+    response_channel: options.responseChannel ?? undefined,
+    response_sla_seconds: options.responseSlaSeconds ?? undefined,
+    form_type: options.formType ?? undefined,
+    error_message: options.errorMessage ?? undefined,
+    qualification_fields: qualificationFields.length ? qualificationFields : undefined,
   });
 }

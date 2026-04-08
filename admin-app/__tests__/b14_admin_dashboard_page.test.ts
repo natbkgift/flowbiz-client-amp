@@ -49,6 +49,7 @@ describe("B14 admin dashboard page contract", () => {
     expect(types).toContain('"pending_translations_count"');
     expect(types).toContain('"unpublished_drafts_count"');
     expect(types).toContain('"recent_leads_inquiries"');
+    expect(types).toContain('"conversion_funnel_health"');
     expect(types).toContain('"review_video_source_verification_pending"');
     expect(types).toContain('"last_import_mirror_status"');
     expect(types).toContain('"last_deploy_health_status"');

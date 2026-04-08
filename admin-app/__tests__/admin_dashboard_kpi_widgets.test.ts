@@ -18,6 +18,7 @@ describe("admin dashboard kpi widgets", () => {
     expect(component).toContain("function statusLabel(");
     expect(component).toContain("project_cover_coverage");
     expect(component).toContain("review_video_source_verification_pending");
+    expect(component).toContain("conversion_funnel_health");
     expect(component).toContain("last_import_mirror_status");
     expect(component).toContain("last_deploy_health_status");
     expect(component).toContain("const widgetCopy");

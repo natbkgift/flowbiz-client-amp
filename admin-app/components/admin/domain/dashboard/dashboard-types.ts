@@ -40,6 +40,18 @@ export type DashboardRawMetrics = Record<string, unknown> & {
     count?: number | null;
     latest_at?: string | null;
   };
+  conversion_funnel?: {
+    counts_7d?: Record<string, number> | null;
+    counts_30d?: Record<string, number> | null;
+    success_rate_7d?: number | null;
+    submit_rate_7d?: number | null;
+    error_rate_7d?: number | null;
+    last_event_at?: string | null;
+    top_source_route_7d?: string | null;
+    top_lead_source_7d?: string | null;
+    top_lead_tier_7d?: string | null;
+    top_error_route_7d?: string | null;
+  };
   last_import_status?: {
     status?: string | null;
     checked_at?: string | null;
@@ -91,6 +103,7 @@ export const WIDGET_KEYS = [
   "pending_translations_count",
   "unpublished_drafts_count",
   "recent_leads_inquiries",
+  "conversion_funnel_health",
   "review_video_source_verification_pending",
   "last_import_mirror_status",
   "last_deploy_health_status",

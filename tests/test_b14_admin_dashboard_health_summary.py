@@ -58,6 +58,7 @@ def test_b14_dashboard_summary_contract(client) -> None:
         "pending_translations_count",
         "unpublished_drafts_count",
         "recent_leads_inquiries",
+        "conversion_funnel_health",
         "review_video_source_verification_pending",
         "last_import_mirror_status",
         "last_deploy_health_status",
@@ -80,6 +81,7 @@ def test_b14_dashboard_summary_contract(client) -> None:
         "pending_translations",
         "unpublished_drafts",
         "recent_inquiries",
+        "conversion_funnel",
         "review_video_source_verification_pending",
         "last_import_status",
         "last_mirror_status",
@@ -126,6 +128,58 @@ def test_b14_dashboard_trend_series_counts_more_than_visible_recent_rows(client)
     trend_total = sum(bucket["count"] for bucket in body["trend_series"]["7d"])
     assert trend_total >= 11
     assert trend_total > len(body["recent_inquiries"])
+
+
+def test_b14_dashboard_conversion_funnel_widget_reports_recent_event_health(client) -> None:
+    headers = _make_admin_headers()
+
+    for event_name in ("form_start", "form_submit", "lead_submit", "form_success"):
+        response = client.post(
+            "/v1/events",
+            json={
+                "event_name": event_name,
+                "source": {
+                    "page": "/en/buy",
+                    "locale": "en",
+                    "route": "buy",
+                },
+                "actor": {
+                    "session_id": "sess-b14-conversion",
+                    "user_agent": "pytest",
+                },
+                "payload": {
+                    "source_route": "buy",
+                    "lead_source": "buy_form",
+                    "lead_tier": "hot",
+                    "lead_score": 88,
+                    "intent": "buy",
+                    "purpose": "buy",
+                    "timeline": "0_3m",
+                    "has_email": True,
+                },
+            },
+        )
+        assert response.status_code == 202, response.text
+
+    summary_response = client.get("/admin/dashboard/health-summary", headers=headers)
+    assert summary_response.status_code == 200, summary_response.text
+    body = summary_response.json()
+
+    widget = {item.get("key"): item for item in body.get("widgets", [])}.get(
+        "conversion_funnel_health"
+    )
+    assert widget is not None
+    assert widget["status"] == "ok"
+
+    metrics = body["raw_metrics"]["conversion_funnel"]
+    assert metrics["counts_7d"]["form_start"] == 1
+    assert metrics["counts_7d"]["form_submit"] == 1
+    assert metrics["counts_7d"]["lead_submit"] == 1
+    assert metrics["counts_7d"]["form_success"] == 1
+    assert metrics["success_rate_7d"] == 100.0
+    assert metrics["top_source_route_7d"] == "buy"
+    assert metrics["top_lead_source_7d"] == "buy_form"
+    assert metrics["top_lead_tier_7d"] == "hot"
 
 
 def test_b14_dashboard_deploy_widget_uses_telemetry_file(client, tmp_path, monkeypatch) -> None:

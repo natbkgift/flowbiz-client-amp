@@ -61,6 +61,18 @@ type DashboardRawMetrics = {
     count?: number | null;
     latest_at?: string | null;
   };
+  conversion_funnel?: {
+    counts_7d?: Record<string, number> | null;
+    counts_30d?: Record<string, number> | null;
+    success_rate_7d?: number | null;
+    submit_rate_7d?: number | null;
+    error_rate_7d?: number | null;
+    last_event_at?: string | null;
+    top_source_route_7d?: string | null;
+    top_lead_source_7d?: string | null;
+    top_lead_tier_7d?: string | null;
+    top_error_route_7d?: string | null;
+  };
   review_video_source_verification_pending?: {
     total_pending?: number | null;
     reviews_pending?: number | null;
@@ -108,8 +120,9 @@ const WIDGET_DISPLAY_ORDER: Record<string, number> = {
   broken_media_count: 3,
   pending_translations_count: 4,
   recent_leads_inquiries: 5,
-  unpublished_drafts_count: 6,
-  review_video_source_verification_pending: 7,
+  conversion_funnel_health: 6,
+  unpublished_drafts_count: 7,
+  review_video_source_verification_pending: 8,
 };
 
 const copy = {
@@ -129,6 +142,9 @@ const copy = {
     entities: "Entities",
     drafts: "Drafts",
     warnings: "Warnings",
+    starts: "Starts",
+    submits: "Submits",
+    successes: "Successes",
     latest: "Latest",
     import: "Import",
     mirror: "Mirror",
@@ -139,6 +155,7 @@ const copy = {
     failures: "Failures",
     build: "Build",
     source: "Source",
+    leadTier: "Top tier",
     approved: "Approved",
     draft: "Draft",
     healthy: "Healthy",
@@ -165,6 +182,9 @@ const copy = {
     entities: "รายการ",
     drafts: "ฉบับร่าง",
     warnings: "คำเตือน",
+    starts: "เริ่มกรอก",
+    submits: "ส่งฟอร์ม",
+    successes: "สำเร็จ",
     latest: "ล่าสุด",
     import: "นำเข้า",
     mirror: "มิเรอร์",
@@ -175,6 +195,7 @@ const copy = {
     failures: "ล้มเหลว",
     build: "บิลด์",
     source: "แหล่งที่มา",
+    leadTier: "tier ที่เด่นสุด",
     approved: "อนุมัติแล้ว",
     draft: "ยังไม่อนุมัติ",
     healthy: "ปกติ",
@@ -233,6 +254,14 @@ const widgetCopy: Record<AdminLocale, Record<string, WidgetUiCopy>> = {
       summary: "ลีดล่าสุดที่ระบบเก็บเข้ามายังตรวจสอบได้ครบจากหน้านี้",
       actions: {
         "/admin/inquiries": "เปิด CRM",
+      },
+    },
+    conversion_funnel_health: {
+      title: "สุขภาพ funnel ของอินไควรี",
+      summary: "ดูอัตราเปลี่ยนจาก lead submit ไปสู่ handoff สำเร็จจาก event telemetry ล่าสุด",
+      actions: {
+        "/admin/inquiries": "เปิด CRM",
+        "/admin/dashboard": "เปิดแดชบอร์ด",
       },
     },
     review_video_source_verification_pending: {
@@ -313,6 +342,7 @@ function statusLabel(status: WidgetStatus, locale: AdminLocale): string {
 function widgetIcon(key: string): AdminIconName {
   if (key.includes("cover")) return "media";
   if (key.includes("media")) return "media";
+  if (key.includes("conversion")) return "message";
   if (key.includes("translation")) return "language";
   if (key.includes("draft")) return "blog";
   if (key.includes("inquiries")) return "message";
@@ -371,6 +401,7 @@ function widgetSortOrder(key: string): number {
 
 function widgetLayoutClass(key: string, status: WidgetStatus): string {
   if (key === "project_cover_coverage") return "dashboard-kpi-card--hero";
+  if (key === "conversion_funnel_health") return "dashboard-kpi-card--signal";
   if (key === "last_import_mirror_status" || key === "last_deploy_health_status") {
     return "dashboard-kpi-card--signal";
   }
@@ -482,6 +513,30 @@ function createPresentation(
         fallback,
       ),
       details: [`${ui.latest}: ${prettyDate(metric?.latest_at, locale) || fallback}`],
+    };
+  }
+
+  if (widget.key === "conversion_funnel_health") {
+    const metric = rawMetrics.conversion_funnel;
+    return {
+      primaryValue: formatPercent(
+        typeof widget.value === "number" ? widget.value : metric?.success_rate_7d,
+        locale,
+        fallback,
+      ),
+      secondaryValue:
+        metric?.counts_7d
+          ? `${ui.successes}: ${formatCount(metric.counts_7d.form_success, locale, fallback)} / ${ui.submits}: ${formatCount(metric.counts_7d.form_submit, locale, fallback)}`
+          : undefined,
+      pills: [
+        `${ui.starts}: ${formatCount(metric?.counts_7d?.form_start, locale, fallback)}`,
+        `${ui.errors}: ${formatCount(metric?.counts_7d?.form_error, locale, fallback)}`,
+      ],
+      details: [
+        `${ui.latest}: ${prettyDate(metric?.last_event_at, locale) || fallback}`,
+        `${ui.source}: ${String(metric?.top_lead_source_7d || metric?.top_source_route_7d || fallback)}`,
+        `${ui.leadTier}: ${String(metric?.top_lead_tier_7d || fallback)}`,
+      ],
     };
   }
 

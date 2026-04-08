@@ -15,6 +15,7 @@ from apps.api.routes.home_composer_contract import normalize_home_config
 from packages.core.database import get_db
 from packages.core.media_integrity import run_scan
 from packages.core.models import (
+    AnalyticsEvent,
     Area,
     Article,
     Developer,
@@ -42,6 +43,13 @@ DEFAULT_DEPLOY_ARTIFACTS_DIR = REPO_ROOT / "ops" / "logs"
 APPROVED_APPROVAL_STATUSES = {"approved"}
 APPROVED_RIGHTS_STATUSES = {"approved", "licensed", "exception_allowed"}
 SUPPORTED_LOCALES = ("en", "th")
+LEAD_FUNNEL_EVENT_TYPES = (
+    "form_start",
+    "form_submit",
+    "lead_submit",
+    "form_success",
+    "form_error",
+)
 
 
 def _to_iso(dt: datetime | None) -> str | None:
@@ -639,6 +647,131 @@ def _collect_inquiry_trend_series(
     return {"7d": _build_series(7), "30d": _build_series(30)}
 
 
+def _analytics_payload_body(payload: object) -> dict[str, object]:
+    if not isinstance(payload, dict):
+        return {}
+    nested = payload.get("payload")
+    return nested if isinstance(nested, dict) else {}
+
+
+def _analytics_payload_token(payload: dict[str, object], key: str) -> str | None:
+    value = payload.get(key)
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _top_counter_key(counter: dict[str, int]) -> str | None:
+    if not counter:
+        return None
+    return max(counter.items(), key=lambda item: (item[1], item[0]))[0]
+
+
+def _collect_conversion_funnel_metrics(db: Session, *, now: datetime) -> dict:
+    start_30d = now - timedelta(days=30)
+    start_7d = now - timedelta(days=7)
+    counts_7d = {event_name: 0 for event_name in LEAD_FUNNEL_EVENT_TYPES}
+    counts_30d = {event_name: 0 for event_name in LEAD_FUNNEL_EVENT_TYPES}
+    source_route_stats_7d: dict[str, dict[str, int]] = {}
+    lead_source_successes_7d: dict[str, int] = {}
+    lead_tier_successes_7d: dict[str, int] = {}
+    error_routes_7d: dict[str, int] = {}
+    latest_at: datetime | None = None
+
+    rows = db.scalars(
+        select(AnalyticsEvent)
+        .where(
+            AnalyticsEvent.event_type.in_(LEAD_FUNNEL_EVENT_TYPES),
+            AnalyticsEvent.created_at.is_not(None),
+            AnalyticsEvent.created_at >= start_30d,
+        )
+        .order_by(desc(AnalyticsEvent.created_at), desc(AnalyticsEvent.id))
+    ).all()
+
+    for row in rows:
+        event_name = str(row.event_type or "").strip()
+        if event_name not in counts_30d:
+            continue
+
+        created_at = row.created_at
+        if created_at is None:
+            continue
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=UTC)
+        else:
+            created_at = created_at.astimezone(UTC)
+
+        payload_body = _analytics_payload_body(row.payload or {})
+        if _analytics_payload_token(payload_body, "form_type") == "seller":
+            continue
+
+        counts_30d[event_name] += 1
+        if latest_at is None or created_at > latest_at:
+            latest_at = created_at
+
+        if created_at < start_7d:
+            continue
+
+        counts_7d[event_name] += 1
+        source_route = _analytics_payload_token(payload_body, "source_route") or "shared"
+        lead_source = _analytics_payload_token(payload_body, "lead_source")
+        lead_tier = _analytics_payload_token(payload_body, "lead_tier")
+
+        if event_name in {"form_submit", "form_success", "form_error"}:
+            stats = source_route_stats_7d.setdefault(
+                source_route,
+                {"submits": 0, "successes": 0, "errors": 0},
+            )
+            if event_name == "form_submit":
+                stats["submits"] += 1
+            elif event_name == "form_success":
+                stats["successes"] += 1
+            else:
+                stats["errors"] += 1
+
+        if event_name == "form_success" and lead_source:
+            lead_source_successes_7d[lead_source] = lead_source_successes_7d.get(lead_source, 0) + 1
+        if event_name == "form_success" and lead_tier:
+            lead_tier_successes_7d[lead_tier] = lead_tier_successes_7d.get(lead_tier, 0) + 1
+        if event_name == "form_error":
+            error_routes_7d[source_route] = error_routes_7d.get(source_route, 0) + 1
+
+    top_source_route_7d: str | None = None
+    if source_route_stats_7d:
+        top_source_route_7d = max(
+            source_route_stats_7d.items(),
+            key=lambda item: (
+                item[1].get("successes", 0),
+                item[1].get("submits", 0),
+                -item[1].get("errors", 0),
+                item[0],
+            ),
+        )[0]
+
+    submits_7d = counts_7d["form_submit"]
+    starts_7d = counts_7d["form_start"]
+    errors_7d = counts_7d["form_error"]
+    successes_7d = counts_7d["form_success"]
+
+    success_rate_7d = round((successes_7d / submits_7d) * 100, 2) if submits_7d else None
+    submit_rate_7d = round((submits_7d / starts_7d) * 100, 2) if starts_7d else None
+    error_rate_7d = round((errors_7d / submits_7d) * 100, 2) if submits_7d else None
+
+    return {
+        "counts_7d": counts_7d,
+        "counts_30d": counts_30d,
+        "success_rate_7d": success_rate_7d,
+        "submit_rate_7d": submit_rate_7d,
+        "error_rate_7d": error_rate_7d,
+        "last_event_at": latest_at,
+        "top_source_route_7d": top_source_route_7d,
+        "top_lead_source_7d": _top_counter_key(lead_source_successes_7d),
+        "top_lead_tier_7d": _top_counter_key(lead_tier_successes_7d),
+        "top_error_route_7d": _top_counter_key(error_routes_7d),
+    }
+
+
 def _latest_home_config_for_locale(db: Session, *, locale: str) -> HomeComposerConfig | None:
     for status_value in ("published", "draft"):
         row = db.scalar(
@@ -1000,6 +1133,7 @@ def admin_dashboard_health_summary(
     draft_metrics = _collect_unpublished_draft_metrics(db)
     recent_inquiries = _collect_recent_inquiries(db)
     trend_series = _collect_inquiry_trend_series(db, now=now)
+    conversion_funnel = _collect_conversion_funnel_metrics(db, now=now)
     review_video = _collect_review_video_verification_metrics(db)
     last_import = _collect_last_import_status(db)
     last_mirror = _collect_last_mirror_status()
@@ -1099,6 +1233,65 @@ def admin_dashboard_health_summary(
     else:
         recent_status = "ok"
         recent_summary = "Recent inquiries are available for immediate follow-up."
+
+    conversion_counts_7d = (
+        conversion_funnel.get("counts_7d")
+        if isinstance(conversion_funnel.get("counts_7d"), dict)
+        else {}
+    )
+    conversion_starts_7d = int(conversion_counts_7d.get("form_start") or 0)
+    conversion_submits_7d = int(conversion_counts_7d.get("form_submit") or 0)
+    conversion_successes_7d = int(conversion_counts_7d.get("form_success") or 0)
+    conversion_errors_7d = int(conversion_counts_7d.get("form_error") or 0)
+    conversion_rate_7d = conversion_funnel.get("success_rate_7d")
+    conversion_top_source = str(
+        conversion_funnel.get("top_lead_source_7d")
+        or conversion_funnel.get("top_source_route_7d")
+        or ""
+    ).strip() or None
+    if (
+        conversion_starts_7d == 0
+        and conversion_submits_7d == 0
+        and conversion_successes_7d == 0
+    ):
+        conversion_status = "unknown"
+        conversion_summary = "No inquiry funnel events recorded in the last 7 days."
+        warnings.append("lead_funnel_events_missing")
+    elif conversion_submits_7d == 0:
+        conversion_status = "warn"
+        conversion_summary = (
+            "Inquiry funnel starts were recorded, but no submitted leads were captured in "
+            "the last 7 days."
+        )
+        warnings.append("lead_funnel_submission_gap")
+    elif (
+        isinstance(conversion_rate_7d, (int, float))
+        and float(conversion_rate_7d) >= 60
+        and conversion_errors_7d == 0
+    ):
+        conversion_status = "ok"
+        conversion_summary = (
+            f"{conversion_successes_7d} successful handoffs from "
+            f"{conversion_submits_7d} submitted leads in the last 7 days."
+        )
+    elif isinstance(conversion_rate_7d, (int, float)) and float(conversion_rate_7d) >= 35:
+        conversion_status = "warn"
+        conversion_summary = (
+            f"{conversion_successes_7d} successful handoffs from "
+            f"{conversion_submits_7d} submitted leads in the last 7 days. "
+            "Review recent errors and drop-off."
+        )
+        warnings.append("lead_funnel_conversion_rate_soft")
+    else:
+        conversion_status = "error"
+        conversion_summary = (
+            f"{conversion_successes_7d} successful handoffs from "
+            f"{conversion_submits_7d} submitted leads in the last 7 days. "
+            "Conversion health needs attention."
+        )
+        warnings.append("lead_funnel_conversion_rate_low")
+    if conversion_top_source:
+        conversion_summary = f"{conversion_summary} Top source: {conversion_top_source}."
 
     review_video_pending = review_video.get("total_pending")
     if review_video_pending is None:
@@ -1227,6 +1420,17 @@ def admin_dashboard_health_summary(
             ],
         ),
         _make_widget(
+            key="conversion_funnel_health",
+            title="Inquiry Funnel Conversion",
+            value=conversion_funnel.get("success_rate_7d"),
+            status=conversion_status,
+            summary=conversion_summary,
+            actions=[
+                {"label": "Open inquiries dashboard", "url": "/admin/inquiries"},
+                {"label": "Open dashboard", "url": "/admin/dashboard"},
+            ],
+        ),
+        _make_widget(
             key="review_video_source_verification_pending",
             title="Review/Video Source Verification Pending",
             value=review_video_pending,
@@ -1273,6 +1477,18 @@ def admin_dashboard_health_summary(
             "count": recent_count,
             "latest_at": _to_iso(recent_inquiries.get("latest_at")),
         },
+        "conversion_funnel": {
+            "counts_7d": conversion_funnel.get("counts_7d"),
+            "counts_30d": conversion_funnel.get("counts_30d"),
+            "success_rate_7d": conversion_funnel.get("success_rate_7d"),
+            "submit_rate_7d": conversion_funnel.get("submit_rate_7d"),
+            "error_rate_7d": conversion_funnel.get("error_rate_7d"),
+            "last_event_at": _to_iso(conversion_funnel.get("last_event_at")),
+            "top_source_route_7d": conversion_funnel.get("top_source_route_7d"),
+            "top_lead_source_7d": conversion_funnel.get("top_lead_source_7d"),
+            "top_lead_tier_7d": conversion_funnel.get("top_lead_tier_7d"),
+            "top_error_route_7d": conversion_funnel.get("top_error_route_7d"),
+        },
         "review_video_source_verification_pending": {
             "total_pending": review_video.get("total_pending"),
             "reviews_pending": review_video.get("reviews_pending"),
@@ -1312,6 +1528,7 @@ def admin_dashboard_health_summary(
         "project_cover_coverage": _freshness(now, project_cover.get("checked_at")),
         "media_integrity": _freshness(now, media_integrity.get("scanned_at")),
         "recent_inquiries": _freshness(now, recent_inquiries.get("latest_at")),
+        "conversion_funnel": _freshness(now, conversion_funnel.get("last_event_at")),
         "review_video_verification": _freshness(now, review_video.get("checked_at")),
         "last_import_status": _freshness(now, last_import.get("checked_at")),
         "last_mirror_status": _freshness(now, last_mirror.get("checked_at")),

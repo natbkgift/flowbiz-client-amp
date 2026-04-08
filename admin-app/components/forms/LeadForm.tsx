@@ -11,9 +11,11 @@ import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
 import { trackEvent } from '../../lib/analytics';
 import { isValidEmail, isValidPhone } from '../../lib/contact-validation';
 import {
+  buildLeadAnalyticsPayload,
   buildLeadHandoffSummary,
   buildLeadHandoffTags,
-  buildLeadTrackingPayload,
+  inferSourceRouteFromPath,
+  type LeadAnalyticsOptions,
   type LeadHandoff,
 } from '../../lib/conversion';
 import { trackExperimentOutcomes } from '../../lib/experiments';
@@ -200,6 +202,7 @@ export function LeadForm({
   const resolvedDefaultPreferredArea = defaultPreferredArea ?? handoff?.location ?? handoffArea ?? '';
   const resolvedDefaultTimeframe = defaultTimeframe ?? inferRouteTimeframe(pathname) ?? '';
   const resolvedInquirySource = (inquirySource ?? inferRouteLeadSource(pathname))?.trim() || undefined;
+  const resolvedSourceRoute = handoff?.sourceRoute ?? inferSourceRouteFromPath(pathname);
   const qualificationPreviewBody = locale === 'th'
     ? 'บริบทนี้จะถูกแนบไปกับคำขอ เพื่อให้ทีมคัดกรองและตอบกลับด้วยขั้นตอนถัดไปที่ชัดขึ้น'
     : 'This context travels with your request so the team can qualify the clearest next step faster.';
@@ -293,6 +296,24 @@ export function LeadForm({
     return url.slice(0, 500);
   }
 
+  function buildLeadEventPayload(overrides: LeadAnalyticsOptions = {}) {
+    const currentIntent = inquiryIntent?.trim() || purpose || resolvedDefaultPurpose || 'general';
+
+    return buildLeadAnalyticsPayload(locale, handoff, {
+      sourceRoute: resolvedSourceRoute,
+      propertyId: propertyId ?? undefined,
+      leadSource: resolvedInquirySource,
+      budgetRange: budgetBand || undefined,
+      purpose: purpose || resolvedDefaultPurpose || undefined,
+      timeframe: timeframe || undefined,
+      preferredArea: preferredArea.trim() || undefined,
+      inquiryIntent: currentIntent,
+      hasEmail: Boolean(email.trim()),
+      hasPhone: Boolean(phone.trim()),
+      ...overrides,
+    });
+  }
+
   function buildSuccessActions(): Array<{ href: string; label: string; external?: boolean; primary?: boolean }> {
     const normalizedPurpose = (purpose || inquiryIntent || '').trim().toLowerCase();
     const browseHref = withLocale(locale, normalizedPurpose === 'rent' ? '/rent' : '/buy');
@@ -354,13 +375,6 @@ export function LeadForm({
 
     const submitIso = new Date().toISOString();
     const effectiveInquiryIntent = inquiryIntent?.trim() || purpose || resolvedDefaultPurpose || 'general';
-    const contactPayload = {
-      name,
-      email: email.trim() || undefined,
-      phone: phone.trim() || undefined,
-      line: undefined,
-    };
-    const leadTrackingPayload = buildLeadTrackingPayload(locale, handoff, contactPayload);
 
     const leadScore = calculateLeadScore({
       name,
@@ -375,20 +389,13 @@ export function LeadForm({
       inquiryIntent: effectiveInquiryIntent,
     });
 
-    trackEvent('form_submit', pathname, {
-      property_id: propertyId ?? null,
-      has_email: Boolean(email.trim()),
-      has_phone: Boolean(phone.trim()),
-      budget_band: budgetBand || null,
-      purpose: purpose || null,
-      timeline: timeframe || null,
-      intent: effectiveInquiryIntent,
-      lead_source: resolvedInquirySource ?? null,
-      lead_tier: leadScore.tier,
+    const leadEventPayload = buildLeadEventPayload({
+      leadTier: leadScore.tier,
+      leadScore: leadScore.total,
     });
-    if (leadTrackingPayload) {
-      trackEvent('lead_submit', pathname, leadTrackingPayload);
-    }
+
+    trackEvent('form_submit', pathname, leadEventPayload);
+    trackEvent('lead_submit', pathname, leadEventPayload);
 
     setStatus({ state: 'submitting' });
 
@@ -480,18 +487,20 @@ export function LeadForm({
         responseChannel: parsed?.sales_automation?.response_channel,
         responseSlaSeconds: parsed?.sales_automation?.response_sla_seconds,
       });
-      trackEvent('form_success', pathname, {
-        property_id: propertyId ?? null,
-        ...(leadTrackingPayload ?? {}),
-      });
+      trackEvent('form_success', pathname, buildLeadEventPayload({
+        leadTier: leadScore.tier,
+        leadScore: leadScore.total,
+        responseChannel: parsed?.sales_automation?.response_channel,
+        responseSlaSeconds: parsed?.sales_automation?.response_sla_seconds,
+      }));
       // Attribute conversion to active experiments
       trackExperimentOutcomes('form_submit', 1, trackEvent, pathname);
     } catch (err) {
-      trackEvent('form_error', pathname, {
-        property_id: propertyId ?? null,
-        message: err instanceof Error ? err.message : 'Failed',
-        ...(leadTrackingPayload ?? {}),
-      });
+      trackEvent('form_error', pathname, buildLeadEventPayload({
+        leadTier: leadScore.tier,
+        leadScore: leadScore.total,
+        errorMessage: err instanceof Error ? err.message : 'Failed',
+      }));
       setStatus({
         state: 'error',
         message: err instanceof Error ? err.message : dict.errors.failedToSubmit,
@@ -532,10 +541,7 @@ export function LeadForm({
         onFocusCapture={() => {
           if (didStart) return;
           setDidStart(true);
-          trackEvent('form_start', pathname, {
-            property_id: propertyId ?? null,
-            ...(buildLeadTrackingPayload(locale, handoff) ?? {}),
-          });
+          trackEvent('form_start', pathname, buildLeadEventPayload());
         }}
       >
         {/* Honeypot field (must remain hidden). */}
