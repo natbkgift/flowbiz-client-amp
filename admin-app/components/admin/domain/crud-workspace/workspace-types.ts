@@ -58,6 +58,14 @@ export type CrudConfig = {
   };
   publishChecklistConfig?: {
     recordPath?: string;
+    requiredFieldGroups?: ReadonlyArray<{
+      label: string;
+      rules: ReadonlyArray<{
+        paths: readonly string[];
+        mode?: "any" | "all";
+        localMedia?: boolean;
+      }>;
+    }>;
     requiredLocales: readonly string[];
     warningLocales?: readonly string[];
     requiredLocalizedFields: ReadonlyArray<{ path: string; label: string }>;

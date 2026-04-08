@@ -271,6 +271,10 @@ describe("B14 admin workspace pages contract", () => {
     expect(entityWorkspace).toContain("renderSectionedFormFields({");
     expect(entityWorkspace).toContain("readinessSummaryTitle");
     expect(entityWorkspace).toContain("previewChecklist.completeness.percent");
+    expect(entityWorkspace).toContain("publishWarningSignature");
+    expect(entityWorkspace).toContain("publishWarningNeedsConfirm");
+    expect(entityWorkspace).toContain("publishGuardTitle");
+    expect(entityWorkspace).toContain("async function handlePublish(): Promise<void>");
     expect(entityWorkspace).toContain("handleBulkAction");
     expect(entityWorkspace).toContain("parseIdentifierList");
     expect(entityWorkspace).toContain("withCurrentSelectOptions");
@@ -279,8 +283,14 @@ describe("B14 admin workspace pages contract", () => {
     expect(entityWorkspace).toContain('return `/api${trimmedPath}`;');
     expect(projectsPage).toContain("createSections");
     expect(projectsPage).toContain("patchSections");
+    expect(projectsPage).toContain("publishChecklistConfig");
+    expect(projectsPage).toContain("requiredFieldGroups");
     expect(projectsPage).toContain("Project identity");
     expect(projectsPage).toContain("Publish essentials");
+    expect(projectsPage).toContain("starting_price");
+    expect(projectsPage).toContain("cover_image_url");
+    expect(projectsPage).toContain("hero_image_url");
+    expect(projectsPage).toContain("location.label");
     expect(propertiesPage).toContain("/admin/properties/bulk/status");
     expect(propertiesPage).toContain("/admin/properties/bulk/tags");
     expect(propertiesPage).toContain("/admin/properties/bulk/update");
@@ -290,6 +300,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(propertiesPage).toContain("Readiness essentials");
     expect(projectsPage).toContain("investment_snapshot.source");
     expect(projectsPage).toContain("investment_snapshot.updated_at");
+    expect(projectsPage).not.toContain("hero_media_id");
     expect(projectsPage).not.toContain("Investment snapshot (JSON)");
   });
 

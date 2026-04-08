@@ -167,4 +167,21 @@ describe("Phase C missing CMS pages", () => {
     expect(entityWorkspace).toContain("bulkActions");
     expect(entityWorkspace).toContain("parseIdentifierList");
   });
+
+  it("enables project publish readiness guard in UI config", () => {
+    const projects = read("app/admin/projects/page.tsx");
+    const entityWorkspace = read("components/admin/domain/entity-workspace/AdminEntityWorkspace.tsx");
+
+    expect(projects).toContain("publishChecklistConfig");
+    expect(projects).toContain("requiredFieldGroups");
+    expect(projects).toContain("starting_price");
+    expect(projects).toContain("cover_image_url");
+    expect(projects).toContain("hero_image_url");
+    expect(projects).toContain("highlights");
+    expect(projects).toContain("location.label");
+    expect(projects).toContain("location.lng");
+    expect(projects).not.toContain("hero_media_id");
+    expect(entityWorkspace).toContain("publishWarningNeedsConfirm");
+    expect(entityWorkspace).toContain("publishGuardTitle");
+  });
 });

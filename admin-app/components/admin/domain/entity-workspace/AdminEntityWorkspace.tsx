@@ -123,6 +123,11 @@ const copy = {
     operationResult: "Latest result",
     nextSteps: "Next steps",
     publishReady: "Ready to publish",
+    publishGuardTitle: "Publish is currently blocked",
+    publishGuardDescription: "Resolve the blocking checklist items below or move into the review checklist before publishing.",
+    publishWarningTitle: "Publish warnings",
+    publishWarningDescription: "This record can publish, but the checklist still has warnings to review first.",
+    publishWarningConfirmDescription: "Warnings are acknowledged for this record. Click publish again to continue, or fix them first.",
     deleteConfirm: "Delete this record now?",
     recordId: "Record ID",
     saveChanges: "Save changes",
@@ -189,6 +194,11 @@ const copy = {
     operationResult: "ผลลัพธ์ล่าสุด",
     nextSteps: "ขั้นตอนถัดไป",
     publishReady: "พร้อมเผยแพร่",
+    publishGuardTitle: "ยังไม่สามารถเผยแพร่ได้",
+    publishGuardDescription: "แก้ checklist ที่ยังบล็อกด้านล่าง หรือเปิดแท็บ review เพื่อตรวจให้ครบก่อนเผยแพร่",
+    publishWarningTitle: "คำเตือนก่อนเผยแพร่",
+    publishWarningDescription: "รายการนี้ยังเผยแพร่ได้ แต่ checklist ยังมีคำเตือนที่ควรตรวจทานก่อน",
+    publishWarningConfirmDescription: "ยืนยันคำเตือนของรายการนี้แล้ว หากต้องการเผยแพร่ต่อให้กด publish อีกครั้ง หรือกลับไปแก้ให้ครบก่อน",
     deleteConfirm: "ต้องการลบรายการนี้ตอนนี้หรือไม่",
     recordId: "รหัสรายการ",
     saveChanges: "บันทึกการแก้ไข",
@@ -395,6 +405,7 @@ export function AdminEntityWorkspace({
   const [activeTab, setActiveTab] = useState<"queue" | "detail" | "create" | "review">("queue");
   const [searchValue, setSearchValue] = useState("");
   const [result, setResult] = useState("");
+  const [publishWarningSignature, setPublishWarningSignature] = useState("");
   const [createValues, setCreateValues] = useState<Record<string, string>>(() =>
     initializePrimitiveValues(config.createFormFields, config.defaultCreatePayload),
   );
@@ -472,6 +483,13 @@ export function AdminEntityWorkspace({
   );
   const previewLocales = config.previewConfig?.locales || ["en", "th"];
   const publishBlocked = Boolean(previewChecklist && previewChecklist.blocking.length > 0);
+  const activePublishWarningSignature =
+    selectedId.trim() && previewChecklist && previewChecklist.warnings.length > 0
+      ? `${selectedId.trim()}:${[...previewChecklist.warnings].sort().join("|")}`
+      : "";
+  const publishWarningNeedsConfirm = Boolean(
+    activePublishWarningSignature && publishWarningSignature === activePublishWarningSignature,
+  );
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -512,6 +530,7 @@ export function AdminEntityWorkspace({
       setSelectedRecord(body);
       setPatchValues(initializePrimitiveValues(config.patchFormFields, JSON.stringify(body)));
       setPatchErrors({});
+      setPublishWarningSignature("");
       setActiveTab("detail");
     } catch (fetchError) {
       setError(formatWorkspaceErrorMessage(fetchError, t.authRequired));
@@ -539,6 +558,7 @@ export function AdminEntityWorkspace({
         body: JSON.stringify(payload),
       });
       setResult(JSON.stringify(response, null, 2));
+      setPublishWarningSignature("");
       await loadList();
       const nextId = pickString(response, config.identifierField) || pickString(response, "id");
       if (nextId) {
@@ -564,11 +584,45 @@ export function AdminEntityWorkspace({
       });
       setResult(JSON.stringify(response, null, 2));
       setSelectedRecord(response);
+      setPublishWarningSignature("");
       await loadList();
       setActiveTab("review");
     } catch (requestError) {
       setError(formatWorkspaceErrorMessage(requestError, t.authRequired));
     }
+  }
+
+  async function handlePublish(): Promise<void> {
+    if (!config.publishPath || !selectedId.trim()) return;
+    if (previewChecklist) {
+      setResult(
+        JSON.stringify(
+          {
+            publish_checklist: {
+              blocking: previewChecklist.blocking,
+              warnings: previewChecklist.warnings,
+              completeness: previewChecklist.completeness,
+            },
+          },
+          null,
+          2,
+        ),
+      );
+      if (previewChecklist.blocking.length > 0) {
+        setPublishWarningSignature("");
+        setActiveTab("review");
+        return;
+      }
+      if (activePublishWarningSignature) {
+        setActiveTab("review");
+        if (!publishWarningNeedsConfirm) {
+          setPublishWarningSignature(activePublishWarningSignature);
+          return;
+        }
+      }
+    }
+    setPublishWarningSignature("");
+    await runSimpleAction(config.publishPath, "POST");
   }
 
   async function runSimpleAction(path: string, method: "POST" | "DELETE"): Promise<void> {
@@ -578,6 +632,7 @@ export function AdminEntityWorkspace({
         method,
       });
       setResult(JSON.stringify(response, null, 2));
+      setPublishWarningSignature("");
       await loadList();
       setActiveTab("review");
     } catch (requestError) {
@@ -632,7 +687,7 @@ export function AdminEntityWorkspace({
     { label: t.refresh, onClick: () => void loadList(), disabled: !isAuthenticated || loading },
     { label: t.tabCreate, onClick: () => setActiveTab("create"), disabled: !isAuthenticated },
     ...(config.publishPath && selectedId
-      ? [{ label: config.publishLabel || t.publishReady, onClick: () => void runSimpleAction(config.publishPath!, "POST"), disabled: publishBlocked }]
+      ? [{ label: config.publishLabel || t.publishReady, onClick: () => void handlePublish(), disabled: !isAuthenticated || detailLoading || publishBlocked }]
       : []),
     ...(config.unpublishPath && selectedId
       ? [{ label: config.unpublishLabel || "Unpublish", onClick: () => void runSimpleAction(config.unpublishPath!, "POST"), disabled: !isAuthenticated || detailLoading }]
@@ -729,6 +784,30 @@ export function AdminEntityWorkspace({
 
           {error ? <div className="state-error">{error}</div> : null}
           {loading ? <div className="state-loading">{t.loading}</div> : null}
+          {selectedId && previewChecklist && publishBlocked ? (
+            <div className="state-error" role="alert">
+              <strong>{t.publishGuardTitle}</strong>
+              <p className="locale-safe">{t.publishGuardDescription}</p>
+              <ul className="admin-bullet-list">
+                {previewChecklist.blocking.slice(0, 4).map((item) => (
+                  <li key={item} className="locale-safe">{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {selectedId && previewChecklist && !publishBlocked && previewChecklist.warnings.length > 0 ? (
+            <div className="state-empty" role="status">
+              <strong>{t.publishWarningTitle}</strong>
+              <p className="locale-safe">
+                {publishWarningNeedsConfirm ? t.publishWarningConfirmDescription : t.publishWarningDescription}
+              </p>
+              <ul className="admin-bullet-list">
+                {previewChecklist.warnings.slice(0, 4).map((item) => (
+                  <li key={item} className="locale-safe">{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="admin-workspace-split">
             <AdminSectionCard title={t.queueTitle} description={config.listHint} icon="table">

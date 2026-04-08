@@ -48,17 +48,39 @@ function pathLabel(path: string): string {
     .join(" ");
 }
 
+function valueHasContent(value: unknown): boolean {
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.some((item) => valueHasContent(item));
+  if (value && typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).some((item) => valueHasContent(item));
+  }
+  return value !== null && value !== undefined;
+}
+
 function hasAnyValue(record: Record<string, unknown>, paths: readonly string[]): boolean {
   return paths.some((path) => {
     const value = nestedValue(record, path);
-    if (typeof value === "string") return value.trim().length > 0;
-    return value !== null && value !== undefined;
+    return valueHasContent(value);
   });
 }
 
 function isLocalMediaPath(value: unknown): boolean {
   if (typeof value !== "string") return false;
   return value.trim().startsWith("/media/");
+}
+
+function checklistRuleSatisfied(
+  record: Record<string, unknown>,
+  rule: NonNullable<NonNullable<CrudConfig["publishChecklistConfig"]>["requiredFieldGroups"]>[number]["rules"][number],
+): boolean {
+  const values = rule.paths.map((path) => nestedValue(record, path));
+  const matcher = rule.localMedia ? isLocalMediaPath : valueHasContent;
+  if (rule.mode === "all") {
+    return values.length > 0 && values.every((value) => matcher(value));
+  }
+  return values.some((value) => matcher(value));
 }
 
 export function parseIdentifierList(value: string): string[] {
@@ -157,6 +179,13 @@ export function checklistReport(config: CrudConfig["publishChecklistConfig"], re
       if (!nestedText(record, `${field.path}.${locale}`)) {
         warnings.push(`${field.label} (${locale.toUpperCase()}) is recommended.`);
       }
+    }
+  }
+
+  for (const group of config.requiredFieldGroups || []) {
+    const isSatisfied = group.rules.some((rule) => checklistRuleSatisfied(record, rule));
+    if (!isSatisfied) {
+      blocking.push(`${group.label} is required.`);
     }
   }
 

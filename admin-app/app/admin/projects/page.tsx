@@ -9,26 +9,47 @@ const PROJECT_CREATE_TEMPLATE = JSON.stringify(
     slug: "sample-project-cms",
     status: "draft",
     property_type: "condo",
+    starting_price: 3900000,
+    cover_image_url: "/media/library/projects/sample-project-cover.webp",
+    hero_image_url: "/media/library/projects/sample-project-hero.webp",
+    highlights: ["Beach access", "Investor-ready handoff"],
+    amenities: ["pool", "gym"],
     investment_snapshot: { source: "Internal Desk", updated_at: "2026-03-01" },
+    location: { label: "Central Pattaya", context: "Pattaya, Thailand", lat: 12.9348, lng: 100.8897 },
     summary: { en: "Summary", th: "สรุป" },
   },
   null,
   2
 );
 
-const PROJECT_PATCH_TEMPLATE = JSON.stringify({ name: "Updated Project Name" }, null, 2);
+const PROJECT_PATCH_TEMPLATE = JSON.stringify(
+  {
+    name: "Updated Project Name",
+    starting_price: 4200000,
+    highlights: ["Beach access", "Updated investor handoff"],
+  },
+  null,
+  2
+);
 
 const PROJECT_CREATE_FIELDS = [
   { name: "name", label: "Name", type: "text", required: true, placeholder: "Sample Project" },
   { name: "slug", label: "Slug", type: "text", required: true, placeholder: "sample-project-cms" },
   { name: "status", label: "Status", type: "status", required: true, options: ["draft", "inactive", "active"] },
   { name: "property_type", label: "Property type", type: "text", required: true, placeholder: "taxonomy slug from kind=property_type (e.g. condo)" },
+  { name: "starting_price", label: "Starting price", type: "number", required: true, placeholder: "3900000" },
   { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
+  { name: "location.label", label: "Location label", type: "text", placeholder: "Central Pattaya" },
+  { name: "location.context", label: "Location context", type: "text", placeholder: "Pattaya, Thailand" },
+  { name: "location.lat", label: "Latitude", type: "number", placeholder: "12.9348" },
+  { name: "location.lng", label: "Longitude", type: "number", placeholder: "100.8897" },
   { name: "amenities", label: "Facilities", type: "chips", placeholder: "pool, gym", rows: 3 },
+  { name: "highlights", label: "Highlights", type: "chips", placeholder: "beach access, investor-ready handoff", rows: 3 },
   { name: "investment_snapshot.source", label: "Investment source", type: "text", placeholder: "Internal Desk" },
   { name: "investment_snapshot.updated_at", label: "Investment snapshot updated", type: "text", placeholder: "2026-03-01" },
-  { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
+  { name: "cover_image_url", label: "Cover image", type: "media", placeholder: "/media/library/projects/sample-project-cover.webp" },
+  { name: "hero_image_url", label: "Hero image", type: "media", placeholder: "/media/library/projects/sample-project-hero.webp" },
   { name: "summary.en", label: "Summary (EN)", type: "textarea", rows: 3 },
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
 ] as const;
@@ -37,12 +58,19 @@ const PROJECT_PATCH_FIELDS = [
   { name: "name", label: "Name", type: "text" },
   { name: "status", label: "Status", type: "status", options: ["draft", "inactive", "active"] },
   { name: "property_type", label: "Property type", type: "text", placeholder: "e.g. condo" },
+  { name: "starting_price", label: "Starting price", type: "number", placeholder: "4200000" },
   { name: "area_id", label: "Area ID", type: "relation", placeholder: "optional area UUID" },
   { name: "developer_id", label: "Developer ID", type: "relation", placeholder: "optional developer UUID" },
+  { name: "location.label", label: "Location label", type: "text", placeholder: "Central Pattaya" },
+  { name: "location.context", label: "Location context", type: "text", placeholder: "Pattaya, Thailand" },
+  { name: "location.lat", label: "Latitude", type: "number", placeholder: "12.9348" },
+  { name: "location.lng", label: "Longitude", type: "number", placeholder: "100.8897" },
   { name: "amenities", label: "Facilities", type: "chips", placeholder: "pool, gym", rows: 3 },
+  { name: "highlights", label: "Highlights", type: "chips", placeholder: "beach access, investor-ready handoff", rows: 3 },
   { name: "investment_snapshot.source", label: "Investment source", type: "text", placeholder: "Internal Desk" },
   { name: "investment_snapshot.updated_at", label: "Investment snapshot updated", type: "text", placeholder: "2026-03-01" },
-  { name: "hero_media_id", label: "Hero media", type: "media", placeholder: "optional media ID/path" },
+  { name: "cover_image_url", label: "Cover image", type: "media", placeholder: "/media/library/projects/sample-project-cover.webp" },
+  { name: "hero_image_url", label: "Hero image", type: "media", placeholder: "/media/library/projects/sample-project-hero.webp" },
   { name: "summary.en", label: "Summary (EN)", type: "textarea", rows: 3 },
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
 ] as const;
@@ -51,17 +79,22 @@ const PROJECT_CREATE_SECTIONS = [
   {
     title: "Project identity",
     description: "Start with the fields operators use to identify and queue the project correctly.",
-    fields: ["name", "slug", "status", "property_type"],
+    fields: ["name", "slug", "status", "property_type", "starting_price"],
   },
   {
     title: "Publish essentials",
-    description: "Complete the summary, facilities, and investment snapshot before sending the project into publish review.",
-    fields: ["summary.en", "summary.th", "amenities", "investment_snapshot.source", "investment_snapshot.updated_at"],
+    description: "Complete the summary, highlights, facilities, and investment snapshot before sending the project into publish review.",
+    fields: ["summary.en", "summary.th", "highlights", "amenities", "investment_snapshot.source", "investment_snapshot.updated_at"],
   },
   {
-    title: "Relationships and hero media",
-    description: "Link the project to its area/developer and attach the hero asset used downstream.",
-    fields: ["area_id", "developer_id", "hero_media_id"],
+    title: "Location and relationships",
+    description: "Link the project to its area/developer or fill the location context fields so the readiness guard can clear.",
+    fields: ["area_id", "developer_id", "location.label", "location.context", "location.lat", "location.lng"],
+  },
+  {
+    title: "Publish media",
+    description: "Attach the local cover and hero assets used downstream before moving into review.",
+    fields: ["cover_image_url", "hero_image_url"],
   },
 ] as const;
 
@@ -69,17 +102,22 @@ const PROJECT_PATCH_SECTIONS = [
   {
     title: "Queue and identity",
     description: "Keep status, type, and naming aligned with the live record before changing publish state.",
-    fields: ["name", "status", "property_type"],
+    fields: ["name", "status", "property_type", "starting_price"],
   },
   {
     title: "Readiness details",
     description: "Use these fields to close the exact publish blockers surfaced by the readiness contract.",
-    fields: ["summary.en", "summary.th", "amenities", "investment_snapshot.source", "investment_snapshot.updated_at"],
+    fields: ["summary.en", "summary.th", "highlights", "amenities", "investment_snapshot.source", "investment_snapshot.updated_at"],
   },
   {
-    title: "Linked records and media",
-    description: "Verify related records and hero media before moving to review and publish.",
-    fields: ["area_id", "developer_id", "hero_media_id"],
+    title: "Location and linked records",
+    description: "Verify the location context and related records before moving to review and publish.",
+    fields: ["area_id", "developer_id", "location.label", "location.context", "location.lat", "location.lng"],
+  },
+  {
+    title: "Publish media",
+    description: "Confirm the local cover and hero image paths before moving to review or publish.",
+    fields: ["cover_image_url", "hero_image_url"],
   },
 ] as const;
 
@@ -112,12 +150,36 @@ export default function AdminProjectsCmsPage() {
         detailSummaryPaths: [
           { label: isThai ? "Slug" : "Slug", path: "slug" },
           { label: isThai ? "ประเภททรัพย์" : "Property type", path: "property_type" },
+          { label: isThai ? "ราคาเริ่มต้น" : "Starting price", path: "starting_price" },
+          { label: isThai ? "Hero image" : "Hero image", path: "hero_image_url" },
           { label: isThai ? "สรุป EN" : "Summary EN", path: "summary.en" },
           { label: isThai ? "สรุป TH" : "Summary TH", path: "summary.th" },
         ],
         previewConfig: {
           titlePath: "summary",
           locales: ["en", "th"],
+        },
+        publishChecklistConfig: {
+          requiredLocales: [],
+          warningLocales: ["th"],
+          requiredLocalizedFields: [{ path: "summary", label: "Summary" }],
+          requiredFieldGroups: [
+            { label: "Summary", rules: [{ paths: ["summary"] }] },
+            { label: "Highlights", rules: [{ paths: ["highlights"] }] },
+            {
+              label: "Location",
+              rules: [
+                { paths: ["area_id", "location.context", "location.label"] },
+                { paths: ["location.lat", "location.lng"], mode: "all" },
+                { paths: ["location.latitude", "location.longitude"], mode: "all" },
+              ],
+            },
+            { label: "Facilities", rules: [{ paths: ["amenities"] }] },
+            { label: "Hero media", rules: [{ paths: ["cover_image_url", "hero_image_url"], localMedia: true }] },
+            { label: "Investment source", rules: [{ paths: ["investment_snapshot.source"] }] },
+            { label: "Investment snapshot updated", rules: [{ paths: ["investment_snapshot.updated_at"] }] },
+          ],
+          requiredNumericGreaterThanZeroPaths: ["starting_price"],
         },
         createSections: [...PROJECT_CREATE_SECTIONS],
         patchSections: [...PROJECT_PATCH_SECTIONS],

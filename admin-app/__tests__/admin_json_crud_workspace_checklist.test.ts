@@ -59,6 +59,41 @@ describe("AdminJsonCrudWorkspace checklist report", () => {
     expect(report.completeness.percent).toBe(100);
   });
 
+  it("supports grouped field rules for publish readiness contracts", () => {
+    const report = checklistReport(
+      {
+        requiredLocales: [],
+        requiredLocalizedFields: [],
+        requiredFieldGroups: [
+          {
+            label: "Hero media",
+            rules: [{ paths: ["cover_image_url", "hero_image_url"], localMedia: true }],
+          },
+          {
+            label: "Location",
+            rules: [
+              { paths: ["area_id", "location.label"] },
+              { paths: ["location.lat", "location.lng"], mode: "all" },
+            ],
+          },
+          {
+            label: "Highlights",
+            rules: [{ paths: ["highlights"] }],
+          },
+        ],
+        requiredNumericGreaterThanZeroPaths: ["starting_price"],
+      },
+      {
+        starting_price: 3900000,
+        hero_image_url: "/media/library/projects/sample-project-hero.webp",
+        location: { lat: 12.9348, lng: 100.8897 },
+        highlights: ["Beach access"],
+      },
+    );
+
+    expect(report.blocking).toEqual([]);
+  });
+
   it("uses roving tab focus and keyboard navigation for locale tabs", () => {
     expect(workspacePanelsSource).toContain("AdminTabSwitch");
     expect(workspacePanelsSource).toContain('ariaLabel={mode === "create" ? "Create locale tabs" : "Update locale tabs"}');
