@@ -72,6 +72,89 @@ function normalizeTagToken(value: string): string {
     .replace(/[^a-z0-9_]/g, '');
 }
 
+function uniqueLines(values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>();
+  const lines: string[] = [];
+
+  for (const value of values) {
+    const text = String(value || '').trim();
+    if (!text) continue;
+
+    const key = text.toLowerCase();
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    lines.push(text);
+  }
+
+  return lines;
+}
+
+function normalizeRoutePath(pathname: string): string {
+  const normalized = pathname.replace(/^\/(en|th)(?=\/|$)/, '');
+  return normalized || '/';
+}
+
+function inferRoutePurpose(pathname: string): string | undefined {
+  const routePath = normalizeRoutePath(pathname);
+
+  if (routePath === '/buy') return 'buy';
+  if (routePath === '/rent') return 'rent';
+  if (routePath === '/invest' || routePath === '/investment' || routePath === '/investor') return 'invest';
+
+  return undefined;
+}
+
+function inferRouteTimeframe(pathname: string): string | undefined {
+  const routePath = normalizeRoutePath(pathname);
+
+  if (
+    routePath === '/buy'
+    || routePath === '/rent'
+    || routePath === '/invest'
+    || routePath === '/investment'
+    || routePath === '/investor'
+    || routePath === '/area-guide'
+    || routePath.startsWith('/areas/')
+  ) {
+    return 'flexible';
+  }
+
+  return undefined;
+}
+
+function inferRouteLeadSource(pathname: string): string | undefined {
+  const routePath = normalizeRoutePath(pathname);
+
+  if (routePath === '/') return 'home_form';
+  if (routePath === '/contact') return 'contact_form';
+  if (routePath === '/buy') return 'buy_form';
+  if (routePath === '/rent') return 'rent_form';
+  if (routePath === '/area-guide') return 'area_guide_form';
+  if (routePath.startsWith('/areas/')) return 'area_detail_form';
+  if (routePath.startsWith('/projects/')) return 'project_detail_form';
+  if (routePath.startsWith('/property/')) return 'property_detail_form';
+  if (routePath.startsWith('/blog/')) return 'blog_form';
+
+  const segments = routePath.split('/').filter(Boolean);
+  if (!segments.length) return undefined;
+
+  return `${normalizeTagToken(segments[0])}_form`;
+}
+
+function inferPurposeFromHandoff(handoff: LeadHandoff | undefined): string | undefined {
+  if (!handoff?.userIntent) return undefined;
+  if (handoff.userIntent === 'buy' || handoff.userIntent === 'invest') return handoff.userIntent;
+  return undefined;
+}
+
+function findOptionLabel(
+  options: Array<{ value: string; label: string }>,
+  value: string,
+): string | null {
+  return options.find((option) => option.value === value)?.label ?? null;
+}
+
 export function LeadForm({
   locale: explicitLocale,
   heading,
@@ -111,16 +194,25 @@ export function LeadForm({
     locale === 'th'
       ? 'กรุณากรอกเบอร์โทรให้มีตัวเลข 7 ถึง 15 หลัก'
       : 'Enter a phone number with 7 to 15 digits.';
+  const handoffArea = typeof handoff?.context?.area === 'string' ? handoff.context.area : undefined;
+  const resolvedDefaultBudgetBand = defaultBudgetBand ?? handoff?.budgetRange ?? '';
+  const resolvedDefaultPurpose = defaultPurpose ?? inferPurposeFromHandoff(handoff) ?? inferRoutePurpose(pathname) ?? '';
+  const resolvedDefaultPreferredArea = defaultPreferredArea ?? handoff?.location ?? handoffArea ?? '';
+  const resolvedDefaultTimeframe = defaultTimeframe ?? inferRouteTimeframe(pathname) ?? '';
+  const resolvedInquirySource = (inquirySource ?? inferRouteLeadSource(pathname))?.trim() || undefined;
+  const qualificationPreviewBody = locale === 'th'
+    ? 'บริบทนี้จะถูกแนบไปกับคำขอ เพื่อให้ทีมคัดกรองและตอบกลับด้วยขั้นตอนถัดไปที่ชัดขึ้น'
+    : 'This context travels with your request so the team can qualify the clearest next step faster.';
 
   const [didStart, setDidStart] = useState(false);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [budgetBand, setBudgetBand] = useState(defaultBudgetBand ?? '');
-  const [purpose, setPurpose] = useState(defaultPurpose ?? '');
-  const [preferredArea, setPreferredArea] = useState(defaultPreferredArea ?? '');
-  const [timeframe, setTimeframe] = useState(defaultTimeframe ?? '');
+  const [budgetBand, setBudgetBand] = useState(resolvedDefaultBudgetBand);
+  const [purpose, setPurpose] = useState(resolvedDefaultPurpose);
+  const [preferredArea, setPreferredArea] = useState(resolvedDefaultPreferredArea);
+  const [timeframe, setTimeframe] = useState(resolvedDefaultTimeframe);
   const [message, setMessage] = useState(defaultMessage ?? '');
   const [website, setWebsite] = useState('');
   const [consent, setConsent] = useState(false);
@@ -153,6 +245,29 @@ export function LeadForm({
     if (!consent) return false;
     return status.state !== 'submitting';
   }, [email, message, name, phone, consent, status.state]);
+
+  const handoffSummaryLines = useMemo(() => uniqueLines([
+    ...buildLeadHandoffSummary(locale, handoff),
+    ...(contextSummary ?? []),
+  ]), [contextSummary, handoff, locale]);
+
+  const qualificationPreviewLines = useMemo(() => {
+    const previewLines = uniqueLines([
+      budgetBand
+        ? `${dict.common.leadForm.budgetLabel}: ${findOptionLabel(dict.common.leadForm.budgetOptions, budgetBand) ?? budgetBand}`
+        : null,
+      purpose
+        ? `${dict.common.leadForm.purposeLabel}: ${findOptionLabel(dict.common.leadForm.purposeOptions, purpose) ?? purpose}`
+        : null,
+      preferredArea.trim() ? `${dict.common.leadForm.preferredAreaLabel}: ${preferredArea.trim()}` : null,
+      timeframe
+        ? `${dict.common.leadForm.timeframeLabel}: ${findOptionLabel(dict.common.leadForm.timeframeOptions, timeframe) ?? timeframe}`
+        : null,
+      ...handoffSummaryLines,
+    ]);
+
+    return previewLines.length >= 2 ? previewLines.slice(0, 6) : [];
+  }, [budgetBand, dict.common.leadForm.budgetLabel, dict.common.leadForm.budgetOptions, dict.common.leadForm.preferredAreaLabel, dict.common.leadForm.purposeLabel, dict.common.leadForm.purposeOptions, dict.common.leadForm.timeframeLabel, dict.common.leadForm.timeframeOptions, handoffSummaryLines, preferredArea, purpose, timeframe]);
 
   function describeResponseChannel(value: string | undefined): string | null {
     if (!value) return null;
@@ -234,6 +349,7 @@ export function LeadForm({
     }
 
     const submitIso = new Date().toISOString();
+    const effectiveInquiryIntent = inquiryIntent?.trim() || purpose || resolvedDefaultPurpose || 'general';
     const contactPayload = {
       name,
       email: email.trim() || undefined,
@@ -242,19 +358,6 @@ export function LeadForm({
     };
     const leadTrackingPayload = buildLeadTrackingPayload(locale, handoff, contactPayload);
 
-    trackEvent('form_submit', pathname, {
-      property_id: propertyId ?? null,
-      has_email: Boolean(email.trim()),
-      has_phone: Boolean(phone.trim()),
-      budget_band: budgetBand || null,
-      purpose: purpose || null,
-      timeline: timeframe || null,
-    });
-    if (leadTrackingPayload) {
-      trackEvent('lead_submit', pathname, leadTrackingPayload);
-    }
-
-    // Compute lead quality score for CRM enrichment
     const leadScore = calculateLeadScore({
       name,
       email: email.trim() || undefined,
@@ -262,6 +365,21 @@ export function LeadForm({
       message,
       propertyId: propertyId ?? undefined,
     });
+
+    trackEvent('form_submit', pathname, {
+      property_id: propertyId ?? null,
+      has_email: Boolean(email.trim()),
+      has_phone: Boolean(phone.trim()),
+      budget_band: budgetBand || null,
+      purpose: purpose || null,
+      timeline: timeframe || null,
+      intent: effectiveInquiryIntent,
+      lead_source: resolvedInquirySource ?? null,
+      lead_tier: leadScore.tier,
+    });
+    if (leadTrackingPayload) {
+      trackEvent('lead_submit', pathname, leadTrackingPayload);
+    }
 
     setStatus({ state: 'submitting' });
 
@@ -272,14 +390,8 @@ export function LeadForm({
       timeframe ? `${dict.common.leadForm.timeframeLabel}: ${dict.common.leadForm.timeframeOptions.find((item) => item.value === timeframe)?.label ?? timeframe}` : null,
     ].filter((item): item is string => Boolean(item));
 
-    const handoffLines = Array.from(
-      new Set([
-        ...buildLeadHandoffSummary(locale, handoff),
-        ...(contextSummary ?? []).map((item) => item.trim()).filter(Boolean),
-      ]),
-    );
-    const handoffBlock = handoffLines.length
-      ? `${locale === 'th' ? 'บริบทที่ส่งต่อ' : 'Lead context'}:\n${handoffLines.join('\n')}`
+    const handoffBlock = handoffSummaryLines.length
+      ? `${locale === 'th' ? 'บริบทที่ส่งต่อ' : 'Lead context'}:\n${handoffSummaryLines.join('\n')}`
       : null;
 
     const composedSections = [
@@ -303,8 +415,9 @@ export function LeadForm({
     const dedupedInquiryTags = Array.from(new Set([
       normalizedPreferredArea ? `preferred_area:${normalizedPreferredArea}` : null,
       purpose ? `purpose:${normalizeTagToken(purpose)}` : null,
-      inquiryIntent ? `intent:${normalizeTagToken(inquiryIntent)}` : null,
-      inquirySource ? `lead_source:${normalizeTagToken(inquirySource)}` : null,
+      effectiveInquiryIntent ? `intent:${normalizeTagToken(effectiveInquiryIntent)}` : null,
+      resolvedInquirySource ? `lead_source:${normalizeTagToken(resolvedInquirySource)}` : null,
+      `lead_tier:${leadScore.tier}`,
       ...normalizedHandoffTags,
       ...normalizedContextTags,
     ].filter((item): item is string => Boolean(item))));
@@ -320,7 +433,7 @@ export function LeadForm({
           phone: phone.trim() || null,
           message: composedMessage,
           consent_given: true,
-          intent: inquiryIntent || purpose || 'general',
+          intent: effectiveInquiryIntent,
           budget_band: budgetBand || null,
           timeline: timeframe || null,
           // Operational metadata (not user PII)
@@ -390,6 +503,20 @@ export function LeadForm({
     >
       <h3 className="type-h3">{heading ?? dict.common.leadForm.headingDefault}</h3>
       <p className="form-desc">{description ?? dict.common.leadForm.description}</p>
+
+      {qualificationPreviewLines.length ? (
+        <div className="form-note-box mb-4" aria-label="lead-form-qualification-preview">
+          <p className="form-note-box__title type-small">{dict.common.leadForm.detailsHeading}</p>
+          <p className="form-note-box__copy">{qualificationPreviewBody}</p>
+          <div className="insight-list mt-1">
+            {qualificationPreviewLines.map((line) => (
+              <div key={line} className="insight-list__item">
+                <span className="insight-list__body">{line}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div
         className="form-grid"

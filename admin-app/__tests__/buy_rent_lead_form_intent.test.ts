@@ -12,14 +12,15 @@ describe('buy and rent lead form intent wiring', () => {
     const page = read('app/(site)/[locale]/buy/page.tsx');
 
     expect(page).toContain('defaultPurpose="buy"');
-    expect(page).toContain('defaultMessage={buyFormDefaultMessage}');
+    expect(page).toContain('defaultMessage={copy.form.defaultMessage}');
     expect(page).toContain("withLocale(locale, '/shortlist')");
-    expect(page).toContain('Review your shortlist before compare');
+    expect(page).toContain('copy.shortlistUtility.linkLabel');
   });
 
   it('preselects rent intent on the rent page CTA form', () => {
     const page = read('app/(site)/[locale]/rent/page.tsx');
 
-    expect(page).toContain('<LeadForm defaultPurpose="rent" defaultMessage={dict.rent.formDefault} />');
+    expect(page).toContain('defaultPurpose="rent"');
+    expect(page).toContain('defaultMessage={dict.rent.formDefault}');
   });
 });

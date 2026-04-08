@@ -46,7 +46,7 @@ describe('HomeBottomCta conversion gate', () => {
     expect(screen.getByText('A short form is enough for the team to start the first shortlist.')).toBeInTheDocument();
     expect(screen.getByText('The Pattaya team replies with a focused first set.')).toBeInTheDocument();
     expect(container.querySelectorAll('form#home-consultation-form')).toHaveLength(1);
-    expect(container.querySelectorAll('.bg-white h3')).toHaveLength(1);
+    expect(container.querySelectorAll('[aria-label="consultation-form-panel"] .type-h3')).toHaveLength(1);
     expect(screen.queryByLabelText('Preferred area')).toBeNull();
     expect(screen.queryByLabelText('Timeframe')).toBeNull();
   });
