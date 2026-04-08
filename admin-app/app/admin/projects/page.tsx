@@ -47,6 +47,42 @@ const PROJECT_PATCH_FIELDS = [
   { name: "summary.th", label: "Summary (TH)", type: "textarea", rows: 3 },
 ] as const;
 
+const PROJECT_CREATE_SECTIONS = [
+  {
+    title: "Project identity",
+    description: "Start with the fields operators use to identify and queue the project correctly.",
+    fields: ["name", "slug", "status", "property_type"],
+  },
+  {
+    title: "Publish essentials",
+    description: "Complete the summary, facilities, and investment snapshot before sending the project into publish review.",
+    fields: ["summary.en", "summary.th", "amenities", "investment_snapshot.source", "investment_snapshot.updated_at"],
+  },
+  {
+    title: "Relationships and hero media",
+    description: "Link the project to its area/developer and attach the hero asset used downstream.",
+    fields: ["area_id", "developer_id", "hero_media_id"],
+  },
+] as const;
+
+const PROJECT_PATCH_SECTIONS = [
+  {
+    title: "Queue and identity",
+    description: "Keep status, type, and naming aligned with the live record before changing publish state.",
+    fields: ["name", "status", "property_type"],
+  },
+  {
+    title: "Readiness details",
+    description: "Use these fields to close the exact publish blockers surfaced by the readiness contract.",
+    fields: ["summary.en", "summary.th", "amenities", "investment_snapshot.source", "investment_snapshot.updated_at"],
+  },
+  {
+    title: "Linked records and media",
+    description: "Verify related records and hero media before moving to review and publish.",
+    fields: ["area_id", "developer_id", "hero_media_id"],
+  },
+] as const;
+
 export default function AdminProjectsCmsPage() {
   const locale = detectAdminLocale();
   const isThai = locale === "th";
@@ -83,6 +119,8 @@ export default function AdminProjectsCmsPage() {
           titlePath: "summary",
           locales: ["en", "th"],
         },
+        createSections: [...PROJECT_CREATE_SECTIONS],
+        patchSections: [...PROJECT_PATCH_SECTIONS],
         createFormFields: [...PROJECT_CREATE_FIELDS],
         patchFormFields: [...PROJECT_PATCH_FIELDS],
         defaultCreatePayload: PROJECT_CREATE_TEMPLATE,

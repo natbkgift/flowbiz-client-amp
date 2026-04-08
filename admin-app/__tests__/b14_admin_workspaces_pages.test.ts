@@ -258,15 +258,27 @@ describe("B14 admin workspace pages contract", () => {
 
     expect(entityWorkspace).toContain("publishChecklistConfig");
     expect(entityWorkspace).toContain("previewConfig");
+    expect(entityWorkspace).toContain("resolveFormSections(");
+    expect(entityWorkspace).toContain("renderSectionedFormFields({");
+    expect(entityWorkspace).toContain("readinessSummaryTitle");
+    expect(entityWorkspace).toContain("previewChecklist.completeness.percent");
     expect(entityWorkspace).toContain("handleBulkAction");
     expect(entityWorkspace).toContain("parseIdentifierList");
     expect(entityWorkspace).toContain("withCurrentSelectOptions");
     expect(entityWorkspace).toContain("resolveEntityApiPath");
     expect(entityWorkspace).toContain('trimmedPath.startsWith("/admin/")');
     expect(entityWorkspace).toContain('return `/api${trimmedPath}`;');
+    expect(projectsPage).toContain("createSections");
+    expect(projectsPage).toContain("patchSections");
+    expect(projectsPage).toContain("Project identity");
+    expect(projectsPage).toContain("Publish essentials");
     expect(propertiesPage).toContain("/admin/properties/bulk/status");
     expect(propertiesPage).toContain("/admin/properties/bulk/tags");
     expect(propertiesPage).toContain("/admin/properties/bulk/update");
+    expect(propertiesPage).toContain("createSections");
+    expect(propertiesPage).toContain("patchSections");
+    expect(propertiesPage).toContain("Listing identity");
+    expect(propertiesPage).toContain("Readiness essentials");
     expect(projectsPage).toContain("investment_snapshot.source");
     expect(projectsPage).toContain("investment_snapshot.updated_at");
     expect(projectsPage).not.toContain("Investment snapshot (JSON)");

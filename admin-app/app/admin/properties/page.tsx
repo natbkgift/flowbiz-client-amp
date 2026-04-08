@@ -73,6 +73,52 @@ const PROPERTY_PATCH_FIELDS = [
   { name: "cover_image", label: "Cover media", type: "media", placeholder: "/media/library/property-cover.jpg" },
 ] as const;
 
+const PROPERTY_CREATE_SECTIONS = [
+  {
+    title: "Listing identity",
+    description: "Create the record with the exact source, title, and listing type operators will search for later.",
+    fields: ["source_id", "slug", "title", "status", "type", "property_type"],
+  },
+  {
+    title: "Pricing and specs",
+    description: "Complete price and core specs first because Phase 5 readiness blocks publish when these drift.",
+    fields: ["price", "bedrooms", "bathrooms", "size_sqm"],
+  },
+  {
+    title: "Location and links",
+    description: "Attach the listing to the right city, project, area, and developer before handing off.",
+    fields: ["address", "city", "project_id", "area_id", "developer_id"],
+  },
+  {
+    title: "Publish media",
+    description: "Use a local cover asset so the listing can pass media governance and publish checks.",
+    fields: ["cover_image"],
+  },
+] as const;
+
+const PROPERTY_PATCH_SECTIONS = [
+  {
+    title: "Queue and listing basics",
+    description: "Update the queue-facing status, title, and type before pushing the listing toward publish.",
+    fields: ["title", "status", "type"],
+  },
+  {
+    title: "Readiness essentials",
+    description: "Price, specs, and address data map directly to the locked property readiness contract.",
+    fields: ["price", "bedrooms", "bathrooms", "size_sqm", "address", "city"],
+  },
+  {
+    title: "Linked records",
+    description: "Use linked project, area, and developer references to keep the listing searchable and publishable.",
+    fields: ["project_id", "area_id", "developer_id"],
+  },
+  {
+    title: "Cover media",
+    description: "Confirm the listing points at a local cover image before moving into review or publish.",
+    fields: ["cover_image"],
+  },
+] as const;
+
 export default function AdminPropertiesCmsPage() {
   const locale = detectAdminLocale();
   const isThai = locale === "th";
@@ -155,6 +201,8 @@ export default function AdminPropertiesCmsPage() {
             ],
           },
         ],
+        createSections: [...PROPERTY_CREATE_SECTIONS],
+        patchSections: [...PROPERTY_PATCH_SECTIONS],
         createFormFields: [...PROPERTY_CREATE_FIELDS],
         patchFormFields: [...PROPERTY_PATCH_FIELDS],
         defaultCreatePayload: PROPERTY_CREATE_TEMPLATE,

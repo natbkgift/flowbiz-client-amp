@@ -34,6 +34,12 @@ import type { CrudConfig } from "@/components/admin/domain/crud-workspace/worksp
 
 type EntityRow = Record<string, unknown>;
 
+type EntityWorkspaceFormSection = {
+  title: string;
+  description?: string;
+  fields: readonly string[];
+};
+
 type EntityWorkspaceConfig = {
   title: string;
   subtitle: string;
@@ -66,6 +72,8 @@ type EntityWorkspaceConfig = {
     idsPayloadKey?: string;
     fields: AdminFormPrimitiveField[];
   }>;
+  createSections?: ReadonlyArray<EntityWorkspaceFormSection>;
+  patchSections?: ReadonlyArray<EntityWorkspaceFormSection>;
   createFormFields: AdminFormPrimitiveField[];
   patchFormFields: AdminFormPrimitiveField[];
   defaultCreatePayload: string;
@@ -129,6 +137,12 @@ const copy = {
     updated: "Updated",
     reviewReadinessTitle: "Publish readiness",
     reviewReadinessDescription: "Use this checklist to decide whether the selected record is ready for publish.",
+    readinessSummaryTitle: "Readiness summary",
+    readinessSummaryDescription: "Check blockers, warnings, and completion before moving this record into review.",
+    completeness: "Completeness",
+    blockers: "Blockers",
+    warningsCount: "Warnings",
+    moveToReview: "Open review checklist",
     readinessBlocked: "Blocking issues",
     readinessWarnings: "Warnings",
     readinessClear: "No blocking checklist issues were found for the selected record.",
@@ -142,6 +156,8 @@ const copy = {
     bulkRun: "Run",
     fixFields: "Fix the highlighted fields before continuing.",
     bulkIdsRequired: "Add at least one target record ID before running a queue-wide action.",
+    additionalFields: "Additional fields",
+    additionalFieldsDescription: "These fields stay available when they are not mapped into a named workflow section.",
   },
   th: {
     authTitle: "เข้าสู่ระบบแอดมิน",
@@ -187,6 +203,12 @@ const copy = {
     updated: "อัปเดตล่าสุด",
     reviewReadinessTitle: "ความพร้อมก่อนเผยแพร่",
     reviewReadinessDescription: "ใช้ checklist นี้ตัดสินใจก่อนเผยแพร่หรือส่งต่องานของรายการที่เลือก",
+    readinessSummaryTitle: "สรุปความพร้อม",
+    readinessSummaryDescription: "ตรวจจุดบล็อก คำเตือน และความครบถ้วนก่อนส่งรายการนี้เข้าสู่ขั้น review",
+    completeness: "ความครบถ้วน",
+    blockers: "จุดบล็อก",
+    warningsCount: "คำเตือน",
+    moveToReview: "เปิด checklist review",
     readinessBlocked: "จุดที่ยังบล็อก",
     readinessWarnings: "คำเตือน",
     readinessClear: "ไม่พบปัญหาแบบบล็อกจาก checklist ของรายการที่เลือก",
@@ -200,6 +222,8 @@ const copy = {
     bulkRun: "รัน",
     fixFields: "กรอกฟิลด์ที่ไฮไลต์ให้ครบก่อนดำเนินการต่อ",
     bulkIdsRequired: "กรอกรหัสรายการเป้าหมายอย่างน้อยหนึ่งรายการก่อนรันคำสั่งทั้งคิว",
+    additionalFields: "ฟิลด์เพิ่มเติม",
+    additionalFieldsDescription: "ฟิลด์ที่ไม่ได้จัดใน section เฉพาะจะยังอยู่ในกลุ่มนี้เพื่อไม่ให้ข้อมูลตกหล่น",
   },
 } as const;
 
@@ -268,6 +292,88 @@ function withCurrentSelectOptions(fields: AdminFormPrimitiveField[], values: Rec
       options: [...options, currentValue],
     };
   });
+}
+
+function resolveFormSections(
+  fields: AdminFormPrimitiveField[],
+  sections: ReadonlyArray<EntityWorkspaceFormSection> | undefined,
+  fallbackTitle: string,
+  fallbackDescription: string,
+): Array<EntityWorkspaceFormSection & { resolvedFields: AdminFormPrimitiveField[] }> {
+  if (!sections?.length) {
+    return [{ title: fallbackTitle, description: fallbackDescription, fields: [], resolvedFields: fields }];
+  }
+
+  const fieldMap = new Map(fields.map((field) => [field.name, field]));
+  const used = new Set<string>();
+  const resolvedSections = sections
+    .map((section) => {
+      const resolvedFields = section.fields
+        .map((fieldName) => fieldMap.get(fieldName))
+        .filter((field): field is AdminFormPrimitiveField => Boolean(field));
+
+      resolvedFields.forEach((field) => used.add(field.name));
+
+      return {
+        ...section,
+        resolvedFields,
+      };
+    })
+    .filter((section) => section.resolvedFields.length > 0);
+
+  const remainingFields = fields.filter((field) => !used.has(field.name));
+  if (remainingFields.length > 0) {
+    resolvedSections.push({
+      title: fallbackTitle,
+      description: fallbackDescription,
+      fields: remainingFields.map((field) => field.name),
+      resolvedFields: remainingFields,
+    });
+  }
+
+  return resolvedSections;
+}
+
+function renderSectionedFormFields({
+  sections,
+  idPrefix,
+  values,
+  errors,
+  authToken,
+  onChange,
+}: {
+  sections: Array<EntityWorkspaceFormSection & { resolvedFields: AdminFormPrimitiveField[] }>;
+  idPrefix: string;
+  values: Record<string, string>;
+  errors: Record<string, string>;
+  authToken: string;
+  onChange: (name: string, value: string) => void;
+}) {
+  return (
+    <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
+      {sections.map((section) => (
+        <section key={`${idPrefix}-${section.title}`} className="admin-workspace-form-section">
+          <div className="admin-workspace-form-section__header">
+            <h3>{section.title}</h3>
+            {section.description ? <p className="locale-safe">{section.description}</p> : null}
+          </div>
+          <div className="admin-workspace-form-grid">
+            {section.resolvedFields.map((field) => (
+              <AdminFormPrimitiveInput
+                key={field.name}
+                idPrefix={idPrefix}
+                field={field}
+                value={values[field.name] || ""}
+                error={errors[field.name]}
+                authToken={authToken}
+                onChange={onChange}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
 }
 
 export function AdminEntityWorkspace({
@@ -355,6 +461,14 @@ export function AdminEntityWorkspace({
   const previewChecklist = useMemo(
     () => (selectedRecord && config.publishChecklistConfig ? checklistReport(config.publishChecklistConfig, selectedRecord) : null),
     [config.publishChecklistConfig, selectedRecord],
+  );
+  const createSections = useMemo(
+    () => resolveFormSections(createFormFields, config.createSections, t.additionalFields, t.additionalFieldsDescription),
+    [config.createSections, createFormFields, t.additionalFields, t.additionalFieldsDescription],
+  );
+  const patchSections = useMemo(
+    () => resolveFormSections(patchFormFields, config.patchSections, t.additionalFields, t.additionalFieldsDescription),
+    [config.patchSections, patchFormFields, t.additionalFields, t.additionalFieldsDescription],
   );
   const previewLocales = config.previewConfig?.locales || ["en", "th"];
   const publishBlocked = Boolean(previewChecklist && previewChecklist.blocking.length > 0);
@@ -719,22 +833,17 @@ export function AdminEntityWorkspace({
 
             {activeTab === "create" ? (
               <AdminSectionCard title={t.createTitle} description={config.createHint} icon="plus">
-                <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
-                  {createFormFields.map((field) => (
-                    <AdminFormPrimitiveInput
-                      key={field.name}
-                      idPrefix={`${config.identifierField}-create`}
-                      field={field}
-                      value={createValues[field.name] || ""}
-                      error={createErrors[field.name]}
-                      authToken={token}
-                      onChange={(name, value) => {
-                        setCreateValues((current) => ({ ...current, [name]: value }));
-                        setCreateErrors((current) => ({ ...current, [name]: "" }));
-                      }}
-                    />
-                  ))}
-                </div>
+                {renderSectionedFormFields({
+                  sections: createSections,
+                  idPrefix: `${config.identifierField}-create`,
+                  values: createValues,
+                  errors: createErrors,
+                  authToken: token,
+                  onChange: (name, value) => {
+                    setCreateValues((current) => ({ ...current, [name]: value }));
+                    setCreateErrors((current) => ({ ...current, [name]: "" }));
+                  },
+                })}
               </AdminSectionCard>
             ) : activeTab === "review" ? (
               <AdminSectionCard title={t.reviewTitle} description={config.reviewHint} icon="info">
@@ -902,22 +1011,74 @@ export function AdminEntityWorkspace({
                         ))}
                       </div>
                     ) : null}
-                    <div className="admin-workspace-form-grid admin-workspace-form-grid--grouped">
-                      {patchFormFields.map((field) => (
-                        <AdminFormPrimitiveInput
-                          key={field.name}
-                          idPrefix={`${config.identifierField}-patch`}
-                          field={field}
-                          value={patchValues[field.name] || ""}
-                          error={patchErrors[field.name]}
-                          authToken={token}
-                          onChange={(name, value) => {
-                            setPatchValues((current) => ({ ...current, [name]: value }));
-                            setPatchErrors((current) => ({ ...current, [name]: "" }));
-                          }}
-                        />
-                      ))}
-                    </div>
+                    {previewChecklist ? (
+                      <div className="admin-grid-layout admin-grid-layout--two">
+                        <div className="admin-workspace-prerequisite">
+                          <strong>{t.readinessSummaryTitle}</strong>
+                          <p className="locale-safe">{t.readinessSummaryDescription}</p>
+                          <div className="admin-workspace-inline-metrics" aria-label={t.readinessSummaryTitle}>
+                            <AdminBadge tone="info">{t.completeness}: {previewChecklist.completeness.percent}%</AdminBadge>
+                            <AdminBadge tone={previewChecklist.blocking.length > 0 ? "error" : "neutral"}>
+                              {t.blockers}: {previewChecklist.blocking.length}
+                            </AdminBadge>
+                            <AdminBadge tone={previewChecklist.warnings.length > 0 ? "warn" : "neutral"}>
+                              {t.warningsCount}: {previewChecklist.warnings.length}
+                            </AdminBadge>
+                          </div>
+                          <div className="card-actions">
+                            <AdminButton type="button" variant="secondary" onClick={() => setActiveTab("review")}>
+                              {t.moveToReview}
+                            </AdminButton>
+                            {config.followUpLinks?.slice(0, 2).map((link) => (
+                              <Link
+                                key={`detail-${link.href}`}
+                                className="admin-button admin-button--secondary admin-button--sm"
+                                href={withAdminLocale(link.href, locale)}
+                              >
+                                {link.label || t.openLinked}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="admin-workspace-prerequisite">
+                          <strong>{t.reviewReadinessTitle}</strong>
+                          <p className="locale-safe">{t.reviewReadinessDescription}</p>
+                          {previewChecklist.blocking.length > 0 ? (
+                            <>
+                              <p><strong>{t.readinessBlocked}</strong></p>
+                              <ul className="admin-bullet-list">
+                                {previewChecklist.blocking.slice(0, 4).map((item) => (
+                                  <li key={item} className="locale-safe">{item}</li>
+                                ))}
+                              </ul>
+                            </>
+                          ) : (
+                            <p className="locale-safe">{t.readinessClear}</p>
+                          )}
+                          {previewChecklist.warnings.length > 0 ? (
+                            <>
+                              <p><strong>{t.readinessWarnings}</strong></p>
+                              <ul className="admin-bullet-list">
+                                {previewChecklist.warnings.slice(0, 4).map((item) => (
+                                  <li key={item} className="locale-safe">{item}</li>
+                                ))}
+                              </ul>
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                    {renderSectionedFormFields({
+                      sections: patchSections,
+                      idPrefix: `${config.identifierField}-patch`,
+                      values: patchValues,
+                      errors: patchErrors,
+                      authToken: token,
+                      onChange: (name, value) => {
+                        setPatchValues((current) => ({ ...current, [name]: value }));
+                        setPatchErrors((current) => ({ ...current, [name]: "" }));
+                      },
+                    })}
                   </>
                 )}
               </AdminSectionCard>
