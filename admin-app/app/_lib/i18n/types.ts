@@ -236,17 +236,50 @@ export type Dictionary = {
     eyebrow: string;
     headline: string;
     subhead: string;
+    supportNote: string;
+    primaryAction: string;
+    secondaryAction: string;
+    reviewProof: string;
+    followUpProof: string;
+    whatsAppMessage: string;
+    advisorySignals: {
+      bestForTitle: string;
+      bestForBody: string;
+      nextStepTitle: string;
+      nextStepBody: string;
+      trustTitle: string;
+      trustBody: string;
+    };
     whatHappensNext: string;
+    whatHappensIntro: string;
     steps: string[];
     formHeading: string;
+    formIntro: string;
     metaDescription: string;
   };
   rent: {
+    eyebrow: string;
     heroTitle: string;
     heroSub: string;
+    supportNote: string;
+    primaryAction: string;
+    secondaryAction: string;
+    availabilityProof: string;
+    moveInProof: string;
+    whatsAppMessage: string;
+    advisorySignals: {
+      bestForTitle: string;
+      bestForBody: string;
+      nextStepTitle: string;
+      nextStepBody: string;
+      trustTitle: string;
+      trustBody: string;
+    };
+    metaDescription: string;
     areaTitle: string;
     areaDesc: string;
     featuredTitle: string;
+    featuredSubtitle: string;
     includedTitle: string;
     includedDesc: string;
     trustTitle: string;
@@ -254,6 +287,7 @@ export type Dictionary = {
     faqTitle: string;
     faqDesc: string;
     formTitle: string;
+    formIntro: string;
     formDefault: string;
   };
   marketplace: {

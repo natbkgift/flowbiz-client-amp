@@ -2,8 +2,10 @@ import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { fetchProperties } from '@/app/_lib/public-api-server';
+import { buildAdvisorWhatsApp, getAdvisoryLabels, getAdvisoryProofs } from '@/app/_lib/public-advisory';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
+import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 const ListingGrid = dynamic(() => import('@/components/listing/ListingGrid').then(m => m.ListingGrid), {
   loading: () => <div className="animate-pulse h-96 rounded bg-slate-100" />,
@@ -22,13 +24,15 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, 'rent', dict.nav.live, dict.home.pathLive.desc, dict.brand.name);
+  return makePageMetadata(locale, 'rent', dict.rent.heroTitle, dict.rent.metaDescription, dict.brand.name);
 }
 
 export default async function RentPage(props: { params: Promise<{ locale: string }> }) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const advisoryLabels = getAdvisoryLabels(locale);
+  const advisoryProofs = getAdvisoryProofs(dict, 2);
 
   let res: Awaited<ReturnType<typeof fetchProperties>>;
   try {
@@ -37,59 +41,104 @@ export default async function RentPage(props: { params: Promise<{ locale: string
     res = { data: [], meta: { page: 1, limit: 60, total: 0 } };  // graceful degradation
   }
 
+  const rentProofs = [dict.rent.availabilityProof, dict.rent.moveInProof, ...advisoryProofs].slice(0, 4);
+
   return (
-    <main id="main-content" className="page-template--catalogue">
+    <main id="main-content" className="page-template--catalogue rent-page decision-page decision-page--confidence">
       <Breadcrumbs
         items={[
             { label: dict.nav.home, href: `/${locale}` },
           { label: dict.nav.live, href: `/${locale}/rent` },
         ]}
       />
-      <section className="hero hero--page">
-        <Container variant="wide">
-          <h1 className="headline">{dict.rent.heroTitle}</h1>
-          <p className="subhead">{dict.rent.heroSub}</p>
-        </Container>
-      </section>
+      <PublicAdvisoryHero
+        eyebrow={dict.rent.eyebrow}
+        title={dict.rent.heroTitle}
+        subtitle={dict.rent.heroSub}
+        proofs={rentProofs}
+        proofsLabel={advisoryLabels.proofsLabel}
+        guidanceLabel={advisoryLabels.guidanceLabel}
+        signals={[
+          {
+            kicker: dict.advisory.bestFor,
+            title: dict.rent.advisorySignals.bestForTitle,
+            body: dict.rent.advisorySignals.bestForBody,
+            icon: 'users',
+          },
+          {
+            kicker: dict.advisory.nextStep,
+            title: dict.rent.advisorySignals.nextStepTitle,
+            body: dict.rent.advisorySignals.nextStepBody,
+            icon: 'check',
+          },
+          {
+            kicker: dict.advisory.trustSignal,
+            title: dict.rent.advisorySignals.trustTitle,
+            body: dict.rent.advisorySignals.trustBody,
+            icon: 'shield',
+          },
+        ]}
+        primaryAction={{
+          href: '#rent-brief',
+          label: dict.rent.primaryAction,
+          eventPayload: { cta: 'rent_brief', from: 'rent_hero' },
+        }}
+        secondaryAction={{
+          href: '#rent-featured',
+          label: dict.rent.secondaryAction,
+          eventPayload: { cta: 'rent_inventory_scan', from: 'rent_hero' },
+        }}
+        tertiaryAction={{
+          href: buildAdvisorWhatsApp(locale, dict, dict.rent.whatsAppMessage),
+          label: dict.cta.whatsapp,
+        }}
+        supportNote={dict.rent.supportNote}
+      />
 
-      <section className="section">
+      <section className="section" id="rent-area-guide">
         <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.areaTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.areaDesc}</p>
         </Container>
       </section>
 
-      <section className="section section--alt">
+      <section className="section section--alt" id="rent-featured">
         <Container variant="wide">
-          <h2 className="section-title mb-4">{dict.rent.featuredTitle}</h2>
+          <div className="section-header">
+            <h2 className="section-title">{dict.rent.featuredTitle}</h2>
+            <p className="section-subtitle">{dict.rent.featuredSubtitle}</p>
+          </div>
           <ListingGrid items={res.data ?? []} />
         </Container>
       </section>
 
-      <section className="section">
+      <section className="section" id="rent-included">
         <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.includedTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.includedDesc}</p>
         </Container>
       </section>
 
-      <section className="section section--alt">
+      <section className="section section--alt" id="rent-trust">
         <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.trustTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.trustDesc}</p>
         </Container>
       </section>
 
-      <section className="section">
+      <section className="section" id="rent-faq">
         <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.faqTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.faqDesc}</p>
         </Container>
       </section>
 
-      <section className="section section--cta">
+      <section className="section section--cta" id="rent-brief">
         <Container variant="wide">
-          <h2 className="section-title mb-3">{dict.rent.formTitle}</h2>
+          <div className="section-header">
+            <h2 className="section-title">{dict.rent.formTitle}</h2>
+            <p className="section-subtitle">{dict.rent.formIntro}</p>
+          </div>
           <LeadForm defaultPurpose="rent" defaultMessage={dict.rent.formDefault} />
         </Container>
       </section>

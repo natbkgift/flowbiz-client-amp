@@ -334,32 +334,86 @@ export const en: Dictionary = {
     channelsTitle: 'Message us',
   },
   sell: {
-    eyebrow: 'Sell',
-    headline: 'List your property',
-    subhead: "Submit your details and we'll review it for listing.",
-    whatHappensNext: 'What happens next',
+    eyebrow: 'Seller advisory',
+    headline: 'Submit a property with pricing and listing context first',
+    subhead: 'Share the essentials once. The team reviews whether the unit is ready for a serious listing conversation before anything is published.',
+    supportNote:
+      'This route is for owners who want a clearer first review on pricing fit, asset facts, and what still needs to be confirmed before a listing draft exists.',
+    primaryAction: 'Start seller brief',
+    secondaryAction: 'See what happens next',
+    reviewProof: 'Local review before draft listing',
+    followUpProof: 'Owner follow-up after fact check',
+    whatsAppMessage: 'Hi AMP Pattaya, I want a seller-side review before listing my property.',
+    advisorySignals: {
+      bestForTitle: 'Owners who want a reality check before listing',
+      bestForBody:
+        'Useful when you need help framing price, photos, paperwork, or whether the unit is market-ready enough to publish.',
+      nextStepTitle: 'Send the brief first, then confirm what is missing',
+      nextStepBody:
+        'A tighter first submission makes it easier to decide whether the next move is a listing draft, more evidence, or a follow-up call.',
+      trustTitle: 'The goal is a cleaner handoff, not instant publication',
+      trustBody:
+        'AMP reviews the submission, filters for missing facts, and only then turns it into a listing-ready conversation.',
+    },
+    whatHappensNext: 'What happens after you send the seller brief',
+    whatHappensIntro:
+      'This is not an auto-publish form. The first pass is meant to confirm facts, spot missing items, and decide what should happen before any draft goes live.',
     steps: [
-      'We review your submission.',
-      'If approved, we create a draft listing for you.',
-      'Our team follows up to confirm details.',
+      'The team reviews pricing context, photos, ownership facts, and sale timeline.',
+      'If the submission is workable, AMP prepares a draft listing or asks for the missing evidence.',
+      'You get a direct follow-up on what to confirm next before the listing is finalized.',
     ],
-    formHeading: 'Seller submission',
-    metaDescription: 'Submit your property for review.',
+    formHeading: 'Start seller brief',
+    formIntro:
+      'Use the form when you are ready to share unit facts, asking price, area, and timing. The reply should move the listing conversation forward, not restart data collection.',
+    metaDescription: 'Send your property for a seller-side review before listing.',
   },
   rent: {
-    heroTitle: 'Rent a Condo in Pattaya — No Ghost Listings, No Hidden Fees',
-    heroSub: 'Fast replies, clear terms, and confirmed availability.',
-    areaTitle: 'Pattaya Area Guide',
-    areaDesc: 'Not sure where to live? Use our quick area guide and tell us your priorities.',
-    featuredTitle: 'Featured Rentals',
-    includedTitle: "What's Included in Every Rental",
-    includedDesc: 'Clear move-in requirements • viewing coordination • transparent fees.',
-    trustTitle: 'Why Rent Through AMP',
-    trustDesc: 'Local team • fast scheduling • we confirm availability before you waste time.',
-    faqTitle: 'Frequently Asked Questions',
-    faqDesc: 'Typical lease terms, deposits, and timelines — ask us anything.',
-    formTitle: "Tell Us What You're Looking For",
-    formDefault: "I'm looking for a rental in Pattaya. My budget and preferred area are...",
+    eyebrow: 'Rental advisory',
+    heroTitle: 'Rent Pattaya with a clearer move-in shortlist',
+    heroSub:
+      'See live rental stock, understand which area fits your stay, and hand the team a brief only after the shortlist starts to make sense.',
+    supportNote:
+      'Use this page to narrow area, budget, and move-in timing first. Then send one rental brief and the team can answer with the units worth scheduling.',
+    primaryAction: 'Send rental brief',
+    secondaryAction: 'Scan live rentals',
+    availabilityProof: 'Confirmed-availability workflow',
+    moveInProof: 'Move-in brief before scheduling',
+    whatsAppMessage:
+      'Hi AMP Pattaya, I want help narrowing a Pattaya rental shortlist around area, budget, and move-in timing.',
+    advisorySignals: {
+      bestForTitle: 'Renters balancing area fit, lease term, and move-in timing',
+      bestForBody:
+        'Useful for relocation, trial stays before buying, or anyone who wants fewer but more workable options.',
+      nextStepTitle: 'Narrow by area and timing, then hand off one clear brief',
+      nextStepBody:
+        'Once you know the stay length and target neighborhoods, the team can respond with units worth scheduling instead of raw volume.',
+      trustTitle: 'Local guidance should reduce wasted viewings',
+      trustBody:
+        'AMP uses availability checks and move-in context so the shortlist stays practical before deposit or travel decisions.',
+    },
+    metaDescription:
+      'Browse Pattaya rentals with clearer area-fit, move-in, and lease guidance before you send one brief to the team.',
+    areaTitle: 'Choose the right Pattaya zone before booking viewings',
+    areaDesc:
+      'Start from lifestyle, commute, and stay length so the team can filter Central Pattaya, Jomtien, or Pratumnak against how you actually plan to live.',
+    featuredTitle: 'Live rentals worth a closer look',
+    featuredSubtitle:
+      'Use this list as a first-pass scan, then involve the team once a few units survive the initial cut.',
+    includedTitle: 'What the team clarifies before you travel or transfer a deposit',
+    includedDesc:
+      'Move-in timing, lease term, deposit structure, utility expectations, and whether the unit is still genuinely available.',
+    trustTitle: 'Why renters use AMP before committing',
+    trustDesc:
+      'The goal is not more options. It is a shorter rental list with area fit, lease reality, and viewing readiness made clear before scheduling.',
+    faqTitle: 'Questions worth settling before the first lease',
+    faqDesc:
+      'Use the form if you need clarity on contract length, deposits, pets, furnishing level, or which area fits a trial stay versus a longer move.',
+    formTitle: 'Send the rental brief once the shortlist is narrower',
+    formIntro:
+      'Share budget, area, move-in timing, and who will live in the unit. The reply should come back as the next set of units worth checking, not another generic list.',
+    formDefault:
+      'I want to rent in Pattaya. My budget, preferred areas, move-in timing, and stay length are...',
   },
   marketplace: {
     title: 'Marketplace',

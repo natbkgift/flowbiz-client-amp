@@ -315,6 +315,7 @@ describe('public design system contract', () => {
     const privacyPage = read('app/(site)/[locale]/privacy/page.tsx');
     const buyPage = read('app/(site)/[locale]/buy/page.tsx');
     const rentPage = read('app/(site)/[locale]/rent/page.tsx');
+    const sellPage = read('app/(site)/[locale]/sell/page.tsx');
     const projectsPage = read('app/(site)/[locale]/projects/page.tsx');
 
     expect(blogArticle).toContain('detail-stack detail-stack--readable');
@@ -332,11 +333,17 @@ describe('public design system contract', () => {
 
     expect(buyPage.match(/variant="wide"/g)?.length).toBe(6);
     expect(buyPage).toContain('page-template--catalogue');
-    expect(rentPage.match(/variant="wide"/g)?.length).toBe(7);
+    expect(rentPage.match(/variant="wide"/g)?.length).toBe(6);
     expect(rentPage).toContain('page-template--catalogue');
+    expect(rentPage).toContain('PublicAdvisoryHero');
+    expect(rentPage).toContain('decision-page--confidence');
+    expect(sellPage).toContain('page-template--narrative');
+    expect(sellPage).toContain('PublicAdvisoryHero');
+    expect(sellPage).toContain('decision-page--confidence');
     expect(projectsPage.match(/variant="wide"/g)?.length).toBe(2);
     expect(projectsPage).toContain('page-template--catalogue');
   });
+
 
   it('keeps the home funnel sequenced around paths, curated stock, trust, and conversion', () => {
     const homePage = read('app/(site)/[locale]/page.tsx');
