@@ -164,6 +164,8 @@ describe('public design system contract', () => {
     expect(propertyCard).toContain('PublicActionRow');
     expect(propertyCard).toContain('PublicChip');
     expect(propertyCard).toContain('btn btn-primary');
+    expect(propertyCard).toContain('property-card__signals');
+    expect(propertyCard).toContain('property-card__media-chip--signal');
 
     expect(publicSectionHeader).toContain('typeClassesByHeading');
     expect(publicSectionHeader).toContain('type-label');

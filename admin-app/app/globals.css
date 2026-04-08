@@ -6961,6 +6961,12 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   text-transform: uppercase;
 }
 
+.property-card__media-chip--signal {
+  background: rgba(255, 248, 239, 0.94);
+  border-color: rgba(7, 19, 39, 0.08);
+  color: rgba(7, 19, 39, 0.88);
+}
+
 .property-card__media-chip--muted {
   background: rgba(255, 248, 239, 0.94);
   border-color: rgba(7, 19, 39, 0.06);
@@ -6968,7 +6974,7 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 }
 
 .property-card__body {
-  gap: 14px;
+  gap: 16px;
   padding: 20px 20px 18px;
 }
 
@@ -6996,13 +7002,25 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .property-card__copy {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .property-card__title {
   margin-bottom: 0;
   font-size: clamp(1.1rem, 2vw, 1.36rem);
   line-height: 1.12;
+}
+
+.property-card__signals {
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.property-card__signal-item {
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 246, 240, 0.88));
+  border-color: rgba(7, 19, 39, 0.06);
 }
 
 .property-card__type {
@@ -7015,6 +7033,7 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 
 .property-card__specs {
   margin-bottom: 0;
+  gap: 8px;
 }
 
 .property-card__location {

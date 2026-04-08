@@ -12,6 +12,16 @@ import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton'
 
 const PROPERTY_CARD_FALLBACK = '/images/property-placeholder.svg';
 
+type PropertyDecisionSignal = {
+  transactionLabel: string;
+  priceLabel: string;
+  fitLabel: string;
+  fitBody: string;
+  nextCheckLabel: string;
+  nextCheckBody: string;
+  primaryCtaLabel: string;
+};
+
 function formatPropertyType(value: string | null | undefined, locale: 'en' | 'th'): string | null {
   const normalized = (value ?? '').trim().toLowerCase();
   if (!normalized) return null;
@@ -46,6 +56,65 @@ function formatPropertySpecs(item: PropertyListItem, locale: 'en' | 'th'): strin
   return specs;
 }
 
+function joinSpecsForSignal(specs: string[]): string | null {
+  if (!specs.length) return null;
+  return specs.join(' • ');
+}
+
+function buildPropertyDecisionSignal(
+  item: PropertyListItem,
+  locale: 'en' | 'th',
+  specsSummary: string | null,
+): PropertyDecisionSignal {
+  const cityLabel = item.city || item.address || (locale === 'th' ? 'ทำเลนี้' : 'this area');
+
+  if (item.type === 'rent') {
+    return {
+      transactionLabel: locale === 'th' ? 'เช่า live' : 'Rental live',
+      priceLabel: locale === 'th' ? 'ค่าเช่า live / เดือน' : 'Live monthly rent',
+      fitLabel: locale === 'th' ? 'เหมาะกับ' : 'Best fit',
+      fitBody: locale === 'th'
+        ? `เหมาะกับคนเช่าที่ต้องคัดยูนิตใน ${cityLabel}${specsSummary ? ` จาก ${specsSummary}` : ''} ก่อนนัดดูจริง`
+        : `Best for renters screening ${cityLabel}${specsSummary ? ` units from ${specsSummary}` : ''} before booking a viewing.`,
+      nextCheckLabel: locale === 'th' ? 'เช็กต่อ' : 'Next check',
+      nextCheckBody: locale === 'th'
+        ? 'เช็กสัญญา ระยะเวลาเข้าอยู่ และรายการเฟอร์นิเจอร์ที่รวมก่อนคุยต่อ'
+        : 'Confirm lease term, move-in timing, and included furnishings before you move forward.',
+      primaryCtaLabel: locale === 'th' ? 'เช็กโจทย์การเช่า' : 'Check rental fit',
+    };
+  }
+
+  if (item.type === 'new') {
+    return {
+      transactionLabel: locale === 'th' ? 'โครงการใหม่' : 'New launch',
+      priceLabel: locale === 'th' ? 'ราคาเปิดขายล่าสุด' : 'Live launch price',
+      fitLabel: locale === 'th' ? 'เหมาะกับ' : 'Best fit',
+      fitBody: locale === 'th'
+        ? `เหมาะกับผู้ซื้อที่ใช้ราคาเปิดขายล่าสุด${specsSummary ? `และ ${specsSummary}` : ''} เพื่อตัดสินใจก่อนคุยเรื่องโควตาและแผนชำระ`
+        : `Best for buyers using the launch-stage price${specsSummary ? ` and ${specsSummary}` : ''} to decide if this unit deserves quota and payment-plan review.`,
+      nextCheckLabel: locale === 'th' ? 'เช็กต่อ' : 'Next check',
+      nextCheckBody: locale === 'th'
+        ? 'เช็กแผนผ่อน โควตาต่างชาติ และกำหนดส่งมอบก่อนเทียบกับตัวเลือกรีเซล'
+        : 'Confirm payment plan, foreign quota, and handover timing before comparing it with resale options.',
+      primaryCtaLabel: locale === 'th' ? 'เช็กโจทย์การซื้อ' : 'Check buy fit',
+    };
+  }
+
+  return {
+    transactionLabel: locale === 'th' ? 'สัญญาณซื้อ' : 'Buy signal',
+    priceLabel: locale === 'th' ? 'ราคาเสนอขาย live' : 'Live asking price',
+    fitLabel: locale === 'th' ? 'เหมาะกับ' : 'Best fit',
+    fitBody: locale === 'th'
+      ? `เหมาะกับผู้ซื้อที่ใช้ราคาเสนอขาย live${specsSummary ? `พร้อม ${specsSummary}` : ''} เพื่อตัดสินใจก่อนลงลึกเรื่องโครงการ เอกสาร หรือการต่อรอง`
+      : `Best for buyers using the live asking price${specsSummary ? ` plus ${specsSummary}` : ''} to decide if this unit deserves deeper project or legal review.`,
+    nextCheckLabel: locale === 'th' ? 'เช็กต่อ' : 'Next check',
+    nextCheckBody: locale === 'th'
+      ? 'เช็กกรรมสิทธิ์ ค่าโอน และสภาพห้องก่อนคุยต่อหรือเริ่มต่อรอง'
+      : 'Confirm ownership structure, transfer costs, and room condition before negotiation.',
+    primaryCtaLabel: locale === 'th' ? 'เช็กโจทย์การซื้อ' : 'Check buy fit',
+  };
+}
+
 export function PropertyCard({
   item,
   dict,
@@ -61,6 +130,9 @@ export function PropertyCard({
   const img = resolveImageUrl(item.cover_image ?? item.local_images?.[0] ?? item.images?.[0] ?? null) ?? PROPERTY_CARD_FALLBACK;
   const propertyTypeLabel = formatPropertyType(item.property_type ?? item.type, locale);
   const propertySpecs = formatPropertySpecs(item, locale);
+  const propertySpecsSummary = joinSpecsForSignal(propertySpecs);
+  const decisionSignal = buildPropertyDecisionSignal(item, locale, propertySpecsSummary);
+  const propertyLocation = item.address || item.city;
 
   return (
     <PublicSurfaceCard as="article" tone="warm" interactive className="property-card">
@@ -81,17 +153,33 @@ export function PropertyCard({
                 {propertyTypeLabel}
               </PublicChip>
             ) : null}
+            <PublicChip size="sm" className="property-card__media-chip property-card__media-chip--signal">
+              {decisionSignal.transactionLabel}
+            </PublicChip>
           </div>
         </div>
 
         <div className="card-content property-card__body">
           <div className="property-card__price-block">
-            <div className="property-card__price-label">{locale === 'th' ? 'ราคา live' : 'Live price'}</div>
+            <div className="property-card__price-label">{decisionSignal.priceLabel}</div>
             <div className="card-price property-card__price">{formatPriceTHB(Number(item.price), locale)}</div>
           </div>
           <div className="property-card__copy">
             <div className="card-title property-card__title">{item.title}</div>
-            <div className="card-location property-card__location">{item.address}</div>
+            <div className="card-location property-card__location">{propertyLocation}</div>
+          </div>
+          <div
+            className="insight-list property-card__signals"
+            aria-label={locale === 'th' ? 'สัญญาณช่วยตัดสินใจของยูนิต' : 'Unit decision signals'}
+          >
+            <div className="insight-list__item property-card__signal-item">
+              <span className="insight-list__title">{decisionSignal.fitLabel}</span>
+              <span className="insight-list__body">{decisionSignal.fitBody}</span>
+            </div>
+            <div className="insight-list__item property-card__signal-item">
+              <span className="insight-list__title">{decisionSignal.nextCheckLabel}</span>
+              <span className="insight-list__body">{decisionSignal.nextCheckBody}</span>
+            </div>
           </div>
           {propertySpecs.length ? (
             <div className="card-specs property-card__specs" aria-label={locale === 'th' ? 'ข้อมูลเบื้องต้นของทรัพย์' : 'Property quick specs'}>
@@ -108,7 +196,7 @@ export function PropertyCard({
       <div className="property-card__actions">
         <PublicActionRow className="card-actions property-card__decision-ladder" stackOnMobile>
           <Link className="btn btn-primary property-card__primary-action" href={href}>
-            {dict.listing.viewDetails}
+            {decisionSignal.primaryCtaLabel}
           </Link>
           <ShortlistSaveButton
             className="property-card__secondary-action"
