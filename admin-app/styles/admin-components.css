@@ -1768,6 +1768,7 @@
     display: -webkit-box;
     overflow: hidden;
     -webkit-box-orient: vertical;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
   }
 
@@ -1786,6 +1787,7 @@
   }
 
   .dashboard-kpi-card--hero .locale-safe {
+    line-clamp: 3;
     -webkit-line-clamp: 3;
   }
 
@@ -3976,6 +3978,43 @@
   .admin-workspace-panel--media-actions .admin-workspace-action-grid--media {
     gap: var(--admin-space-3);
     align-items: start;
+  }
+
+  .admin-media-selection-card,
+  .admin-media-gallery-builder {
+    align-content: start;
+  }
+
+  .admin-media-gallery-queue {
+    display: grid;
+    gap: var(--admin-space-2);
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .admin-media-gallery-queue__item {
+    display: grid;
+    gap: var(--admin-space-2);
+    padding: var(--admin-space-2) 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.68);
+  }
+
+  .admin-media-gallery-queue__item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .admin-media-gallery-queue__copy {
+    display: grid;
+    gap: 4px;
+  }
+
+  .admin-media-gallery-queue__copy span {
+    color: var(--admin-text-soft);
+    font-size: var(--admin-font-size-xs);
+    font-weight: var(--admin-font-weight-semibold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .admin-workspace-panel--imports-run .admin-workspace-result-field textarea,

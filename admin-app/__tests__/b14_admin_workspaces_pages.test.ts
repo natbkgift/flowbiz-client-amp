@@ -45,6 +45,14 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain("invalidGalleryPayload");
     expect(page).toContain("operationResultHint");
     expect(page).toContain("selectionHint");
+    expect(page).toContain("librarySearch");
+    expect(page).toContain("gallerySelection");
+    expect(page).toContain("setGalleryCover(");
+    expect(page).toContain("queueGalleryImage(");
+    expect(page).toContain("moveGalleryImage(");
+    expect(page).toContain("clearGalleryComposer()");
+    expect(page).toContain("galleryBuilderTitle");
+    expect(page).toContain("selectedAssetDescription");
     expect(page).toContain('patchJson: "ข้อมูลอัปเดตแบบ JSON"');
     expect(page).toContain("archiveConfirm");
     expect(page).toContain("window.confirm");
@@ -52,6 +60,7 @@ describe("B14 admin workspace pages contract", () => {
     expect(page).toContain('primaryAction={{ ...stickyPrimaryAction, disabled: !isAuthenticated || opBusy || loading');
     expect(page).toContain('className="state-empty admin-workspace-empty-state"');
     expect(page).toContain("listEmptyTitle");
+    expect(page).toContain("searchEmptyTitle");
     expect(page).toContain("openDashboard");
     expect(page).toContain("openSeo");
     expect(page).toContain('href={withAdminLocale("/admin/dashboard", locale)}');

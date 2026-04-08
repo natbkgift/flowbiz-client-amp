@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ADMIN_AUTH_LOGIN_PATH } from "@/app/_lib/admin-auth";
 import { detectAdminLocale, type AdminLocale, withAdminLocale } from "@/app/_lib/admin-i18n";
@@ -42,6 +42,11 @@ type MediaItem = {
   approval_status: string | null;
   source_url: string | null;
   updated_at: string | null;
+};
+
+type GallerySelectionItem = {
+  id: string;
+  storage_path: string;
 };
 
 type MediaListResponse = {
@@ -143,6 +148,21 @@ const copy = {
     replaceDescription: "Replace an existing media file while preserving the current record and references.",
     galleryDescription: "Apply gallery payloads to property or project targets from the same workspace.",
     mediaListDescription: "Recent media assets with approval, rights, status, and quick-select actions.",
+    searchLibrary: "Search library",
+    searchLibraryPlaceholder: "Search by path, status, approval, or rights",
+    selectedAsset: "Selected asset",
+    selectedAssetDescription: "This record is ready for get, patch, archive, restore, usage, or replace actions.",
+    queueForGallery: "Queue image",
+    setAsCover: "Set cover",
+    galleryBuilderTitle: "Gallery builder",
+    galleryBuilderDescription: "Build the cover image and ordered gallery list from selected local assets before applying the existing gallery endpoint.",
+    galleryBuilderHint: "Builder actions rewrite the JSON payload below so operators do not have to hand-order media paths.",
+    galleryQueueEmpty: "No gallery assets queued yet. Use library actions to set a cover or add images.",
+    clearGalleryBuilder: "Clear builder",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    remove: "Remove",
+    selectedInRecord: "Selected in record tools",
     property: "property",
     project: "project",
     path: "Path",
@@ -168,6 +188,8 @@ const copy = {
     sessionHint: "Use dashboard for health context, then return here to fix the exact media record, rights, or gallery action without losing session context.",
     listEmptyTitle: "No media records loaded yet",
     listEmptyBody: "Refresh the workspace or upload one asset, then use dashboard and SEO views to verify follow-on publishing effects.",
+    searchEmptyTitle: "No media matched this search",
+    searchEmptyBody: "Try another path, status, approval, or rights keyword to narrow the library.",
   },
   th: {
     eyebrow: "งานจัดการสื่อ",
@@ -244,6 +266,21 @@ const copy = {
     replaceDescription: "แทนที่ไฟล์สื่อเดิมโดยคงเรคอร์ดและการอ้างอิงเดิมไว้",
     galleryDescription: "ส่งเพย์โหลดแกลเลอรีไปยังทรัพย์หรือโครงการจากหน้าเดียวกัน",
     mediaListDescription: "รายการสื่อล่าสุด พร้อมสถานะการอนุมัติ สิทธิ์ และปุ่มเลือกใช้งานทันที",
+    searchLibrary: "ค้นหาในคลังสื่อ",
+    searchLibraryPlaceholder: "ค้นหาจากพาธ สถานะ การอนุมัติ หรือสิทธิ์",
+    selectedAsset: "asset ที่เลือกอยู่",
+    selectedAssetDescription: "รายการนี้พร้อมใช้กับคำสั่งดูข้อมูล อัปเดต เก็บเข้าคลัง กู้คืน ดูการใช้งาน หรือแทนที่ไฟล์",
+    queueForGallery: "เพิ่มเข้า gallery",
+    setAsCover: "ตั้งเป็นภาพปก",
+    galleryBuilderTitle: "ตัวจัด gallery",
+    galleryBuilderDescription: "ประกอบ cover image และลำดับรูปจาก asset โลคัลที่เลือกไว้ ก่อนส่งเข้า gallery endpoint เดิมของระบบ",
+    galleryBuilderHint: "ทุก action ใน builder จะเขียน payload JSON ด้านล่างให้อัตโนมัติ เพื่อลดการจัดลำดับพาธด้วยมือ",
+    galleryQueueEmpty: "ยังไม่มี asset ในคิว gallery ใช้ action จากรายการสื่อเพื่อกำหนดภาพปกหรือเพิ่มรูปก่อน",
+    clearGalleryBuilder: "ล้างตัวจัด gallery",
+    moveUp: "เลื่อนขึ้น",
+    moveDown: "เลื่อนลง",
+    remove: "นำออก",
+    selectedInRecord: "เลือกแล้วในเครื่องมือ record",
     property: "ทรัพย์",
     project: "โครงการ",
     path: "พาธ",
@@ -269,6 +306,8 @@ const copy = {
     sessionHint: "ใช้แดชบอร์ดดูภาพรวมสุขภาพระบบก่อน แล้วกลับมาแก้รายการสื่อ สิทธิ์ หรือ gallery action ที่หน้านี้ต่อได้โดยไม่หลุดบริบท",
     listEmptyTitle: "ยังไม่มีรายการสื่อที่โหลดเข้ามา",
     listEmptyBody: "รีเฟรช workspace หรืออัปโหลดสื่อหนึ่งรายการก่อน แล้วใช้ dashboard และ SEO เพื่อตรวจผลต่อเนื่องก่อนเผยแพร่",
+    searchEmptyTitle: "ไม่พบรายการสื่อตามคำค้นนี้",
+    searchEmptyBody: "ลองเปลี่ยนคำค้นจากพาธ สถานะ การอนุมัติ หรือสิทธิ์ เพื่อกรองคลังสื่อใหม่",
   },
 };
 
@@ -364,6 +403,21 @@ function translateMediaValue(value: string | null | undefined, t: (typeof copy)[
   return raw;
 }
 
+function toMediaPath(value: string | null | undefined): string {
+  return String(value || "").trim();
+}
+
+function toGalleryPayloadValue(coverImage: string | null, images: GallerySelectionItem[]): string {
+  return JSON.stringify(
+    {
+      cover_image: coverImage,
+      images: images.map((item) => item.storage_path),
+    },
+    null,
+    2,
+  );
+}
+
 export default function AdminMediaPage() {
   const [locale, setLocale] = useState<Locale>(() => detectLocale());
   const [activeTab, setActiveTab] = useState<"library" | "upload" | "record" | "gallery">("library");
@@ -378,6 +432,7 @@ export default function AdminMediaPage() {
   const [pageError, setPageError] = useState<string | null>(null);
   const [integrity, setIntegrity] = useState<IntegritySummary | null>(null);
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [librarySearch, setLibrarySearch] = useState("");
 
   const [opBusy, setOpBusy] = useState(false);
   const [opError, setOpError] = useState<string | null>(null);
@@ -391,6 +446,8 @@ export default function AdminMediaPage() {
   const [galleryTargetType, setGalleryTargetType] = useState<"property" | "project">("property");
   const [galleryTargetId, setGalleryTargetId] = useState("");
   const [galleryPayload, setGalleryPayload] = useState('{"cover_image": null, "images": []}');
+  const [galleryCoverImage, setGalleryCoverImage] = useState<string | null>(null);
+  const [gallerySelection, setGallerySelection] = useState<GallerySelectionItem[]>([]);
 
   useEffect(() => {
     setLocale(detectLocale());
@@ -402,6 +459,20 @@ export default function AdminMediaPage() {
 
   const t = copy[locale];
   const isAuthenticated = authToken.trim().length > 0;
+  const filteredItems = useMemo(() => {
+    const keyword = librarySearch.trim().toLowerCase();
+    if (!keyword) return items;
+    return items.filter((item) => {
+      const candidates = [item.id, item.storage_path, item.status, item.approval_status, item.rights_status]
+        .map((value) => String(value || "").trim().toLowerCase())
+        .filter(Boolean);
+      return candidates.some((value) => value.includes(keyword));
+    });
+  }, [items, librarySearch]);
+  const selectedMediaRecord = useMemo(
+    () => items.find((item) => item.id === mediaId.trim()) || null,
+    [items, mediaId],
+  );
 
   useEffect(() => {
     if (!authToken.trim()) return;
@@ -538,6 +609,59 @@ export default function AdminMediaPage() {
         setUploadTitle("");
       },
     });
+  }
+
+  function updateGalleryComposer(nextCoverImage: string | null, nextImages: GallerySelectionItem[]) {
+    setGalleryCoverImage(nextCoverImage);
+    setGallerySelection(nextImages);
+    setGalleryPayload(toGalleryPayloadValue(nextCoverImage, nextImages));
+  }
+
+  function selectMediaRecordForActions(item: MediaItem) {
+    setMediaId(item.id);
+    setOpError(null);
+    setOpNotice(null);
+  }
+
+  function queueGalleryImage(item: MediaItem) {
+    const storagePath = toMediaPath(item.storage_path);
+    if (!storagePath) return;
+    const existing = gallerySelection.find((entry) => entry.storage_path === storagePath);
+    if (existing) {
+      setActiveTab("gallery");
+      return;
+    }
+    updateGalleryComposer(galleryCoverImage, [...gallerySelection, { id: item.id, storage_path: storagePath }]);
+    setActiveTab("gallery");
+  }
+
+  function setGalleryCover(item: MediaItem) {
+    const storagePath = toMediaPath(item.storage_path);
+    if (!storagePath) return;
+    const nextImages = gallerySelection.some((entry) => entry.storage_path === storagePath)
+      ? gallerySelection
+      : [...gallerySelection, { id: item.id, storage_path: storagePath }];
+    updateGalleryComposer(storagePath, nextImages);
+    setActiveTab("gallery");
+  }
+
+  function moveGalleryImage(index: number, direction: -1 | 1) {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= gallerySelection.length) return;
+    const nextImages = [...gallerySelection];
+    const [moved] = nextImages.splice(index, 1);
+    nextImages.splice(nextIndex, 0, moved);
+    updateGalleryComposer(galleryCoverImage, nextImages);
+  }
+
+  function removeGalleryImage(storagePath: string) {
+    const nextImages = gallerySelection.filter((entry) => entry.storage_path !== storagePath);
+    const nextCoverImage = galleryCoverImage === storagePath ? null : galleryCoverImage;
+    updateGalleryComposer(nextCoverImage, nextImages);
+  }
+
+  function clearGalleryComposer() {
+    updateGalleryComposer(null, []);
   }
 
   async function runGetAction() {
@@ -800,6 +924,16 @@ export default function AdminMediaPage() {
               </ActionCard>
 
               <ActionCard title={t.crudTitle} description={t.crudDescription} icon="refresh">
+                {selectedMediaRecord ? (
+                  <div className="admin-workspace-prerequisite admin-media-selection-card">
+                    <strong>{t.selectedAsset}</strong>
+                    <p className="locale-safe">{t.selectedAssetDescription}</p>
+                    <div className="admin-workspace-inline-metrics">
+                      <AdminBadge tone="info">{selectedMediaRecord.storage_path || selectedMediaRecord.id}</AdminBadge>
+                      <AdminBadge tone="neutral">{t.selectedInRecord}</AdminBadge>
+                    </div>
+                  </div>
+                ) : null}
                 <label className="field" htmlFor="media-id">
                   <span>{t.mediaId}</span>
                   <input
@@ -887,6 +1021,49 @@ export default function AdminMediaPage() {
               </ActionCard>
 
               <ActionCard title={t.galleryOps} description={t.galleryDescription} icon="media">
+                <div className="admin-workspace-prerequisite admin-media-gallery-builder">
+                  <strong>{t.galleryBuilderTitle}</strong>
+                  <p className="locale-safe">{t.galleryBuilderDescription}</p>
+                  <p className="admin-input__hint">{t.galleryBuilderHint}</p>
+                  <div className="admin-workspace-inline-metrics">
+                    <AdminBadge tone={galleryCoverImage ? "ok" : "neutral"}>
+                      {t.setAsCover}: {galleryCoverImage || "-"}
+                    </AdminBadge>
+                    <AdminBadge tone={gallerySelection.length > 0 ? "info" : "neutral"}>
+                      {t.queueForGallery}: {gallerySelection.length}
+                    </AdminBadge>
+                  </div>
+                  {gallerySelection.length > 0 ? (
+                    <ol className="admin-media-gallery-queue">
+                      {gallerySelection.map((item, index) => (
+                        <li key={`${item.id}-${item.storage_path}`} className="admin-media-gallery-queue__item">
+                          <div className="admin-media-gallery-queue__copy">
+                            <strong>{index + 1}. {item.storage_path}</strong>
+                            {galleryCoverImage === item.storage_path ? <span>{t.setAsCover}</span> : null}
+                          </div>
+                          <div className="card-actions">
+                            <AdminButton variant="secondary" size="sm" type="button" disabled={index === 0} onClick={() => moveGalleryImage(index, -1)}>
+                              {t.moveUp}
+                            </AdminButton>
+                            <AdminButton variant="secondary" size="sm" type="button" disabled={index === gallerySelection.length - 1} onClick={() => moveGalleryImage(index, 1)}>
+                              {t.moveDown}
+                            </AdminButton>
+                            <AdminButton variant="secondary" size="sm" type="button" onClick={() => removeGalleryImage(item.storage_path)}>
+                              {t.remove}
+                            </AdminButton>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <div className="state-empty admin-workspace-empty-state">{t.galleryQueueEmpty}</div>
+                  )}
+                  <div className="card-actions">
+                    <AdminButton variant="secondary" size="sm" type="button" disabled={!gallerySelection.length && !galleryCoverImage} onClick={clearGalleryComposer}>
+                      {t.clearGalleryBuilder}
+                    </AdminButton>
+                  </div>
+                </div>
                 <label className="field" htmlFor="gallery-target-type">
                   <span>{t.galleryTargetType}</span>
                   <select
@@ -964,10 +1141,20 @@ export default function AdminMediaPage() {
             icon="table"
             titleTag="h2"
           >
-            {items.length === 0 ? (
+            <label className="field" htmlFor="media-library-search">
+              <span>{t.searchLibrary}</span>
+              <input
+                id="media-library-search"
+                type="search"
+                placeholder={t.searchLibraryPlaceholder}
+                value={librarySearch}
+                onChange={(event) => setLibrarySearch(event.target.value)}
+              />
+            </label>
+            {filteredItems.length === 0 ? (
               <div className="state-empty admin-workspace-empty-state" role="status">
-                <strong>{t.listEmptyTitle}</strong>
-                <p className="locale-safe">{t.listEmptyBody}</p>
+                <strong>{items.length === 0 ? t.listEmptyTitle : t.searchEmptyTitle}</strong>
+                <p className="locale-safe">{items.length === 0 ? t.listEmptyBody : t.searchEmptyBody}</p>
                 <div className="card-actions">
                   <Link className="admin-button admin-button--secondary admin-button--sm" href={withAdminLocale("/admin/dashboard", locale)}>
                     {t.openDashboard}
@@ -993,7 +1180,7 @@ export default function AdminMediaPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {items.map((item) => (
+                        {filteredItems.map((item) => (
                           <tr key={item.id}>
                             <td>{item.storage_path || "-"}</td>
                             <td>{translateMediaValue(item.status, t)}</td>
@@ -1001,9 +1188,17 @@ export default function AdminMediaPage() {
                             <td>{translateMediaValue(item.rights_status, t)}</td>
                             <td>{prettyDate(item.updated_at, locale)}</td>
                             <td>
-                              <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setMediaId(item.id)}>
-                                {t.select}
-                              </AdminButton>
+                              <div className="card-actions">
+                                <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => selectMediaRecordForActions(item)}>
+                                  {t.select}
+                                </AdminButton>
+                                <AdminButton variant="secondary" size="sm" type="button" onClick={() => setGalleryCover(item)}>
+                                  {t.setAsCover}
+                                </AdminButton>
+                                <AdminButton variant="secondary" size="sm" type="button" onClick={() => queueGalleryImage(item)}>
+                                  {t.queueForGallery}
+                                </AdminButton>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1013,14 +1208,14 @@ export default function AdminMediaPage() {
                 )}
                 mobile={(
                   <div className="admin-mobile-record-list" aria-label={t.mediaList}>
-                    {items.map((item) => (
+                    {filteredItems.map((item) => (
                       <article key={item.id} className="dashboard-table-card admin-mobile-record-card">
                         <div className="dashboard-table-card-head">
                           <div>
                             <h3 className="dashboard-table-card-name">{item.storage_path || "-"}</h3>
                             <p>{prettyDate(item.updated_at, locale)}</p>
                           </div>
-                          <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => setMediaId(item.id)}>
+                          <AdminButton variant="secondary" size="sm" icon="search" type="button" onClick={() => selectMediaRecordForActions(item)}>
                             {t.select}
                           </AdminButton>
                         </div>
@@ -1037,6 +1232,14 @@ export default function AdminMediaPage() {
                             <span>{t.rights}</span>
                             <strong>{translateMediaValue(item.rights_status, t)}</strong>
                           </div>
+                        </div>
+                        <div className="card-actions">
+                          <AdminButton variant="secondary" size="sm" type="button" onClick={() => setGalleryCover(item)}>
+                            {t.setAsCover}
+                          </AdminButton>
+                          <AdminButton variant="secondary" size="sm" type="button" onClick={() => queueGalleryImage(item)}>
+                            {t.queueForGallery}
+                          </AdminButton>
                         </div>
                       </article>
                     ))}
