@@ -120,12 +120,115 @@ describe('ShortlistListSurface', () => {
       );
     });
     expect(screen.getByText(/best next move: compare 2 saved projects/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /turn this shortlist into the next decision round/i })).toBeTruthy();
+    expect(screen.getByText('2 compare-ready projects')).toBeTruthy();
+    expect(screen.getByText(/compare-ready project ids travel with the advisor link/i)).toBeTruthy();
     expect(screen.getByRole('link', { name: /send this shortlist for advisor review/i }).getAttribute('href')).toBe(
-      '/en/contact?intent=project_shortlist&source=shortlist_contact&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
+      '/en/contact?intent=project_shortlist&source=shortlist_contact&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium&compare_ids=project-1%2Cproject-2',
     );
     expect(screen.getByRole('link', { name: /keep adding listings/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.getByText('Alpha Project')).toBeTruthy();
     expect(screen.getByText('Beta Project')).toBeTruthy();
+  });
+
+  it('does not misroute the primary shortlist CTA while compare-ready projects are still resolving', async () => {
+    const propertyOneDeferred = createDeferred<Response>();
+    const propertyTwoDeferred = createDeferred<Response>();
+
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/v1/shortlists/current?')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            shortlist: {
+              id: 'shortlist-1',
+              owner_type: 'session',
+              owner_key: 'owner-12345678',
+              status: 'active',
+              title: null,
+              intent: null,
+              share_mode: null,
+              source_context: null,
+              created_at: '2026-03-15T00:00:00Z',
+              updated_at: '2026-03-15T00:00:00Z',
+              last_viewed_at: null,
+              item_count: 2,
+              items: [
+                {
+                  property_id: 'property-1',
+                  slug: 'alpha-residence',
+                  title: 'Alpha Residence',
+                  project: 'Alpha Project',
+                  location: 'Central Pattaya',
+                  price: 6200000,
+                  size: 56,
+                  bedrooms: 2,
+                  bathrooms: 2,
+                  image: null,
+                  status: 'published',
+                  foreign_quota: false,
+                  position: 0,
+                  added_at: '2026-03-15T00:00:00Z',
+                  source_surface: 'property_detail',
+                },
+                {
+                  property_id: 'property-2',
+                  slug: 'beta-residence',
+                  title: 'Beta Residence',
+                  project: 'Beta Project',
+                  location: 'Jomtien',
+                  price: 4900000,
+                  size: 48,
+                  bedrooms: 1,
+                  bathrooms: 1,
+                  image: null,
+                  status: 'published',
+                  foreign_quota: false,
+                  position: 1,
+                  added_at: '2026-03-15T00:00:00Z',
+                  source_surface: 'buy_listing_card',
+                },
+              ],
+            },
+          }),
+        } as Response);
+      }
+
+      if (url.includes('/api/v1/properties/property-1?')) {
+        return propertyOneDeferred.promise;
+      }
+
+      if (url.includes('/api/v1/properties/property-2?')) {
+        return propertyTwoDeferred.promise;
+      }
+
+      throw new Error(`Unexpected fetch ${url}`);
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<ShortlistListSurface locale="en" />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Alpha Residence' })).toBeTruthy();
+    });
+
+    expect(screen.getByRole('button', { name: /preparing compare-ready projects/i })).toBeDisabled();
+    expect(screen.queryByRole('link', { name: /add one more listing first/i })).toBeNull();
+
+    propertyOneDeferred.resolve({
+      ok: true,
+      json: async () => ({ project_id: 'project-1' }),
+    } as Response);
+    propertyTwoDeferred.resolve({
+      ok: true,
+      json: async () => ({ project_id: 'project-2' }),
+    } as Response);
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: /compare 2 saved projects/i })).toBeTruthy();
+    });
   });
 
   it('renders an empty state when the shortlist has no items', async () => {
@@ -321,6 +424,8 @@ describe('ShortlistListSurface', () => {
     });
 
     expect(screen.queryByRole('link', { name: /compare saved projects/i })).toBeNull();
+    expect(screen.getByRole('heading', { name: /strengthen this shortlist before compare/i })).toBeTruthy();
+    expect(screen.getByText(/one more save makes compare useful/i)).toBeTruthy();
     expect(screen.getByRole('link', { name: /add one more listing first/i }).getAttribute('href')).toBe('/en/buy');
     expect(screen.getByRole('link', { name: /review this shortlist with an advisor/i }).getAttribute('href')).toBe(
       '/en/contact?intent=project_shortlist&source=shortlist_contact&projects=Alpha+Project&buyer_fit=shortlist_narrowing&signal_level=medium',

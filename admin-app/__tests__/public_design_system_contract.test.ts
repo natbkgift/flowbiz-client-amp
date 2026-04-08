@@ -202,6 +202,23 @@ describe('public design system contract', () => {
     expect(globals).toContain('.listing-guidance-card--empty .listing-guidance-card__list .insight-list__item');
   });
 
+  it('keeps shortlist conversion guidance on shared surface, action, chip, and section primitives', () => {
+    const shortlistListSurface = read('components/shortlist/ShortlistListSurface.tsx');
+    const globals = read('app/globals.css');
+
+    expect(shortlistListSurface).toContain('PublicSurfaceCard');
+    expect(shortlistListSurface).toContain('PublicActionRow');
+    expect(shortlistListSurface).toContain('PublicSectionHeader');
+    expect(shortlistListSurface).toContain('PublicChip');
+    expect(shortlistListSurface).toContain('shortlist-conversion-pack');
+    expect(shortlistListSurface).toContain('compareIds: compareReady ? compareProjectIds : undefined');
+
+    expect(globals).toContain('.shortlist-surface__summary-signals');
+    expect(globals).toContain('.shortlist-conversion-pack');
+    expect(globals).toContain('.shortlist-conversion-card');
+    expect(globals).toContain('.shortlist-conversion-card--handoff .insight-list__item');
+  });
+
   it('keeps decision detail routes on the shared public hero system', () => {
     const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
     const propertyDetail = read('app/(site)/[locale]/property/[slug]/page.tsx');

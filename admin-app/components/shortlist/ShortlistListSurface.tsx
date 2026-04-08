@@ -7,7 +7,11 @@ import { useEffect, useState } from 'react';
 import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
+import { PublicActionRow } from '@/components/public/PublicActionRow';
+import { PublicChip } from '@/components/public/PublicChip';
+import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
+import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { EmptyStateCard, InlineStatusMessage } from '@/components/ui/StateBlocks';
 import { trackEvent } from '@/lib/analytics';
 import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, publishShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
@@ -77,6 +81,181 @@ function getShortlistSummaryContent(input: {
       : `This shortlist currently has ${itemCount} saved listing${itemCount === 1 ? '' : 's'}, but compare only becomes decision-useful once at least 2 projects resolve in the same frame. Add one more strong option first, or send this shortlist to the team if the search is already narrowing.`,
     primaryLabel: locale === 'th' ? 'เพิ่มอีก 1 ตัวเลือกก่อน' : 'Add one more listing first',
     browseUtilityLabel: null,
+  };
+}
+
+function summarizeProjectNames(names: string[], locale: 'en' | 'th'): string {
+  const uniqueNames = Array.from(new Set(names.filter(Boolean)));
+
+  if (!uniqueNames.length) {
+    return locale === 'th' ? 'shortlist ชุดนี้' : 'this shortlist';
+  }
+
+  if (uniqueNames.length <= 2) {
+    return uniqueNames.join(', ');
+  }
+
+  const visibleNames = uniqueNames.slice(0, 2).join(', ');
+  const hiddenCount = uniqueNames.length - 2;
+  return locale === 'th'
+    ? `${visibleNames} และอีก ${hiddenCount} รายการ`
+    : `${visibleNames}, and ${hiddenCount} more`;
+}
+
+type ShortlistConversionCard = {
+  key: string;
+  title: string;
+  body: string;
+  lines: string[];
+  tone: 'light' | 'warm' | 'deep';
+};
+
+function buildShortlistConversionPack(input: {
+  locale: 'en' | 'th';
+  itemCount: number;
+  compareProjectCount: number;
+  shortlistNames: string[];
+  compareProjectNames: string[];
+}) {
+  const { locale, itemCount, compareProjectCount, shortlistNames, compareProjectNames } = input;
+  const compareReady = compareProjectCount >= 2;
+  const shortlistNameSummary = summarizeProjectNames(shortlistNames, locale);
+  const compareNameSummary = summarizeProjectNames(compareProjectNames, locale);
+
+  if (compareReady) {
+    return {
+      kicker: locale === 'th' ? 'Shortlist พร้อมเข้าสู่ decision round' : 'Compare-ready shortlist',
+      title: locale === 'th' ? 'เปลี่ยน shortlist นี้ให้เป็น decision round ถัดไป' : 'Turn this shortlist into the next decision round',
+      subtitle: locale === 'th'
+        ? 'ตอนนี้ shortlist ชุดนี้พร้อมสำหรับการอ่าน trade-off แบบ side-by-side แล้ว จากนั้นค่อยส่ง context เดิมต่อให้ทีมถ้าผู้ชนะยังต้อง pressure-test เพิ่ม'
+        : 'This shortlist is already strong enough for a side-by-side compare. Use that round to cut weaker options, then hand the same frame to the team if the winner still needs pressure-testing.',
+      cards: [
+        {
+          key: 'status',
+          title: locale === 'th' ? 'shortlist นี้ยืนยันอะไรได้แล้ว' : 'What this shortlist already confirms',
+          body: locale === 'th'
+            ? 'ตอนนี้คุณไม่ได้อยู่ในโหมด browse กว้าง ๆ แล้ว แต่กำลังอยู่ใน shortlist ที่พอจะตัดสินใจรอบจริงได้'
+            : 'This is no longer a raw browsing state. The shortlist is already narrow enough to support a real decision round.',
+          lines: [
+            locale === 'th'
+              ? `${itemCount} listing ที่บันทึกไว้กำลังถูกอ่านใน shortlist นี้`
+              : `${itemCount} saved listings are active in this shortlist review.`,
+            locale === 'th'
+              ? `${compareProjectCount} โครงการ resolve เข้าสู่ compare frame เดียวกันได้แล้ว`
+              : `${compareProjectCount} projects already resolve into the same compare frame.`,
+            locale === 'th'
+              ? 'ขั้นนี้เหมาะกับการ pressure-test ผู้ชนะ ไม่ใช่การกลับไปเริ่มค้นหาใหม่'
+              : 'This stage is for pressure-testing likely winners, not restarting discovery.',
+          ],
+          tone: 'light',
+        },
+        {
+          key: 'next',
+          title: locale === 'th' ? 'ใช้ compare เพื่อตัดตัวเลือกที่อ่อนกว่า' : 'Use compare to remove weaker options',
+          body: locale === 'th'
+            ? 'Compare คือ step ที่คุ้มที่สุดตอนนี้ เพราะช่วยอ่าน trade-off ก่อนส่งต่อให้ทีม'
+            : 'Compare is the highest-value next move because it forces the trade-offs into one frame before advisor review.',
+          lines: [
+            locale === 'th'
+              ? `เปิด compare ด้วย ${compareNameSummary}`
+              : `Open compare with ${compareNameSummary}.`,
+            locale === 'th'
+              ? 'กลับมาที่ shortlist นี้หลังดูตาราง เพื่อเก็บผู้ชนะและตัดรายการที่อ่อนลง'
+              : 'Return to this shortlist after the table to keep the winner and remove weaker options.',
+            locale === 'th'
+              ? 'ถ้าผลยังไม่ขาด ค่อยส่ง shortlist frame เดิมนี้ต่อให้ทีมโดยไม่ต้องอธิบายใหม่'
+              : 'If the result is still not decisive, send the same shortlist frame to the team without rebuilding the brief.',
+          ],
+          tone: 'warm',
+        },
+        {
+          key: 'handoff',
+          title: locale === 'th' ? 'สิ่งที่ถูกพกต่อไปยังทีม' : 'What carries into advisor handoff',
+          body: locale === 'th'
+            ? 'Contact route ควรเห็น shortlist และ compare-ready frame เดียวกับที่คุณกำลังใช้อยู่ตอนนี้'
+            : 'The contact route should receive the same shortlist and compare-ready frame you are using now.',
+          lines: [
+            locale === 'th'
+              ? `โครงการในบริบทนี้: ${shortlistNameSummary}`
+              : `Projects in scope: ${shortlistNameSummary}.`,
+            locale === 'th'
+              ? 'compare-ready project IDs จะถูกพกไปกับ advisor link ด้วย'
+              : 'Compare-ready project IDs travel with the advisor link.',
+            locale === 'th'
+              ? 'หลัง compare แล้วคุณไม่ต้องสรุป shortlist ซ้ำอีกครั้ง'
+              : 'You do not need to restate the shortlist after compare.',
+          ],
+          tone: 'light',
+        },
+      ] satisfies ShortlistConversionCard[],
+    };
+  }
+
+  return {
+    kicker: locale === 'th' ? 'Shortlist ยังอยู่ในขั้น narrowing' : 'Shortlist still narrowing',
+    title: locale === 'th' ? 'เสริม shortlist นี้ให้พร้อมก่อนเข้า compare' : 'Strengthen this shortlist before compare',
+    subtitle: locale === 'th'
+      ? 'ตอนนี้ shortlist ชุดนี้ยังขาดอีกอย่างน้อย 1 โครงการที่ผูกกับ compare frame เดียวกัน ดังนั้น step ที่คุ้มกว่าคือเพิ่ม save อีก 1 ตัวเลือกหรือส่ง shortlist ปัจจุบันให้ทีมช่วยคัดต่อ'
+      : 'This shortlist is still at least one project short of a meaningful compare, so the higher-value move is either one more save or an advisor review on the current shortlist.',
+    cards: [
+      {
+        key: 'status',
+        title: locale === 'th' ? 'shortlist นี้ยืนยันอะไรได้แล้ว' : 'What this shortlist already confirms',
+        body: locale === 'th'
+          ? 'การค้นหาเริ่มแคบลงแล้ว แต่ compare ยังไม่พร้อมพอสำหรับตารางที่มีน้ำหนัก'
+          : 'The search is clearly narrowing, but compare is not ready for a meaningful table yet.',
+        lines: [
+          locale === 'th'
+            ? `${itemCount} listing ที่บันทึกไว้กำลังถูกอ่านใน shortlist นี้`
+            : `${itemCount} saved listing${itemCount === 1 ? '' : 's'} are active in this shortlist review.`,
+          locale === 'th'
+            ? `${compareProjectCount} โครงการที่ผูกกับ compare frame ถูก resolve ได้ตอนนี้`
+            : `${compareProjectCount} project-backed option${compareProjectCount === 1 ? '' : 's'} currently resolve for compare.`,
+          locale === 'th'
+            ? 'หน้านี้ยังเป็นพื้นที่ owner-safe สำหรับเก็บ ตัด หรือแชร์ตัวเลือกเดิมต่อได้'
+            : 'This page remains the owner-safe place to keep, cut, or share the current options.',
+        ],
+        tone: 'light',
+      },
+      {
+        key: 'next',
+        title: locale === 'th' ? 'อีก 1 save จะทำให้ compare คุ้มขึ้น' : 'One more save makes compare useful',
+        body: locale === 'th'
+          ? 'Compare จะเริ่มมีน้ำหนักเมื่ออย่างน้อย 2 โครงการ resolve อยู่ในเฟรมเดียวกัน'
+          : 'Compare only becomes decision-useful once at least 2 projects resolve in the same frame.',
+        lines: [
+          locale === 'th'
+            ? 'เพิ่มอีก 1 project-backed listing จากหน้า buy หรือ property detail'
+            : 'Add one more project-backed listing from buy or property detail.',
+          locale === 'th'
+            ? 'ถ้าการค้นหาแคบพอแล้ว คุณข้ามไป advisor review ด้วย shortlist ชุดนี้ได้ทันที'
+            : 'If the search is already tight, skip straight to advisor review with this shortlist.',
+          locale === 'th'
+            ? 'เมื่อมีตัวเลือกสดอีก 1 ตัวในเฟรมนี้ ค่อยกลับมาเปิด compare'
+            : 'Come back once one more live project belongs in this frame.',
+        ],
+        tone: 'warm',
+      },
+      {
+        key: 'handoff',
+        title: locale === 'th' ? 'สิ่งที่ยังพกต่อไปยังทีมได้' : 'What still carries into advisor handoff',
+        body: locale === 'th'
+          ? 'แม้ compare จะยังไม่พร้อม แต่ shortlist ปัจจุบันก็ส่งต่อให้ทีมช่วยคัดต่อได้แล้ว'
+          : 'Even before compare is ready, the current shortlist can still move forward into advisor review.',
+        lines: [
+          locale === 'th'
+            ? `โครงการในบริบทนี้: ${shortlistNameSummary}`
+            : `Projects in scope: ${shortlistNameSummary}.`,
+          locale === 'th'
+            ? 'advisor link จะพกชื่อ shortlist และ stage ของการตัดสินใจนี้ต่อไปด้วย'
+            : 'The advisor link keeps the shortlist names and this decision stage together.',
+          locale === 'th'
+            ? 'ทีมช่วยชี้ได้ว่าควรเก็บ ตัด หรือแทนตัวเลือกไหนก่อน compare จะพร้อม'
+            : 'The team can suggest what to keep, cut, or replace before compare is ready.',
+        ],
+        tone: 'light',
+      },
+    ] satisfies ShortlistConversionCard[],
   };
 }
 
@@ -303,7 +482,34 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     itemCount: items.length,
     compareProjectCount: compareProjects.length,
   });
+  const shortlistConversionPack = buildShortlistConversionPack({
+    locale,
+    itemCount: items.length,
+    compareProjectCount: compareProjects.length,
+    shortlistNames: shortlistProjectNames,
+    compareProjectNames,
+  });
   const advisorLabel = getShortlistAdvisorLabel(locale, compareReady);
+  const summarySignals = [
+    {
+      label: locale === 'th' ? `${items.length} รายการที่บันทึกไว้` : `${items.length} saved listing${items.length === 1 ? '' : 's'}`,
+      tone: 'neutral' as const,
+    },
+    {
+      label: isResolvingCompare
+        ? (locale === 'th' ? 'กำลังเตรียม compare-ready projects' : 'Preparing compare-ready projects')
+        : compareReady
+          ? (locale === 'th' ? `${compareProjects.length} โครงการพร้อม compare` : `${compareProjects.length} compare-ready projects`)
+          : (locale === 'th' ? `${compareProjects.length} โครงการที่ resolve ได้` : `${compareProjects.length} project-backed option${compareProjects.length === 1 ? '' : 's'}`),
+      tone: isResolvingCompare ? 'neutral' as const : compareReady ? 'accent' as const : 'neutral' as const,
+    },
+    {
+      label: compareReady
+        ? (locale === 'th' ? 'พร้อมส่งต่อ shortlist frame เดิม' : 'Shortlist frame ready to hand off')
+        : (locale === 'th' ? 'ยังคุยกับทีมต่อได้ทันที' : 'Advisor review still available'),
+      tone: 'deep' as const,
+    },
+  ];
   const compareHref = compareProjects.length >= 2
     ? withLocaleQuery(locale, '/compare', {
         ids: compareProjects.map((item) => item.projectId).join(','),
@@ -322,17 +528,29 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     projects: shortlistProjectNames,
     buyerFit: 'shortlist_narrowing',
     signalLevel: items.length >= 3 ? 'high' : 'medium',
+    compareIds: compareReady ? compareProjectIds : undefined,
   }));
 
   return (
     <div className="shortlist-surface">
-      <div className="cta-strip shortlist-surface__summary">
-        <div className="cta-strip__text">
+      <PublicSurfaceCard as="section" className="shortlist-surface__summary" tone={compareReady ? 'warm' : 'light'}>
+        <div className="shortlist-surface__summary-copy">
           <strong className="shortlist-surface__summary-title">{shortlistSummary.title}</strong>
-          <span>{shortlistSummary.body}</span>
+          <p className="shortlist-surface__summary-body">{shortlistSummary.body}</p>
         </div>
-        <div className="card-actions shortlist-surface__summary-actions">
-          {compareReady ? (
+
+        <div className="shortlist-surface__summary-signals" aria-label={locale === 'th' ? 'สัญญาณของ shortlist ตอนนี้' : 'Current shortlist signals'}>
+          {summarySignals.map((signal) => (
+            <PublicChip key={signal.label} tone={signal.tone}>{signal.label}</PublicChip>
+          ))}
+        </div>
+
+        <PublicActionRow className="shortlist-surface__summary-actions" stackOnMobile>
+          {isResolvingCompare ? (
+            <button type="button" className="btn btn-cta" disabled>
+              {locale === 'th' ? 'กำลังเตรียม compare-ready projects…' : 'Preparing compare-ready projects…'}
+            </button>
+          ) : compareReady ? (
             <Link
               className="btn btn-cta"
               href={compareHref ?? withLocale(locale, '/compare')}
@@ -376,10 +594,38 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
           >
             {advisorLabel}
           </Link>
-        </div>
-      </div>
+        </PublicActionRow>
+      </PublicSurfaceCard>
 
-      <div className="shortlist-compare-panel" aria-live="polite">
+      <section id="shortlist-conversion-pack" className="shortlist-conversion-pack" aria-label={locale === 'th' ? 'ขั้นถัดไปจาก shortlist นี้' : 'Next-step decision layer for this shortlist'}>
+        <PublicSectionHeader
+          align="start"
+          kicker={shortlistConversionPack.kicker}
+          title={shortlistConversionPack.title}
+          subtitle={shortlistConversionPack.subtitle}
+        />
+
+        <div className="signal-grid signal-grid--three-up shortlist-conversion-grid">
+          {shortlistConversionPack.cards.map((card) => (
+            <PublicSurfaceCard key={card.key} as="section" className={`shortlist-conversion-card shortlist-conversion-card--${card.key}`} tone={card.tone}>
+              <div className="shortlist-conversion-card__copy">
+                <h4 className="card-title">{card.title}</h4>
+                <p className="card-subtitle">{card.body}</p>
+              </div>
+
+              <div className="insight-list shortlist-conversion-card__list">
+                {card.lines.map((line) => (
+                  <div key={line} className="insight-list__item">
+                    <span className="insight-list__body">{line}</span>
+                  </div>
+                ))}
+              </div>
+            </PublicSurfaceCard>
+          ))}
+        </div>
+      </section>
+
+      <PublicSurfaceCard as="section" className="shortlist-compare-panel" tone={compareReady ? 'warm' : 'light'} aria-live="polite">
         <div className="shortlist-compare-panel__header">
           <h2 className="card-title mb-0">
             {compareReady
@@ -421,7 +667,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
               : 'This shortlist does not yet resolve to 2 projects for compare. Save at least one more project-backed listing to open the comparison table.'}
           </p>
         )}
-      </div>
+      </PublicSurfaceCard>
 
       <div className="card-actions shortlist-surface__utility-actions">
         {shortlistSummary.browseUtilityLabel ? (

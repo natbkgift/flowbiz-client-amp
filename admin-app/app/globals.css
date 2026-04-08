@@ -6751,6 +6751,16 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   gap: var(--space-5);
 }
 
+.shortlist-surface__summary {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shortlist-surface__summary-copy {
+  display: grid;
+  gap: 8px;
+}
+
 .shortlist-surface__summary-title {
   display: block;
   margin-bottom: 6px;
@@ -6759,8 +6769,64 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   line-height: 1.45;
 }
 
+.shortlist-surface__summary-body {
+  margin: 0;
+  max-width: 64ch;
+  color: rgba(7, 19, 39, 0.72);
+  line-height: 1.68;
+}
+
+.shortlist-surface__summary-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .shortlist-surface__summary-actions {
   width: 100%;
+  align-items: flex-start;
+}
+
+.shortlist-conversion-pack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shortlist-conversion-grid {
+  gap: var(--space-4);
+}
+
+.shortlist-conversion-card {
+  display: grid;
+  gap: 14px;
+  height: 100%;
+  padding: clamp(18px, 4vw, 26px);
+}
+
+.shortlist-conversion-card__copy {
+  display: grid;
+  gap: 8px;
+}
+
+.shortlist-conversion-card__list {
+  gap: 12px;
+}
+
+.shortlist-conversion-card__list .insight-list__item {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.shortlist-conversion-card--next .insight-list__item {
+  background: rgba(255, 249, 242, 0.94);
+  border-color: rgba(176, 92, 55, 0.12);
+}
+
+.shortlist-conversion-card--handoff .insight-list__item {
+  background: rgba(7, 19, 39, 0.06);
+  border-color: rgba(7, 19, 39, 0.08);
 }
 
 .shortlist-surface__items {
@@ -9372,6 +9438,10 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   color: rgba(7, 19, 39, 0.96);
   font-size: 0.98rem;
   line-height: 1.45;
+}
+
+.decision-page--shortlist .shortlist-surface__summary-signals {
+  gap: 8px;
 }
 
 .decision-page--shortlist .shortlist-surface__summary-actions {
