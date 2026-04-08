@@ -336,10 +336,10 @@ export default async function HomePage({
   const defaultSectionOrder = [
     'hero',
     'pathways',
-    'trust_micro_strip',
     'featured_projects',
     'featured_properties',
     'why_pattaya',
+    'trust_micro_strip',
     'team_cta',
     'bottom_cta',
   ];
@@ -375,12 +375,12 @@ export default async function HomePage({
   const forcedFunnelOrder = new Map<string, number>([
     ['hero', 1],
     ['pathways', 2],
-    ['trust_micro_strip', 3],
-    ['featured_projects', 4],
-    ['featured_properties', 5],
-    ['why_pattaya', 6],
-    ['team_cta', 7],
-    ['bottom_cta', 8],
+    ['featured_projects', 3],
+    ['featured_properties', 3],
+    ['why_pattaya', 4],
+    ['trust_micro_strip', 5],
+    ['team_cta', 6],
+    ['bottom_cta', 7],
   ]);
   const sectionOrderStyle = (key: string): { order: number } => ({ order: forcedFunnelOrder.get(key) ?? sectionOrderMap.get(key) ?? 999 });
   const recommendation = getContentRecommendation();
@@ -1261,59 +1261,48 @@ export default async function HomePage({
     );
   }
 
-  function HomeOwnerAdvisorySection() {
-    const ownerCards = [
-      {
-        title: locale === 'th' ? 'ขายด้วยการวางตำแหน่งที่ดีกว่า' : 'Sell with better positioning',
-        body: locale === 'th'
-          ? 'ประเมินราคา กลุ่มผู้ซื้อที่เหมาะ และวิธีนำเสนอทรัพย์ให้น่าสนใจขึ้น'
-          : 'Review pricing, buyer fit, and how to present the property more effectively.',
-        href: withLocaleQuery(locale, '/sell', { source: 'home_owner_sell' }),
-        ctaLabel: locale === 'th' ? 'พูดคุยเรื่องการขาย' : 'Discuss selling options',
-      },
-      {
-        title: locale === 'th' ? 'ปล่อยเช่าด้วยแนวทางที่เหมาะกว่า' : 'Rent out with better fit',
-        body: locale === 'th'
-          ? 'ดูว่าทรัพย์ของคุณควรปล่อยเช่าตอนนี้หรือไม่ ตามประเภท ทำเล และดีมานด์'
-          : 'See whether renting out now makes more sense based on type, area, and demand.',
-        href: withLocaleQuery(locale, '/contact', { source: 'home_owner_consult' }),
-        ctaLabel: locale === 'th' ? 'ดูแนวทางปล่อยเช่า' : 'Review rental strategy',
-      },
-    ];
-
+  function HomeTeamCtaSection() {
     return (
-      <section className="home-owner-section" aria-labelledby="home-owner-title">
+      <section className="home-owner-section" aria-labelledby="home-team-cta-title">
         <Container variant="wide">
           <div className="home-owner-shell reveal">
             <PublicSectionHeader
               align="start"
               className="home-owner-shell__header"
-              kicker={locale === 'th' ? 'สำหรับเจ้าของทรัพย์' : 'For owners'}
+              kicker={teamCtaEyebrow}
               kickerClassName="home-section-kicker"
-              title={locale === 'th'
-                ? 'ขายหรือปล่อยเช่าด้วยการวางตำแหน่งที่ชัดกว่า'
-                : 'Sell or rent out with clearer positioning'}
-              titleId="home-owner-title"
-              subtitle={locale === 'th'
-                ? 'หากคุณมีอสังหาในพัทยาอยู่แล้ว เราช่วยคิดต่อเรื่องราคา การนำเสนอ และขั้นตอนถัดไปที่เหมาะกว่าได้'
-                : 'If you already own property in Pattaya, we can help you think through pricing, presentation, and the next practical move.'}
+              title={teamCtaHeading}
+              titleId="home-team-cta-title"
+              subtitle={teamCtaSubheading}
             />
 
             <div className="home-owner-grid">
-              {ownerCards.map((card) => (
-                <TrackedLink
-                  key={card.href}
-                  className="home-owner-card public-surface-card public-surface-card--interactive public-surface-card--warm"
-                  href={card.href}
-                  prefetch={false}
-                  eventType="cta_click"
-                  eventPayload={{ cta: 'home_owner_card', from: 'home_owner', target: card.href }}
-                >
-                  <h3 className="home-owner-card__title">{card.title}</h3>
-                  <p className="home-owner-card__body">{card.body}</p>
-                  <span className="home-owner-card__cta">{card.ctaLabel}</span>
-                </TrackedLink>
-              ))}
+              <PublicSurfaceCard as="div" tone="warm" className="home-owner-card">
+                <h3 className="home-owner-card__title">
+                  {locale === 'th' ? 'คุยกับทีมก่อน แล้วค่อยเปิดเฉพาะสิ่งที่ควรดู' : 'Talk to the team first, then open only what is worth reviewing.'}
+                </h3>
+                <p className="home-owner-card__body">{teamCtaTrustNote}</p>
+                <div className="home-pathways-support" aria-label={locale === 'th' ? 'เส้นทางคุยกับทีม' : 'Advisory next steps'}>
+                  <TrackedLink
+                    className="home-pathways-support__link"
+                    href={teamCtaPrimaryUrl}
+                    prefetch={false}
+                    eventType="cta_click"
+                    eventPayload={{ cta: 'home_team_primary', from: 'home_team_cta', target: teamCtaPrimaryUrl }}
+                  >
+                    {teamCtaPrimaryLabel}
+                  </TrackedLink>
+                  <TrackedLink
+                    className="home-pathways-support__link"
+                    href={teamCtaSecondaryUrl}
+                    prefetch={false}
+                    eventType="cta_click"
+                    eventPayload={{ cta: 'home_team_secondary', from: 'home_team_cta', target: teamCtaSecondaryUrl }}
+                  >
+                    {teamCtaSecondaryLabel}
+                  </TrackedLink>
+                </div>
+              </PublicSurfaceCard>
             </div>
           </div>
         </Container>
@@ -1821,38 +1810,6 @@ export default async function HomePage({
         <HomePathwaysSection />
       </div>
 
-      {showHomeTrustLayer ? (
-        <section className="home-trust-layer-section py-12 md:py-16 xl:py-16 2xl:py-20 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
-          <Container variant="wide">
-            <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
-              <PublicSectionHeader
-                align="start"
-                kicker={locale === 'th' ? 'ภาพรวมความน่าเชื่อถือ' : 'Trust snapshot'}
-                kickerClassName="home-section-kicker"
-                title={locale === 'th'
-                  ? 'คัดเฉพาะรายการที่ตรวจแล้ว'
-                  : 'Verified stock first.'}
-                subtitle={trustSnapshotIntro}
-                subtitleClassName="max-w-3xl mt-3"
-                subtitleProps={{
-                  role: 'note',
-                  'aria-label': locale === 'th' ? 'ข้อมูลความน่าเชื่อถือ' : 'Trust highlights',
-                  'data-home-perf': 'trust-strip',
-                }}
-              />
-              <div className="home-trust-snapshot-grid mt-8">
-                {trustSnapshotItems.map((item) => (
-                  <div key={item.label} className="home-trust-snapshot__item">
-                    <p className="home-trust-snapshot__label">{item.label}</p>
-                    <p className="home-trust-snapshot__value">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </PublicSurfaceCard>
-          </Container>
-        </section>
-      ) : null}
-
       {/* Guided Finder Overlay — client component.
           Reads URL params client-side so this server component stays
           searchParams-free → Next.js ISR cache is shared across ALL URL
@@ -1887,9 +1844,41 @@ export default async function HomePage({
         </div>
       ) : null}
 
+      {showHomeTrustLayer ? (
+        <section className="home-trust-layer-section py-12 md:py-16 xl:py-16 2xl:py-20 bg-surface" style={sectionOrderStyle('trust_micro_strip')} id="home-trust-layer" data-home-perf="trust-layer">
+          <Container variant="wide">
+            <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
+              <PublicSectionHeader
+                align="start"
+                kicker={locale === 'th' ? 'ภาพรวมความน่าเชื่อถือ' : 'Trust snapshot'}
+                kickerClassName="home-section-kicker"
+                title={locale === 'th'
+                  ? 'คัดเฉพาะรายการที่ตรวจแล้ว'
+                  : 'Verified stock first.'}
+                subtitle={trustSnapshotIntro}
+                subtitleClassName="max-w-3xl mt-3"
+                subtitleProps={{
+                  role: 'note',
+                  'aria-label': locale === 'th' ? 'ข้อมูลความน่าเชื่อถือ' : 'Trust highlights',
+                  'data-home-perf': 'trust-strip',
+                }}
+              />
+              <div className="home-trust-snapshot-grid mt-8">
+                {trustSnapshotItems.map((item) => (
+                  <div key={item.label} className="home-trust-snapshot__item">
+                    <p className="home-trust-snapshot__label">{item.label}</p>
+                    <p className="home-trust-snapshot__value">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </PublicSurfaceCard>
+          </Container>
+        </section>
+      ) : null}
+
       {isSectionEnabled('team_cta') ? (
         <div style={sectionOrderStyle('team_cta')}>
-          <HomeOwnerAdvisorySection />
+          <HomeTeamCtaSection />
         </div>
       ) : null}
 

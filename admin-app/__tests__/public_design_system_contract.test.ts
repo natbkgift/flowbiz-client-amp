@@ -220,4 +220,24 @@ describe('public design system contract', () => {
     expect(projectsPage.match(/variant="wide"/g)?.length).toBe(2);
     expect(projectsPage).toContain('page-template--catalogue');
   });
+
+  it('keeps the home funnel sequenced around paths, curated stock, trust, and conversion', () => {
+    const homePage = read('app/(site)/[locale]/page.tsx');
+    const renderStart = homePage.indexOf('return (\n    <main');
+    const renderBody = renderStart >= 0 ? homePage.slice(renderStart) : homePage;
+
+    expect(homePage).toMatch(/const defaultSectionOrder = \[\s*'hero',\s*'pathways',\s*'featured_projects',\s*'featured_properties',\s*'why_pattaya',\s*'trust_micro_strip',\s*'team_cta',\s*'bottom_cta',\s*\]/);
+    expect(homePage).toContain("['featured_projects', 3]");
+    expect(homePage).toContain("['featured_properties', 3]");
+    expect(homePage).toContain("['why_pattaya', 4]");
+    expect(homePage).toContain("['trust_micro_strip', 5]");
+    expect(homePage).toContain('function HomeTeamCtaSection()');
+    expect(homePage).not.toContain('function HomeOwnerAdvisorySection()');
+
+    expect(renderBody.indexOf('HomePathwaysSection')).toBeLessThan(renderBody.indexOf('HomeCuratedOpportunitiesSection'));
+    expect(renderBody.indexOf('HomeCuratedOpportunitiesSection')).toBeLessThan(renderBody.indexOf('HomeMarketClaritySection'));
+    expect(renderBody.indexOf('HomeMarketClaritySection')).toBeLessThan(renderBody.indexOf('id="home-trust-layer"'));
+    expect(renderBody.indexOf('id="home-trust-layer"')).toBeLessThan(renderBody.indexOf('HomeTeamCtaSection'));
+    expect(renderBody.indexOf('HomeTeamCtaSection')).toBeLessThan(renderBody.indexOf('HomeBottomCta'));
+  });
 });
