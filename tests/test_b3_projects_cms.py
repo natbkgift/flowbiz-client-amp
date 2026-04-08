@@ -80,6 +80,40 @@ def _seed_area_and_developer() -> tuple[str, str]:
         return str(area.id), str(developer.id)
 
 
+def _build_publishable_project_payload(
+    *,
+    slug: str,
+    area_id: str | None = None,
+    developer_id: str | None = None,
+    starting_price: int = 3100000,
+    cover_image_url: str | None = None,
+    hero_image_url: str | None = None,
+    images: list[str] | None = None,
+    summary: dict | None = None,
+    highlights: list[str] | None = None,
+    amenities: list[str] | None = None,
+    investment_snapshot: dict | None = None,
+    location: dict | None = None,
+) -> dict:
+    return {
+        "slug": slug,
+        "name": "Publishable Project",
+        "status": "draft",
+        "property_type": "condo",
+        "area_id": area_id,
+        "developer_id": developer_id,
+        "starting_price": starting_price,
+        "cover_image_url": cover_image_url,
+        "hero_image_url": hero_image_url,
+        "images": images or [],
+        "summary": summary or {"en": {"title": "Project Summary"}, "th": {"title": "สรุปโครงการ"}},
+        "highlights": highlights or ["near_beach", "sea_view"],
+        "amenities": amenities or ["pool", "gym"],
+        "investment_snapshot": investment_snapshot or {"source": "Internal Desk", "updated_at": "2026-02-27"},
+        "location": location or {"label": "Central Pattaya", "context": {"en": "Beachfront corridor"}},
+    }
+
+
 def test_b3_crud_publish_and_public_reflection(client) -> None:
     headers = _make_admin_headers()
     area_id, developer_id = _seed_area_and_developer()
@@ -313,9 +347,115 @@ def test_b3_publish_blocked_when_required_project_fields_are_missing(client) -> 
     detail = publish.json().get("detail") or {}
     assert detail.get("code") == "project_publish_requirements_missing"
     missing = detail.get("missing") or []
+    assert "starting_price" in missing
+    assert "hero_media" in missing
+    assert "summary" in missing
+    assert "highlights" in missing
+    assert "location" in missing
     assert "facilities" in missing
     assert "investment_snapshot.source" in missing
     assert "investment_snapshot.updated_at" in missing
+
+
+def test_b3_publish_accepts_cover_or_hero_when_one_local_primary_asset_exists(client) -> None:
+    headers = _make_admin_headers()
+    area_id, developer_id = _seed_area_and_developer()
+
+    cover_only = f"/media/library/{uuid4()}.jpg"
+    hero_only = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover_only)
+    _add_media_asset(path=hero_only)
+
+    cover_project = client.post(
+        "/admin/projects",
+        headers=headers,
+        json=_build_publishable_project_payload(
+            slug=f"b3-cover-only-{uuid4()}",
+            area_id=area_id,
+            developer_id=developer_id,
+            cover_image_url=cover_only,
+        ),
+    )
+    assert cover_project.status_code == 201, cover_project.text
+    cover_project_id = cover_project.json()["project"]["id"]
+
+    cover_publish = client.post(f"/admin/projects/{cover_project_id}/publish", headers=headers)
+    assert cover_publish.status_code == 200, cover_publish.text
+
+    hero_project = client.post(
+        "/admin/projects",
+        headers=headers,
+        json=_build_publishable_project_payload(
+            slug=f"b3-hero-only-{uuid4()}",
+            area_id=area_id,
+            developer_id=developer_id,
+            hero_image_url=hero_only,
+        ),
+    )
+    assert hero_project.status_code == 201, hero_project.text
+    hero_project_id = hero_project.json()["project"]["id"]
+
+    hero_publish = client.post(f"/admin/projects/{hero_project_id}/publish", headers=headers)
+    assert hero_publish.status_code == 200, hero_publish.text
+
+
+def test_b3_publish_blocks_zero_starting_price_even_with_other_ready_fields(client) -> None:
+    headers = _make_admin_headers()
+    area_id, developer_id = _seed_area_and_developer()
+
+    cover = f"/media/library/{uuid4()}.jpg"
+    hero = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(path=cover)
+    _add_media_asset(path=hero)
+
+    created = client.post(
+        "/admin/projects",
+        headers=headers,
+        json=_build_publishable_project_payload(
+            slug=f"b3-zero-price-{uuid4()}",
+            area_id=area_id,
+            developer_id=developer_id,
+            starting_price=0,
+            cover_image_url=cover,
+            hero_image_url=hero,
+        ),
+    )
+    assert created.status_code == 201, created.text
+
+    project_id = created.json()["project"]["id"]
+    publish = client.post(f"/admin/projects/{project_id}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    detail = publish.json().get("detail") or {}
+    assert detail.get("code") == "project_publish_requirements_missing"
+    assert "starting_price" in (detail.get("missing") or [])
+
+
+def test_b3_publish_blocks_legacy_external_primary_media(client) -> None:
+    headers = _make_admin_headers()
+
+    with SessionLocal() as db:
+        row = Project(
+            slug=f"b3-legacy-external-{uuid4()}",
+            name="Legacy External Media",
+            status="draft",
+            property_type="condo",
+            starting_price=3100000,
+            cover_image_url="https://cdn.example.com/legacy-cover.jpg",
+            summary={"en": {"title": "Project Summary"}},
+            highlights=["sea_view"],
+            amenities=["pool"],
+            investment_snapshot={"source": "Internal Desk", "updated_at": "2026-02-27"},
+            location={"label": "Central Pattaya"},
+        )
+        db.add(row)
+        db.commit()
+        project_id = str(row.id)
+
+    publish = client.post(f"/admin/projects/{project_id}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    detail = publish.json().get("detail") or {}
+    assert detail.get("code") == "project_publish_requirements_missing"
+    assert "hero_media" in (detail.get("missing") or [])
 
 
 def test_b3_area_developer_fk_validation(client) -> None:

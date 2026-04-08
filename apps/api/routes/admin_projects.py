@@ -228,11 +228,59 @@ def _validate_media_governance(db: Session, paths: list[str]) -> list[dict]:
     return [item.to_dict() for item in result.warnings]
 
 
+def _payload_has_text(value: object) -> bool:
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, dict):
+        return any(_payload_has_text(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_payload_has_text(item) for item in value)
+    return False
+
+
+def _project_has_local_hero_media(row: Project) -> bool:
+    for path in [row.hero_image_url, row.cover_image_url]:
+        item = str(path or "").strip()
+        if item.startswith("/media/"):
+            return True
+    return False
+
+
+def _project_location_ready(row: Project) -> bool:
+    if row.area_id is not None:
+        return True
+
+    location = row.location if isinstance(row.location, dict) else {}
+    if _payload_has_text(location.get("context")) or _payload_has_text(location.get("label")):
+        return True
+
+    lat_raw = location.get("lat") if location.get("lat") is not None else location.get("latitude")
+    lng_raw = location.get("lng") if location.get("lng") is not None else location.get("longitude")
+    return str(lat_raw or "").strip() != "" and str(lng_raw or "").strip() != ""
+
+
 def _project_publish_readiness(row: Project) -> dict:
     missing: list[str] = []
     property_type = str(row.property_type or "").strip()
     if not property_type:
         missing.append("property_type")
+
+    if row.starting_price is None or row.starting_price <= 0:
+        missing.append("starting_price")
+
+    if not _project_has_local_hero_media(row):
+        missing.append("hero_media")
+
+    if not _payload_has_text(row.summary):
+        missing.append("summary")
+
+    highlights = row.highlights if isinstance(row.highlights, list) else []
+    has_highlights = any(str(item or "").strip() for item in highlights)
+    if not has_highlights:
+        missing.append("highlights")
+
+    if not _project_location_ready(row):
+        missing.append("location")
 
     amenities = row.amenities if isinstance(row.amenities, list) else []
     has_facilities = any(str(item or "").strip() for item in amenities)
@@ -414,11 +462,24 @@ def admin_publish_project(
     if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     readiness = _enforce_project_publish_requirements(row)
+    media_warnings = _validate_media_governance(
+        db,
+        [
+            p
+            for p in [row.cover_image_url, row.hero_image_url, *((row.images or []) if isinstance(row.images, list) else [])]
+            if isinstance(p, str) and p.strip().startswith("/media/")
+        ],
+    )
     row.status = "published"
     db.add(row)
     db.commit()
     db.refresh(row)
-    return {"project": _serialize(row, db), "published": True, "publish_readiness": readiness}
+    return {
+        "project": _serialize(row, db),
+        "published": True,
+        "publish_readiness": readiness,
+        "media_warnings": media_warnings,
+    }
 
 
 @router.delete("/projects/{project_id}")

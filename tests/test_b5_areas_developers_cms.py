@@ -293,6 +293,10 @@ def test_b5_developers_cms_crud_publish_reflect_and_validation(client) -> None:
 
 def test_b5_projects_link_area_developer_reflection_is_structured(client) -> None:
     headers = _make_admin_headers()
+    cover = f"/media/library/{uuid4()}.jpg"
+    hero = f"/media/library/{uuid4()}.jpg"
+    _add_media_asset(cover)
+    _add_media_asset(hero)
 
     with SessionLocal() as db:
         area = Area(slug=f"b5-area-link-{uuid4()}", name="Linked Area", status="published")
@@ -329,6 +333,11 @@ def test_b5_projects_link_area_developer_reflection_is_structured(client) -> Non
         f"/admin/projects/{project_id}",
         headers=headers,
         json={
+            "starting_price": 4200000,
+            "cover_image_url": cover,
+            "hero_image_url": hero,
+            "summary": {"en": {"title": "Linked project summary"}},
+            "highlights": ["linked_area", "linked_developer"],
             "amenities": ["pool"],
             "investment_snapshot": {"source": "Internal Desk", "updated_at": "2026-03-01"},
         },
