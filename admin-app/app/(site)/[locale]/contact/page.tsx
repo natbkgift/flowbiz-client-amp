@@ -35,22 +35,19 @@ export async function generateMetadata(
   const searchParams = await props.searchParams;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const metadataCopy = dict.contact.metadata;
   const topic = readSingleSearchParam(searchParams, 'topic');
   const normalizedTopic = String(topic || '').trim().toLowerCase();
   const title = normalizedTopic === 'private_tour'
-    ? (locale === 'th' ? 'นัด private tour บน shortlist ที่เหมาะก่อน' : 'Book a private tour with the right shortlist first')
+    ? metadataCopy.privateTourTitle
     : normalizedTopic === 'investment_plan'
-      ? (locale === 'th' ? 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว' : 'Discuss your Pattaya investment plan with context already in place')
-      : (locale === 'th' ? 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า' : 'Talk to AMP Pattaya about the next serious step');
+      ? metadataCopy.investmentPlanTitle
+      : metadataCopy.defaultTitle;
   const description = normalizedTopic === 'private_tour'
-    ? (locale === 'th'
-      ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวกเพื่อให้ทีมคัด shortlist และจัด private tour ที่เหมาะก่อนนัดจริง'
-      : 'Share budget, preferred areas, and timing so the team can shape the shortlist and line up the right private tour before you visit.')
+    ? metadataCopy.privateTourDescription
     : normalizedTopic === 'investment_plan'
-      ? (locale === 'th'
-        ? 'เริ่มจากงบประมาณและเป้าหมายผลตอบแทน เพื่อให้ทีมเตรียม shortlist และ next step ที่คมขึ้นตั้งแต่รอบแรก'
-        : 'Start from your budget and return goals so the team can respond with a sharper shortlist and next step from the first reply.')
-      : dict.contact.subtitle;
+      ? metadataCopy.investmentPlanDescription
+      : metadataCopy.defaultDescription;
   return makePageMetadata(locale, 'contact', title, description, dict.brand.name);
 }
 
@@ -79,26 +76,7 @@ function inferBudgetBand(purchasePrice: number | null | undefined): string | und
 function humanizeBuyingCostValue(locale: 'en' | 'th', value: string | null | undefined, kind: 'purchase' | 'ownership' | 'transfer' | 'financing'): string | null {
   if (!value) return null;
 
-  const maps = {
-    purchase: {
-      thai_local: locale === 'th' ? 'บริบทการซื้อแบบคนไทย / ผู้ซื้อในประเทศ' : 'Thai / local purchase context',
-      foreign: locale === 'th' ? 'บริบทการซื้อแบบผู้ซื้อต่างชาติ' : 'Foreign purchase context',
-    },
-    ownership: {
-      freehold: locale === 'th' ? 'กรรมสิทธิ์ freehold / foreign quota' : 'Freehold / foreign quota',
-      leasehold: locale === 'th' ? 'สัญญาเช่าระยะยาว' : 'Leasehold',
-      company_hold: locale === 'th' ? 'ถือครองผ่านบริษัทไทย' : 'Thai company hold',
-    },
-    transfer: {
-      buyer_pays: locale === 'th' ? 'ผู้ซื้อรับภาระหลัก' : 'Buyer-led split',
-      split_equally: locale === 'th' ? 'แบ่งกันคนละครึ่ง' : 'Split equally',
-      seller_pays: locale === 'th' ? 'ผู้ขายรับภาระหลัก' : 'Seller-led split',
-    },
-    financing: {
-      cash: locale === 'th' ? 'ซื้อด้วยเงินสด' : 'Cash purchase',
-      financing: locale === 'th' ? 'มีการขอสินเชื่อ / financing' : 'Financing scenario',
-    },
-  } as const;
+  const maps = getDictionary(locale).contact.buyingCostValues;
 
   return maps[kind][value as keyof (typeof maps)[typeof kind]] ?? value;
 }
@@ -143,16 +121,12 @@ function humanizeToken(locale: 'en' | 'th', value: string | null | undefined): s
 }
 
 function describeLeadIntent(locale: 'en' | 'th', value: string): string {
-  if (value === 'project_consultation') {
-    return locale === 'th' ? 'คุยต่อจากโครงการที่กำลังพิจารณา' : 'Continue the conversation from a live project review';
-  }
-  if (value === 'project_shortlist') {
-    return locale === 'th' ? 'ขอ shortlist รอบตัวเลือกที่กำลังสนใจ' : 'Request a tighter shortlist around the current options';
-  }
-  if (value === 'project_compare') {
-    return locale === 'th' ? 'คุยต่อจากการเปรียบเทียบหลายโครงการ' : 'Continue from a multi-project comparison';
-  }
-  return locale === 'th' ? 'สอบถามทั่วไป' : 'General inquiry';
+  const labels = getDictionary(locale).contact.leadIntentLabels;
+  return labels[value as keyof typeof labels] ?? labels.general_inquiry;
+}
+
+function fillProjects(template: string, projectNames: string[]): string {
+  return template.replace('{projects}', projectNames.join(', '));
 }
 
 function buildLeadDraftMessage(
@@ -165,70 +139,51 @@ function buildLeadDraftMessage(
     signalLevel: string | null;
   },
 ): string {
+  const copy = getDictionary(locale).contact.draftMessages;
   const names = params.projectNames.filter(Boolean);
   const source = String(params.source || '').toLowerCase();
 
   if (params.intent === 'project_compare' && source === 'compare_recovery') {
     if (names.length >= 1) {
-      return locale === 'th'
-        ? `compare เดิมของ ${names.join(', ')} ใช้งานต่อไม่ได้ครบแล้ว และต้องการให้ทีมช่วยกู้ context นี้กลับมาเป็น shortlist ที่ใช้งานต่อได้`
-        : `The original compare around ${names.join(', ')} no longer resolves cleanly, and I want the team to recover this context into a shortlist I can keep working from.`;
+      return fillProjects(copy.compareRecoveryWithProjects, names);
     }
 
-    return locale === 'th'
-      ? 'ลิงก์ compare เดิมใช้งานต่อไม่ได้ครบแล้ว และต้องการให้ทีมช่วยกู้ brief นี้กลับมาเป็น shortlist ที่ใช้งานต่อได้'
-      : 'The original compare link no longer resolves cleanly, and I want the team to recover this brief into a usable shortlist.';
+    return copy.compareRecovery;
   }
 
   if (params.intent === 'project_shortlist' && source === 'shortlist_shared') {
     if (names.length) {
-      return locale === 'th'
-        ? `ได้รับ shared shortlist ของ ${names.join(', ')} และต้องการให้ทีมช่วยรีวิวว่าควรเก็บ ตัด หรือเช็กตัวเลือกไหนต่อ`
-        : `I received a shared shortlist around ${names.join(', ')} and want the team to review what should be kept, cut, or checked next.`;
+      return fillProjects(copy.sharedShortlistWithProjects, names);
     }
 
-    return locale === 'th'
-      ? 'ได้รับ shared shortlist และต้องการให้ทีมช่วยรีวิวว่าควรเก็บ ตัด หรือเช็กตัวเลือกไหนต่อ'
-      : 'I received a shared shortlist and want the team to review what should be kept, cut, or checked next.';
+    return copy.sharedShortlist;
   }
 
   if (params.intent === 'project_compare') {
     if (names.length >= 2) {
-      return locale === 'th'
-        ? `กำลังเทียบ ${names.join(', ')} และต้องการให้ทีมช่วยสรุปว่าควรคุยต่อกับตัวเลือกไหนก่อน พร้อมบอกเหตุผลที่ควรตัดหรือเก็บไว้ต่อ`
-        : `I am comparing ${names.join(', ')} and want the team to clarify which option deserves the next conversation, including what should be kept or cut.`;
+      return fillProjects(copy.compareWithProjects, names);
     }
 
-    return locale === 'th'
-      ? 'กำลังเทียบหลายโครงการและต้องการให้ทีมช่วยสรุป next step ที่ชัดขึ้นจากตาราง compare นี้'
-      : 'I am comparing multiple projects and want the team to turn this compare read into a clearer next step.';
+    return copy.compare;
   }
 
   if (params.intent === 'project_shortlist') {
     if (names.length) {
-      return locale === 'th'
-        ? `สนใจ ${names.join(', ')} และต้องการ shortlist ที่แคบลงพร้อมตัวเลือกสำรองในกรอบราคาและทำเลใกล้เคียง`
-        : `I am interested in ${names.join(', ')} and want a tighter shortlist with backup options in the same budget and area range.`;
+      return fillProjects(copy.shortlistWithProjects, names);
     }
 
-    return locale === 'th'
-      ? 'ต้องการให้ทีมช่วยคัด shortlist ที่แคบลงจากตัวเลือกที่กำลังดูอยู่'
-      : 'I want the team to tighten the shortlist around the options I am reviewing now.';
+    return copy.shortlist;
   }
 
   if (names.length) {
-    return locale === 'th'
-      ? `สนใจ ${names[0]} และต้องการคุยต่อแบบมีบริบทชัด ทั้งเรื่องความเหมาะกับโจทย์และขั้นตอนถัดไป`
-      : `I am interested in ${names[0]} and want to continue with clearer context on fit, trade-offs, and the next step.`;
+    return fillProjects(copy.projectWithName, [names[0]]);
   }
 
   if (params.buyerFit || params.signalLevel) {
-    return locale === 'th'
-      ? 'ต้องการคุยต่อจากบริบทที่ส่งมาจากหน้านี้ โดยคงงบ เป้าหมาย และสัญญาณการตัดสินใจไว้ให้ครบ'
-      : 'I want to continue from the handoff context on this page while keeping the same budget, goals, and decision signals.';
+    return copy.contextual;
   }
 
-  return locale === 'th' ? 'ต้องการคุยกับที่ปรึกษาเพื่อไปขั้นตอนถัดไป' : 'I want to speak with an advisor about the next step.';
+  return copy.default;
 }
 
 function inferLeadPurpose(
@@ -268,77 +223,28 @@ function buildContactResponseBullets(
     intent: string;
   },
 ): string[] {
+  const copy = getDictionary(locale).contact.responseBullets;
   const source = String(params.source || '').toLowerCase();
   const isCompareFlow = source === 'compare_recovery' || params.intent === 'project_compare';
   const isShortlistFlow = source === 'shortlist_shared' || params.intent === 'project_shortlist';
 
   if (params.isPrivateTourTopic) {
-    return [
-      locale === 'th'
-        ? 'คำตอบกลับควรมาในรูปของ shortlist สำหรับนัดดูจริง ไม่ใช่เพียงลิงก์รายการกว้าง ๆ เพิ่มอีกชุด'
-        : 'The reply should come back as a viewing shortlist you can act on, not just another wide catalogue link.',
-      locale === 'th'
-        ? 'เรื่องเวลา ความเป็นส่วนตัว และโซนที่สนใจควรถูกพกต่อไปใน handoff โดยไม่ต้องอธิบายซ้ำ'
-        : 'Timing, privacy, and area preferences should carry forward in the handoff without forcing you to restate the brief.',
-      locale === 'th'
-        ? 'ถ้ายูนิตใดไม่เหมาะแล้ว ทีมควรชี้ตัวแทนที่ใกล้เคียงที่สุดทันที'
-        : 'If a unit is no longer suitable, the team should point to the clearest next-best viewing option immediately.',
-    ];
+    return copy.privateTour;
   }
 
   if (params.isInvestmentPlanTopic) {
-    return [
-      locale === 'th'
-        ? 'คำตอบกลับควรมาเป็น shortlist ที่ใช้ลงทุนได้ พร้อม downside checks ไม่ใช่เพียงการพูดถึง yield ในมุมบวก'
-        : 'The reply should come back as an investable shortlist with downside checks, not just optimistic yield language.',
-      locale === 'th'
-        ? 'งบ ผลตอบแทนที่คาดหวัง และ thesis การลงทุนควรถูกพกต่อไปใน handoff แบบไม่ drift'
-        : 'Budget, return targets, and the investment thesis should stay attached to the handoff without drifting.',
-      locale === 'th'
-        ? 'ถ้าโจทย์ยังบาง ทีมควรบอกให้ชัดว่าต้องยืนยันสมมติฐานข้อไหนก่อนคุยต่อ'
-        : 'If the brief is still thin, the team should say which assumption needs to be clarified before the investment conversation moves.',
-    ];
+    return copy.investmentPlan;
   }
 
   if (isCompareFlow) {
-    return [
-      locale === 'th'
-        ? 'บริบท compare เดิมควรถูกพกต่อไปในคำตอบกลับ โดยไม่ต้องให้คุณเริ่มเล่ารายการที่กำลังเทียบใหม่อีกครั้ง'
-        : 'The same compare context should stay attached to the reply so you do not need to restate the projects in scope.',
-      locale === 'th'
-        ? 'ถ้า live availability เปลี่ยนไป คำตอบกลับควรอธิบายให้ชัดว่าอะไรหายไปและอะไรควรถูกแทน'
-        : 'If live availability shifted, the reply should explain what changed and what should replace it.',
-      locale === 'th'
-        ? 'ขั้นถัดไปควรจบลงที่การตัดสินใจ shortlist, viewing plan, หรือ advisor call ที่คมขึ้น'
-        : 'The next step should tighten into a shortlist decision, a viewing plan, or a sharper advisor call.',
-    ];
+    return copy.compare;
   }
 
   if (isShortlistFlow) {
-    return [
-      locale === 'th'
-        ? 'บริบท shortlist เดิมควรถูกพกต่อไปในคำตอบกลับ โดยไม่ต้องเริ่ม brief ใหม่จากศูนย์'
-        : 'The existing shortlist context should carry into the reply so the brief does not restart from zero.',
-      locale === 'th'
-        ? 'คำตอบกลับควรชี้ให้ชัดว่าควรเก็บ ตัด หรือยืนยันอะไรต่อจากรายการที่มีอยู่'
-        : 'The reply should say clearly what to keep, cut, or verify next from the current shortlist.',
-      locale === 'th'
-        ? 'ถ้าสต็อกขยับไปแล้ว ทีมควรชี้ตัวแทนที่ใกล้ที่สุด แทนการวนกลับไป browse กว้าง ๆ อีกครั้ง'
-        : 'If stock has moved, the team should point to the nearest replacement instead of sending you back into a broad browse again.',
-    ];
+    return copy.shortlist;
   }
 
-  return [
-    locale === 'th'
-      ? 'คำตอบกลับควรมาเป็น shortlist ที่แคบลงหรือ next step ที่ชัด ไม่ใช่ listing dump แบบกว้าง ๆ'
-      : 'The reply should come back as a tighter shortlist or the clearest next step, not another generic listing dump.',
-    locale === 'th'
-      ? 'งบ ทำเล และเวลา ควรถูกพกต่อไปใน handoff เพื่อไม่ให้คุณต้องเริ่มอธิบาย brief ใหม่ภายหลัง'
-      : 'Budget, area, and timing should stay attached to the handoff so you do not restart the brief later.',
-    locale === 'th'
-      ? 'ถ้าเส้นทางยังไม่ชัด ทีมควรบอกให้ชัดว่าควร compare, verify, หรือนัดอะไรเป็นขั้นถัดไป'
-      : 'If the route is still ambiguous, the team should tell you what to compare, verify, or schedule next.',
-  ];
+  return copy.default;
 }
 
 export default async function ContactPage(
@@ -351,6 +257,9 @@ export default async function ContactPage(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const contactCopy = dict.contact;
+  const heroCopy = contactCopy.hero;
+  const labelCopy = contactCopy.contextLabels;
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
   const investorContext = parseInvestorToolContext(searchParams);
@@ -364,77 +273,77 @@ export default async function ContactPage(
     readSingleSearchParam(searchParams, 'msg') ?? null;
   const investorLines = [
     formatCurrency(locale, investorContext.purchasePrice)
-      ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, investorContext.purchasePrice)}`
+      ? `${labelCopy.targetPurchasePrice}: ${formatCurrency(locale, investorContext.purchasePrice)}`
       : null,
     formatCurrency(locale, investorContext.monthlyRent)
-      ? `${locale === 'th' ? 'ค่าเช่าต่อเดือน' : 'Monthly rent'}: ${formatCurrency(locale, investorContext.monthlyRent)}`
+      ? `${labelCopy.monthlyRent}: ${formatCurrency(locale, investorContext.monthlyRent)}`
       : null,
     typeof investorContext.occupancyRate === 'number' && Number.isFinite(investorContext.occupancyRate)
-      ? `${locale === 'th' ? 'อัตราปล่อยเช่า' : 'Occupancy'}: ${investorContext.occupancyRate.toFixed(0)}%`
+      ? `${labelCopy.occupancy}: ${investorContext.occupancyRate.toFixed(0)}%`
       : null,
     formatCurrency(locale, investorContext.annualCosts)
-      ? `${locale === 'th' ? 'ต้นทุนต่อปี' : 'Annual costs'}: ${formatCurrency(locale, investorContext.annualCosts)}`
+      ? `${labelCopy.annualCosts}: ${formatCurrency(locale, investorContext.annualCosts)}`
       : null,
     formatPercent(investorContext.grossYield)
-      ? `${locale === 'th' ? 'อัตราผลตอบแทนขั้นต้น' : 'Gross yield'}: ${formatPercent(investorContext.grossYield)}`
+      ? `${labelCopy.grossYield}: ${formatPercent(investorContext.grossYield)}`
       : null,
     formatPercent(investorContext.netYield)
-      ? `${locale === 'th' ? 'อัตราผลตอบแทนสุทธิ' : 'Net yield'}: ${formatPercent(investorContext.netYield)}`
+      ? `${labelCopy.netYield}: ${formatPercent(investorContext.netYield)}`
       : null,
     typeof investorContext.paybackYears === 'number' && Number.isFinite(investorContext.paybackYears)
-      ? `${locale === 'th' ? 'ระยะเวลาคืนทุน' : 'Payback'}: ${investorContext.paybackYears.toFixed(1)} ${locale === 'th' ? 'ปี' : 'years'}`
+      ? `${labelCopy.payback}: ${investorContext.paybackYears.toFixed(1)} ${labelCopy.paybackYearsUnit}`
       : null,
     investorContext.ids?.length
-      ? `${locale === 'th' ? 'โครงการที่นำมาเทียบ' : 'Compared projects'}: ${investorContext.ids.join(', ')}`
+      ? `${labelCopy.comparedProjects}: ${investorContext.ids.join(', ')}`
       : null,
   ].filter((item): item is string => Boolean(item));
   const buyingCostLines = [
     formatCurrency(locale, buyingCostContext.propertyPrice)
-      ? `${locale === 'th' ? 'ราคาซื้อเป้าหมาย' : 'Target purchase price'}: ${formatCurrency(locale, buyingCostContext.propertyPrice)}`
+      ? `${labelCopy.targetPurchasePrice}: ${formatCurrency(locale, buyingCostContext.propertyPrice)}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')
-      ? `${locale === 'th' ? 'บริบทการซื้อ' : 'Purchase context'}: ${humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')}`
+      ? `${labelCopy.purchaseContext}: ${humanizeBuyingCostValue(locale, buyingCostContext.purchaseContext, 'purchase')}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')
-      ? `${locale === 'th' ? 'รูปแบบการถือครอง' : 'Ownership type'}: ${humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')}`
+      ? `${labelCopy.ownershipType}: ${humanizeBuyingCostValue(locale, buyingCostContext.ownershipType, 'ownership')}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')
-      ? `${locale === 'th' ? 'การแบ่งภาระค่าโอน' : 'Transfer split'}: ${humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')}`
+      ? `${labelCopy.transferSplit}: ${humanizeBuyingCostValue(locale, buyingCostContext.transferSplit, 'transfer')}`
       : null,
     humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')
-      ? `${locale === 'th' ? 'รูปแบบการชำระเงิน' : 'Financing mode'}: ${humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')}`
+      ? `${labelCopy.financingMode}: ${humanizeBuyingCostValue(locale, buyingCostContext.financingMode, 'financing')}`
       : null,
     formatCurrency(locale, buyingCostContext.governmentFees)
-      ? `${locale === 'th' ? 'ค่าธรรมเนียมภาครัฐ' : 'Government fees'}: ${formatCurrency(locale, buyingCostContext.governmentFees)}`
+      ? `${labelCopy.governmentFees}: ${formatCurrency(locale, buyingCostContext.governmentFees)}`
       : null,
     formatCurrency(locale, buyingCostContext.closingCost)
-      ? `${locale === 'th' ? 'ค่าใช้จ่ายวันโอน' : 'Closing cost'}: ${formatCurrency(locale, buyingCostContext.closingCost)}`
+      ? `${labelCopy.closingCost}: ${formatCurrency(locale, buyingCostContext.closingCost)}`
       : null,
     formatCurrency(locale, buyingCostContext.totalCashNeeded)
-      ? `${locale === 'th' ? 'เงินสดรวมที่ต้องเตรียม' : 'Total cash needed'}: ${formatCurrency(locale, buyingCostContext.totalCashNeeded)}`
+      ? `${labelCopy.totalCashNeeded}: ${formatCurrency(locale, buyingCostContext.totalCashNeeded)}`
       : null,
     buyingCostContext.unresolvedItems?.length
-      ? `${locale === 'th' ? 'รายการที่ยังต้องตรวจเพิ่ม' : 'Unresolved items'}: ${buyingCostContext.unresolvedItems.join(', ')}`
+      ? `${labelCopy.unresolvedItems}: ${buyingCostContext.unresolvedItems.join(', ')}`
       : null,
     buyingCostContext.disclaimerKey
-      ? `${locale === 'th' ? 'หมายเหตุการประเมิน' : 'Disclosure'}: ${buyingCostContext.disclaimerKey}`
+      ? `${labelCopy.disclosure}: ${buyingCostContext.disclaimerKey}`
       : null,
   ].filter((item): item is string => Boolean(item));
   const leadProjectNames = (leadCaptureContext.projects?.length ? leadCaptureContext.projects : leadCaptureContext.project ? [leadCaptureContext.project] : [])
     .filter(Boolean);
   const leadCaptureLines = [
-    `${locale === 'th' ? 'เส้นทางที่ต้องการ' : 'Lead path'}: ${describeLeadIntent(locale, leadCaptureContext.intent)}`,
+    `${labelCopy.leadPath}: ${describeLeadIntent(locale, leadCaptureContext.intent)}`,
     leadProjectNames.length
-      ? `${locale === 'th' ? (leadProjectNames.length > 1 ? 'โครงการในบริบทนี้' : 'โครงการที่กำลังสนใจ') : (leadProjectNames.length > 1 ? 'Projects in scope' : 'Project in focus')}: ${leadProjectNames.join(', ')}`
+      ? `${leadProjectNames.length > 1 ? labelCopy.projectsInScope : labelCopy.projectInFocus}: ${leadProjectNames.join(', ')}`
       : null,
     humanizeToken(locale, leadCaptureContext.source)
-      ? `${locale === 'th' ? 'ต้นทางของการส่งต่อ' : 'Handoff source'}: ${humanizeToken(locale, leadCaptureContext.source)}`
+      ? `${labelCopy.handoffSource}: ${humanizeToken(locale, leadCaptureContext.source)}`
       : null,
     humanizeToken(locale, leadCaptureContext.buyerFit)
-      ? `${locale === 'th' ? 'ลักษณะผู้ซื้อที่เหมาะ' : 'Buyer fit'}: ${humanizeToken(locale, leadCaptureContext.buyerFit)}`
+      ? `${labelCopy.buyerFit}: ${humanizeToken(locale, leadCaptureContext.buyerFit)}`
       : null,
     humanizeToken(locale, leadCaptureContext.signalLevel)
-      ? `${locale === 'th' ? 'ระดับความชัดของสัญญาณ' : 'Signal strength'}: ${humanizeToken(locale, leadCaptureContext.signalLevel)}`
+      ? `${labelCopy.signalStrength}: ${humanizeToken(locale, leadCaptureContext.signalLevel)}`
       : null,
   ].filter((item): item is string => Boolean(item));
   const hasLeadCaptureContext = leadCaptureLines.length > 1 || leadCaptureContext.intent !== 'general_inquiry';
@@ -442,17 +351,13 @@ export default async function ContactPage(
     ? `${msg}`
     : buyingCostLines.length
       ? [
-          locale === 'th'
-            ? 'ต้องการคุยต่อกับที่ปรึกษาโดยอ้างอิงสมมติฐานจากการประเมิน buying cost ด้านล่าง'
-            : 'I want to continue the buying-cost estimate with an advisor using the assumptions below.',
+          contactCopy.draftMessages.buyingCostIntro,
           '',
           ...buyingCostLines,
         ].join('\n')
     : investorLines.length
       ? [
-          locale === 'th'
-            ? 'ต้องการคุยต่อเรื่องแผนลงทุนและ shortlist จาก investor tools'
-            : 'I want to continue the investment-plan and shortlist conversation from the investor tools.',
+          contactCopy.draftMessages.investorIntro,
           '',
           ...investorLines,
         ].join('\n')
@@ -528,125 +433,88 @@ export default async function ContactPage(
       : undefined;
 
   const contactHeroTitle = isPrivateTourTopic
-    ? (locale === 'th' ? 'นัด private tour บน shortlist ที่เหมาะก่อน' : 'Book a private tour with the right shortlist first')
+    ? heroCopy.privateTourTitle
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว' : 'Discuss your Pattaya investment plan with context already in place')
+      ? heroCopy.investmentPlanTitle
       : leadCaptureContext.source === 'compare_recovery'
-        ? (locale === 'th' ? 'กู้ next step จาก compare นี้กับ AMP Pattaya' : 'Recover the next step from this compare brief')
+        ? heroCopy.compareRecoveryTitle
         : leadCaptureContext.source === 'shortlist_shared'
-          ? (locale === 'th' ? 'คุย shortlist ที่แชร์นี้ต่อกับ AMP Pattaya' : 'Review this shared shortlist with AMP Pattaya')
+          ? heroCopy.sharedShortlistTitle
         : leadCaptureContext.intent === 'project_compare'
-          ? (locale === 'th' ? 'คุยต่อจาก compare นี้กับ AMP Pattaya' : 'Continue from this comparison with AMP Pattaya')
+          ? heroCopy.compareTitle
           : leadCaptureContext.intent === 'project_shortlist'
-            ? (locale === 'th' ? 'คุย shortlist นี้ต่อกับ AMP Pattaya' : 'Review this shortlist with AMP Pattaya')
-      : (locale === 'th' ? 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า' : 'Talk to AMP Pattaya about the next serious step');
+            ? heroCopy.shortlistTitle
+      : heroCopy.defaultTitle;
   const contactHeroSubtitle = isPrivateTourTopic
-    ? (locale === 'th'
-      ? 'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะคัด viewing route ที่เหมาะก่อนนัดดูจริง'
-      : 'Share your preferred areas, budget, and timing so the team can line up the right viewing route before the tour.')
+    ? heroCopy.privateTourSubtitle
     : isInvestmentPlanTopic
-      ? (locale === 'th'
-        ? 'เริ่มจากงบประมาณ ผลตอบแทนที่คาดหวัง และ thesis การลงทุน เพื่อให้ shortlist ที่ได้คมขึ้นตั้งแต่รอบแรก'
-        : 'Start from your budget, return goals, and thesis so the first shortlist is sharper and more credible.')
+      ? heroCopy.investmentPlanSubtitle
       : leadCaptureContext.source === 'compare_recovery'
-        ? (locale === 'th'
-          ? 'บางโครงการใน compare เดิมอาจหายไปหรือ snapshot ใช้งานไม่ได้แล้ว แต่ทีมยังใช้ brief ที่พกมาช่วยกู้ shortlist ใหม่และชี้ next step ให้ต่อได้'
-          : 'Some projects in the original compare may have disappeared or lost their snapshot, but the team can still use the carried brief to rebuild the shortlist and point to the next step.')
+        ? heroCopy.compareRecoverySubtitle
         : leadCaptureContext.source === 'shortlist_shared'
-          ? (locale === 'th'
-            ? 'บริบทจาก shared shortlist จะถูกพกต่อไป เพื่อให้ทีมช่วยอ่านว่าควรเก็บ ตัด หรือเช็ก listing ไหนต่อ โดยไม่ทำให้บริบทของลิงก์แชร์หายไป'
-            : 'The shared-shortlist context carries forward so the team can review what to keep, cut, or check next without losing the context of the shared link.')
+          ? heroCopy.sharedShortlistSubtitle
         : leadCaptureContext.intent === 'project_compare'
-          ? (locale === 'th'
-          ? 'ระบบจะพก compare brief เดิมต่อไป เพื่อให้ทีมช่วยบีบ shortlist และชี้ next step โดยไม่ต้องอธิบาย context ซ้ำ'
-          : 'The same compare brief carries forward so the team can tighten the shortlist and point to the next step without rebuilding the context.')
+          ? heroCopy.compareSubtitle
         : leadCaptureContext.intent === 'project_shortlist'
-          ? (locale === 'th'
-            ? 'ระบบจะพก shortlist ที่คุณกำลังดูอยู่ต่อไป เพื่อให้ทีมช่วยคัดตัวเลือกที่ควรเก็บ ควรตัด และควรเช็กต่อ'
-            : 'The same shortlist context carries forward so the team can help decide what to keep, cut, and check next.')
-      : (locale === 'th'
-        ? 'เลือกเส้นทางที่ตรงกับโจทย์ของคุณ แล้วทีมจะตอบกลับด้วย shortlist, private tour, หรือ next step ที่ชัดเจน'
-        : 'Choose the route that fits your goal and the team will come back with a shortlist, private tour, or a clear next step.');
-  const contactProofs = [
-    locale === 'th' ? 'ทีมพัทยาที่ดูแลในพื้นที่' : 'Local Pattaya team',
-    locale === 'th' ? 'WhatsApp / LINE / private tour' : 'WhatsApp / LINE / private tour',
-    locale === 'th' ? 'สอดคล้อง PDPA / GDPR' : 'PDPA / GDPR aligned',
-    locale === 'th' ? 'ตอบกลับแบบมี action ชัด' : 'Action-oriented replies',
-  ];
+          ? heroCopy.shortlistSubtitle
+      : heroCopy.defaultSubtitle;
+  const contactProofs = heroCopy.proofs;
   const contactRouteCards = [
     {
       key: 'investment',
-      eyebrow: locale === 'th' ? 'สำหรับนักลงทุน' : 'Investor route',
-      title: locale === 'th' ? 'แผนลงทุน' : 'Investment plan',
-      body: locale === 'th'
-        ? 'เหมาะกับผู้ลงทุนที่ต้องการเริ่มจาก ROI, downside, และ shortlist ตาม thesis'
-        : 'For investors who want to start from ROI, downside, and a shortlist built around the thesis.',
+      eyebrow: contactCopy.routeChooser.investment.eyebrow,
+      title: contactCopy.routeChooser.investment.title,
+      body: contactCopy.routeChooser.investment.body,
       href: withLocaleQuery(locale, '/contact', { topic: 'investment_plan' }),
-      action: locale === 'th' ? 'เปิด investment route' : 'Open investment route',
+      action: contactCopy.routeChooser.investment.action,
     },
     {
       key: 'private-tour',
-      eyebrow: locale === 'th' ? 'สำหรับ private tour' : 'Private-tour route',
-      title: locale === 'th' ? 'Private tour แบบคัดมาก่อน' : 'Private tour',
-      body: locale === 'th'
-        ? 'เหมาะกับผู้ซื้อระดับบนที่ต้องการ shortlist สั้นและนัดดูแบบมี privacy'
-        : 'For high-end buyers who want a shorter shortlist and a more private viewing handoff.',
+      eyebrow: contactCopy.routeChooser.privateTour.eyebrow,
+      title: contactCopy.routeChooser.privateTour.title,
+      body: contactCopy.routeChooser.privateTour.body,
       href: withLocaleQuery(locale, '/contact', { topic: 'private_tour' }),
-      action: locale === 'th' ? 'เปิด private tour route' : 'Open private tour route',
+      action: contactCopy.routeChooser.privateTour.action,
     },
     {
       key: 'general',
-      eyebrow: locale === 'th' ? 'สำหรับผู้ซื้อทั่วไป' : 'General route',
-      title: locale === 'th' ? 'Shortlist ที่คัดตามโจทย์' : 'Curated shortlist',
-      body: locale === 'th'
-        ? 'เหมาะกับผู้ซื้ออยู่อาศัยจริงหรือย้ายมาอยู่ ที่ต้องการเริ่มจากทำเล งบ และขั้นตอนที่ชัด'
-        : 'For end-users and relocators who want to start from area, budget, and a cleaner next step.',
+      eyebrow: contactCopy.routeChooser.general.eyebrow,
+      title: contactCopy.routeChooser.general.title,
+      body: contactCopy.routeChooser.general.body,
       href: withLocale(locale, '/contact'),
-      action: locale === 'th' ? 'ใช้ contact route หลัก' : 'Use the main contact route',
+      action: contactCopy.routeChooser.general.action,
     },
   ];
   const contactAdvisoryTitle = isPrivateTourTopic
-    ? (locale === 'th' ? 'ส่งต่อโจทย์ private tour' : 'Private-tour handoff')
+    ? contactCopy.advisoryVariants.privateTourTitle
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'ส่งต่อโจทย์การลงทุน' : 'Investment-plan handoff')
+      ? contactCopy.advisoryVariants.investmentPlanTitle
       : dict.contact.advisoryTitle;
   const contactAdvisoryBody = isPrivateTourTopic
-    ? (locale === 'th'
-      ? 'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะกลับมาพร้อม shortlist ที่สั้นกว่าและ route การพาชมที่พร้อมใช้งาน'
-      : 'Share preferred areas, budget, and timing and the team will reply with a shorter shortlist and a viewing route you can act on.')
+    ? contactCopy.advisoryVariants.privateTourBody
     : isInvestmentPlanTopic
-      ? (locale === 'th'
-        ? 'ส่งงบประมาณ ผลตอบแทนที่คาดหวัง และ downside ที่กังวล แล้วทีมจะตอบกลับด้วย shortlist และ next step ที่ยึดตาม thesis การลงทุน'
-        : 'Share budget, return goals, and downside concerns and the team will respond with a shortlist and next step shaped around your investment thesis.')
+      ? contactCopy.advisoryVariants.investmentPlanBody
       : dict.contact.advisoryBody;
   const contactTrustTitle = isPrivateTourTopic
-    ? (locale === 'th' ? 'มาตรฐานการจัด private tour' : 'Private-tour standards')
+    ? contactCopy.trustVariants.privateTourTitle
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'มาตรฐานการตอบกลับสำหรับนักลงทุน' : 'Investor response standard')
+      ? contactCopy.trustVariants.investmentPlanTitle
       : dict.contact.trustTitle;
   const contactTrustBullets = isPrivateTourTopic
-    ? [
-        locale === 'th' ? 'เริ่มจาก shortlist ที่แคบลงก่อนนัดดูจริง' : 'Starts from a tighter shortlist before the viewing is booked',
-        locale === 'th' ? 'คุยผ่าน WhatsApp / LINE หรือฟอร์มได้ตามจังหวะของคุณ' : 'Works through WhatsApp, LINE, or form without repeating your context',
-        locale === 'th' ? 'ออกแบบเพื่อพาไปสู่ viewing plan ไม่ใช่ตอบกลับแบบกว้าง ๆ' : 'Designed to end in a viewing plan, not another generic reply',
-      ]
+    ? contactCopy.trustVariants.privateTourBullets
     : isInvestmentPlanTopic
-      ? [
-          locale === 'th' ? 'เริ่มจากงบประมาณ ผลตอบแทน และ downside ที่ยอมรับได้' : 'Starts from budget, return targets, and acceptable downside',
-          locale === 'th' ? 'ตอบกลับด้วย shortlist และจุดที่ควรเช็กต่อ ไม่ใช่ listing dump' : 'Replies with a shortlist and checks that matter, not a listing dump',
-          locale === 'th' ? 'รองรับการคุยต่อทาง WhatsApp / LINE เมื่ออยากลงรายละเอียด' : 'Supports deeper follow-up on WhatsApp or LINE when needed',
-        ]
+      ? contactCopy.trustVariants.investmentPlanBullets
       : dict.contact.trustBullets;
   const contactFormHeading = isPrivateTourTopic
-    ? (locale === 'th' ? 'ส่ง brief สำหรับ private tour' : 'Send your private-tour brief')
+    ? contactCopy.formHeadings.privateTour
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send your investment brief')
+      ? contactCopy.formHeadings.investmentPlan
       : leadCaptureContext.source === 'shortlist_shared'
-        ? (locale === 'th' ? 'ส่งบรีฟ shortlist ที่แชร์นี้' : 'Send this shared-shortlist brief')
+        ? contactCopy.formHeadings.sharedShortlist
       : leadCaptureContext.source === 'compare_recovery'
-        ? (locale === 'th' ? 'ส่งบรีฟเพื่อกู้ compare นี้' : 'Send this compare-recovery brief')
+        ? contactCopy.formHeadings.compareRecovery
       : leadCaptureContext.intent === 'project_shortlist'
-        ? (locale === 'th' ? 'ส่งบรีฟ shortlist นี้' : 'Send your shortlist brief')
+        ? contactCopy.formHeadings.shortlist
       : dict.contact.formTitle;
   const hasSpecializedContactContext =
     isPrivateTourTopic
@@ -655,19 +523,19 @@ export default async function ContactPage(
     || hasInvestorContext
     || hasBuyingCostContext;
   const contactHeroPrimaryLabel = isPrivateTourTopic
-    ? (locale === 'th' ? 'ส่งโจทย์ private tour' : 'Send private-tour brief')
+    ? contactCopy.heroPrimaryActionLabels.privateTour
     : isInvestmentPlanTopic
-      ? (locale === 'th' ? 'ส่ง brief การลงทุน' : 'Send investment brief')
+      ? contactCopy.heroPrimaryActionLabels.investmentPlan
       : leadCaptureContext.source === 'shortlist_shared'
-        ? (locale === 'th' ? 'ส่งบรีฟ shortlist ที่แชร์นี้' : 'Continue with this shared shortlist')
+        ? contactCopy.heroPrimaryActionLabels.sharedShortlist
       : leadCaptureContext.source === 'compare_recovery'
-        ? (locale === 'th' ? 'ส่งบรีฟเพื่อกู้ compare นี้' : 'Continue with this compare recovery brief')
+        ? contactCopy.heroPrimaryActionLabels.compareRecovery
       : leadCaptureContext.intent === 'project_shortlist'
-        ? (locale === 'th' ? 'ส่งบรีฟ shortlist นี้' : 'Continue with this shortlist brief')
+        ? contactCopy.heroPrimaryActionLabels.shortlist
       : leadCaptureContext.intent === 'project_compare'
-        ? (locale === 'th' ? 'ส่งบรีฟจาก compare นี้' : 'Continue with this compare brief')
+        ? contactCopy.heroPrimaryActionLabels.compare
         : hasLeadCaptureContext || hasInvestorContext || hasBuyingCostContext
-          ? (locale === 'th' ? 'ส่งบรีฟต่อจากบริบทนี้' : 'Continue with this brief')
+          ? contactCopy.heroPrimaryActionLabels.contextual
           : dict.contact.formTitle;
   const contactResponseBullets = buildContactResponseBullets(locale, {
     isPrivateTourTopic,
@@ -694,26 +562,20 @@ export default async function ContactPage(
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'Investor, end-user, และ private-tour buyer ที่ต้องการ next step ชัด' : 'Investors, end-users, and private-tour buyers who need a clearer next step',
-            body: locale === 'th'
-              ? 'ใช้หน้านี้เมื่อพร้อมส่งงบ เป้าหมาย และทำเล เพื่อให้ทีมตอบกลับด้วย shortlist หรือ viewing plan ที่ใช้ต่อได้จริง'
-              : 'Use this when you are ready to share budget, goals, and areas so the team can reply with a shortlist or viewing plan you can act on.',
+            title: heroCopy.signals.bestForTitle,
+            body: heroCopy.signals.bestForBody,
             icon: 'users',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เลือกเส้นทางที่ตรงกับวิธีตัดสินใจของคุณ' : 'Choose the route that matches how you decide',
-            body: locale === 'th'
-              ? 'จะเริ่มจาก investment brief, private tour, หรือ contact route หลักก็ได้ โดยไม่ต้องส่งคำอธิบายซ้ำหลายรอบ'
-              : 'Start from an investment brief, a private-tour route, or the main contact path without repeating the same context.',
+            title: heroCopy.signals.nextStepTitle,
+            body: heroCopy.signals.nextStepBody,
             icon: 'check',
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ทีมตอบกลับพร้อม shortlist, viewing plan, หรือ next step ที่ชัด' : 'The team replies with a shortlist, viewing plan, or a concrete next step',
-            body: locale === 'th'
-              ? 'หน้านี้ถูกออกแบบให้ปิดความลังเล ไม่ใช่เพิ่มข้อความกลาง ๆ ที่ยังไม่ช่วยให้ตัดสินใจ'
-              : 'This page is designed to close hesitation, not generate another round of generic back-and-forth.',
+            title: heroCopy.signals.trustTitle,
+            body: heroCopy.signals.trustBody,
             icon: 'shield',
           },
         ]}
@@ -722,21 +584,15 @@ export default async function ContactPage(
           label: contactHeroPrimaryLabel,
           eventPayload: { cta: 'open_contact_form', from: 'contact_hero' },
         }}
-        supportNote={locale === 'th'
-          ? 'อธิบายโจทย์ครั้งเดียวก็พอ ทีมจะตอบกลับด้วย shortlist, viewing plan, หรือ next step ที่ชัดกว่าเดิม หากต้องการคุยเร็วขึ้น ยังใช้ WhatsApp หรือ LINE ด้านล่างได้'
-          : 'One brief is enough. The team will reply with a shortlist, a viewing plan, or the clearest next step. If you prefer a faster async follow-up, use WhatsApp or LINE below.'}
+        supportNote={heroCopy.supportNote}
       />
 
       {!hasSpecializedContactContext ? (
         <section className="section section--alt contact-route-section">
           <Container>
             <div className="section-header">
-              <h2 className="section-title">{locale === 'th' ? 'เริ่มจากเส้นทางที่ตรงกับโจทย์' : 'Start from the route that fits'}</h2>
-              <p className="section-subtitle">
-                {locale === 'th'
-                  ? 'เลือกเส้นทางที่ตรงกับเป้าหมายก่อนกรอกฟอร์ม เพื่อให้ทีมรับ brief ที่คมขึ้นตั้งแต่รอบแรก'
-                  : 'Pick the route that fits your goal before filling the form so the team receives a sharper brief on the first pass.'}
-              </p>
+              <h2 className="section-title">{contactCopy.routeChooser.title}</h2>
+              <p className="section-subtitle">{contactCopy.routeChooser.subtitle}</p>
             </div>
             <div className="grid grid-3 contact-route-grid">
               {contactRouteCards.map((card) => (
@@ -761,9 +617,7 @@ export default async function ContactPage(
 
               {hasBuyingCostContext ? (
                 <div className="trust-box contact-concierge-box">
-                  <h3 className="trust-box__title">
-                    {locale === 'th' ? 'สรุปการประเมิน buying cost ที่ส่งต่อมาจาก estimator' : 'Buying cost estimate carried from estimator'}
-                  </h3>
+                  <h3 className="trust-box__title">{contactCopy.summaryTitles.buyingCost}</h3>
                   <ul className="bullet-list">
                     {buyingCostLines.map((line) => (
                       <li key={line}>{line}</li>
@@ -774,9 +628,7 @@ export default async function ContactPage(
 
               {hasInvestorContext ? (
                 <div className="trust-box contact-concierge-box">
-                  <h3 className="trust-box__title">
-                    {locale === 'th' ? 'สรุปบริบทนักลงทุนที่ส่งต่อมา' : 'Investor handoff summary'}
-                  </h3>
+                  <h3 className="trust-box__title">{contactCopy.summaryTitles.investor}</h3>
                   <ul className="bullet-list">
                     {investorLines.map((line) => (
                       <li key={line}>{line}</li>
@@ -787,9 +639,7 @@ export default async function ContactPage(
 
               {hasLeadCaptureContext ? (
                 <div className="trust-box contact-concierge-box">
-                  <h3 className="trust-box__title">
-                    {locale === 'th' ? 'สรุปบริบท lead ที่ส่งต่อมา' : 'Lead handoff summary'}
-                  </h3>
+                  <h3 className="trust-box__title">{contactCopy.summaryTitles.lead}</h3>
                   <ul className="bullet-list">
                     {leadCaptureLines.map((line) => (
                       <li key={line}>{line}</li>

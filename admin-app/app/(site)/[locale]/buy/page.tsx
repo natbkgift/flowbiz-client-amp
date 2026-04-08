@@ -26,21 +26,25 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const copy = dict.buy.route;
   return makePageMetadata(
     locale,
     'buy',
-    locale === 'th' ? 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น' : 'Foreign-buyer inventory that is easier to act on',
-    locale === 'th'
-      ? 'เริ่มจากรายการซื้อที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และรายการคัดไว้ โดยไม่ต้องเสียเวลาไล่ดูรายการที่ไม่เกี่ยว'
-      : 'Start from buy-ready Pattaya inventory with clearer next steps on foreign quota, fees, shortlist, and private tour.',
+    copy.metadataTitle,
+    copy.metadataDescription,
     dict.brand.name
   );
+}
+
+function applyCountTemplate(template: string, count: number): string {
+  return template.replace('{count}', String(count));
 }
 
 export default async function BuyPage(props: { params: Promise<{ locale: string }> }) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const copy = dict.buy.route;
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
 
@@ -61,32 +65,15 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     typeof item.price === 'number' && Number.isFinite(item.price) && item.price >= 10_000_000
   ).length;
   const buyProofs = [
-    locale === 'th'
-      ? `${res.data?.length ?? 0} รายการซื้อที่พร้อมคุยต่อ`
-      : `${res.data?.length ?? 0} buy-ready listings`,
+    applyCountTemplate(copy.proofReadyListingsTemplate, res.data?.length ?? 0),
     liveEntryPrice
-      ? (locale === 'th'
-        ? `เริ่มต้นที่ THB ${Math.round(liveEntryPrice).toLocaleString()}`
-        : `Entry from THB ${Math.round(liveEntryPrice).toLocaleString()}`)
+      ? `${copy.entryFromPrefix} THB ${Math.round(liveEntryPrice).toLocaleString()}`
       : null,
     luxuryReadyCount > 0
-      ? (locale === 'th' ? `${luxuryReadyCount} ตัวเลือกระดับลักชัวรี` : `${luxuryReadyCount} luxury-ready options`)
+      ? applyCountTemplate(copy.luxuryReadyOptionsTemplate, luxuryReadyCount)
       : null,
     ...advisoryProofs,
   ].filter((item): item is string => Boolean(item)).slice(0, 4);
-  const buyFormHeading = locale === 'th' ? 'ส่งบรีฟฝั่งซื้อของคุณ' : 'Send your buy-side brief';
-  const buyFormDescription = locale === 'th'
-    ? 'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวก แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไปได้ทันที'
-    : 'Share budget, preferred areas, and timing so the team can respond with a shortlist ready for quota, fee, and next-step discussion.';
-  const buyFormDefaultMessage = locale === 'th'
-    ? 'ต้องการให้ทีมคัดรายการคัดไว้ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่องโควตาต่างชาติและค่าโอน'
-    : 'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.';
-  const buyClosingEyebrow = locale === 'th'
-    ? 'ส่งต่อหลัง shortlist เริ่มชัด'
-    : 'Hand off once the shortlist is clearer';
-  const buyClosingNote = locale === 'th'
-    ? 'ทีมจะใช้บรีฟนี้กลับไปจัด shortlist พร้อมกรอบ quota ค่าโอน และประเด็นที่ควรคุยต่อในสายถัดไป โดยไม่ต้องเริ่มอธิบายใหม่ทั้งหมด.'
-    : 'The team uses this brief to return with a shortlist framed around quota, transfer costs, and the checks worth covering on the next call without restarting the conversation.';
 
   return (
     <main id="main-content" className="page-template--catalogue buy-page decision-page--confidence">
@@ -98,68 +85,56 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
-        title={locale === 'th' ? 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น' : 'Foreign-buyer inventory that is easier to act on'}
-        subtitle={locale === 'th'
-          ? 'เปิดดูยูนิตขายที่พร้อมใช้ต่อสำหรับรายการคัดไว้ การตรวจเอกสาร และการนัดชมแบบส่วนตัว โดยไม่ต้องเริ่มจากกองรายการจำนวนมาก'
-          : 'Browse resale and buy-ready units that can move directly into shortlist, legal review, and a private tour without starting from a listing dump.'}
+        title={copy.heroTitle}
+        subtitle={copy.heroSubtitle}
         proofs={buyProofs}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อต่างชาติที่ต้องการรายการพร้อมขั้นถัดไปที่ชัด' : 'Foreign buyers who want inventory with a clear next step',
-            body: locale === 'th'
-              ? 'เหมาะกับผู้ที่ต้องการเข้าใจโควตาต่างชาติ ค่าใช้จ่าย และลำดับการตรวจเอกสาร โดยยังเห็นตัวเลือกที่ใช้ได้จริงก่อน'
-              : 'Best for buyers who need foreign quota, transfer-cost, and due-diligence clarity while still seeing workable options first.',
+            title: copy.signals.bestForTitle,
+            body: copy.signals.bestForBody,
             icon: 'users',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เริ่มจากรายการคัดไว้ที่สั้นกว่าและแผนค่าใช้จ่ายที่ชัด' : 'Start with a shorter shortlist and a clearer fee map',
-            body: locale === 'th'
-              ? 'ส่งงบประมาณและช่วงเวลามา แล้วทีมจะคัดยูนิตที่ควรดูต่อ พร้อมสิ่งที่ต้องเช็กก่อนคุยลึก'
-              : 'Share your budget and timing and the team will narrow the units worth seeing next, together with the checks that matter.',
+            title: copy.signals.nextStepTitle,
+            body: copy.signals.nextStepBody,
             icon: 'check',
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'ทีมที่ปรึกษาในพื้นที่ช่วยคัดก่อนเกิดความล้าในการตัดสินใจ' : 'Local advisory support reduces decision fatigue before it starts',
-            body: locale === 'th'
-              ? 'เราไม่ส่งรายการจำนวนมาก แต่คัดตัวเลือกผ่านมุมมองของผู้ซื้อต่างชาติและความพร้อมในการเข้าชม'
-              : 'We filter options through a foreign-buyer and viewing-readiness lens instead of sending raw listing volume.',
+            title: copy.signals.trustTitle,
+            body: copy.signals.trustBody,
             icon: 'shield',
           },
         ]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'buy', source: 'buy_hero' }),
-          label: locale === 'th' ? 'คัด shortlist ฝั่งซื้อ' : 'Get buy-ready shortlist',
+          label: copy.primaryActionLabel,
           eventPayload: { cta: 'buy_consultation', from: 'buy_hero' },
         }}
         secondaryAction={{
           href: withLocale(locale, '/projects'),
-          label: locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้ว' : 'See published projects',
+          label: copy.secondaryActionLabel,
           eventPayload: { cta: 'browse_verified_inventory', from: 'buy_hero' },
         }}
         tertiaryAction={{
           href: buildAdvisorWhatsApp(locale, dict),
           label: dict.cta.whatsapp,
         }}
-        supportNote={locale === 'th'
-          ? 'ส่งงบประมาณ ทำเล และช่วงเวลาเพียงครั้งเดียว แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไป'
-          : 'Share budget, area, and timing once. The team replies with a shortlist ready for quota, transfer-cost, and next-step discussion.'}
+        supportNote={copy.supportNote}
       />
 
       <section className="section">
         <Container variant="wide">
-          <div className="buy-scan-note buy-scan-note--hero buy-scan-note--process mb-6" aria-label={locale === 'th' ? 'โหมดสแกนก่อนตัดสินใจ' : 'Scan mode before acting'}>
+          <div className="buy-scan-note buy-scan-note--hero buy-scan-note--process mb-6" aria-label={copy.scanMode.ariaLabel}>
             <p className="buy-scan-note__eyebrow">
-              {locale === 'th' ? 'เริ่มจากโหมดสแกน' : 'Scan mode first'}
+              {copy.scanMode.eyebrow}
             </p>
             <p className="buy-scan-note__body">
-              {locale === 'th'
-                ? 'เริ่มจากการสแกนยูนิตที่พร้อมคุยต่อก่อน แล้วค่อยใช้ advisory เมื่อมีตัวเลือกที่ผ่าน first pass จริง'
-                : 'Start by scanning units worth a second look, then use advisory support only once a few options survive the first pass.'}
+              {copy.scanMode.body}
             </p>
           </div>
           <div className="section-header">
@@ -176,15 +151,13 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             ))}
           </div>
 
-          <div className="buy-flow-utility buy-flow-utility--process" aria-label={locale === 'th' ? 'เส้นทางช่วยตัดสินใจหลังดูขั้นตอน' : 'Process support path'}>
+          <div className="buy-flow-utility buy-flow-utility--process" aria-label={copy.processUtility.ariaLabel}>
             <div className="buy-flow-utility__text">
-              {locale === 'th'
-                ? 'เมื่อเห็น flow ชัดแล้ว ให้เก็บการคุยกับทีมไว้หลังจาก shortlist เริ่มแคบลง จะทำให้คำแนะนำตรงกว่า'
-                : 'Once the flow is clear, use the team after the shortlist tightens so the advice can stay specific.'}
+              {copy.processUtility.body}
             </div>
             <div className="buy-flow-utility__links">
               <a className="buy-flow-utility__link" href={withLocale(locale, '/contact')}>
-                {locale === 'th' ? 'คุยกับที่ปรึกษาหลัง shortlist เริ่มชัด' : 'Talk to an advisor after the shortlist tightens'}
+                {copy.processUtility.linkLabel}
               </a>
             </div>
           </div>
@@ -214,92 +187,86 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">
-              {locale === 'th' ? 'ตารางผ่อนชำระ & ค่าโอน' : 'Payment Plans & Transfer Costs'}
+              {copy.reference.title}
             </h2>
             <p className="section-subtitle">
-              {locale === 'th'
-                ? 'ข้อมูลค่าใช้จ่ายสำคัญที่ผู้ซื้อควรทราบก่อนตัดสินใจ'
-                : 'Key cost information every buyer should know before committing'}
+              {copy.reference.subtitle}
             </p>
           </div>
 
           <div className="grid grid-2 buy-reference-grid">
             <div className="card buy-reference-card buy-reference-card--installment">
               <h3 className="card-title">
-                {locale === 'th' ? 'การผ่อนชำระ (ตัวอย่าง)' : 'Installment Plans (Example)'}
+                {copy.reference.installmentTitle}
               </h3>
                 <table className="info-table buy-reference-card__table">
                   <thead>
                     <tr>
-                      <th>{locale === 'th' ? 'งวด' : 'Phase'}</th>
-                      <th>{locale === 'th' ? 'เงื่อนไข' : 'Condition'}</th>
-                      <th>{locale === 'th' ? 'สัดส่วน' : 'Percentage'}</th>
+                      <th>{copy.reference.phaseHeader}</th>
+                      <th>{copy.reference.conditionHeader}</th>
+                      <th>{copy.reference.percentageHeader}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{locale === 'th' ? 'จอง' : 'Booking'}</td>
-                      <td>{locale === 'th' ? 'เงินจองเริ่มต้น' : 'Initial reservation'}</td>
+                      <td>{copy.reference.bookingLabel}</td>
+                      <td>{copy.reference.bookingCondition}</td>
                       <td>฿50,000–200,000</td>
                     </tr>
                     <tr>
-                      <td>{locale === 'th' ? 'ทำสัญญา' : 'Contract'}</td>
-                      <td>{locale === 'th' ? 'ภายใน 7–30 วัน' : 'Within 7–30 days'}</td>
+                      <td>{copy.reference.contractLabel}</td>
+                      <td>{copy.reference.contractCondition}</td>
                       <td>20–30%</td>
                     </tr>
                     <tr>
-                      <td>{locale === 'th' ? 'ผ่อนระหว่างสร้าง' : 'Construction'}</td>
-                      <td>{locale === 'th' ? 'รายเดือน/รายไตรมาส' : 'Monthly/Quarterly'}</td>
+                      <td>{copy.reference.constructionLabel}</td>
+                      <td>{copy.reference.constructionCondition}</td>
                       <td>30–40%</td>
                     </tr>
                     <tr>
-                      <td>{locale === 'th' ? 'โอนกรรมสิทธิ์' : 'Transfer'}</td>
-                      <td>{locale === 'th' ? 'วันรับมอบห้อง' : 'Handover day'}</td>
+                      <td>{copy.reference.transferLabel}</td>
+                      <td>{copy.reference.transferCondition}</td>
                       <td>30–40%</td>
                     </tr>
                   </tbody>
                 </table>
                 <p className="text-caption buy-reference-card__caption">
-                  {locale === 'th'
-                    ? '* เงื่อนไขแตกต่างตามโครงการ กรุณาสอบถามเพื่อรับข้อมูลเฉพาะ'
-                    : '* Terms vary by project. Contact us for specific payment plans.'}
+                  {copy.reference.installmentCaption}
                 </p>
             </div>
 
             <div className="card buy-reference-card buy-reference-card--closing">
               <h3 className="card-title">
-                {locale === 'th' ? 'ค่าโอน & ค่าใช้จ่ายปิดการซื้อ' : 'Transfer & Closing Costs'}
+                {copy.reference.transferTitle}
               </h3>
                 <table className="info-table buy-reference-card__table">
                   <thead>
                     <tr>
-                      <th>{locale === 'th' ? 'รายการ' : 'Item'}</th>
-                      <th>{locale === 'th' ? 'อัตรา' : 'Rate'}</th>
+                      <th>{copy.reference.itemHeader}</th>
+                      <th>{copy.reference.rateHeader}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{locale === 'th' ? 'ค่าธรรมเนียมโอน' : 'Transfer fee'}</td>
+                      <td>{copy.reference.transferFeeLabel}</td>
                       <td>2%</td>
                     </tr>
                     <tr>
-                      <td>{locale === 'th' ? 'ภาษีธุรกิจเฉพาะ' : 'Specific business tax'}</td>
+                      <td>{copy.reference.specificBusinessTaxLabel}</td>
                       <td>3.3%</td>
                     </tr>
                     <tr>
-                      <td>{locale === 'th' ? 'อากรแสตมป์' : 'Stamp duty'}</td>
+                      <td>{copy.reference.stampDutyLabel}</td>
                       <td>0.5%</td>
                     </tr>
                     <tr>
-                      <td>{locale === 'th' ? 'ค่าจดจำนอง' : 'Mortgage registration'}</td>
+                      <td>{copy.reference.mortgageRegistrationLabel}</td>
                       <td>1%</td>
                     </tr>
                   </tbody>
                 </table>
                 <p className="text-caption buy-reference-card__caption">
-                  {locale === 'th'
-                    ? '* การแบ่งค่าใช้จ่ายระหว่างผู้ซื้อ/ผู้ขายขึ้นอยู่กับการเจรจา'
-                    : '* Buyer/seller cost split depends on negotiation. Consult your advisor.'}
+                  {copy.reference.transferCaption}
                 </p>
             </div>
           </div>
@@ -319,11 +286,9 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
             ))}
           </ul>
 
-          <div className="buy-flow-utility buy-flow-utility--legal mt-6" aria-label={locale === 'th' ? 'เส้นทางต่อหลัง legal checks' : 'Legal follow-up path'}>
+          <div className="buy-flow-utility buy-flow-utility--legal mt-6" aria-label={copy.legalUtility.ariaLabel}>
             <div className="buy-flow-utility__text">
-              {locale === 'th'
-                ? 'หลัง legal checks ให้เลือกว่าจะคุยกับทีมต่อ หรือเปิดมุมมองการลงทุนเพิ่ม ไม่ต้องมีปุ่มหลักซ้ำอีกชุด'
-                : 'After the legal checks, choose whether to brief the team or open the investment angle without adding another full CTA stack.'}
+              {copy.legalUtility.body}
             </div>
             <div className="buy-flow-utility__links">
               <a className="buy-flow-utility__link" href={withLocale(locale, '/contact')}>
@@ -346,30 +311,24 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
           {featuredItems.length ? (
             <>
-              <div className="buy-scan-note buy-scan-note--cards" aria-label={locale === 'th' ? 'โซนสแกนรายการซื้อ' : 'Listing scan zone'}>
+              <div className="buy-scan-note buy-scan-note--cards" aria-label={copy.listingScan.ariaLabel}>
                 <p className="buy-scan-note__eyebrow">
-                  {locale === 'th' ? 'โซนตัดสินใจจากการ์ด' : 'Card decision zone'}
+                  {copy.listingScan.eyebrow}
                 </p>
                 <p className="buy-scan-note__body">
-                  {locale === 'th'
-                    ? 'ใช้การ์ดเป็นจุดตัดสินใจหลัก: เปิดรายละเอียดก่อน แล้วค่อยบันทึก shortlist เมื่อยูนิตนั้นผ่าน first pass'
-                    : 'Use each card as the main decision point: open details first, then save to shortlist only when the unit survives the first pass.'}
+                  {copy.listingScan.body}
                 </p>
               </div>
               <ListingGrid items={featuredItems} />
-              <div className="buy-flow-utility buy-flow-utility--shortlist mt-6" aria-label={locale === 'th' ? 'เส้นทางทบทวน shortlist' : 'Shortlist review path'}>
+              <div className="buy-flow-utility buy-flow-utility--shortlist mt-6" aria-label={copy.shortlistUtility.ariaLabel}>
                 <div className="buy-flow-utility__text">
                   {hiddenItemCount > 0
-                    ? locale === 'th'
-                      ? `ยังมีตัวเลือกที่ผ่านเกณฑ์อีก ${hiddenItemCount} รายการ หากต้องการ shortlist ที่ตรงงบและแผนถือครองมากขึ้น ทีมสามารถคัดเพิ่มให้ได้`
-                      : `${hiddenItemCount} more verified options remain, and the team can narrow them into a sharper shortlist for your budget and holding plan.`
-                    : locale === 'th'
-                      ? 'หากยังไม่เจอยูนิตที่ใช่ ทีมสามารถคัด shortlist รอบถัดไปจาก inventory ที่ตรวจสอบแล้วให้ได้'
-                      : 'If this sample is not enough, the team can prepare the next shortlist from the verified inventory.'}
+                    ? applyCountTemplate(copy.shortlistUtility.moreOptionsTemplate, hiddenItemCount)
+                    : copy.shortlistUtility.fallbackBody}
                 </div>
                 <div className="buy-flow-utility__links">
                   <a className="buy-flow-utility__link" href={withLocale(locale, '/shortlist')}>
-                    {locale === 'th' ? 'ทบทวน shortlist ก่อนค่อย compare' : 'Review your shortlist before compare'}
+                    {copy.shortlistUtility.linkLabel}
                   </a>
                 </div>
               </div>
@@ -392,23 +351,19 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         <Container variant="wide">
           <div className="cta-panel buy-closing-cta-panel">
             <div className="buy-closing-cta-panel__copy">
-              <p className="buy-closing-cta-panel__eyebrow">{buyClosingEyebrow}</p>
+              <p className="buy-closing-cta-panel__eyebrow">{copy.closing.eyebrow}</p>
               <h2 className="cta-title">
-                {locale === 'th' ? 'ส่งบรีฟให้ทีม เพื่อได้รายการคัดฝั่งซื้อที่ชัดขึ้น' : 'Brief the team for a cleaner buy-side shortlist'}
+                {copy.closing.title}
               </h2>
-              <p className="cta-body">
-                {locale === 'th'
-                  ? 'ใช้บล็อกนี้เมื่อพร้อมให้ทีมคัดยูนิตที่ควรดูต่อ พร้อมสรุป quota, ค่าโอน, และ step ที่ควรเช็กก่อนคุยลึก'
-                  : 'Use this block when you are ready for the team to narrow the units worth seeing next and frame the quota, fee, and diligence checks before the next call.'}
-              </p>
-              <p className="buy-closing-cta-panel__note">{buyClosingNote}</p>
+              <p className="cta-body">{copy.closing.body}</p>
+              <p className="buy-closing-cta-panel__note">{copy.closing.note}</p>
             </div>
             <div className="cta-panel__form buy-closing-cta-panel__form">
               <LeadForm
-                heading={buyFormHeading}
-                description={buyFormDescription}
+                heading={copy.form.heading}
+                description={copy.form.description}
                 defaultPurpose="buy"
-                defaultMessage={buyFormDefaultMessage}
+                defaultMessage={copy.form.defaultMessage}
               />
             </div>
           </div>

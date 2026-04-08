@@ -53,6 +53,17 @@ describe('i18n dictionaries', () => {
     expect(th.about.whoParagraphs).toHaveLength(3);
   });
 
+  it('buy route shell has dictionary-backed copy keys', () => {
+    const requiredKeys: (keyof Dictionary['buy']['route'])[] = [
+      'metadataTitle', 'metadataDescription', 'heroTitle', 'heroSubtitle', 'supportNote',
+      'form', 'scanMode', 'processUtility', 'reference', 'legalUtility', 'listingScan', 'shortlistUtility', 'closing',
+    ];
+    for (const key of requiredKeys) {
+      expect(en.buy.route[key]).toBeTruthy();
+      expect(th.buy.route[key]).toBeTruthy();
+    }
+  });
+
   it('nav has all required keys', () => {
     const requiredNav: (keyof Dictionary['nav'])[] = [
       'home', 'invest', 'buy', 'live', 'projects', 'areaGuide', 'contact',
@@ -195,6 +206,30 @@ describe('i18n dictionaries', () => {
     }
   });
 
+  it('contact route copy contract has metadata, hero, and route chooser keys', () => {
+    const metadataKeys: (keyof Dictionary['contact']['metadata'])[] = [
+      'defaultTitle', 'defaultDescription', 'privateTourTitle', 'privateTourDescription', 'investmentPlanTitle', 'investmentPlanDescription',
+    ];
+    const heroKeys: (keyof Dictionary['contact']['hero'])[] = [
+      'defaultTitle', 'defaultSubtitle', 'privateTourTitle', 'privateTourSubtitle', 'investmentPlanTitle', 'investmentPlanSubtitle',
+      'compareRecoveryTitle', 'sharedShortlistTitle', 'compareTitle', 'shortlistTitle', 'proofs', 'supportNote', 'signals',
+    ];
+    const routeChooserKeys: (keyof Dictionary['contact']['routeChooser'])[] = ['title', 'subtitle', 'investment', 'privateTour', 'general'];
+
+    for (const key of metadataKeys) {
+      expect(en.contact.metadata[key]).toBeTruthy();
+      expect(th.contact.metadata[key]).toBeTruthy();
+    }
+    for (const key of heroKeys) {
+      expect(en.contact.hero[key]).toBeTruthy();
+      expect(th.contact.hero[key]).toBeTruthy();
+    }
+    for (const key of routeChooserKeys) {
+      expect(en.contact.routeChooser[key]).toBeTruthy();
+      expect(th.contact.routeChooser[key]).toBeTruthy();
+    }
+  });
+
   it('contact handoff labels stay available in both locales', () => {
     const requiredKeys: (keyof Dictionary['contact']['handoffLabels'])[] = [
       'compare_hero', 'compare_review', 'compare_recovery',
@@ -216,6 +251,26 @@ describe('i18n dictionaries', () => {
     for (const key of requiredKeys) {
       expect(en.shortlist[key]).toBeTruthy();
       expect(th.shortlist[key]).toBeTruthy();
+    }
+  });
+
+  it('projects page route shell has dictionary-backed keys', () => {
+    const requiredKeys: (keyof Dictionary['projectsPage'])[] = [
+      'metadataTitle', 'metadataDescription', 'hero', 'proofs', 'browseListingsLabel', 'card', 'empty',
+    ];
+    for (const key of requiredKeys) {
+      expect(en.projectsPage[key]).toBeTruthy();
+      expect(th.projectsPage[key]).toBeTruthy();
+    }
+  });
+
+  it('about route shell has extended section keys', () => {
+    const requiredKeys: (keyof Dictionary['about'])[] = [
+      'processSection', 'teamSection', 'proofSection', 'reviewsSection',
+    ];
+    for (const key of requiredKeys) {
+      expect(en.about[key]).toBeTruthy();
+      expect(th.about[key]).toBeTruthy();
     }
   });
 

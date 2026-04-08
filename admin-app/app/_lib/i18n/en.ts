@@ -277,6 +277,102 @@ export const en: Dictionary = {
     advisoryCtaTitle: 'Advisory CTA',
     advisoryCtaBody:
       'Send your criteria and we will propose a shortlist that fits both lifestyle and investment priorities.',
+    route: {
+      metadataTitle: 'Foreign-buyer inventory that is easier to act on',
+      metadataDescription:
+        'Start from buy-ready Pattaya inventory with clearer next steps on foreign quota, fees, shortlist, and private tour.',
+      proofReadyListingsTemplate: '{count} buy-ready listings',
+      entryFromPrefix: 'Entry from',
+      luxuryReadyOptionsTemplate: '{count} luxury-ready options',
+      heroTitle: 'Foreign-buyer inventory that is easier to act on',
+      heroSubtitle:
+        'Browse resale and buy-ready units that can move directly into shortlist, legal review, and a private tour without starting from a listing dump.',
+      supportNote:
+        'Share budget, area, and timing once. The team replies with a shortlist ready for quota, transfer-cost, and next-step discussion.',
+      primaryActionLabel: 'Get buy-ready shortlist',
+      secondaryActionLabel: 'See published projects',
+      signals: {
+        bestForTitle: 'Foreign buyers who want inventory with a clear next step',
+        bestForBody:
+          'Best for buyers who need foreign quota, transfer-cost, and due-diligence clarity while still seeing workable options first.',
+        nextStepTitle: 'Start with a shorter shortlist and a clearer fee map',
+        nextStepBody:
+          'Share your budget and timing and the team will narrow the units worth seeing next, together with the checks that matter.',
+        trustTitle: 'Local advisory support reduces decision fatigue before it starts',
+        trustBody:
+          'We filter options through a foreign-buyer and viewing-readiness lens instead of sending raw listing volume.',
+      },
+      form: {
+        heading: 'Send your buy-side brief',
+        description:
+          'Share budget, preferred areas, and timing so the team can respond with a shortlist ready for quota, fee, and next-step discussion.',
+        defaultMessage:
+          'I want the team to prepare a buy-side shortlist that fits my budget, area, and timing, together with the next checks on quota and transfer costs.',
+      },
+      scanMode: {
+        ariaLabel: 'Scan mode before acting',
+        eyebrow: 'Scan mode first',
+        body:
+          'Start by scanning units worth a second look, then use advisory support only once a few options survive the first pass.',
+      },
+      processUtility: {
+        ariaLabel: 'Process support path',
+        body: 'Once the flow is clear, use the team after the shortlist tightens so the advice can stay specific.',
+        linkLabel: 'Talk to an advisor after the shortlist tightens',
+      },
+      reference: {
+        title: 'Payment Plans & Transfer Costs',
+        subtitle: 'Key cost information every buyer should know before committing',
+        installmentTitle: 'Installment Plans (Example)',
+        installmentCaption: '* Terms vary by project. Contact us for specific payment plans.',
+        transferTitle: 'Transfer & Closing Costs',
+        transferCaption: '* Buyer/seller cost split depends on negotiation. Consult your advisor.',
+        phaseHeader: 'Phase',
+        conditionHeader: 'Condition',
+        percentageHeader: 'Percentage',
+        itemHeader: 'Item',
+        rateHeader: 'Rate',
+        bookingLabel: 'Booking',
+        bookingCondition: 'Initial reservation',
+        contractLabel: 'Contract',
+        contractCondition: 'Within 7–30 days',
+        constructionLabel: 'Construction',
+        constructionCondition: 'Monthly/Quarterly',
+        transferLabel: 'Transfer',
+        transferCondition: 'Handover day',
+        transferFeeLabel: 'Transfer fee',
+        specificBusinessTaxLabel: 'Specific business tax',
+        stampDutyLabel: 'Stamp duty',
+        mortgageRegistrationLabel: 'Mortgage registration',
+      },
+      legalUtility: {
+        ariaLabel: 'Legal follow-up path',
+        body:
+          'After the legal checks, choose whether to brief the team or open the investment angle without adding another full CTA stack.',
+      },
+      listingScan: {
+        ariaLabel: 'Listing scan zone',
+        eyebrow: 'Card decision zone',
+        body:
+          'Use each card as the main decision point: open details first, then save to shortlist only when the unit survives the first pass.',
+      },
+      shortlistUtility: {
+        ariaLabel: 'Shortlist review path',
+        moreOptionsTemplate:
+          '{count} more verified options remain, and the team can narrow them into a sharper shortlist for your budget and holding plan.',
+        fallbackBody:
+          'If this sample is not enough, the team can prepare the next shortlist from the verified inventory.',
+        linkLabel: 'Review your shortlist before compare',
+      },
+      closing: {
+        eyebrow: 'Hand off once the shortlist is clearer',
+        title: 'Brief the team for a cleaner buy-side shortlist',
+        body:
+          'Use this block when you are ready for the team to narrow the units worth seeing next and frame the quota, fee, and diligence checks before the next call.',
+        note:
+          'The team uses this brief to return with a shortlist framed around quota, transfer costs, and the checks worth covering on the next call without restarting the conversation.',
+      },
+    },
   },
   invest: {
     title: 'Invest in Pattaya Property',
@@ -337,6 +433,226 @@ export const en: Dictionary = {
     trustBullets: ['Clear process', 'No third‑party tracking', 'Fast response on WhatsApp or LINE'],
     responseTitle: 'What happens after you send the brief',
     channelsTitle: 'Message us',
+    metadata: {
+      defaultTitle: 'Talk to AMP Pattaya about the next serious step',
+      defaultDescription: 'Advisor-led guidance for international buyers.',
+      privateTourTitle: 'Book a private tour with the right shortlist first',
+      privateTourDescription:
+        'Share budget, preferred areas, and timing so the team can shape the shortlist and line up the right private tour before you visit.',
+      investmentPlanTitle: 'Discuss your Pattaya investment plan with context already in place',
+      investmentPlanDescription:
+        'Start from your budget and return goals so the team can respond with a sharper shortlist and next step from the first reply.',
+    },
+    hero: {
+      defaultTitle: 'Talk to AMP Pattaya about the next serious step',
+      defaultSubtitle:
+        'Choose the route that fits your goal and the team will come back with a shortlist, private tour, or a clear next step.',
+      privateTourTitle: 'Book a private tour with the right shortlist first',
+      privateTourSubtitle:
+        'Share your preferred areas, budget, and timing so the team can line up the right viewing route before the tour.',
+      investmentPlanTitle: 'Discuss your Pattaya investment plan with context already in place',
+      investmentPlanSubtitle:
+        'Start from your budget, return goals, and thesis so the first shortlist is sharper and more credible.',
+      compareRecoveryTitle: 'Recover the next step from this compare brief',
+      compareRecoverySubtitle:
+        'Some projects in the original compare may have disappeared or lost their snapshot, but the team can still use the carried brief to rebuild the shortlist and point to the next step.',
+      sharedShortlistTitle: 'Review this shared shortlist with AMP Pattaya',
+      sharedShortlistSubtitle:
+        'The shared-shortlist context carries forward so the team can review what to keep, cut, or check next without losing the context of the shared link.',
+      compareTitle: 'Continue from this comparison with AMP Pattaya',
+      compareSubtitle:
+        'The same compare brief carries forward so the team can tighten the shortlist and point to the next step without rebuilding the context.',
+      shortlistTitle: 'Review this shortlist with AMP Pattaya',
+      shortlistSubtitle:
+        'The same shortlist context carries forward so the team can help decide what to keep, cut, and check next.',
+      proofs: [
+        'Local Pattaya team',
+        'WhatsApp / LINE / private tour',
+        'PDPA / GDPR aligned',
+        'Action-oriented replies',
+      ],
+      supportNote:
+        'One brief is enough. The team will reply with a shortlist, a viewing plan, or the clearest next step. If you prefer a faster async follow-up, use WhatsApp or LINE below.',
+      signals: {
+        bestForTitle: 'Investors, end-users, and private-tour buyers who need a clearer next step',
+        bestForBody:
+          'Use this when you are ready to share budget, goals, and areas so the team can reply with a shortlist or viewing plan you can act on.',
+        nextStepTitle: 'Choose the route that matches how you decide',
+        nextStepBody:
+          'Start from an investment brief, a private-tour route, or the main contact path without repeating the same context.',
+        trustTitle: 'The team replies with a shortlist, viewing plan, or a concrete next step',
+        trustBody:
+          'This page is designed to close hesitation, not generate another round of generic back-and-forth.',
+      },
+    },
+    routeChooser: {
+      title: 'Start from the route that fits',
+      subtitle: 'Pick the route that fits your goal before filling the form so the team receives a sharper brief on the first pass.',
+      investment: {
+        eyebrow: 'Investor route',
+        title: 'Investment plan',
+        body: 'For investors who want to start from ROI, downside, and a shortlist built around the thesis.',
+        action: 'Open investment route',
+      },
+      privateTour: {
+        eyebrow: 'Private-tour route',
+        title: 'Private tour',
+        body: 'For high-end buyers who want a shorter shortlist and a more private viewing handoff.',
+        action: 'Open private tour route',
+      },
+      general: {
+        eyebrow: 'General route',
+        title: 'Curated shortlist',
+        body: 'For end-users and relocators who want to start from area, budget, and a cleaner next step.',
+        action: 'Use the main contact route',
+      },
+    },
+    advisoryVariants: {
+      privateTourTitle: 'Private-tour handoff',
+      privateTourBody:
+        'Share preferred areas, budget, and timing and the team will reply with a shorter shortlist and a viewing route you can act on.',
+      investmentPlanTitle: 'Investment-plan handoff',
+      investmentPlanBody:
+        'Share budget, return goals, and downside concerns and the team will respond with a shortlist and next step shaped around your investment thesis.',
+    },
+    trustVariants: {
+      privateTourTitle: 'Private-tour standards',
+      privateTourBullets: [
+        'Starts from a tighter shortlist before the viewing is booked',
+        'Works through WhatsApp, LINE, or form without repeating your context',
+        'Designed to end in a viewing plan, not another generic reply',
+      ],
+      investmentPlanTitle: 'Investor response standard',
+      investmentPlanBullets: [
+        'Starts from budget, return targets, and acceptable downside',
+        'Replies with a shortlist and checks that matter, not a listing dump',
+        'Supports deeper follow-up on WhatsApp or LINE when needed',
+      ],
+    },
+    formHeadings: {
+      privateTour: 'Send your private-tour brief',
+      investmentPlan: 'Send your investment brief',
+      sharedShortlist: 'Send this shared-shortlist brief',
+      compareRecovery: 'Send this compare-recovery brief',
+      shortlist: 'Send your shortlist brief',
+    },
+    heroPrimaryActionLabels: {
+      privateTour: 'Send private-tour brief',
+      investmentPlan: 'Send investment brief',
+      sharedShortlist: 'Continue with this shared shortlist',
+      compareRecovery: 'Continue with this compare recovery brief',
+      shortlist: 'Continue with this shortlist brief',
+      compare: 'Continue with this compare brief',
+      contextual: 'Continue with this brief',
+    },
+    responseBullets: {
+      default: [
+        'The reply should come back as a tighter shortlist or the clearest next step, not another generic listing dump.',
+        'Budget, area, and timing should stay attached to the handoff so you do not restart the brief later.',
+        'If the route is still ambiguous, the team should tell you what to compare, verify, or schedule next.',
+      ],
+      privateTour: [
+        'The reply should come back as a viewing shortlist you can act on, not just another wide catalogue link.',
+        'Timing, privacy, and area preferences should carry forward in the handoff without forcing you to restate the brief.',
+        'If a unit is no longer suitable, the team should point to the clearest next-best viewing option immediately.',
+      ],
+      investmentPlan: [
+        'The reply should come back as an investable shortlist with downside checks, not just optimistic yield language.',
+        'Budget, return targets, and the investment thesis should stay attached to the handoff without drifting.',
+        'If the brief is still thin, the team should say which assumption needs to be clarified before the investment conversation moves.',
+      ],
+      compare: [
+        'The same compare context should stay attached to the reply so you do not need to restate the projects in scope.',
+        'If live availability shifted, the reply should explain what changed and what should replace it.',
+        'The next step should tighten into a shortlist decision, a viewing plan, or a sharper advisor call.',
+      ],
+      shortlist: [
+        'The existing shortlist context should carry into the reply so the brief does not restart from zero.',
+        'The reply should say clearly what to keep, cut, or verify next from the current shortlist.',
+        'If stock has moved, the team should point to the nearest replacement instead of sending you back into a broad browse again.',
+      ],
+    },
+    summaryTitles: {
+      buyingCost: 'Buying cost estimate carried from estimator',
+      investor: 'Investor handoff summary',
+      lead: 'Lead handoff summary',
+    },
+    leadIntentLabels: {
+      project_consultation: 'Continue the conversation from a live project review',
+      project_shortlist: 'Request a tighter shortlist around the current options',
+      project_compare: 'Continue from a multi-project comparison',
+      general_inquiry: 'General inquiry',
+    },
+    contextLabels: {
+      targetPurchasePrice: 'Target purchase price',
+      monthlyRent: 'Monthly rent',
+      occupancy: 'Occupancy',
+      annualCosts: 'Annual costs',
+      grossYield: 'Gross yield',
+      netYield: 'Net yield',
+      payback: 'Payback',
+      paybackYearsUnit: 'years',
+      comparedProjects: 'Compared projects',
+      purchaseContext: 'Purchase context',
+      ownershipType: 'Ownership type',
+      transferSplit: 'Transfer split',
+      financingMode: 'Financing mode',
+      governmentFees: 'Government fees',
+      closingCost: 'Closing cost',
+      totalCashNeeded: 'Total cash needed',
+      unresolvedItems: 'Unresolved items',
+      disclosure: 'Disclosure',
+      leadPath: 'Lead path',
+      projectsInScope: 'Projects in scope',
+      projectInFocus: 'Project in focus',
+      handoffSource: 'Handoff source',
+      buyerFit: 'Buyer fit',
+      signalStrength: 'Signal strength',
+    },
+    buyingCostValues: {
+      purchase: {
+        thai_local: 'Thai / local purchase context',
+        foreign: 'Foreign purchase context',
+      },
+      ownership: {
+        freehold: 'Freehold / foreign quota',
+        leasehold: 'Leasehold',
+        company_hold: 'Thai company hold',
+      },
+      transfer: {
+        buyer_pays: 'Buyer-led split',
+        split_equally: 'Split equally',
+        seller_pays: 'Seller-led split',
+      },
+      financing: {
+        cash: 'Cash purchase',
+        financing: 'Financing scenario',
+      },
+    },
+    draftMessages: {
+      compareRecoveryWithProjects:
+        'The original compare around {projects} no longer resolves cleanly, and I want the team to recover this context into a shortlist I can keep working from.',
+      compareRecovery:
+        'The original compare link no longer resolves cleanly, and I want the team to recover this brief into a usable shortlist.',
+      sharedShortlistWithProjects:
+        'I received a shared shortlist around {projects} and want the team to review what should be kept, cut, or checked next.',
+      sharedShortlist:
+        'I received a shared shortlist and want the team to review what should be kept, cut, or checked next.',
+      compareWithProjects:
+        'I am comparing {projects} and want the team to clarify which option deserves the next conversation, including what should be kept or cut.',
+      compare:
+        'I am comparing multiple projects and want the team to turn this compare read into a clearer next step.',
+      shortlistWithProjects:
+        'I am interested in {projects} and want a tighter shortlist with backup options in the same budget and area range.',
+      shortlist: 'I want the team to tighten the shortlist around the options I am reviewing now.',
+      projectWithName:
+        'I am interested in {projects} and want to continue with clearer context on fit, trade-offs, and the next step.',
+      contextual:
+        'I want to continue from the handoff context on this page while keeping the same budget, goals, and decision signals.',
+      default: 'I want to speak with an advisor about the next step.',
+      buyingCostIntro: 'I want to continue the buying-cost estimate with an advisor using the assumptions below.',
+      investorIntro: 'I want to continue the investment-plan and shortlist conversation from the investor tools.',
+    },
     handoffLabels: {
       compare_hero: 'Compare page',
       compare_review: 'Compare review',
@@ -446,6 +762,41 @@ export const en: Dictionary = {
     featuredSubtitle: 'Published listings',
     noListings: 'No listings yet.',
   },
+  projectsPage: {
+    metadataTitle: 'Published Pattaya projects',
+    metadataDescription: 'See location, entry pricing, and a short project summary before opening details.',
+    hero: {
+      eyebrow: 'Pattaya projects',
+      title: 'Published projects',
+      subtitle: 'See location, entry pricing, and a short summary before opening details.',
+      emptySubtitle: 'Published project data is temporarily unavailable right now.',
+      supportNote:
+        'Start with verified project snapshots, then narrow the next conversation around fit, location, and budget.',
+      primaryActionLabel: 'Request project guidance',
+    },
+    proofs: {
+      publishedProjectsTemplate: '{count} published projects',
+      entryFromPrefix: 'Entry from',
+      luxuryProjectsTemplate: '{count} luxury-led projects',
+      verifiedData: 'Verified data',
+      advisorSupport: 'Advisor support available',
+    },
+    browseListingsLabel: 'Browse shortlist-ready listings',
+    card: {
+      areaFallback: 'Pattaya',
+      entryLabel: 'Entry',
+      statusLabel: 'Status',
+      publishedStatus: 'Published project',
+      reviewAction: 'Review project',
+    },
+    empty: {
+      sectionTitle: 'Published projects unavailable right now',
+      sectionSubtitle: 'Try again soon, or ask the team to verify the projects you want first.',
+      cardTitle: 'Published project data could not be loaded',
+      cardBody:
+        'Published project data could not be loaded right now, so this page intentionally avoids showing a misleading fallback.',
+    },
+  },
   about: {
     heroTitle: 'About AMP Pattaya',
     heroSubtitle:
@@ -499,6 +850,36 @@ export const en: Dictionary = {
       'Speak with our advisory team today. No fees, no obligation.',
     metaDescription:
       'AMP Pattaya is a trusted property advisory firm helping international buyers navigate real estate in Pattaya, Thailand with verified data and expert guidance.',
+    processSection: {
+      title: 'How we work',
+      subtitle: 'The operating sequence and decision principles the team uses on live briefs.',
+      relatedTitle: 'Related next steps',
+      relatedBullets: [
+        'Review the live team roster and role coverage.',
+        'Read published client feedback before sending your brief.',
+        'Move into contact once you are ready to share budget, area, and goal.',
+      ],
+      actionLabel: 'Open how we work',
+    },
+    teamSection: {
+      title: 'Published team',
+      subtitle: 'Only team members published from backadmin are shown here.',
+      bioFallback: 'This profile is managed directly from CMS.',
+      emptyTitle: 'Published team profiles will appear here',
+      emptyBody: 'Publish team member records from backadmin and this page will update automatically.',
+    },
+    proofSection: {
+      title: 'Published proof signals',
+      subtitle: 'Signals that confirm this surface is tied to genuinely published content.',
+    },
+    reviewsSection: {
+      title: 'Published client reviews',
+      subtitle: 'This section uses only testimonial records that are already published from backadmin.',
+      attributionFallback: 'AMP client',
+      contextFallback: 'Published feedback from the live system.',
+      emptyTitle: 'Reviews will appear when they are published',
+      emptyBody: 'Publish testimonials from the admin system and this section will update automatically.',
+    },
   },
   deepReview: {
     title: 'Deep Review',

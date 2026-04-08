@@ -21,13 +21,12 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const copy = dict.projectsPage;
   return makePageMetadata(
     locale,
     'projects',
-    locale === 'th' ? 'โครงการพัทยาที่เปิดอยู่' : 'Published Pattaya projects',
-    locale === 'th'
-      ? 'ดูทำเล ราคาเริ่มต้น และภาพรวมของโครงการพัทยาที่เปิดอยู่ก่อนเปิดรายละเอียด'
-      : 'See location, entry pricing, and a short project summary before opening details.',
+    copy.metadataTitle,
+    copy.metadataDescription,
     dict.brand.name
   );
 }
@@ -165,6 +164,10 @@ function humanizeToken(value: string): string {
     .trim();
 }
 
+function applyCountTemplate(template: string, count: number): string {
+  return template.replace('{count}', String(count));
+}
+
 function localizePropertyType(locale: 'en' | 'th', value: string | null): string | null {
   if (!value) return null;
   if (locale !== 'th') return value;
@@ -201,6 +204,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
+  const copy = dict.projectsPage;
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
   const siteUrl = 'https://amppattaya.com';
@@ -226,10 +230,10 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       typeof project.starting_price === 'number' && Number.isFinite(project.starting_price) && project.starting_price >= 10_000_000
     ).length;
     const projectProofs = [
-      locale === 'th' ? `${sorted.length} โครงการที่เผยแพร่แล้ว` : `${sorted.length} published projects`,
+      applyCountTemplate(copy.proofs.publishedProjectsTemplate, sorted.length),
       advisoryProofs[1] ?? null,
-      liveEntryPrice ? `${locale === 'th' ? 'เริ่มต้น' : 'Entry from'} ${formatCompactPrice(liveEntryPrice, locale)}` : null,
-      luxuryProjectCount > 0 ? (locale === 'th' ? `${luxuryProjectCount} โครงการกลุ่มลักชัวรี` : `${luxuryProjectCount} luxury-led projects`) : null,
+      liveEntryPrice ? `${copy.proofs.entryFromPrefix} ${formatCompactPrice(liveEntryPrice, locale)}` : null,
+      luxuryProjectCount > 0 ? applyCountTemplate(copy.proofs.luxuryProjectsTemplate, luxuryProjectCount) : null,
       advisoryProofs[2] ?? null,
     ].filter((item): item is string => Boolean(item)).slice(0, 3);
     const jsonLd = JSON.stringify(
@@ -258,21 +262,17 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       <main id="main-content" className="page-template--catalogue projects-page decision-page--confidence">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <PublicAdvisoryHero
-          eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
-          title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Published projects'}
-          subtitle={locale === 'th'
-            ? 'ดูทำเล ราคาเริ่มต้น และสรุปสั้นก่อนเปิดรายละเอียด'
-            : 'See location, entry pricing, and a short summary before opening details.'}
+          eyebrow={copy.hero.eyebrow}
+          title={copy.hero.title}
+          subtitle={copy.hero.subtitle}
           proofs={projectProofs}
-          supportNote={locale === 'th'
-            ? 'เริ่มจากโครงการที่ตรวจข้อมูลแล้ว แล้วค่อยคุยต่อเฉพาะตัวเลือกที่เหมาะกับงบ ทำเล และเป้าหมายของคุณ'
-            : 'Start with verified project snapshots, then narrow the next conversation around fit, location, and budget.'}
+          supportNote={copy.hero.supportNote}
           proofsLabel={advisoryLabels.proofsLabel}
           guidanceLabel={advisoryLabels.guidanceLabel}
           signals={[]}
           primaryAction={{
             href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-            label: locale === 'th' ? 'ขอคำแนะนำคัดโครงการ' : 'Request project guidance',
+            label: copy.hero.primaryActionLabel,
             eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
             prefetch: false,
           }}
@@ -287,12 +287,12 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         <Container variant="wide">
           <div className="card-actions mb-4">
             <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')} prefetch={false}>
-              {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings'}
+              {copy.browseListingsLabel}
             </Link>
           </div>
           <div className="grid grid-3 projects-catalogue-grid">
             {sorted.map((p, index) => {
-              const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || (locale === 'th' ? 'พัทยา' : 'Pattaya');
+              const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || copy.card.areaFallback;
               const hasEntryPrice = Boolean(p.starting_price && Number.isFinite(p.starting_price));
               const localizedStatus = localizeProjectStatus(locale, p.status);
               const summary = summarizeProject(locale, p as unknown as Record<string, unknown>);
@@ -319,7 +319,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                       {area ? <span className="project-catalogue-card__chip">{area}</span> : null}
                       {hasEntryPrice ? (
                         <span className="project-catalogue-card__chip project-catalogue-card__chip--value">
-                          {`${locale === 'th' ? 'เริ่ม' : 'Entry'} ${formatCompactPrice(p.starting_price ?? null, locale)}`}
+                          {`${copy.card.entryLabel} ${formatCompactPrice(p.starting_price ?? null, locale)}`}
                         </span>
                       ) : null}
                     </div>
@@ -327,8 +327,8 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                   <div className="project-catalogue-card__copy">
                     <div className="catalogue-card__eyebrow project-catalogue-card__eyebrow">
                       {localizedStatus
-                        ? `${locale === 'th' ? 'สถานะ' : 'Status'} • ${localizedStatus}`
-                        : (locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project')}
+                        ? `${copy.card.statusLabel} • ${localizedStatus}`
+                        : copy.card.publishedStatus}
                     </div>
                     <h2 className="card-title project-catalogue-card__title">{p.name}</h2>
                     {summary ? <p className="card-subtitle project-catalogue-card__summary">{summary}</p> : null}
@@ -341,7 +341,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                     ) : null}
                     <div className="card-actions project-catalogue-card__actions">
                       <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`} prefetch={false}>
-                        {locale === 'th' ? 'ดูสรุปโครงการ' : 'Review project'}
+                        {copy.card.reviewAction}
                       </Link>
                     </div>
                   </div>
@@ -375,14 +375,12 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
     <main id="main-content" className="page-template--catalogue projects-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
-        eyebrow={locale === 'th' ? 'โครงการพัทยา' : 'Pattaya projects'}
-        title={locale === 'th' ? 'โครงการที่เปิดอยู่' : 'Published projects'}
-        subtitle={locale === 'th'
-          ? 'รายการยังไม่พร้อมในขณะนี้'
-          : 'Published project data is temporarily unavailable right now.'}
+        eyebrow={copy.hero.eyebrow}
+        title={copy.hero.title}
+        subtitle={copy.hero.emptySubtitle}
         proofs={[
-          locale === 'th' ? 'ข้อมูลตรวจสอบแล้ว' : 'Verified data',
-          locale === 'th' ? 'คุยกับทีมได้ทันที' : 'Advisor support available',
+          copy.proofs.verifiedData,
+          copy.proofs.advisorSupport,
         ]}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
@@ -403,20 +401,14 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         <section className="section">
       <Container variant="wide">
         <div className="section-header mb-6">
-          <h2 className="section-title">{locale === 'th' ? 'รายการโครงการยังไม่พร้อม' : dict.nav.projects}</h2>
-          <p className="section-subtitle">
-            {locale === 'th'
-              ? 'ลองใหม่อีกครั้ง หรือใช้ทีมช่วยเช็กโครงการที่สนใจให้ก่อน'
-              : dict.listing.projectsSubtitle}
-          </p>
+          <h2 className="section-title">{copy.empty.sectionTitle}</h2>
+          <p className="section-subtitle">{copy.empty.sectionSubtitle}</p>
         </div>
         <EmptyStateCard
-          title={locale === 'th' ? 'ยังโหลดคลังโครงการไม่สำเร็จ' : dict.advisory.noPublishedDataTitle}
+          title={projectsFetchOk ? dict.advisory.noPublishedDataTitle : copy.empty.cardTitle}
           body={projectsFetchOk
             ? dict.advisory.noPublishedDataBody
-            : (locale === 'th'
-              ? 'ระบบยังดึงรายการโครงการไม่สำเร็จในขณะนี้ จึงยังไม่แสดงรายการแทนที่อาจทำให้เข้าใจคลาดเคลื่อน'
-              : 'Published project data could not be loaded right now, so this page intentionally avoids showing a misleading fallback.')}
+            : copy.empty.cardBody}
           action={
             <Link className="btn btn-secondary" href={withLocale(locale, '/contact')} prefetch={false}>
               {dict.cta.speakToAdvisor}

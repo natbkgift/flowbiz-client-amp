@@ -19,6 +19,10 @@ describe('Thai dictionary public copy regression', () => {
     expect(th.compare.expectedYield).toBe('ผลตอบแทนที่คาดได้');
     expect(th.areaGuide.confidenceTitle).toBe('วิธีใช้ area guide แบบมั่นใจกว่าเดิม');
     expect(th.contact.responseTitle).toBe('หลังส่ง brief แล้วจะเกิดอะไรขึ้น');
+    expect(th.buy.route.heroTitle).toBe('รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น');
+    expect(th.projectsPage.hero.title).toBe('โครงการที่เปิดอยู่');
+    expect(th.about.teamSection.title).toBe('ทีมที่เผยแพร่แล้ว');
+    expect(th.contact.metadata.privateTourTitle).toBe('นัด private tour บน shortlist ที่เหมาะก่อน');
     expect(th.contact.handoffLabels.project_timeout).toBe('หน้าสรุปโครงการเมื่อข้อมูลยังไม่ครบ');
     expect(th.shortlist.locationPending).toBe('กำลังยืนยันบริบทโครงการและทำเล');
     expect(th.property.similarComingSoonText).not.toContain('brief');

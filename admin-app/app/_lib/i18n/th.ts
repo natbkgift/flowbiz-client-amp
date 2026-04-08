@@ -272,6 +272,102 @@ export const th: Dictionary = {
     featuredSubtitle: 'ตัวอย่างรายการปัจจุบัน (ภาพรวม)',
     advisoryCtaTitle: 'คุยกับที่ปรึกษา',
     advisoryCtaBody: 'ส่งเกณฑ์ของคุณ แล้วเราจะจัดรายการคัดไว้ที่เหมาะทั้งการอยู่อาศัยและการลงทุน',
+    route: {
+      metadataTitle: 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น',
+      metadataDescription:
+        'เริ่มจากรายการซื้อที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และรายการคัดไว้ โดยไม่ต้องเสียเวลาไล่ดูรายการที่ไม่เกี่ยว',
+      proofReadyListingsTemplate: '{count} รายการซื้อที่พร้อมคุยต่อ',
+      entryFromPrefix: 'เริ่มต้นที่',
+      luxuryReadyOptionsTemplate: '{count} ตัวเลือกระดับลักชัวรี',
+      heroTitle: 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น',
+      heroSubtitle:
+        'เปิดดูยูนิตขายที่พร้อมใช้ต่อสำหรับรายการคัดไว้ การตรวจเอกสาร และการนัดชมแบบส่วนตัว โดยไม่ต้องเริ่มจากกองรายการจำนวนมาก',
+      supportNote:
+        'ส่งงบประมาณ ทำเล และช่วงเวลาเพียงครั้งเดียว แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไป',
+      primaryActionLabel: 'คัด shortlist ฝั่งซื้อ',
+      secondaryActionLabel: 'ดูโครงการที่เผยแพร่แล้ว',
+      signals: {
+        bestForTitle: 'ผู้ซื้อต่างชาติที่ต้องการรายการพร้อมขั้นถัดไปที่ชัด',
+        bestForBody:
+          'เหมาะกับผู้ที่ต้องการเข้าใจโควตาต่างชาติ ค่าใช้จ่าย และลำดับการตรวจเอกสาร โดยยังเห็นตัวเลือกที่ใช้ได้จริงก่อน',
+        nextStepTitle: 'เริ่มจากรายการคัดไว้ที่สั้นกว่าและแผนค่าใช้จ่ายที่ชัด',
+        nextStepBody:
+          'ส่งงบประมาณและช่วงเวลามา แล้วทีมจะคัดยูนิตที่ควรดูต่อ พร้อมสิ่งที่ต้องเช็กก่อนคุยลึก',
+        trustTitle: 'ทีมที่ปรึกษาในพื้นที่ช่วยคัดก่อนเกิดความล้าในการตัดสินใจ',
+        trustBody:
+          'เราไม่ส่งรายการจำนวนมาก แต่คัดตัวเลือกผ่านมุมมองของผู้ซื้อต่างชาติและความพร้อมในการเข้าชม',
+      },
+      form: {
+        heading: 'ส่งบรีฟฝั่งซื้อของคุณ',
+        description:
+          'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวก แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไปได้ทันที',
+        defaultMessage:
+          'ต้องการให้ทีมคัดรายการคัดไว้ฝั่งผู้ซื้อที่เหมาะกับงบ ทำเล และช่วงเวลาของผม/ฉัน พร้อมบอกสิ่งที่ควรเช็กต่อเรื่องโควตาต่างชาติและค่าโอน',
+      },
+      scanMode: {
+        ariaLabel: 'โหมดสแกนก่อนตัดสินใจ',
+        eyebrow: 'เริ่มจากโหมดสแกน',
+        body:
+          'เริ่มจากการสแกนยูนิตที่พร้อมคุยต่อก่อน แล้วค่อยใช้ advisory เมื่อมีตัวเลือกที่ผ่าน first pass จริง',
+      },
+      processUtility: {
+        ariaLabel: 'เส้นทางช่วยตัดสินใจหลังดูขั้นตอน',
+        body: 'เมื่อเห็น flow ชัดแล้ว ให้เก็บการคุยกับทีมไว้หลังจาก shortlist เริ่มแคบลง จะทำให้คำแนะนำตรงกว่า',
+        linkLabel: 'คุยกับที่ปรึกษาหลัง shortlist เริ่มชัด',
+      },
+      reference: {
+        title: 'ตารางผ่อนชำระ & ค่าโอน',
+        subtitle: 'ข้อมูลค่าใช้จ่ายสำคัญที่ผู้ซื้อควรทราบก่อนตัดสินใจ',
+        installmentTitle: 'การผ่อนชำระ (ตัวอย่าง)',
+        installmentCaption: '* เงื่อนไขแตกต่างตามโครงการ กรุณาสอบถามเพื่อรับข้อมูลเฉพาะ',
+        transferTitle: 'ค่าโอน & ค่าใช้จ่ายปิดการซื้อ',
+        transferCaption: '* การแบ่งค่าใช้จ่ายระหว่างผู้ซื้อ/ผู้ขายขึ้นอยู่กับการเจรจา',
+        phaseHeader: 'งวด',
+        conditionHeader: 'เงื่อนไข',
+        percentageHeader: 'สัดส่วน',
+        itemHeader: 'รายการ',
+        rateHeader: 'อัตรา',
+        bookingLabel: 'จอง',
+        bookingCondition: 'เงินจองเริ่มต้น',
+        contractLabel: 'ทำสัญญา',
+        contractCondition: 'ภายใน 7–30 วัน',
+        constructionLabel: 'ผ่อนระหว่างสร้าง',
+        constructionCondition: 'รายเดือน/รายไตรมาส',
+        transferLabel: 'โอนกรรมสิทธิ์',
+        transferCondition: 'วันรับมอบห้อง',
+        transferFeeLabel: 'ค่าธรรมเนียมโอน',
+        specificBusinessTaxLabel: 'ภาษีธุรกิจเฉพาะ',
+        stampDutyLabel: 'อากรแสตมป์',
+        mortgageRegistrationLabel: 'ค่าจดจำนอง',
+      },
+      legalUtility: {
+        ariaLabel: 'เส้นทางต่อหลัง legal checks',
+        body:
+          'หลัง legal checks ให้เลือกว่าจะคุยกับทีมต่อ หรือเปิดมุมมองการลงทุนเพิ่ม ไม่ต้องมีปุ่มหลักซ้ำอีกชุด',
+      },
+      listingScan: {
+        ariaLabel: 'โซนสแกนรายการซื้อ',
+        eyebrow: 'โซนตัดสินใจจากการ์ด',
+        body:
+          'ใช้การ์ดเป็นจุดตัดสินใจหลัก: เปิดรายละเอียดก่อน แล้วค่อยบันทึก shortlist เมื่อยูนิตนั้นผ่าน first pass',
+      },
+      shortlistUtility: {
+        ariaLabel: 'เส้นทางทบทวน shortlist',
+        moreOptionsTemplate:
+          'ยังมีตัวเลือกที่ผ่านเกณฑ์อีก {count} รายการ หากต้องการ shortlist ที่ตรงงบและแผนถือครองมากขึ้น ทีมสามารถคัดเพิ่มให้ได้',
+        fallbackBody:
+          'หากยังไม่เจอยูนิตที่ใช่ ทีมสามารถคัด shortlist รอบถัดไปจาก inventory ที่ตรวจสอบแล้วให้ได้',
+        linkLabel: 'ทบทวน shortlist ก่อนค่อย compare',
+      },
+      closing: {
+        eyebrow: 'ส่งต่อหลัง shortlist เริ่มชัด',
+        title: 'ส่งบรีฟให้ทีม เพื่อได้รายการคัดฝั่งซื้อที่ชัดขึ้น',
+        body:
+          'ใช้บล็อกนี้เมื่อพร้อมให้ทีมคัดยูนิตที่ควรดูต่อ พร้อมสรุป quota, ค่าโอน, และ step ที่ควรเช็กก่อนคุยลึก',
+        note:
+          'ทีมจะใช้บรีฟนี้กลับไปจัด shortlist พร้อมกรอบ quota ค่าโอน และประเด็นที่ควรคุยต่อในสายถัดไป โดยไม่ต้องเริ่มอธิบายใหม่ทั้งหมด.',
+      },
+    },
   },
   invest: {
     title: 'ลงทุนอสังหาฯ ในพัทยา',
@@ -330,6 +426,226 @@ export const th: Dictionary = {
     trustBullets: ['กระบวนการชัดเจน', 'ไม่มี third‑party tracking', 'ตอบไวผ่าน WhatsApp หรือ LINE'],
     responseTitle: 'หลังส่ง brief แล้วจะเกิดอะไรขึ้น',
     channelsTitle: 'ช่องทางติดต่อ',
+    metadata: {
+      defaultTitle: 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า',
+      defaultDescription: 'คำแนะนำแบบที่ปรึกษาสำหรับผู้ซื้อชาวต่างชาติ',
+      privateTourTitle: 'นัด private tour บน shortlist ที่เหมาะก่อน',
+      privateTourDescription:
+        'ส่งงบประมาณ ทำเล และช่วงเวลาที่สะดวกเพื่อให้ทีมคัด shortlist และจัด private tour ที่เหมาะก่อนนัดจริง',
+      investmentPlanTitle: 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว',
+      investmentPlanDescription:
+        'เริ่มจากงบประมาณและเป้าหมายผลตอบแทน เพื่อให้ทีมเตรียม shortlist และ next step ที่คมขึ้นตั้งแต่รอบแรก',
+    },
+    hero: {
+      defaultTitle: 'คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า',
+      defaultSubtitle:
+        'เลือกเส้นทางที่ตรงกับโจทย์ของคุณ แล้วทีมจะตอบกลับด้วย shortlist, private tour, หรือ next step ที่ชัดเจน',
+      privateTourTitle: 'นัด private tour บน shortlist ที่เหมาะก่อน',
+      privateTourSubtitle:
+        'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะคัด viewing route ที่เหมาะก่อนนัดดูจริง',
+      investmentPlanTitle: 'คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว',
+      investmentPlanSubtitle:
+        'เริ่มจากงบประมาณ ผลตอบแทนที่คาดหวัง และ thesis การลงทุน เพื่อให้ shortlist ที่ได้คมขึ้นตั้งแต่รอบแรก',
+      compareRecoveryTitle: 'กู้ next step จาก compare นี้กับ AMP Pattaya',
+      compareRecoverySubtitle:
+        'บางโครงการใน compare เดิมอาจหายไปหรือ snapshot ใช้งานไม่ได้แล้ว แต่ทีมยังใช้ brief ที่พกมาช่วยกู้ shortlist ใหม่และชี้ next step ให้ต่อได้',
+      sharedShortlistTitle: 'คุย shortlist ที่แชร์นี้ต่อกับ AMP Pattaya',
+      sharedShortlistSubtitle:
+        'บริบทจาก shared shortlist จะถูกพกต่อไป เพื่อให้ทีมช่วยอ่านว่าควรเก็บ ตัด หรือเช็ก listing ไหนต่อ โดยไม่ทำให้บริบทของลิงก์แชร์หายไป',
+      compareTitle: 'คุยต่อจาก compare นี้กับ AMP Pattaya',
+      compareSubtitle:
+        'ระบบจะพก compare brief เดิมต่อไป เพื่อให้ทีมช่วยบีบ shortlist และชี้ next step โดยไม่ต้องอธิบาย context ซ้ำ',
+      shortlistTitle: 'คุย shortlist นี้ต่อกับ AMP Pattaya',
+      shortlistSubtitle:
+        'ระบบจะพก shortlist ที่คุณกำลังดูอยู่ต่อไป เพื่อให้ทีมช่วยคัดตัวเลือกที่ควรเก็บ ควรตัด และควรเช็กต่อ',
+      proofs: [
+        'ทีมพัทยาที่ดูแลในพื้นที่',
+        'WhatsApp / LINE / private tour',
+        'สอดคล้อง PDPA / GDPR',
+        'ตอบกลับแบบมี action ชัด',
+      ],
+      supportNote:
+        'อธิบายโจทย์ครั้งเดียวก็พอ ทีมจะตอบกลับด้วย shortlist, viewing plan, หรือ next step ที่ชัดกว่าเดิม หากต้องการคุยเร็วขึ้น ยังใช้ WhatsApp หรือ LINE ด้านล่างได้',
+      signals: {
+        bestForTitle: 'Investor, end-user, และ private-tour buyer ที่ต้องการ next step ชัด',
+        bestForBody:
+          'ใช้หน้านี้เมื่อพร้อมส่งงบ เป้าหมาย และทำเล เพื่อให้ทีมตอบกลับด้วย shortlist หรือ viewing plan ที่ใช้ต่อได้จริง',
+        nextStepTitle: 'เลือกเส้นทางที่ตรงกับวิธีตัดสินใจของคุณ',
+        nextStepBody:
+          'จะเริ่มจาก investment brief, private tour, หรือ contact route หลักก็ได้ โดยไม่ต้องส่งคำอธิบายซ้ำหลายรอบ',
+        trustTitle: 'ทีมตอบกลับพร้อม shortlist, viewing plan, หรือ next step ที่ชัด',
+        trustBody:
+          'หน้านี้ถูกออกแบบให้ปิดความลังเล ไม่ใช่เพิ่มข้อความกลาง ๆ ที่ยังไม่ช่วยให้ตัดสินใจ',
+      },
+    },
+    routeChooser: {
+      title: 'เริ่มจากเส้นทางที่ตรงกับโจทย์',
+      subtitle: 'เลือกเส้นทางที่ตรงกับเป้าหมายก่อนกรอกฟอร์ม เพื่อให้ทีมรับ brief ที่คมขึ้นตั้งแต่รอบแรก',
+      investment: {
+        eyebrow: 'สำหรับนักลงทุน',
+        title: 'แผนลงทุน',
+        body: 'เหมาะกับผู้ลงทุนที่ต้องการเริ่มจาก ROI, downside, และ shortlist ตาม thesis',
+        action: 'เปิด investment route',
+      },
+      privateTour: {
+        eyebrow: 'สำหรับ private tour',
+        title: 'Private tour แบบคัดมาก่อน',
+        body: 'เหมาะกับผู้ซื้อระดับบนที่ต้องการ shortlist สั้นและนัดดูแบบมี privacy',
+        action: 'เปิด private tour route',
+      },
+      general: {
+        eyebrow: 'สำหรับผู้ซื้อทั่วไป',
+        title: 'Shortlist ที่คัดตามโจทย์',
+        body: 'เหมาะกับผู้ซื้ออยู่อาศัยจริงหรือย้ายมาอยู่ ที่ต้องการเริ่มจากทำเล งบ และขั้นตอนที่ชัด',
+        action: 'ใช้ contact route หลัก',
+      },
+    },
+    advisoryVariants: {
+      privateTourTitle: 'ส่งต่อโจทย์ private tour',
+      privateTourBody:
+        'ส่งทำเล งบประมาณ และช่วงเวลาที่สะดวก แล้วทีมจะกลับมาพร้อม shortlist ที่สั้นกว่าและ route การพาชมที่พร้อมใช้งาน',
+      investmentPlanTitle: 'ส่งต่อโจทย์การลงทุน',
+      investmentPlanBody:
+        'ส่งงบประมาณ ผลตอบแทนที่คาดหวัง และ downside ที่กังวล แล้วทีมจะตอบกลับด้วย shortlist และ next step ที่ยึดตาม thesis การลงทุน',
+    },
+    trustVariants: {
+      privateTourTitle: 'มาตรฐานการจัด private tour',
+      privateTourBullets: [
+        'เริ่มจาก shortlist ที่แคบลงก่อนนัดดูจริง',
+        'คุยผ่าน WhatsApp / LINE หรือฟอร์มได้ตามจังหวะของคุณ',
+        'ออกแบบเพื่อพาไปสู่ viewing plan ไม่ใช่ตอบกลับแบบกว้าง ๆ',
+      ],
+      investmentPlanTitle: 'มาตรฐานการตอบกลับสำหรับนักลงทุน',
+      investmentPlanBullets: [
+        'เริ่มจากงบประมาณ ผลตอบแทน และ downside ที่ยอมรับได้',
+        'ตอบกลับด้วย shortlist และจุดที่ควรเช็กต่อ ไม่ใช่ listing dump',
+        'รองรับการคุยต่อทาง WhatsApp / LINE เมื่ออยากลงรายละเอียด',
+      ],
+    },
+    formHeadings: {
+      privateTour: 'ส่ง brief สำหรับ private tour',
+      investmentPlan: 'ส่ง brief การลงทุน',
+      sharedShortlist: 'ส่งบรีฟ shortlist ที่แชร์นี้',
+      compareRecovery: 'ส่งบรีฟเพื่อกู้ compare นี้',
+      shortlist: 'ส่งบรีฟ shortlist นี้',
+    },
+    heroPrimaryActionLabels: {
+      privateTour: 'ส่งโจทย์ private tour',
+      investmentPlan: 'ส่ง brief การลงทุน',
+      sharedShortlist: 'ส่งบรีฟ shortlist ที่แชร์นี้',
+      compareRecovery: 'ส่งบรีฟเพื่อกู้ compare นี้',
+      shortlist: 'ส่งบรีฟ shortlist นี้',
+      compare: 'ส่งบรีฟจาก compare นี้',
+      contextual: 'ส่งบรีฟต่อจากบริบทนี้',
+    },
+    responseBullets: {
+      default: [
+        'คำตอบกลับควรมาเป็น shortlist ที่แคบลงหรือ next step ที่ชัด ไม่ใช่ listing dump แบบกว้าง ๆ',
+        'งบ ทำเล และเวลา ควรถูกพกต่อไปใน handoff เพื่อไม่ให้คุณต้องเริ่มอธิบาย brief ใหม่ภายหลัง',
+        'ถ้าเส้นทางยังไม่ชัด ทีมควรบอกให้ชัดว่าควร compare, verify, หรือนัดอะไรเป็นขั้นถัดไป',
+      ],
+      privateTour: [
+        'คำตอบกลับควรมาในรูปของ shortlist สำหรับนัดดูจริง ไม่ใช่เพียงลิงก์รายการกว้าง ๆ เพิ่มอีกชุด',
+        'เรื่องเวลา ความเป็นส่วนตัว และโซนที่สนใจควรถูกพกต่อไปใน handoff โดยไม่ต้องอธิบายซ้ำ',
+        'ถ้ายูนิตใดไม่เหมาะแล้ว ทีมควรชี้ตัวแทนที่ใกล้เคียงที่สุดทันที',
+      ],
+      investmentPlan: [
+        'คำตอบกลับควรมาเป็น shortlist ที่ใช้ลงทุนได้ พร้อม downside checks ไม่ใช่เพียงการพูดถึง yield ในมุมบวก',
+        'งบ ผลตอบแทนที่คาดหวัง และ thesis การลงทุนควรถูกพกต่อไปใน handoff แบบไม่ drift',
+        'ถ้าโจทย์ยังบาง ทีมควรบอกให้ชัดว่าต้องยืนยันสมมติฐานข้อไหนก่อนคุยต่อ',
+      ],
+      compare: [
+        'บริบท compare เดิมควรถูกพกต่อไปในคำตอบกลับ โดยไม่ต้องให้คุณเริ่มเล่ารายการที่กำลังเทียบใหม่อีกครั้ง',
+        'ถ้า live availability เปลี่ยนไป คำตอบกลับควรอธิบายให้ชัดว่าอะไรหายไปและอะไรควรถูกแทน',
+        'ขั้นถัดไปควรจบลงที่การตัดสินใจ shortlist, viewing plan, หรือ advisor call ที่คมขึ้น',
+      ],
+      shortlist: [
+        'บริบท shortlist เดิมควรถูกพกต่อไปในคำตอบกลับ โดยไม่ต้องเริ่ม brief ใหม่จากศูนย์',
+        'คำตอบกลับควรชี้ให้ชัดว่าควรเก็บ ตัด หรือยืนยันอะไรต่อจากรายการที่มีอยู่',
+        'ถ้าสต็อกขยับไปแล้ว ทีมควรชี้ตัวแทนที่ใกล้ที่สุด แทนการวนกลับไป browse กว้าง ๆ อีกครั้ง',
+      ],
+    },
+    summaryTitles: {
+      buyingCost: 'สรุปการประเมิน buying cost ที่ส่งต่อมาจาก estimator',
+      investor: 'สรุปบริบทนักลงทุนที่ส่งต่อมา',
+      lead: 'สรุปบริบท lead ที่ส่งต่อมา',
+    },
+    leadIntentLabels: {
+      project_consultation: 'คุยต่อจากโครงการที่กำลังพิจารณา',
+      project_shortlist: 'ขอ shortlist รอบตัวเลือกที่กำลังสนใจ',
+      project_compare: 'คุยต่อจากการเปรียบเทียบหลายโครงการ',
+      general_inquiry: 'สอบถามทั่วไป',
+    },
+    contextLabels: {
+      targetPurchasePrice: 'ราคาซื้อเป้าหมาย',
+      monthlyRent: 'ค่าเช่าต่อเดือน',
+      occupancy: 'อัตราปล่อยเช่า',
+      annualCosts: 'ต้นทุนต่อปี',
+      grossYield: 'อัตราผลตอบแทนขั้นต้น',
+      netYield: 'อัตราผลตอบแทนสุทธิ',
+      payback: 'ระยะเวลาคืนทุน',
+      paybackYearsUnit: 'ปี',
+      comparedProjects: 'โครงการที่นำมาเทียบ',
+      purchaseContext: 'บริบทการซื้อ',
+      ownershipType: 'รูปแบบการถือครอง',
+      transferSplit: 'การแบ่งภาระค่าโอน',
+      financingMode: 'รูปแบบการชำระเงิน',
+      governmentFees: 'ค่าธรรมเนียมภาครัฐ',
+      closingCost: 'ค่าใช้จ่ายวันโอน',
+      totalCashNeeded: 'เงินสดรวมที่ต้องเตรียม',
+      unresolvedItems: 'รายการที่ยังต้องตรวจเพิ่ม',
+      disclosure: 'หมายเหตุการประเมิน',
+      leadPath: 'เส้นทางที่ต้องการ',
+      projectsInScope: 'โครงการในบริบทนี้',
+      projectInFocus: 'โครงการที่กำลังสนใจ',
+      handoffSource: 'ต้นทางของการส่งต่อ',
+      buyerFit: 'ลักษณะผู้ซื้อที่เหมาะ',
+      signalStrength: 'ระดับความชัดของสัญญาณ',
+    },
+    buyingCostValues: {
+      purchase: {
+        thai_local: 'บริบทการซื้อแบบคนไทย / ผู้ซื้อในประเทศ',
+        foreign: 'บริบทการซื้อแบบผู้ซื้อต่างชาติ',
+      },
+      ownership: {
+        freehold: 'กรรมสิทธิ์ freehold / foreign quota',
+        leasehold: 'สัญญาเช่าระยะยาว',
+        company_hold: 'ถือครองผ่านบริษัทไทย',
+      },
+      transfer: {
+        buyer_pays: 'ผู้ซื้อรับภาระหลัก',
+        split_equally: 'แบ่งกันคนละครึ่ง',
+        seller_pays: 'ผู้ขายรับภาระหลัก',
+      },
+      financing: {
+        cash: 'ซื้อด้วยเงินสด',
+        financing: 'มีการขอสินเชื่อ / financing',
+      },
+    },
+    draftMessages: {
+      compareRecoveryWithProjects:
+        'compare เดิมของ {projects} ใช้งานต่อไม่ได้ครบแล้ว และต้องการให้ทีมช่วยกู้ context นี้กลับมาเป็น shortlist ที่ใช้งานต่อได้',
+      compareRecovery:
+        'ลิงก์ compare เดิมใช้งานต่อไม่ได้ครบแล้ว และต้องการให้ทีมช่วยกู้ brief นี้กลับมาเป็น shortlist ที่ใช้งานต่อได้',
+      sharedShortlistWithProjects:
+        'ได้รับ shared shortlist ของ {projects} และต้องการให้ทีมช่วยรีวิวว่าควรเก็บ ตัด หรือเช็กตัวเลือกไหนต่อ',
+      sharedShortlist:
+        'ได้รับ shared shortlist และต้องการให้ทีมช่วยรีวิวว่าควรเก็บ ตัด หรือเช็กตัวเลือกไหนต่อ',
+      compareWithProjects:
+        'กำลังเทียบ {projects} และต้องการให้ทีมช่วยสรุปว่าควรคุยต่อกับตัวเลือกไหนก่อน พร้อมบอกเหตุผลที่ควรตัดหรือเก็บไว้ต่อ',
+      compare:
+        'กำลังเทียบหลายโครงการและต้องการให้ทีมช่วยสรุป next step ที่ชัดขึ้นจากตาราง compare นี้',
+      shortlistWithProjects:
+        'สนใจ {projects} และต้องการ shortlist ที่แคบลงพร้อมตัวเลือกสำรองในกรอบราคาและทำเลใกล้เคียง',
+      shortlist: 'ต้องการให้ทีมช่วยคัด shortlist ที่แคบลงจากตัวเลือกที่กำลังดูอยู่',
+      projectWithName:
+        'สนใจ {projects} และต้องการคุยต่อแบบมีบริบทชัด ทั้งเรื่องความเหมาะกับโจทย์และขั้นตอนถัดไป',
+      contextual:
+        'ต้องการคุยต่อจากบริบทที่ส่งมาจากหน้านี้ โดยคงงบ เป้าหมาย และสัญญาณการตัดสินใจไว้ให้ครบ',
+      default: 'ต้องการคุยกับที่ปรึกษาเพื่อไปขั้นตอนถัดไป',
+      buyingCostIntro: 'ต้องการคุยต่อกับที่ปรึกษาโดยอ้างอิงสมมติฐานจากการประเมิน buying cost ด้านล่าง',
+      investorIntro: 'ต้องการคุยต่อเรื่องแผนลงทุนและ shortlist จาก investor tools',
+    },
     handoffLabels: {
       compare_hero: 'หน้าเปรียบเทียบ',
       compare_review: 'รีวิวจากหน้าเปรียบเทียบ',
@@ -438,6 +754,40 @@ export const th: Dictionary = {
     featuredSubtitle: 'รายการที่เผยแพร่แล้ว',
     noListings: 'ยังไม่มีรายการ',
   },
+  projectsPage: {
+    metadataTitle: 'โครงการพัทยาที่เปิดอยู่',
+    metadataDescription: 'ดูทำเล ราคาเริ่มต้น และภาพรวมของโครงการพัทยาที่เปิดอยู่ก่อนเปิดรายละเอียด',
+    hero: {
+      eyebrow: 'โครงการพัทยา',
+      title: 'โครงการที่เปิดอยู่',
+      subtitle: 'ดูทำเล ราคาเริ่มต้น และสรุปสั้นก่อนเปิดรายละเอียด',
+      emptySubtitle: 'รายการยังไม่พร้อมในขณะนี้',
+      supportNote:
+        'เริ่มจากโครงการที่ตรวจข้อมูลแล้ว แล้วค่อยคุยต่อเฉพาะตัวเลือกที่เหมาะกับงบ ทำเล และเป้าหมายของคุณ',
+      primaryActionLabel: 'ขอคำแนะนำคัดโครงการ',
+    },
+    proofs: {
+      publishedProjectsTemplate: '{count} โครงการที่เผยแพร่แล้ว',
+      entryFromPrefix: 'เริ่มต้น',
+      luxuryProjectsTemplate: '{count} โครงการกลุ่มลักชัวรี',
+      verifiedData: 'ข้อมูลตรวจสอบแล้ว',
+      advisorSupport: 'คุยกับทีมได้ทันที',
+    },
+    browseListingsLabel: 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ',
+    card: {
+      areaFallback: 'พัทยา',
+      entryLabel: 'เริ่ม',
+      statusLabel: 'สถานะ',
+      publishedStatus: 'โครงการที่เผยแพร่แล้ว',
+      reviewAction: 'ดูสรุปโครงการ',
+    },
+    empty: {
+      sectionTitle: 'รายการโครงการยังไม่พร้อม',
+      sectionSubtitle: 'ลองใหม่อีกครั้ง หรือใช้ทีมช่วยเช็กโครงการที่สนใจให้ก่อน',
+      cardTitle: 'ยังโหลดคลังโครงการไม่สำเร็จ',
+      cardBody: 'ระบบยังดึงรายการโครงการไม่สำเร็จในขณะนี้ จึงยังไม่แสดงรายการแทนที่อาจทำให้เข้าใจคลาดเคลื่อน',
+    },
+  },
   about: {
     heroTitle: 'เกี่ยวกับ AMP Pattaya',
     heroSubtitle:
@@ -491,6 +841,36 @@ export const th: Dictionary = {
       'พูดคุยกับที่ปรึกษาของเราวันนี้ ไม่มีค่าใช้จ่าย ไม่มีข้อผูกมัด',
     metaDescription:
       'AMP Pattaya ที่ปรึกษาอสังหาริมทรัพย์ที่ไว้ใจได้สำหรับผู้ซื้อชาวต่างชาติในพัทยา ข้อมูลตรวจสอบแล้ว คำแนะนำจากผู้เชี่ยวชาญ',
+    processSection: {
+      title: 'วิธีที่เราทำงาน',
+      subtitle: 'ลำดับการทำงานและหลักการตัดสินใจที่ทีมใช้เมื่อรับ brief จริง',
+      relatedTitle: 'ขั้นถัดไปที่เกี่ยวข้อง',
+      relatedBullets: [
+        'กลับไปดูทีมและ role ที่เผยแพร่แล้ว',
+        'ดู feedback ที่เผยแพร่แล้วก่อนส่ง brief',
+        'ไปต่อที่ contact เมื่อพร้อมอธิบายงบ เป้าหมาย และทำเล',
+      ],
+      actionLabel: 'เปิดหน้า how we work',
+    },
+    teamSection: {
+      title: 'ทีมที่เผยแพร่แล้ว',
+      subtitle: 'แสดงเฉพาะสมาชิกทีมที่ publish แล้วจาก backadmin',
+      bioFallback: 'โปรไฟล์ทีมจะอัปเดตจาก CMS โดยตรง',
+      emptyTitle: 'ทีมจะปรากฏที่นี่เมื่อมีการ publish',
+      emptyBody: 'เพิ่มหรือเผยแพร่ team members จาก backadmin แล้วหน้านี้จะอัปเดตตามจริง',
+    },
+    proofSection: {
+      title: 'สัญญาณยืนยันการเผยแพร่',
+      subtitle: 'สัญญาณที่ช่วยยืนยันว่าหน้านี้ผูกกับข้อมูลที่ publish จริง',
+    },
+    reviewsSection: {
+      title: 'เสียงจากลูกค้าที่เผยแพร่แล้ว',
+      subtitle: 'ใช้เฉพาะ testimonial records ที่เผยแพร่แล้วจาก backadmin',
+      attributionFallback: 'ลูกค้า AMP',
+      contextFallback: 'รีวิวที่เผยแพร่แล้วจากระบบ',
+      emptyTitle: 'รีวิวจะปรากฏเมื่อมีการ publish',
+      emptyBody: 'เผยแพร่ testimonial จากหลังบ้านแล้วส่วนนี้จะอัปเดตอัตโนมัติ',
+    },
   },
   deepReview: {
     title: 'รีวิวเชิงลึก',

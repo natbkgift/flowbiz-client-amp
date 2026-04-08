@@ -8,13 +8,14 @@ function read(relativePath: string): string {
 }
 
 describe('buy page locale parity', () => {
-  it('keeps the Thai buy hero and form headings localized instead of reusing the English heading', () => {
+  it('sources the buy route shell from the dictionary contract instead of inline locale branches', () => {
     const page = read('app/(site)/[locale]/buy/page.tsx');
 
-    expect(page).toContain("locale === 'th' ? 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น'");
-    expect(page).toContain("const buyFormHeading = locale === 'th' ? 'ส่งบรีฟฝั่งซื้อของคุณ'");
-    expect(page).toContain("locale === 'th' ? 'เริ่มจากโหมดสแกน' : 'Scan mode first'");
-    expect(page).toContain("locale === 'th' ? 'โซนตัดสินใจจากการ์ด' : 'Card decision zone'");
-    expect(page).not.toContain("locale === 'th' ? 'Foreign-buyer inventory that is easier to act on' : 'Foreign-buyer inventory that is easier to act on'");
+    expect(page).toContain('const copy = dict.buy.route;');
+    expect(page).toContain('title={copy.heroTitle}');
+    expect(page).toContain('heading={copy.form.heading}');
+    expect(page).toContain('aria-label={copy.scanMode.ariaLabel}');
+    expect(page).not.toContain("locale === 'th' ? 'รายการซื้อสำหรับผู้ซื้อต่างชาติที่พร้อมไปต่อได้ง่ายขึ้น'");
+    expect(page).not.toContain("const buyFormHeading = locale === 'th'");
   });
 });

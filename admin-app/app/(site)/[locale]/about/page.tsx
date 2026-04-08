@@ -54,6 +54,12 @@ export default async function AboutPage(
   const dict = getDictionary(locale);
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
+  const heroSignals = dict.about.heroSignals.map((signal, index) => ({
+    kicker: [dict.advisory.bestFor, dict.advisory.nextStep, dict.advisory.trustSignal][index] ?? dict.advisory.bestFor,
+    title: signal.title,
+    body: signal.body,
+    icon: (['users', 'check', 'shield'] as const)[index] ?? 'users',
+  }));
 
   const [aboutInfo, processInfo, teamMembers, testimonials] = await Promise.all([
     fetchCompanyInfoBySlug('about').catch(() => null),
@@ -131,32 +137,7 @@ export default async function AboutPage(
         proofs={advisoryProofs}
         proofsLabel={advisoryLabels.proofsLabel}
         guidanceLabel={advisoryLabels.guidanceLabel}
-        signals={[
-          {
-            kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อที่อยากรู้ว่าใครอยู่เบื้องหลัง shortlist นี้' : 'Buyers who want to know who is behind the shortlist',
-            body: locale === 'th'
-              ? 'หน้านี้รวมภาพรวมบริษัท วิธีทำงาน ทีม และ feedback ที่เผยแพร่แล้วไว้ในที่เดียว'
-              : 'This page brings company context, process, live team profiles, and published feedback into one place.',
-            icon: 'users',
-          },
-          {
-            kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'รู้จักทีมและวิธีทำงานก่อน แล้วค่อย handoff ไปขั้นถัดไป' : 'Meet the team and process before the next handoff',
-            body: locale === 'th'
-              ? 'เมื่อเข้าใจแนวทางทำงานแล้ว คุณจะไปต่อที่ contact, shortlist หรือ smart finder ได้ชัดขึ้น'
-              : 'Once the operating approach is clear, it becomes easier to move into contact, shortlist, or smart finder.',
-            icon: 'check',
-          },
-          {
-            kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'เนื้อหาส่วนนี้ผูกกับข้อมูลหลังบ้านจริง' : 'This surface is tied to real admin-managed content',
-            body: locale === 'th'
-              ? 'ทีม รีวิว และข้อความบริษัทที่เผยแพร่จะสะท้อนจาก record ที่จัดการใน backadmin โดยตรง'
-              : 'Published company copy, team members, and testimonials are reflected directly from backadmin records.',
-            icon: 'shield',
-          },
-        ]}
+        signals={heroSignals}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'consultation', source: 'about_hero' }),
           label: dict.cta.speakToAdvisor,
@@ -193,12 +174,8 @@ export default async function AboutPage(
         <span id="how-we-work" className="sr-only" />
         <Container>
           <div className="section-header">
-            <h2 className="section-title">{processInfo?.title || (locale === 'th' ? 'How we work' : 'How we work')}</h2>
-            <p className="section-subtitle">
-              {locale === 'th'
-                ? 'ลำดับการทำงานและหลักการตัดสินใจที่ทีมใช้เมื่อรับ brief จริง'
-                : 'The operating sequence and decision principles the team uses on live briefs.'}
-            </p>
+            <h2 className="section-title">{processInfo?.title || dict.about.processSection.title}</h2>
+            <p className="section-subtitle">{dict.about.processSection.subtitle}</p>
           </div>
           <div className="grid md:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.9fr)] gap-6 md:gap-8">
             <article className="card reveal">
@@ -209,13 +186,11 @@ export default async function AboutPage(
               </div>
             </article>
             <aside className="trust-box reveal">
-              <h3 className="trust-box__title">
-                {locale === 'th' ? 'ขั้นถัดไปที่เกี่ยวข้อง' : 'Related next steps'}
-              </h3>
+              <h3 className="trust-box__title">{dict.about.processSection.relatedTitle}</h3>
               <ul className="bullet-list">
-                <li>{locale === 'th' ? 'กลับไปดูทีมและ role ที่เผยแพร่แล้ว' : 'Review the live team roster and role coverage.'}</li>
-                <li>{locale === 'th' ? 'ดู feedback ที่เผยแพร่แล้วก่อนส่ง brief' : 'Read published client feedback before sending your brief.'}</li>
-                <li>{locale === 'th' ? 'ไปต่อที่ contact เมื่อพร้อมอธิบายงบ เป้าหมาย และทำเล' : 'Move into contact once you are ready to share budget, area, and goal.'}</li>
+                {dict.about.processSection.relatedBullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
               </ul>
               <div className="cta-row">
                 <TrackedLink
@@ -224,7 +199,7 @@ export default async function AboutPage(
                   eventType="cta_click"
                   eventPayload={{ cta: 'open_how_we_work', from: 'about_process' }}
                 >
-                  {locale === 'th' ? 'เปิดหน้า how we work' : 'Open how we work'}
+                  {dict.about.processSection.actionLabel}
                 </TrackedLink>
               </div>
             </aside>
@@ -235,12 +210,8 @@ export default async function AboutPage(
       <section className="section" id="team-section">
         <Container>
           <div className="section-header">
-            <h2 className="section-title">{locale === 'th' ? 'ทีมที่เผยแพร่แล้ว' : 'Published team'}</h2>
-            <p className="section-subtitle">
-              {locale === 'th'
-                ? 'แสดงเฉพาะสมาชิกทีมที่ publish แล้วจาก backadmin'
-                : 'Only team members published from backadmin are shown here.'}
-            </p>
+            <h2 className="section-title">{dict.about.teamSection.title}</h2>
+            <p className="section-subtitle">{dict.about.teamSection.subtitle}</p>
           </div>
           {teamMembers.length > 0 ? (
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -260,7 +231,7 @@ export default async function AboutPage(
                         <p className="public-hero__eyebrow">{member.role_title}</p>
                         <h3 className="card-title">{member.name}</h3>
                       </div>
-                      <p className="card-subtitle">{bio || (locale === 'th' ? 'โปรไฟล์ทีมจะอัปเดตจาก CMS โดยตรง' : 'This profile is managed directly from CMS.')}</p>
+                      <p className="card-subtitle">{bio || dict.about.teamSection.bioFallback}</p>
                       {member.languages?.length ? (
                         <div className="chip-list">
                           {member.languages.map((language) => (
@@ -282,8 +253,8 @@ export default async function AboutPage(
             </div>
           ) : (
             <div className="premium-empty-state" role="status">
-              <h3>{locale === 'th' ? 'ทีมจะปรากฏที่นี่เมื่อมีการ publish' : 'Published team profiles will appear here'}</h3>
-              <p>{locale === 'th' ? 'เพิ่มหรือเผยแพร่ team members จาก backadmin แล้วหน้านี้จะอัปเดตตามจริง' : 'Publish team member records from backadmin and this page will update automatically.'}</p>
+              <h3>{dict.about.teamSection.emptyTitle}</h3>
+              <p>{dict.about.teamSection.emptyBody}</p>
             </div>
           )}
         </Container>
@@ -292,12 +263,8 @@ export default async function AboutPage(
       <section className="section section--alt" id="proof-assets">
         <Container>
           <div className="section-header">
-            <h2 className="section-title">{locale === 'th' ? 'Proof assets' : 'Proof assets'}</h2>
-            <p className="section-subtitle">
-              {locale === 'th'
-                ? 'สัญญาณที่ช่วยยืนยันว่าหน้านี้ผูกกับข้อมูลที่ publish จริง'
-                : 'Signals that confirm this surface is tied to genuinely published content.'}
-            </p>
+            <h2 className="section-title">{dict.about.proofSection.title}</h2>
+            <p className="section-subtitle">{dict.about.proofSection.subtitle}</p>
           </div>
           <div className="grid grid-3">
             {proofCards.map((card) => (
@@ -314,12 +281,8 @@ export default async function AboutPage(
         <span id="reviews" className="sr-only" />
         <Container>
           <div className="section-header">
-            <h2 className="section-title">{locale === 'th' ? 'เสียงจากลูกค้าที่เผยแพร่แล้ว' : 'Published client reviews'}</h2>
-            <p className="section-subtitle">
-              {locale === 'th'
-                ? 'ใช้เฉพาะ testimonial records ที่เผยแพร่แล้วจาก backadmin'
-                : 'This section uses only testimonial records that are already published from backadmin.'}
-            </p>
+            <h2 className="section-title">{dict.about.reviewsSection.title}</h2>
+            <p className="section-subtitle">{dict.about.reviewsSection.subtitle}</p>
           </div>
           {testimonials.length > 0 ? (
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -327,17 +290,17 @@ export default async function AboutPage(
                 <figure key={item.id} className="card reveal">
                   <blockquote className="card-title">&ldquo;{item.quote}&rdquo;</blockquote>
                   <figcaption className="card-subtitle mt-4">
-                    <strong>{item.attribution_name || (locale === 'th' ? 'ลูกค้า AMP' : 'AMP client')}</strong>
+                    <strong>{item.attribution_name || dict.about.reviewsSection.attributionFallback}</strong>
                     <br />
-                    <span>{item.context || (locale === 'th' ? 'รีวิวที่เผยแพร่แล้วจากระบบ' : 'Published feedback from the live system.')}</span>
+                    <span>{item.context || dict.about.reviewsSection.contextFallback}</span>
                   </figcaption>
                 </figure>
               ))}
             </div>
           ) : (
             <div className="premium-empty-state" role="status">
-              <h3>{locale === 'th' ? 'รีวิวจะปรากฏเมื่อมีการ publish' : 'Reviews will appear when they are published'}</h3>
-              <p>{locale === 'th' ? 'เผยแพร่ testimonial จากหลังบ้านแล้วส่วนนี้จะอัปเดตอัตโนมัติ' : 'Publish testimonials from the admin system and this section will update automatically.'}</p>
+              <h3>{dict.about.reviewsSection.emptyTitle}</h3>
+              <p>{dict.about.reviewsSection.emptyBody}</p>
             </div>
           )}
         </Container>

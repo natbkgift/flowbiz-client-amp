@@ -185,6 +185,87 @@ export type Dictionary = {
     featuredSubtitle: string;
     advisoryCtaTitle: string;
     advisoryCtaBody: string;
+    route: {
+      metadataTitle: string;
+      metadataDescription: string;
+      proofReadyListingsTemplate: string;
+      entryFromPrefix: string;
+      luxuryReadyOptionsTemplate: string;
+      heroTitle: string;
+      heroSubtitle: string;
+      supportNote: string;
+      primaryActionLabel: string;
+      secondaryActionLabel: string;
+      signals: {
+        bestForTitle: string;
+        bestForBody: string;
+        nextStepTitle: string;
+        nextStepBody: string;
+        trustTitle: string;
+        trustBody: string;
+      };
+      form: {
+        heading: string;
+        description: string;
+        defaultMessage: string;
+      };
+      scanMode: {
+        ariaLabel: string;
+        eyebrow: string;
+        body: string;
+      };
+      processUtility: {
+        ariaLabel: string;
+        body: string;
+        linkLabel: string;
+      };
+      reference: {
+        title: string;
+        subtitle: string;
+        installmentTitle: string;
+        installmentCaption: string;
+        transferTitle: string;
+        transferCaption: string;
+        phaseHeader: string;
+        conditionHeader: string;
+        percentageHeader: string;
+        itemHeader: string;
+        rateHeader: string;
+        bookingLabel: string;
+        bookingCondition: string;
+        contractLabel: string;
+        contractCondition: string;
+        constructionLabel: string;
+        constructionCondition: string;
+        transferLabel: string;
+        transferCondition: string;
+        transferFeeLabel: string;
+        specificBusinessTaxLabel: string;
+        stampDutyLabel: string;
+        mortgageRegistrationLabel: string;
+      };
+      legalUtility: {
+        ariaLabel: string;
+        body: string;
+      };
+      listingScan: {
+        ariaLabel: string;
+        eyebrow: string;
+        body: string;
+      };
+      shortlistUtility: {
+        ariaLabel: string;
+        moreOptionsTemplate: string;
+        fallbackBody: string;
+        linkLabel: string;
+      };
+      closing: {
+        eyebrow: string;
+        title: string;
+        body: string;
+        note: string;
+      };
+    };
   };
   invest: {
     title: string;
@@ -236,6 +317,169 @@ export type Dictionary = {
     trustBullets: string[];
     responseTitle: string;
     channelsTitle: string;
+    metadata: {
+      defaultTitle: string;
+      defaultDescription: string;
+      privateTourTitle: string;
+      privateTourDescription: string;
+      investmentPlanTitle: string;
+      investmentPlanDescription: string;
+    };
+    hero: {
+      defaultTitle: string;
+      defaultSubtitle: string;
+      privateTourTitle: string;
+      privateTourSubtitle: string;
+      investmentPlanTitle: string;
+      investmentPlanSubtitle: string;
+      compareRecoveryTitle: string;
+      compareRecoverySubtitle: string;
+      sharedShortlistTitle: string;
+      sharedShortlistSubtitle: string;
+      compareTitle: string;
+      compareSubtitle: string;
+      shortlistTitle: string;
+      shortlistSubtitle: string;
+      proofs: string[];
+      supportNote: string;
+      signals: {
+        bestForTitle: string;
+        bestForBody: string;
+        nextStepTitle: string;
+        nextStepBody: string;
+        trustTitle: string;
+        trustBody: string;
+      };
+    };
+    routeChooser: {
+      title: string;
+      subtitle: string;
+      investment: {
+        eyebrow: string;
+        title: string;
+        body: string;
+        action: string;
+      };
+      privateTour: {
+        eyebrow: string;
+        title: string;
+        body: string;
+        action: string;
+      };
+      general: {
+        eyebrow: string;
+        title: string;
+        body: string;
+        action: string;
+      };
+    };
+    advisoryVariants: {
+      privateTourTitle: string;
+      privateTourBody: string;
+      investmentPlanTitle: string;
+      investmentPlanBody: string;
+    };
+    trustVariants: {
+      privateTourTitle: string;
+      privateTourBullets: string[];
+      investmentPlanTitle: string;
+      investmentPlanBullets: string[];
+    };
+    formHeadings: {
+      privateTour: string;
+      investmentPlan: string;
+      sharedShortlist: string;
+      compareRecovery: string;
+      shortlist: string;
+    };
+    heroPrimaryActionLabels: {
+      privateTour: string;
+      investmentPlan: string;
+      sharedShortlist: string;
+      compareRecovery: string;
+      shortlist: string;
+      compare: string;
+      contextual: string;
+    };
+    responseBullets: {
+      default: string[];
+      privateTour: string[];
+      investmentPlan: string[];
+      compare: string[];
+      shortlist: string[];
+    };
+    summaryTitles: {
+      buyingCost: string;
+      investor: string;
+      lead: string;
+    };
+    leadIntentLabels: {
+      project_consultation: string;
+      project_shortlist: string;
+      project_compare: string;
+      general_inquiry: string;
+    };
+    contextLabels: {
+      targetPurchasePrice: string;
+      monthlyRent: string;
+      occupancy: string;
+      annualCosts: string;
+      grossYield: string;
+      netYield: string;
+      payback: string;
+      paybackYearsUnit: string;
+      comparedProjects: string;
+      purchaseContext: string;
+      ownershipType: string;
+      transferSplit: string;
+      financingMode: string;
+      governmentFees: string;
+      closingCost: string;
+      totalCashNeeded: string;
+      unresolvedItems: string;
+      disclosure: string;
+      leadPath: string;
+      projectsInScope: string;
+      projectInFocus: string;
+      handoffSource: string;
+      buyerFit: string;
+      signalStrength: string;
+    };
+    buyingCostValues: {
+      purchase: {
+        thai_local: string;
+        foreign: string;
+      };
+      ownership: {
+        freehold: string;
+        leasehold: string;
+        company_hold: string;
+      };
+      transfer: {
+        buyer_pays: string;
+        split_equally: string;
+        seller_pays: string;
+      };
+      financing: {
+        cash: string;
+        financing: string;
+      };
+    };
+    draftMessages: {
+      compareRecoveryWithProjects: string;
+      compareRecovery: string;
+      sharedShortlistWithProjects: string;
+      sharedShortlist: string;
+      compareWithProjects: string;
+      compare: string;
+      shortlistWithProjects: string;
+      shortlist: string;
+      projectWithName: string;
+      contextual: string;
+      default: string;
+      buyingCostIntro: string;
+      investorIntro: string;
+    };
     handoffLabels: {
       compare_hero: string;
       compare_review: string;
@@ -321,6 +565,39 @@ export type Dictionary = {
     featuredSubtitle: string;
     noListings: string;
   };
+  projectsPage: {
+    metadataTitle: string;
+    metadataDescription: string;
+    hero: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      emptySubtitle: string;
+      supportNote: string;
+      primaryActionLabel: string;
+    };
+    proofs: {
+      publishedProjectsTemplate: string;
+      entryFromPrefix: string;
+      luxuryProjectsTemplate: string;
+      verifiedData: string;
+      advisorSupport: string;
+    };
+    browseListingsLabel: string;
+    card: {
+      areaFallback: string;
+      entryLabel: string;
+      statusLabel: string;
+      publishedStatus: string;
+      reviewAction: string;
+    };
+    empty: {
+      sectionTitle: string;
+      sectionSubtitle: string;
+      cardTitle: string;
+      cardBody: string;
+    };
+  };
   about: {
     heroTitle: string;
     heroSubtitle: string;
@@ -335,6 +612,32 @@ export type Dictionary = {
     ctaTitle: string;
     ctaBody: string;
     metaDescription: string;
+    processSection: {
+      title: string;
+      subtitle: string;
+      relatedTitle: string;
+      relatedBullets: string[];
+      actionLabel: string;
+    };
+    teamSection: {
+      title: string;
+      subtitle: string;
+      bioFallback: string;
+      emptyTitle: string;
+      emptyBody: string;
+    };
+    proofSection: {
+      title: string;
+      subtitle: string;
+    };
+    reviewsSection: {
+      title: string;
+      subtitle: string;
+      attributionFallback: string;
+      contextFallback: string;
+      emptyTitle: string;
+      emptyBody: string;
+    };
   };
   deepReview: {
     title: string;
