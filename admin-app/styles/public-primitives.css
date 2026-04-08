@@ -439,6 +439,54 @@ html[lang='th'] .decision-page .public-hero__signal-copy p:last-child {
   gap: var(--public-space-3);
 }
 
+.decision-page--project .public-hero__subtitle {
+  max-width: min(40rem, 100%);
+}
+
+html[lang='th'] .decision-page--project .public-hero__subtitle {
+  max-width: min(34rem, 100%);
+}
+
+.decision-page--project .project-confidence-pack--topline {
+  margin-top: 4px;
+}
+
+.decision-page--project .project-confidence-pack--topline .project-confidence-card {
+  gap: 12px;
+}
+
+.decision-page--project .project-confidence-pack--topline .card-subtitle {
+  max-width: 33ch;
+}
+
+.decision-page--project .project-confidence-facts {
+  gap: 10px;
+}
+
+.decision-page--project .project-confidence-fact {
+  display: grid;
+  gap: 4px;
+}
+
+.decision-page--project .project-confidence-fact .insight-list__title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: var(--public-font-weight-bold);
+  line-height: 1.45;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(7, 19, 39, 0.52);
+}
+
+.decision-page--project .project-confidence-fact .insight-list__body {
+  margin: 0;
+  color: rgba(7, 19, 39, 0.86);
+}
+
+.decision-page--project .project-confidence-fit-list .insight-list__item {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 244, 238, 0.86));
+}
+
 .decision-page--confidence .public-hero__actions .public-hero__action,
 .decision-page--confidence .hero .cta-row .btn {
   flex: 1 1 100%;

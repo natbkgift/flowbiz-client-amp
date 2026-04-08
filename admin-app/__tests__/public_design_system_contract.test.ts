@@ -190,6 +190,21 @@ describe('public design system contract', () => {
     expect(propertyDetail).toContain('decision-page--property');
   });
 
+  it('keeps the project hero anchored on a decision-led summary above the gallery', () => {
+    const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
+    const primitives = read('styles/public-primitives.css');
+
+    expect(projectDetail).toContain('subtitle={projectHeroSubtitle}');
+    expect(projectDetail).toContain('signals={projectHeroSignals}');
+    expect(projectDetail).toContain('project-confidence-pack--topline');
+    expect(projectDetail).toContain('className="insight-list project-confidence-facts mt-3"');
+    expect(projectDetail.indexOf('project-confidence-pack--topline')).toBeLessThan(projectDetail.indexOf('project-gallery mt-6 reveal'));
+
+    expect(primitives).toContain('.decision-page--project .project-confidence-pack--topline');
+    expect(primitives).toContain('.decision-page--project .project-confidence-fact');
+    expect(primitives).toContain('.decision-page--project .public-hero__subtitle');
+  });
+
   it('locks audited route container intent for narrative and inventory shells', () => {
     const blogArticle = read('app/(site)/[locale]/blog/[slug]/page.tsx');
     const aboutPage = read('app/(site)/[locale]/about/page.tsx');
