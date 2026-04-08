@@ -29,7 +29,7 @@ export default async function TermsPage(
   return (
     <main id="main-content">
       <section className="hero hero--page">
-        <Container>
+        <Container variant="readable">
           <h1 className="headline">{isTh ? 'ข้อกำหนดการใช้บริการ' : 'Terms of Service'}</h1>
           <p className="hero-subtitle">
             {isTh ? 'เงื่อนไขการใช้งานเว็บไซต์และบริการ' : 'Conditions for using our website and services'}
@@ -38,7 +38,7 @@ export default async function TermsPage(
       </section>
 
       <section className="section">
-        <Container>
+        <Container variant="readable">
           <div className="content-article">
             <h2>{isTh ? 'ลักษณะการบริการ' : 'Nature of Services'}</h2>
             <p>

@@ -148,6 +148,7 @@ These rules are enforced starting now even before the rest of Phase 0 lands:
 
 - Home, Listing, Project, Property, and support pages must use a shared container variant for each major section.
 - Support and long-form pages should prefer `readable` containers for narrative blocks.
+- Long-form routes that keep a supporting rail may keep the outer section shell at `default`, but the narrative column itself should still respect the readable measure.
 - Inventory and gallery-heavy surfaces may use `wide`, but only when the content genuinely benefits from the wider shell.
 - No new page may introduce a fifth container language outside `default`, `wide`, `full`, or `readable` without updating this spec and its contract test.
 - New page or component work must use the canonical typography roles above instead of local `text-*` utility sizing for headings, body copy, or helper copy.

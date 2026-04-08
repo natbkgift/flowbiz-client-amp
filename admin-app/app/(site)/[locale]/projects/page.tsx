@@ -284,7 +284,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           }}
         />
         <section className="section projects-catalogue-section">
-        <Container>
+        <Container variant="wide">
           <div className="card-actions mb-4">
             <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')} prefetch={false}>
               {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกไว้เทียบต่อ' : 'Browse shortlist-ready listings'}
@@ -401,7 +401,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         }}
       />
         <section className="section">
-      <Container>
+      <Container variant="wide">
         <div className="section-header mb-6">
           <h2 className="section-title">{locale === 'th' ? 'รายการโครงการยังไม่พร้อม' : dict.nav.projects}</h2>
           <p className="section-subtitle">

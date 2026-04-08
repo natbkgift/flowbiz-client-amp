@@ -7242,6 +7242,12 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   gap: clamp(20px, 3vw, 36px);
 }
 
+.detail-stack--readable {
+  width: 100%;
+  max-width: var(--public-container-readable);
+  justify-self: start;
+}
+
 .authority-card,
 .page-rail-card,
 .editorial-card {

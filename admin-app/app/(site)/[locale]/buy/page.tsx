@@ -151,7 +151,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       />
 
       <section className="section">
-        <Container>
+        <Container variant="wide">
           <div className="buy-scan-note buy-scan-note--hero buy-scan-note--process mb-6" aria-label={locale === 'th' ? 'โหมดสแกนก่อนตัดสินใจ' : 'Scan mode before acting'}>
             <p className="buy-scan-note__eyebrow">
               {locale === 'th' ? 'เริ่มจากโหมดสแกน' : 'Scan mode first'}
@@ -192,7 +192,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       </section>
 
       <section className="section section--alt">
-        <Container>
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.buy.quotaTitle}</h2>
             <p className="section-subtitle">{dict.buy.quotaSubtitle}</p>
@@ -211,7 +211,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
       {/* Installment & Transfer Cost Guide (TH-prioritized, but visible to all) */}
       <section className="section">
-        <Container>
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">
               {locale === 'th' ? 'ตารางผ่อนชำระ & ค่าโอน' : 'Payment Plans & Transfer Costs'}
@@ -307,7 +307,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       </section>
 
       <section className="section">
-        <Container>
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.buy.legalTitle}</h2>
             <p className="section-subtitle">{dict.buy.legalSubtitle}</p>
@@ -338,7 +338,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       </section>
 
       <section className="section section--alt">
-        <Container>
+        <Container variant="wide">
           <div className="section-header">
             <h2 className="section-title">{dict.buy.featuredTitle}</h2>
             <p className="section-subtitle">{dict.buy.featuredSubtitle}</p>
@@ -389,7 +389,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
       </section>
 
       <section className="section section--cta buy-closing-cta-section">
-        <Container>
+        <Container variant="wide">
           <div className="cta-panel buy-closing-cta-panel">
             <div className="buy-closing-cta-panel__copy">
               <p className="buy-closing-cta-panel__eyebrow">{buyClosingEyebrow}</p>

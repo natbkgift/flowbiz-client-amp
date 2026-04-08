@@ -160,7 +160,7 @@ export default async function HowWeWorkPage(
       </section>
 
       <section className="section section--cta">
-        <Container>
+        <Container variant="readable">
           <div className="cta-panel reveal">
             <div>
               <h2 className="cta-title">

@@ -46,49 +46,49 @@ export default async function RentPage(props: { params: Promise<{ locale: string
         ]}
       />
       <section className="hero hero--page">
-        <Container>
+        <Container variant="wide">
           <h1 className="headline">{dict.rent.heroTitle}</h1>
           <p className="subhead">{dict.rent.heroSub}</p>
         </Container>
       </section>
 
       <section className="section">
-        <Container>
+        <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.areaTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.areaDesc}</p>
         </Container>
       </section>
 
       <section className="section section--alt">
-        <Container>
+        <Container variant="wide">
           <h2 className="section-title mb-4">{dict.rent.featuredTitle}</h2>
           <ListingGrid items={res.data ?? []} />
         </Container>
       </section>
 
       <section className="section">
-        <Container>
+        <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.includedTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.includedDesc}</p>
         </Container>
       </section>
 
       <section className="section section--alt">
-        <Container>
+        <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.trustTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.trustDesc}</p>
         </Container>
       </section>
 
       <section className="section">
-        <Container>
+        <Container variant="wide">
           <h2 className="section-title mb-2">{dict.rent.faqTitle}</h2>
           <p className="text-[var(--color-text-secondary)]">{dict.rent.faqDesc}</p>
         </Container>
       </section>
 
       <section className="section section--cta">
-        <Container>
+        <Container variant="wide">
           <h2 className="section-title mb-3">{dict.rent.formTitle}</h2>
           <LeadForm defaultPurpose="rent" defaultMessage={dict.rent.formDefault} />
         </Container>

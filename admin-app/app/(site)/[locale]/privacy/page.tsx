@@ -29,7 +29,7 @@ export default async function PrivacyPage(
   return (
     <main id="main-content">
       <section className="hero hero--page">
-        <Container>
+        <Container variant="readable">
           <h1 className="headline">{isTh ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}</h1>
           <p className="hero-subtitle">
             {isTh
@@ -40,7 +40,7 @@ export default async function PrivacyPage(
       </section>
 
       <section className="section">
-        <Container>
+        <Container variant="readable">
           <div className="content-article">
             <h2>{isTh ? 'การเก็บรวบรวมข้อมูล' : 'Data Collection'}</h2>
             <p>

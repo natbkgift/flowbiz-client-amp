@@ -57,6 +57,7 @@ describe('public design system contract', () => {
     expect(globals).toContain('--type-h4: var(--public-type-h4-size);');
     expect(globals).toContain('font-size: var(--public-type-h1-size);');
     expect(globals).toContain('.container--readable');
+    expect(globals).toContain('.detail-stack--readable');
     expect(globals).toContain('padding: var(--public-section-space-desktop) 0;');
 
     expect(primitives).toContain('.type-h1');
@@ -75,6 +76,7 @@ describe('public design system contract', () => {
     expect(foundationSpec).toContain('## Typography');
     expect(foundationSpec).toContain('## Content Rhythm');
     expect(foundationSpec).toContain('Home final CTA may use an `h2` element with the `type-h1` class');
+    expect(foundationSpec).toContain('Long-form routes that keep a supporting rail may keep the outer section shell at `default`, but the narrative column itself should still respect the readable measure.');
   });
 
   it('uses shared public primitives on the home shell, advisory hero, and reusable cards', () => {
@@ -150,5 +152,28 @@ describe('public design system contract', () => {
 
     expect(propertyDetail).toContain('PublicAdvisoryHero');
     expect(propertyDetail).toContain('decision-page--property');
+  });
+
+  it('locks audited route container intent for narrative and inventory shells', () => {
+    const blogArticle = read('app/(site)/[locale]/blog/[slug]/page.tsx');
+    const aboutPage = read('app/(site)/[locale]/about/page.tsx');
+    const howWeWorkPage = read('app/(site)/[locale]/how-we-work/page.tsx');
+    const termsPage = read('app/(site)/[locale]/terms/page.tsx');
+    const privacyPage = read('app/(site)/[locale]/privacy/page.tsx');
+    const buyPage = read('app/(site)/[locale]/buy/page.tsx');
+    const rentPage = read('app/(site)/[locale]/rent/page.tsx');
+    const projectsPage = read('app/(site)/[locale]/projects/page.tsx');
+
+    expect(blogArticle).toContain('detail-stack detail-stack--readable');
+    expect(blogArticle.match(/variant="readable"/g)?.length).toBe(1);
+
+    expect(aboutPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(howWeWorkPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(termsPage.match(/variant="readable"/g)?.length).toBe(2);
+    expect(privacyPage.match(/variant="readable"/g)?.length).toBe(2);
+
+    expect(buyPage.match(/variant="wide"/g)?.length).toBe(6);
+    expect(rentPage.match(/variant="wide"/g)?.length).toBe(7);
+    expect(projectsPage.match(/variant="wide"/g)?.length).toBe(2);
   });
 });

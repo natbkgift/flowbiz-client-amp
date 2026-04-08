@@ -89,7 +89,7 @@ export default async function BlogArticlePage(
   if (!post) {
     return (
       <main className="section" id="main-content">
-        <Container>
+        <Container variant="readable">
           <h1 className="section-title">{locale === 'th' ? 'ไม่พบบทความ' : 'Article not found'}</h1>
           <p className="section-subtitle">
             {locale === 'th' ? 'บทความนี้อาจถูกย้ายหรือยังไม่เผยแพร่' : 'This article may have moved or is not published.'}
@@ -189,7 +189,7 @@ export default async function BlogArticlePage(
       <section className="section" id="blog-article-content">
         <Container>
           <div className="detail-layout advisory-detail-layout">
-            <div className="detail-stack">
+            <div className="detail-stack detail-stack--readable">
               <div className="authority-card reveal" id="blog-article-body">
                 <div className="editorial-card__meta">
                   {publishedText ? <span>{locale === 'th' ? 'เผยแพร่' : 'Published'}: {publishedText}</span> : null}
