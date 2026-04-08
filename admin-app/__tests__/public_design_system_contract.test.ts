@@ -240,4 +240,21 @@ describe('public design system contract', () => {
     expect(renderBody.indexOf('id="home-trust-layer"')).toBeLessThan(renderBody.indexOf('HomeTeamCtaSection'));
     expect(renderBody.indexOf('HomeTeamCtaSection')).toBeLessThan(renderBody.indexOf('HomeBottomCta'));
   });
+
+  it('keeps the home trust layer anchored on proof, process, and review blocks', () => {
+    const homePage = read('app/(site)/[locale]/page.tsx');
+    const primitives = read('styles/public-primitives.css');
+
+    expect(homePage).toContain('title={proofTrustHeading}');
+    expect(homePage).toContain('subtitle={proofTrustSubcopy}');
+    expect(homePage).toContain('className="home-trust-proof-list"');
+    expect(homePage).toContain('className="home-trust-process-list"');
+    expect(homePage).toContain('className="home-trust-review-stack"');
+    expect(homePage).toContain("cta: 'home_trust_primary'");
+    expect(homePage).toContain("cta: 'home_trust_secondary'");
+
+    expect(primitives).toContain('.home-trust-module__columns');
+    expect(primitives).toContain('.home-trust-process-card');
+    expect(primitives).toContain('.home-trust-review-card');
+  });
 });

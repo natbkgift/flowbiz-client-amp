@@ -1772,12 +1772,10 @@ export default async function HomePage({
             <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
               <PublicSectionHeader
                 align="start"
-                kicker={locale === 'th' ? 'ภาพรวมความน่าเชื่อถือ' : 'Trust snapshot'}
+                kicker={locale === 'th' ? 'หลักฐานและขั้นตอน' : 'Proof and process'}
                 kickerClassName="home-section-kicker"
-                title={locale === 'th'
-                  ? 'คัดเฉพาะรายการที่ตรวจแล้ว'
-                  : 'Verified stock first.'}
-                subtitle={trustSnapshotIntro}
+                title={proofTrustHeading}
+                subtitle={proofTrustSubcopy}
                 subtitleClassName="max-w-3xl mt-3"
                 subtitleProps={{
                   role: 'note',
@@ -1785,13 +1783,87 @@ export default async function HomePage({
                   'data-home-perf': 'trust-strip',
                 }}
               />
-              <div className="home-trust-snapshot-grid mt-8">
-                {trustSnapshotItems.map((item) => (
-                  <div key={item.label} className="home-trust-snapshot__item">
-                    <p className="home-trust-snapshot__label">{item.label}</p>
-                    <p className="home-trust-snapshot__value">{item.value}</p>
+              <div className="home-trust-module mt-8">
+                <div className="home-trust-module__summary">
+                  <p className="home-trust-module__intro">{trustSnapshotIntro}</p>
+                  <div className="home-trust-snapshot-grid">
+                    {trustSnapshotItems.map((item) => (
+                      <div key={item.label} className="home-trust-snapshot__item">
+                        <p className="home-trust-snapshot__label">{item.label}</p>
+                        <p className="home-trust-snapshot__value">{item.value}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                  <div className="home-trust-module__actions">
+                    <TrackedLink
+                      className="home-section-utility__link"
+                      href={proofTrustPrimaryUrl}
+                      prefetch={false}
+                      eventType="cta_click"
+                      eventPayload={{ cta: 'home_trust_primary', from: 'home_trust', target: proofTrustPrimaryUrl }}
+                    >
+                      {proofTrustPrimaryLabel}
+                    </TrackedLink>
+                    <TrackedLink
+                      className="home-section-utility__link"
+                      href={proofTrustSecondaryUrl}
+                      prefetch={false}
+                      eventType="cta_click"
+                      eventPayload={{ cta: 'home_trust_secondary', from: 'home_trust', target: proofTrustSecondaryUrl }}
+                    >
+                      {proofTrustSecondaryLabel}
+                    </TrackedLink>
+                  </div>
+                </div>
+
+                <div className="home-trust-module__columns">
+                  <div className="home-trust-module__proofs">
+                    <p className="home-trust-module__eyebrow">{locale === 'th' ? 'เหตุผลที่ช่วยลดความลังเล' : 'Why this lowers hesitation'}</p>
+                    <div className="home-trust-proof-list">
+                      {trustProofItems.slice(0, 4).map((item) => (
+                        <article key={item.key} className="home-trust-proof-item public-surface-card public-surface-card--warm">
+                          <p className="home-trust-snapshot__label">{item.label}</p>
+                          {item.value ? <p className="home-trust-snapshot__value">{item.value}</p> : null}
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+
+                  <PublicSurfaceCard as="div" tone="deep" className="home-trust-process-card">
+                    <p className="home-trust-module__eyebrow home-trust-module__eyebrow--light">
+                      {locale === 'th' ? 'AMP ทำงานอย่างไร' : 'How AMP works'}
+                    </p>
+                    <div className="home-trust-process-list">
+                      {processTimeline.slice(0, 3).map((item) => (
+                        <div key={`${item.step}-${item.title}`} className="home-trust-process-item">
+                          <span className="home-trust-process-item__step">{item.step}</span>
+                          <div>
+                            <strong className="home-trust-process-item__title">{item.title}</strong>
+                            <p className="home-trust-process-item__body">{item.body}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </PublicSurfaceCard>
+                </div>
+
+                {reviewItems.length > 0 ? (
+                  <div className="home-trust-review-shell">
+                    <div className="home-trust-review-copy">
+                      <p className="home-trust-module__eyebrow">{reviewsHeading}</p>
+                      <p className="home-trust-module__subcopy">{reviewsSubcopy}</p>
+                    </div>
+                    <div className="home-trust-review-stack">
+                      {reviewItems.slice(0, 3).map((item, index) => (
+                        <article key={`${item.name}-${index}`} className="home-trust-review-card public-surface-card public-surface-card--warm">
+                          <p className="home-trust-review-quote">&ldquo;{getReviewHighlight(item.quote)}&rdquo;</p>
+                          <p className="home-trust-review-meta">{item.name}</p>
+                          <p className="home-trust-review-context">{item.context}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </PublicSurfaceCard>
           </Container>
