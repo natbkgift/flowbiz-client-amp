@@ -38,6 +38,10 @@ vi.mock('@/app/_lib/public-api-server', async () => {
     })),
     fetchProjectEvaluation: vi.fn(async () => null),
     fetchBlogPosts: vi.fn(async () => []),
+    fetchProperties: vi.fn(async () => ({
+      data: [],
+      meta: { page: 1, limit: 6, total: 0 },
+    })),
     fetchSmartFinder: vi.fn(async () => ({
       ranking_version: 'v1',
       query_hash: 'hash-1',

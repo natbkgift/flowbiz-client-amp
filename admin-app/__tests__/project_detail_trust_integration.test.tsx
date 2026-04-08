@@ -107,6 +107,10 @@ vi.mock('@/app/_lib/public-api-server', async () => {
       };
     }),
     fetchBlogPosts: vi.fn(async () => []),
+    fetchProperties: vi.fn(async () => ({
+      data: [],
+      meta: { page: 1, limit: 6, total: 0 },
+    })),
   };
 });
 

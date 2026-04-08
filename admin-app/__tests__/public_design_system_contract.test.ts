@@ -220,6 +220,21 @@ describe('public design system contract', () => {
     expect(primitives).toContain('.decision-page--project .project-use-case-item');
   });
 
+  it('keeps the project page unit inventory layer on the existing property-card and shared section primitives', () => {
+    const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
+    const primitives = read('styles/public-primitives.css');
+
+    expect(projectDetail).toContain('fetchProperties({ limit: 6, sort: \'newest\', project_id: project.id })');
+    expect(projectDetail).toContain('PropertyCard');
+    expect(projectDetail).toContain('id="project-unit-inventory"');
+    expect(projectDetail).toContain('className="signal-grid signal-grid--three-up project-unit-inventory-grid"');
+    expect(projectDetail).toContain('className="cta-strip project-unit-inventory-empty"');
+
+    expect(primitives).toContain('.decision-page--project .project-unit-inventory');
+    expect(primitives).toContain('.decision-page--project .project-unit-summary-card');
+    expect(primitives).toContain('.decision-page--project .project-unit-inventory-grid .property-card');
+  });
+
   it('locks audited route container intent for narrative and inventory shells', () => {
     const blogArticle = read('app/(site)/[locale]/blog/[slug]/page.tsx');
     const aboutPage = read('app/(site)/[locale]/about/page.tsx');

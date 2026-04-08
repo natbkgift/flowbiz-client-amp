@@ -7,9 +7,11 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { withLocale, ogLocale } from '@/app/_lib/i18n/routing';
 import { resolveLocalizedText } from '@/app/_lib/public-content';
-import { fetchProjectBySlug, fetchProjectEvaluation, fetchBlogPosts } from '@/app/_lib/public-api-server';
+import { fetchProjectBySlug, fetchProjectEvaluation, fetchBlogPosts, fetchProperties } from '@/app/_lib/public-api-server';
+import type { PropertyListItem } from '@/app/public/_shared/types';
 import { getInternalLinks } from '@/app/_lib/internal-links';
 
+import { PropertyCard } from '@/components/cards/PropertyCard';
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 import { PublicAdvisoryHero, type HeroSignal } from '@/components/public/PublicAdvisoryHero';
 import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
@@ -120,6 +122,12 @@ function uniqueItems(items: Array<string | null>): string[] {
 function hasMeaningfulCopy(value: string | null | undefined): boolean {
   const text = String(value || '').replace(/\s+/g, ' ').trim();
   return text.length > 0 && !/^[\-—–]+$/.test(text);
+}
+
+function formatInventoryBedroomLabel(locale: 'en' | 'th', bedrooms: number | null | undefined): string | null {
+  if (typeof bedrooms !== 'number' || Number.isNaN(bedrooms) || bedrooms < 0) return null;
+  if (bedrooms === 0) return locale === 'th' ? 'สตูดิโอ' : 'Studio';
+  return locale === 'th' ? `${bedrooms} ห้องนอน` : `${bedrooms} BR`;
 }
 
 function buildProjectWhyConsiderLines(
@@ -486,6 +494,86 @@ function buildProjectInvestmentFramingLines(
   ]).slice(0, 3);
 }
 
+function buildProjectUnitMixLines(
+  locale: 'en' | 'th',
+  properties: PropertyListItem[],
+  linkedTotal: number,
+): string[] {
+  const visibleTotal = linkedTotal > 0 ? linkedTotal : properties.length;
+  const bedroomMix = uniqueItems(
+    properties
+      .map((item) => formatInventoryBedroomLabel(locale, item.bedrooms))
+      .filter((item): item is string => Boolean(item)),
+  ).slice(0, 4);
+  const sizeValues = properties
+    .map((item) => Number(item.size_sqm ?? item.size ?? null))
+    .filter((value) => Number.isFinite(value) && value > 0) as number[];
+  const minSize = sizeValues.length ? Math.min(...sizeValues) : null;
+  const maxSize = sizeValues.length ? Math.max(...sizeValues) : null;
+
+  return uniqueItems([
+    visibleTotal > 0
+      ? (locale === 'th'
+        ? `${visibleTotal} ยูนิตที่ผูกกับโครงการนี้ยังเปิดให้เช็กต่อได้ใน route นี้`
+        : `${visibleTotal} project-linked units are currently visible on this route.`)
+      : null,
+    bedroomMix.length > 0
+      ? (locale === 'th'
+        ? `mix ที่เห็นตอนนี้: ${bedroomMix.join(' • ')}`
+        : `Visible unit mix: ${bedroomMix.join(' • ')}.`)
+      : null,
+    minSize && maxSize
+      ? (locale === 'th'
+        ? `ช่วงขนาดที่เห็น: ${Math.round(minSize).toLocaleString()}-${Math.round(maxSize).toLocaleString()} ตร.ม.`
+        : `Visible size range: ${Math.round(minSize).toLocaleString()}-${Math.round(maxSize).toLocaleString()} sqm.`)
+      : null,
+    properties.length > 0 && bedroomMix.length === 0 && !minSize
+      ? (locale === 'th'
+        ? 'ใช้การ์ดยูนิตด้านล่างเพื่อเช็กราคา ตำแหน่ง และความต่างของแต่ละตัวเลือกโดยตรง'
+        : 'Use the unit cards below to inspect price, placement, and the differences between currently visible options.')
+      : null,
+  ]).slice(0, 3);
+}
+
+function buildProjectInventoryFlowLines(
+  locale: 'en' | 'th',
+  projectName: string,
+  properties: PropertyListItem[],
+  startingPriceLabel: string | null,
+): string[] {
+  const prices = properties
+    .map((item) => Number(item.price))
+    .filter((value) => Number.isFinite(value) && value > 0) as number[];
+  const minPrice = prices.length ? Math.min(...prices) : null;
+  const maxPrice = prices.length ? Math.max(...prices) : null;
+
+  return uniqueItems([
+    minPrice && maxPrice
+      ? (locale === 'th'
+        ? minPrice === maxPrice
+          ? `ราคา live ของยูนิตที่เห็นตอนนี้อยู่ที่ ${formatCurrency(locale, minPrice)}`
+          : `ราคา live ของยูนิตที่เห็นตอนนี้อยู่ระหว่าง ${formatCurrency(locale, minPrice)} ถึง ${formatCurrency(locale, maxPrice)}`
+        : minPrice === maxPrice
+          ? `The live units shown here currently sit at ${formatCurrency(locale, minPrice)}.`
+          : `The live units shown here currently range from ${formatCurrency(locale, minPrice)} to ${formatCurrency(locale, maxPrice)}.`)
+      : startingPriceLabel
+        ? (locale === 'th'
+          ? `ถ้ายังไม่มียูนิตผูกโครงการมากพอ ให้ใช้ราคาเริ่มต้น ${startingPriceLabel} เป็น anchor ก่อนส่งต่อไปเช็ก live stock`
+          : `If the linked unit set is still thin, use the ${startingPriceLabel} starting signal as the anchor before you request live stock.`)
+        : null,
+    properties.length > 0
+      ? (locale === 'th'
+        ? `เปิดการ์ดยูนิตเพื่อขยับจากการอ่านโครงการไปสู่การตัดสินใจระดับยูนิต โดยไม่หลุดจากบริบทของ ${projectName}`
+        : `Open a unit card to move from the project read into unit-level decisions without losing the ${projectName} context.`)
+      : (locale === 'th'
+        ? `หาก route นี้ยังไม่แสดงยูนิตที่ผูกกับ ${projectName} ให้ใช้ advisor handoff เพื่อขอ unit mix และ stock ล่าสุด`
+        : `If this route is not yet surfacing linked units for ${projectName}, use the advisor handoff to request the latest unit mix and stock.`),
+    locale === 'th'
+      ? 'เก็บ project brief เดิมไว้ แล้วค่อยเช็กผัง ขนาด และราคา live ในรอบถัดไป'
+      : 'Keep the project brief intact, then verify layouts, size, and live pricing in the next step.',
+  ]).slice(0, 3);
+}
+
 export async function generateMetadata(
   props: {
     params: Promise<{ locale: string; slug: string }>;
@@ -649,6 +737,10 @@ export default async function ProjectDetailPage(
 
   const evaluation = await withTimeout(fetchProjectEvaluation(project.id), null);
   const publishedBlogPosts = await withTimeout(fetchBlogPosts(), []);
+  const linkedInventoryResponse = await withTimeout(
+    fetchProperties({ limit: 6, sort: 'newest', project_id: project.id }),
+    { data: [], meta: { page: 1, limit: 0, total: 0 } },
+  );
   const hasEvaluationSnapshot = Boolean(
     evaluation?.area_statistics?.avg_price ||
     evaluation?.area_statistics?.avg_rent ||
@@ -804,6 +896,12 @@ export default async function ProjectDetailPage(
       return containsContext(titleText, project.name) || containsContext(titleText, project.area?.name) || containsContext(excerptText, project.area?.name);
     })
     .slice(0, 2);
+  const linkedProjectProperties = linkedInventoryResponse.data
+    .filter((item) => item.slug || Number.isFinite(Number(item.price)))
+    .slice(0, 3);
+  const linkedInventoryCount = typeof linkedInventoryResponse.meta?.total === 'number' && linkedInventoryResponse.meta.total > 0
+    ? linkedInventoryResponse.meta.total
+    : linkedProjectProperties.length;
   const whyConsiderLines = buildProjectWhyConsiderLines(
     locale,
     project,
@@ -840,6 +938,17 @@ export default async function ProjectDetailPage(
     investmentFacts,
     evaluationSignals,
     hasInvestmentView,
+  );
+  const projectUnitMixLines = buildProjectUnitMixLines(
+    locale,
+    linkedProjectProperties,
+    linkedInventoryCount,
+  );
+  const projectInventoryFlowLines = buildProjectInventoryFlowLines(
+    locale,
+    project.name,
+    linkedProjectProperties,
+    startingPriceLabel,
   );
   const projectHeroPrimaryPayload = {
     source_route: 'project',
@@ -1146,6 +1255,85 @@ export default async function ProjectDetailPage(
                   </div>
                 </div>
               </div>
+            </section>
+
+            <section id="project-unit-inventory" className="reveal project-unit-inventory">
+              <PublicSectionHeader
+                align="start"
+                kicker={locale === 'th' ? 'Unit path' : 'Unit path'}
+                kickerClassName="project-unit-inventory__kicker"
+                title={locale === 'th' ? 'ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยัง active' : 'Move from the project read into live units'}
+                subtitle={locale === 'th'
+                  ? 'ส่วนนี้ช่วยบอกว่าเห็น unit mix แบบไหนแล้ว ราคา live อยู่ช่วงใด และควรไปต่อที่การ์ดยูนิตหรือ advisor handoff'
+                  : 'This layer shows which unit mix is already visible, where live pricing sits, and whether the next move should be a unit card or an advisor handoff.'}
+                subtitleClassName="project-unit-inventory__subtitle"
+              />
+
+              <div className="signal-grid signal-grid--two-up project-unit-summary-grid">
+                <div className="authority-card project-unit-summary-card project-unit-summary-card--mix">
+                  <h2 className="card-title">{locale === 'th' ? 'mix ของยูนิตที่เห็นตอนนี้' : 'Visible unit mix now'}</h2>
+                  <p className="card-subtitle">
+                    {locale === 'th'
+                      ? 'ใช้บล็อกนี้เพื่อดูว่าจากโครงการนี้คุณขยับไปเช็กยูนิตแบบไหนได้ทันที'
+                      : 'Use this block to see what kind of unit review you can move into immediately from this project.'}
+                  </p>
+                  <div className="insight-list mt-3 project-unit-summary-list">
+                    {projectUnitMixLines.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="authority-card project-unit-summary-card project-unit-summary-card--flow">
+                  <h2 className="card-title">{locale === 'th' ? 'ไปต่อยัง live stock อย่างไร' : 'How to move into live stock'}</h2>
+                  <p className="card-subtitle">
+                    {locale === 'th'
+                      ? 'อ่านทางเดินต่อจากโครงการนี้ไปสู่การตัดสินใจระดับยูนิต โดยไม่ต้องกระโดดข้ามบริบทของหน้า'
+                      : 'Read the next path from this project into unit-level decisions without dropping the page context.'}
+                  </p>
+                  <div className="insight-list mt-3 project-unit-summary-list">
+                    {projectInventoryFlowLines.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="card-actions project-unit-summary-actions mt-3">
+                    <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
+                      {locale === 'th' ? 'ดูยูนิตที่พร้อมคัดต่อ' : 'Browse shortlist-ready units'}
+                    </Link>
+                    <Link className="btn btn-tertiary" href={projectDecisionCta.primaryHref}>
+                      {projectDecisionCta.primaryLabel}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {linkedProjectProperties.length > 0 ? (
+                <div className="signal-grid signal-grid--three-up project-unit-inventory-grid">
+                  {linkedProjectProperties.map((item) => (
+                    <PropertyCard key={item.id} item={item} dict={dict} locale={locale} />
+                  ))}
+                </div>
+              ) : (
+                <div className="cta-strip project-unit-inventory-empty">
+                  <div className="cta-strip__text">
+                    {locale === 'th'
+                      ? 'ถ้ายังไม่มียูนิตผูกกับโครงการนี้บน route สาธารณะ ให้ใช้ project brief ด้านบนแล้วส่งต่อเพื่อขอ unit mix และ availability ล่าสุดจากทีม'
+                      : 'If this public route is not yet surfacing linked units, keep the project brief above and hand it off to request the latest unit mix and availability from the team.'}
+                  </div>
+                  <div className="card-actions project-unit-summary-actions">
+                    <Link className="btn btn-secondary" href={projectDecisionCta.primaryHref}>
+                      {projectDecisionCta.primaryLabel}
+                    </Link>
+                    <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
+                      {locale === 'th' ? 'ดูยูนิตในคลังหลัก' : 'Browse the main unit catalogue'}
+                    </Link>
+                  </div>
+                </div>
+              )}
             </section>
 
             <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal project-advisory-reads-grid">

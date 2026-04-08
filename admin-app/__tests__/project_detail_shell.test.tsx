@@ -3,6 +3,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import ProjectDetailPage from '@/app/(site)/[locale]/projects/[slug]/page';
 
+vi.mock('next/image', () => ({
+  default: ({ fill, unoptimized, priority, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+}));
+
+vi.mock('@/components/shortlist/ShortlistSaveButton', () => ({
+  ShortlistSaveButton: () => <button type="button">Save shortlist</button>,
+}));
+
 vi.mock('@/app/_lib/public-api-server', async () => {
   const actual = await vi.importActual<typeof import('@/app/_lib/public-api-server')>('@/app/_lib/public-api-server');
   return {
@@ -45,6 +53,47 @@ vi.mock('@/app/_lib/public-api-server', async () => {
         excerpt: { en: 'Jomtien context for shortlist decisions.', th: 'บริบท Jomtien สำหรับการคัดรายการ' },
       },
     ])),
+    fetchProperties: vi.fn(async () => ({
+      data: [
+        {
+          id: 'property-1',
+          source_id: 'source-1',
+          slug: 'alpha-residence-1br',
+          title: 'Alpha Residence 1BR',
+          type: 'resale',
+          property_type: 'condo',
+          price: 5900000,
+          bedrooms: 1,
+          bathrooms: 1,
+          size_sqm: 47,
+          address: 'Alpha Residence, Jomtien',
+          city: 'Pattaya',
+          images: [],
+          local_images: [],
+          cover_image: '/images/alpha-1br.jpg',
+          status: 'published',
+        },
+        {
+          id: 'property-2',
+          source_id: 'source-2',
+          slug: 'alpha-residence-2br',
+          title: 'Alpha Residence 2BR',
+          type: 'resale',
+          property_type: 'condo',
+          price: 8200000,
+          bedrooms: 2,
+          bathrooms: 2,
+          size_sqm: 82,
+          address: 'Alpha Residence, Jomtien',
+          city: 'Pattaya',
+          images: [],
+          local_images: [],
+          cover_image: '/images/alpha-2br.jpg',
+          status: 'published',
+        },
+      ],
+      meta: { page: 1, limit: 6, total: 2 },
+    })),
   };
 });
 
@@ -64,6 +113,8 @@ describe('project detail shell', () => {
     expect(container.textContent ?? '').toContain('Market snapshot available');
     expect(container.querySelector('#project-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#project-brief-section')).not.toBeNull();
+    expect(container.querySelector('#project-why-framework')).not.toBeNull();
+    expect(container.querySelector('#project-unit-inventory')).not.toBeNull();
     expect(container.querySelector('#project-decision-lens')).not.toBeNull();
     expect(container.querySelector('#project-related-reads')).not.toBeNull();
     expect(container.querySelector('#project-trust-grid')).not.toBeNull();
@@ -71,6 +122,8 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-mobile-cta')).not.toBeNull();
     expect(container.querySelector('.public-hero__content.public-surface-card')).not.toBeNull();
     expect(container.querySelector('.public-hero__actions .btn.btn-primary')).not.toBeNull();
+    expect(container.querySelector('.project-unit-inventory-grid .property-card')).not.toBeNull();
+    expect(container.textContent ?? '').toContain('Browse shortlist-ready units');
     expect(container.querySelectorAll('#project-next-steps a')).toHaveLength(3);
     expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe('invest');
   });
@@ -85,6 +138,8 @@ describe('project detail shell', () => {
     const markup = container.textContent ?? '';
 
     expect(markup).toContain('สรุปโครงการเพื่อใช้คัดรายการ');
+    expect(markup).toContain('เหตุผลที่โครงการนี้ควรอยู่ต่อใน shortlist');
+    expect(markup).toContain('ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยัง active');
     expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
     expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
