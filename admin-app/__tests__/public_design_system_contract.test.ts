@@ -205,6 +205,21 @@ describe('public design system contract', () => {
     expect(primitives).toContain('.decision-page--project .public-hero__subtitle');
   });
 
+  it('keeps the project page why-this-project layer on shared section and card primitives', () => {
+    const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
+    const primitives = read('styles/public-primitives.css');
+
+    expect(projectDetail).toContain('PublicSectionHeader');
+    expect(projectDetail).toContain('id="project-why-framework"');
+    expect(projectDetail).toContain('className="signal-grid signal-grid--three-up project-why-grid"');
+    expect(projectDetail).toContain('className="project-use-case-list mt-3"');
+    expect(projectDetail).toContain('className="insight-list mt-3 project-investment-framing-list"');
+
+    expect(primitives).toContain('.decision-page--project .project-why-framework');
+    expect(primitives).toContain('.decision-page--project .project-why-card');
+    expect(primitives).toContain('.decision-page--project .project-use-case-item');
+  });
+
   it('locks audited route container intent for narrative and inventory shells', () => {
     const blogArticle = read('app/(site)/[locale]/blog/[slug]/page.tsx');
     const aboutPage = read('app/(site)/[locale]/about/page.tsx');

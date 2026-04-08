@@ -12,6 +12,7 @@ import { getInternalLinks } from '@/app/_lib/internal-links';
 
 import { ProjectDeepReview } from '@/components/projects/ProjectDeepReview';
 import { PublicAdvisoryHero, type HeroSignal } from '@/components/public/PublicAdvisoryHero';
+import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 import { PageOwnedMobileCTA } from '@/components/ux/PageOwnedMobileCTA';
@@ -104,6 +105,12 @@ type ProjectDecisionCtaPlan = {
   inquirySource: string;
   buyerFit: string;
   signalLevel: string;
+};
+
+type ProjectUseCaseFrame = {
+  key: 'investment' | 'holiday_home' | 'end_use';
+  title: string;
+  body: string;
 };
 
 function uniqueItems(items: Array<string | null>): string[] {
@@ -367,6 +374,118 @@ function buildProjectHeroSubtitle(
       : 'This page acts as the starting project brief before you hand off into shortlist, compare, or advisor review.');
 }
 
+function buildProjectUseCaseFrames(
+  locale: 'en' | 'th',
+  projectName: string,
+  areaName: string | null | undefined,
+  startingPriceLabel: string | null,
+  deliveryLabel: string | null,
+  hasInvestmentView: boolean,
+  hasEvaluationSnapshot: boolean,
+  amenityCount: number,
+): ProjectUseCaseFrame[] {
+  const areaLabel = areaName ?? (locale === 'th' ? 'ทำเลของโครงการนี้' : 'this project area');
+
+  return [
+    {
+      key: 'investment',
+      title: locale === 'th' ? 'ลงทุน' : 'Investment',
+      body: hasInvestmentView && startingPriceLabel
+        ? (locale === 'th'
+          ? `เริ่มจาก ${startingPriceLabel} ใน ${areaLabel} พร้อมสัญญาณตลาดล่าสุด เหมาะกับเคสที่ต้องการกดเทียบราคา ค่าเช่า และ upside ของโครงการนี้ทันที`
+          : `Starts from ${startingPriceLabel} in ${areaLabel} with live market context, so it suits buyers who want to pressure-test price, rent, and upside next.`)
+        : hasEvaluationSnapshot
+          ? (locale === 'th'
+            ? `มี snapshot พอให้ใช้ ${projectName} เป็นจุดเริ่มของการเทียบฝั่งลงทุน แต่ยังควรยืนยัน rent และ liquidity ก่อนสรุป`
+            : `There is enough snapshot context to use ${projectName} as an investment starting point, but rent and liquidity still need confirmation before you conclude.`)
+          : (locale === 'th'
+            ? `มอง ${projectName} เป็น shortlist candidate ก่อน และค่อยขอข้อมูล rent, resale, และ inventory live เพิ่มเติม`
+            : `Treat ${projectName} as a shortlist candidate first, then request rent, resale, and live inventory detail before making an investment call.`),
+    },
+    {
+      key: 'holiday_home',
+      title: locale === 'th' ? 'พักตากอากาศ' : 'Holiday home',
+      body: amenityCount > 0 && areaName
+        ? (locale === 'th'
+          ? `ทั้งบริบทของ ${areaLabel} และสิ่งอำนวยความสะดวกที่เผยแพร่ ทำให้หน้านี้อ่านต่อในกรอบ holiday-home ได้ แต่ยังควรยืนยันการใช้งานจริงและยูนิตที่ยังเปิดอยู่`
+          : `The ${areaLabel} context and the published amenity mix make this readable as a holiday-home option, though real-use fit and live units still need checking.`)
+        : areaName
+          ? (locale === 'th'
+            ? `${areaLabel} ให้เฟรมเริ่มต้นสำหรับ holiday-home แต่ควรเช็ก amenity mix และการใช้งานจริงก่อนตัดสินใจ`
+            : `${areaLabel} gives this a holiday-home starting frame, but the amenity mix and real-use setup still need checking.`)
+          : (locale === 'th'
+            ? 'ถ้าจะอ่านเป็น holiday-home ควรยืนยันบริบทของทำเล การจัดการอาคาร และยูนิตที่ตรงโจทย์ก่อน'
+            : 'If you are reading this as a holiday-home option, confirm the area context, building management, and matching live units first.'),
+    },
+    {
+      key: 'end_use',
+      title: locale === 'th' ? 'อยู่อาศัยจริง' : 'End use',
+      body: deliveryLabel && amenityCount > 0
+        ? (locale === 'th'
+          ? `กำหนดส่งมอบ ${deliveryLabel} และชุดสิ่งอำนวยความสะดวกที่เผยแพร่ ทำให้หน้านี้ใช้เช็ก move-in readiness ได้เร็วขึ้น`
+          : `The published ${deliveryLabel} delivery timing plus the visible amenity mix make this page useful for a faster move-in readiness read.`)
+        : deliveryLabel
+          ? (locale === 'th'
+            ? `กำหนดส่งมอบ ${deliveryLabel} ช่วยตั้งเฟรม end-use ได้ แต่ยังควรยืนยันผังยูนิตและ readiness ของการอยู่อาศัยจริง`
+            : `The published ${deliveryLabel} delivery timing gives you an end-use frame, but layouts and real move-in readiness still need confirmation.`)
+          : (locale === 'th'
+            ? 'ใช้หน้านี้เพื่อคัดกรองเบื้องต้นสำหรับการอยู่อาศัยจริง แล้วค่อยเช็กผัง ยูนิต และ handover timing ต่อกับทีม'
+            : 'Use this page as the first pass for end-use planning, then confirm layouts, matching units, and handover timing with the team.'),
+    },
+  ];
+}
+
+function buildProjectInvestmentFramingLines(
+  locale: 'en' | 'th',
+  projectName: string,
+  areaName: string | null | undefined,
+  startingPriceLabel: string | null,
+  investmentFacts: Array<{ label: string; value: string }>,
+  evaluationSignals: string[],
+  hasInvestmentView: boolean,
+): string[] {
+  const areaLabel = areaName ?? (locale === 'th' ? 'ทำเลนี้' : 'this area');
+  const snapshotLines = investmentFacts.slice(0, 3).map((item) => `${item.label}: ${item.value}`);
+
+  if (snapshotLines.length > 0) {
+    return uniqueItems([
+      ...snapshotLines,
+      locale === 'th'
+        ? `ใช้ตัวเลขชุดนี้เพื่อเทียบ ${projectName} กับทางเลือกใกล้เคียง มากกว่าจะสรุปผลตอบแทนล่วงหน้า`
+        : `Use these figures to compare ${projectName} against nearby options, not as a forward-looking guarantee.`,
+    ]).slice(0, 4);
+  }
+
+  if (hasInvestmentView) {
+    return uniqueItems([
+      evaluationSignals[0] ?? null,
+      locale === 'th'
+        ? `${projectName} มี market snapshot พอให้เริ่มเทียบในกรอบลงทุนของ ${areaLabel}`
+        : `${projectName} has enough market snapshot context to start an investment comparison inside ${areaLabel}.`,
+      startingPriceLabel
+        ? (locale === 'th'
+          ? `ใช้ราคาเริ่มต้น ${startingPriceLabel} เป็นจุดเริ่ม แล้วค่อยกดเทียบ rent, yield, และ resale liquidity ต่อ`
+          : `Use the ${startingPriceLabel} entry point as the start, then pressure-test rent, yield, and resale liquidity next.`)
+        : null,
+      locale === 'th'
+        ? 'หากจะคุยเชิงลงทุนต่อ ควรยืนยัน rent, vacancy, และ unit mix ที่ยังเปิดอยู่ก่อนทุกครั้ง'
+        : 'If you are moving this into an investment conversation, confirm rent, vacancy, and live unit mix before every next step.',
+    ]).slice(0, 4);
+  }
+
+  return uniqueItems([
+    locale === 'th'
+      ? `${projectName} ยังอยู่ในโหมด project-first มากกว่าการสรุปลงทุนขั้นสุดท้าย`
+      : `${projectName} is still better treated as a project-first read than a final investment conclusion.`,
+    locale === 'th'
+      ? `ใช้บริบทของ ${areaLabel} เพื่อดูว่าควรขอข้อมูล rent, resale, และ demand ฝั่งลงทุนต่อหรือไม่`
+      : `Use the ${areaLabel} context to judge whether it is worth requesting rent, resale, and demand evidence next.`,
+    locale === 'th'
+      ? 'ถ้ายังไม่มี snapshot ตัวเลขครบ ให้ใช้โครงการนี้เป็น seed ของ compare brief มากกว่าการฟันธงผลตอบแทน'
+      : 'When the number set is still thin, use the project as the seed of a compare brief instead of forcing a return conclusion.',
+  ]).slice(0, 3);
+}
+
 export async function generateMetadata(
   props: {
     params: Promise<{ locale: string; slug: string }>;
@@ -547,6 +666,7 @@ export default async function ProjectDetailPage(
   const startingPriceLabel = formatCurrency(locale, project.starting_price);
   const investmentFacts = toKeyValueList(project.investment_snapshot);
   const locationFacts = toKeyValueList(project.location);
+  const amenityCount = project.amenities?.length ?? 0;
   const projectMetrics = [
     { label: locale === 'th' ? 'ราคาเริ่มต้น' : 'Starting price', value: startingPriceLabel },
     { label: locale === 'th' ? 'ส่งมอบ' : 'Delivery', value: deliveryLabel },
@@ -696,11 +816,30 @@ export default async function ProjectDetailPage(
     whyConsiderLines[0] ?? null,
     buyerFitSignals[1] ?? null,
   ]).slice(0, 3);
+  const projectUseCaseFrames = buildProjectUseCaseFrames(
+    locale,
+    project.name,
+    project.area?.name,
+    startingPriceLabel,
+    deliveryLabel,
+    hasInvestmentView,
+    hasEvaluationSnapshot,
+    amenityCount,
+  );
   const availabilityLines = buildProjectAvailabilityLines(
     locale,
     project,
     startingPriceLabel,
     deliveryLabel,
+  );
+  const projectInvestmentFramingLines = buildProjectInvestmentFramingLines(
+    locale,
+    project.name,
+    project.area?.name,
+    startingPriceLabel,
+    investmentFacts,
+    evaluationSignals,
+    hasInvestmentView,
   );
   const projectHeroPrimaryPayload = {
     source_route: 'project',
@@ -943,6 +1082,70 @@ export default async function ProjectDetailPage(
                   ))}
                 </article>
               ) : null}
+            </section>
+
+            <section id="project-why-framework" className="reveal project-why-framework">
+              <PublicSectionHeader
+                align="start"
+                kicker={locale === 'th' ? 'Why this project' : 'Why this project'}
+                kickerClassName="project-why-framework__kicker"
+                title={locale === 'th' ? 'เหตุผลที่โครงการนี้ควรอยู่ต่อใน shortlist' : 'Why this project deserves another shortlist round'}
+                subtitle={locale === 'th'
+                  ? 'อ่านชั้นนี้เพื่อดูว่าโครงการนี้น่าสนใจเพราะอะไร เหมาะกับ use case แบบไหน และควรตีความฝั่งลงทุนอย่างไร'
+                  : 'Use this layer to see why the project stays interesting, which use case it best fits, and how to read the investment angle without overreaching.'}
+                subtitleClassName="project-why-framework__subtitle"
+              />
+
+              <div className="signal-grid signal-grid--three-up project-why-grid">
+                <div className="authority-card project-why-card project-why-card--lead">
+                  <h2 className="card-title">{locale === 'th' ? 'ทำไมโครงการนี้ยังน่าคุยต่อ' : 'Why this project is still worth discussing'}</h2>
+                  <p className="card-subtitle">
+                    {locale === 'th'
+                      ? 'ไม่ใช่เพียงชื่อโครงการหรือราคาเปิด แต่คือเหตุผลว่าทำไมมันยังควรอยู่ในการคัดตัวเลือกต่อ'
+                      : 'This is not just the project name or entry price. It is the reason the project still deserves another round of attention.'}
+                  </p>
+                  <div className="insight-list mt-3 project-why-list">
+                    {whyConsiderLines.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="authority-card project-why-card project-why-card--fit">
+                  <h2 className="card-title">{locale === 'th' ? 'กรอบการใช้งานที่เหมาะ' : 'Best-fit use cases'}</h2>
+                  <p className="card-subtitle">
+                    {locale === 'th'
+                      ? 'อ่านว่าโครงการนี้ควรถูกส่งต่อในกรอบลงทุน พักตากอากาศ หรืออยู่อาศัยจริงแบบไหน'
+                      : 'Read which buyer brief this project supports best across investment, holiday-home, and end-use decisions.'}
+                  </p>
+                  <div className="project-use-case-list mt-3">
+                    {projectUseCaseFrames.map((item) => (
+                      <div key={item.key} className="project-use-case-item">
+                        <span className="project-use-case-item__title">{item.title}</span>
+                        <p className="project-use-case-item__body">{item.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="authority-card project-why-card project-why-card--investment">
+                  <h2 className="card-title">{locale === 'th' ? 'กรอบการอ่านฝั่งลงทุน' : 'Investment framing'}</h2>
+                  <p className="card-subtitle">
+                    {locale === 'th'
+                      ? 'ใช้ส่วนนี้เพื่ออ่านตัวเลขและสัญญาณตลาดในฐานะ comparison context ไม่ใช่ข้อสรุปผลตอบแทนล่วงหน้า'
+                      : 'Use this block to read the numbers and market signals as comparison context, not as a promised return conclusion.'}
+                  </p>
+                  <div className="insight-list mt-3 project-investment-framing-list">
+                    {projectInvestmentFramingLines.map((item) => (
+                      <div key={item} className="insight-list__item">
+                        <span className="insight-list__body">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </section>
 
             <section id="project-decision-grid" className="signal-grid signal-grid--two-up reveal project-advisory-reads-grid">

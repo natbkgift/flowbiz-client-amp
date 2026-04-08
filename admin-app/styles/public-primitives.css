@@ -487,6 +487,118 @@ html[lang='th'] .decision-page--project .public-hero__subtitle {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 244, 238, 0.86));
 }
 
+.decision-page--project .project-why-framework {
+  display: grid;
+  gap: var(--public-space-4);
+}
+
+.decision-page--project .project-why-framework .section-header {
+  max-width: 44rem;
+}
+
+.decision-page--project .project-why-framework__subtitle {
+  max-width: 40rem;
+}
+
+.decision-page--project .project-why-grid {
+  gap: clamp(14px, 1.8vw, 20px);
+}
+
+.decision-page--project .project-why-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(7, 19, 39, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 40px rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--project .project-why-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  opacity: 0.76;
+}
+
+.decision-page--project .project-why-card .card-subtitle {
+  max-width: 40ch;
+}
+
+.decision-page--project .project-why-list,
+.decision-page--project .project-investment-framing-list {
+  gap: 10px;
+}
+
+.decision-page--project .project-why-list .insight-list__item,
+.decision-page--project .project-investment-framing-list .insight-list__item {
+  padding: 14px 15px;
+  border-radius: 17px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 240, 0.84));
+  border-color: rgba(7, 19, 39, 0.06);
+}
+
+.decision-page--project .project-why-card--lead {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(247, 243, 236, 0.972));
+}
+
+.decision-page--project .project-why-card--lead::before {
+  background: linear-gradient(90deg, rgba(232, 199, 141, 0.58), rgba(10, 77, 140, 0.24));
+}
+
+.decision-page--project .project-why-card--fit {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(10, 77, 140, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.994), rgba(247, 243, 236, 0.972));
+}
+
+.decision-page--project .project-why-card--fit::before {
+  background: linear-gradient(90deg, rgba(10, 77, 140, 0.54), rgba(232, 199, 141, 0.26));
+}
+
+.decision-page--project .project-why-card--investment {
+  background:
+    radial-gradient(circle at 12% 82%, rgba(10, 77, 140, 0.06), transparent 24%),
+    radial-gradient(circle at 88% 12%, rgba(232, 199, 141, 0.14), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.992), rgba(248, 245, 240, 0.968));
+}
+
+.decision-page--project .project-why-card--investment::before {
+  background: linear-gradient(90deg, rgba(120, 92, 47, 0.5), rgba(10, 77, 140, 0.24));
+}
+
+.decision-page--project .project-use-case-list {
+  display: grid;
+  gap: 12px;
+}
+
+.decision-page--project .project-use-case-item {
+  display: grid;
+  gap: 6px;
+  padding: 14px 15px;
+  border-radius: 17px;
+  border: 1px solid rgba(7, 19, 39, 0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 240, 0.84));
+}
+
+.decision-page--project .project-use-case-item__title {
+  font-size: 0.8rem;
+  font-weight: var(--public-font-weight-bold);
+  line-height: 1.45;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(7, 19, 39, 0.52);
+}
+
+.decision-page--project .project-use-case-item__body {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.68;
+  color: rgba(7, 19, 39, 0.78);
+}
+
 .decision-page--confidence .public-hero__actions .public-hero__action,
 .decision-page--confidence .hero .cta-row .btn {
   flex: 1 1 100%;
