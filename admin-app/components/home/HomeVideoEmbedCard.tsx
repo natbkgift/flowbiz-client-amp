@@ -76,12 +76,12 @@ export function HomeVideoEmbedCard({
           </button>
         )}
       </div>
-      <figcaption className="home-video-card__body px-5 py-4 text-sm text-gray-600 min-h-[72px] leading-relaxed">
+      <figcaption className="home-video-card__body type-small px-5 py-4 text-gray-600 min-h-[72px]">
         <div className="home-video-card__meta">
           <span>{topic}</span>
           <span>{locale === 'th' ? 'Curated advisory media' : 'Curated advisory media'}</span>
         </div>
-        <h3 className="home-video-card__title">{title}</h3>
+        <h3 className="home-video-card__title type-h3">{title}</h3>
         <p>{caption}</p>
         <div className="home-video-card__actions">
           <TrackedLink

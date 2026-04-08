@@ -165,11 +165,11 @@ export function SellerForm({ heading }: SellerFormProps) {
 
   return (
     <form className="inquiry-form" onSubmit={(e) => e.preventDefault()}>
-      <h3>{heading ?? dict.common.sellerForm.headingDefault}</h3>
+      <h3 className="type-h3">{heading ?? dict.common.sellerForm.headingDefault}</h3>
       <p className="form-desc">{dict.common.sellerForm.description}</p>
-      <div className="mb-4 rounded-2xl border border-[rgba(10,77,140,0.12)] bg-[rgba(10,77,140,0.04)] px-4 py-3 text-sm text-[var(--color-text-secondary)]">
-        <p className="mb-1 font-medium text-[var(--color-text)]">{dict.common.sellerForm.trustIntro}</p>
-        <p className="mb-0">{dict.common.sellerForm.responsePromise}</p>
+      <div className="form-note-box mb-4">
+        <p className="form-note-box__title type-small">{dict.common.sellerForm.trustIntro}</p>
+        <p className="form-note-box__copy">{dict.common.sellerForm.responsePromise}</p>
       </div>
 
       <div
@@ -204,7 +204,7 @@ export function SellerForm({ heading }: SellerFormProps) {
           onChange={(e) => setName(e.target.value)}
         />
         <div>
-          <p className="text-sm text-gray-600">{contactMethodHelper}</p>
+          <p className="form-helper form-helper--muted">{contactMethodHelper}</p>
           {contactMethodError ? (
             <p className="form-error mt-2" role="alert">
               {contactMethodError}

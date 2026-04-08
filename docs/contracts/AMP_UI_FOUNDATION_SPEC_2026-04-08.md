@@ -94,6 +94,54 @@ Rules:
 - Use `.section-rhythm` only when composing nested structures that still need the same contract.
 - New sections should reuse existing section-header and surface primitives before introducing local spacing systems.
 
+## Typography
+
+Canonical public typography is locked through the shared token and primitive layers. This is a hardening pass on the shipped V1 system, not a second typography system.
+
+Tokens live in `admin-app/styles/public-tokens.css` and are applied through `admin-app/app/globals.css` plus `admin-app/styles/public-primitives.css`.
+
+Required canonical roles:
+
+| Role | Canonical rule |
+| --- | --- |
+| H1 | `type-h1` or the canonical hero/title classes wired to the same token set |
+| H2 | `type-h2` or `section-title` on standard section shells |
+| H3 | `type-h3` for card and sub-section titles |
+| H4 | `type-h4` for tertiary headings such as filters or rail titles |
+| body | `type-body` or body-copy primitives wired to the same token set |
+| small | `type-small` for secondary explanation copy |
+| label | `type-label`, `form-label`, or shared eyebrow/kicker patterns |
+| caption | `type-caption`, helper text, status text, and support-note text |
+
+Locale rules:
+
+- EN headings may use the serif title family.
+- TH headings switch through the same token layer to the Thai-safe sans family.
+- TH line-height and tracking adjustments must come from the token layer, not page-specific numeric overrides.
+
+Exceptions that are allowed because they are now tokenized and documented:
+
+- Home hero copy may use the tokenized `--public-type-home-hero-*` values.
+- Home and Projects landing section headers may use the tokenized compact section-header values.
+- Home final CTA may use an `h2` element with the `type-h1` class when that section functions as the page-closing conversion headline.
+
+Rules:
+
+- Do not add page-level magic-number font sizes or line-heights when a canonical role already exists.
+- If an exception is needed, add a named token and document it here before using it.
+
+## Content Rhythm
+
+Paragraph, list, and section-heading rhythm must reuse the shared typography tokens.
+
+Rules:
+
+- Standard prose blocks should use `content-flow` or an equivalent shared article primitive.
+- Paragraph spacing must come from the shared paragraph-gap token.
+- List spacing and list indent must come from the shared list-gap and list-indent tokens.
+- Section heading composition is `kicker -> title -> subtitle` and should prefer `PublicSectionHeader`.
+- When `PublicSectionHeader` is not used, the replacement must still use the same `type-label`, heading, and body-copy contract.
+
 ## Page Template Rules For This Slice
 
 These rules are enforced starting now even before the rest of Phase 0 lands:
@@ -102,6 +150,7 @@ These rules are enforced starting now even before the rest of Phase 0 lands:
 - Support and long-form pages should prefer `readable` containers for narrative blocks.
 - Inventory and gallery-heavy surfaces may use `wide`, but only when the content genuinely benefits from the wider shell.
 - No new page may introduce a fifth container language outside `default`, `wide`, `full`, or `readable` without updating this spec and its contract test.
+- New page or component work must use the canonical typography roles above instead of local `text-*` utility sizing for headings, body copy, or helper copy.
 
 ## PR Review Rules
 

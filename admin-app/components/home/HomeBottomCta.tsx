@@ -57,15 +57,15 @@ export function HomeBottomCta({
                 {eyebrow}
               </PublicChip>
             </div>
-            <h2 id={headingId} className={`home-bottom-cta__title text-3xl md:text-5xl ${isThai ? 'font-sans' : 'font-serif'} font-semibold mb-6 leading-tight`}>
+            <h2 id={headingId} className="home-bottom-cta__title type-h1 mb-6">
               {heading}
             </h2>
-            <p className="home-bottom-cta__lede text-lg text-white/80 mb-5 max-w-lg leading-relaxed">
+            <p className="home-bottom-cta__lede type-body text-white/80 mb-5 max-w-lg">
               {subheading}
             </p>
             {benefits.length > 0 ? (
               <ul
-                className="home-bottom-cta__benefits mb-6 grid gap-3 max-w-xl text-sm text-white/82 leading-relaxed"
+                className="home-bottom-cta__benefits type-small mb-6 grid gap-3 max-w-xl text-white/82"
                 aria-label={isThai ? 'ประโยชน์จากการคุยกับทีม' : 'consultation benefits'}
               >
                 {benefits.map((benefit) => (
@@ -97,9 +97,9 @@ export function HomeBottomCta({
               </TrackedLink>
             </PublicActionRow>
             {conversionNote ? (
-              <p className="home-bottom-conversion-note mt-4 text-sm text-white/72 max-w-xl">{conversionNote}</p>
+              <p className="home-bottom-conversion-note type-caption mt-4 text-white/72 max-w-xl">{conversionNote}</p>
             ) : null}
-            <p className="home-bottom-trust-note mt-4 text-sm text-white/70 max-w-xl">{trustNote}</p>
+            <p className="home-bottom-trust-note type-caption mt-4 text-white/70 max-w-xl">{trustNote}</p>
           </div>
           <div className="reveal home-bottom-cta__form-wrap">
             <PublicSurfaceCard as="div" tone="warm" className="bg-white p-5 md:p-8 rounded-2xl shadow-2xl text-gray-900 home-bottom-cta__panel" aria-label="consultation-form-panel">

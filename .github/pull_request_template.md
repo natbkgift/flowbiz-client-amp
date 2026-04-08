@@ -12,6 +12,13 @@
 - [ ] No related regression.
 - [ ] Empty/loading/error states are handled (or N/A with reason).
 
+## AMP Foundation Compliance
+- [ ] Typography usage follows the canonical H1/H2/H3/H4/body/small/label/caption contract.
+- [ ] Spacing and visual tokens reuse the shared token layer with no new style language.
+- [ ] Responsive behavior is explicit across mobile, tablet, laptop, and desktop tiers.
+- [ ] CTA hierarchy is intentional and matches the shared primary/secondary/tertiary system.
+- [ ] Components reuse shared primitives instead of creating near-duplicate one-off variants.
+
 ## Definition of Done (DoD) - PR Standard
 > Rule: every item must be checked, or marked `N/A` with a reason.
 

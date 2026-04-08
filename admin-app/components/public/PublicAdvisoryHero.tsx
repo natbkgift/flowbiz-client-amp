@@ -86,9 +86,9 @@ export function PublicAdvisoryHero({
       <Container variant="wide">
         <div className="public-hero">
           <PublicSurfaceCard as="div" tone="warm" className="public-hero__content">
-            <span className="public-hero__eyebrow">{eyebrow}</span>
-            <h1 className="headline public-hero__headline">{title}</h1>
-            <p className="subhead public-hero__subtitle">{subtitle}</p>
+            <span className="public-hero__eyebrow type-label">{eyebrow}</span>
+            <h1 className="headline public-hero__headline type-h1">{title}</h1>
+            <p className="subhead public-hero__subtitle type-body">{subtitle}</p>
 
             <PublicActionRow className="public-hero__actions cta-row" stackOnMobile>
               <TrackedLink
@@ -131,7 +131,7 @@ export function PublicAdvisoryHero({
 
             <div className="public-hero__meta">
               {supportNote ? (
-                <p className="public-hero__support-note">{supportNote}</p>
+                <p className="public-hero__support-note type-caption">{supportNote}</p>
               ) : null}
 
               <div className="public-hero__proofs" role="note" aria-label={proofsLabel}>
@@ -152,9 +152,9 @@ export function PublicAdvisoryHero({
                     {signalIcon(signal.icon)}
                   </div>
                   <div className="public-hero__signal-copy">
-                    <span className="public-hero__signal-kicker">{signal.kicker}</span>
-                    <h2 className="public-hero__signal-title">{signal.title}</h2>
-                    <p>{signal.body}</p>
+                    <span className="public-hero__signal-kicker type-label">{signal.kicker}</span>
+                    <h2 className="public-hero__signal-title type-h4">{signal.title}</h2>
+                    <p className="type-small">{signal.body}</p>
                   </div>
                   <span className="public-hero__signal-arrow" aria-hidden="true">
                     <IconArrowRight size="sm" />

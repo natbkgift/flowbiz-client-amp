@@ -388,7 +388,7 @@ export function LeadForm({
         void onSubmit();
       }}
     >
-      <h3>{heading ?? dict.common.leadForm.headingDefault}</h3>
+      <h3 className="type-h3">{heading ?? dict.common.leadForm.headingDefault}</h3>
       <p className="form-desc">{description ?? dict.common.leadForm.description}</p>
 
       <div
@@ -426,7 +426,7 @@ export function LeadForm({
           onChange={(e) => setName(e.target.value)}
         />
         <div>
-          <p id={contactHelperId} className="text-sm text-gray-600">{contactMethodHelper}</p>
+          <p id={contactHelperId} className="form-helper form-helper--muted">{contactMethodHelper}</p>
           {contactMethodError ? (
             <p id={contactErrorId} className="form-error mt-2" role="alert">
               {contactMethodError}
@@ -612,12 +612,12 @@ export function LeadForm({
         </button>
 
         <div className="mt-4 border-t border-gray-200 pt-4" aria-label="lead-form-support-links">
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="lead-form__support-copy mb-2">
             {locale === 'th'
               ? 'ถ้าคุณอยากคุยก่อน ติดต่อเราได้ทาง WhatsApp หรือ LINE'
               : 'Prefer to talk first? Reach us on WhatsApp or LINE.'}
           </p>
-          <div className="flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center gap-4">
             <a
               className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
               href={CTA.whatsAppUrl}

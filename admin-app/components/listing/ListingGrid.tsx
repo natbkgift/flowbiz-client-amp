@@ -87,7 +87,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
               </p>
             </div>
             <div className="results-header__controls flex gap-2 items-center">
-              <label className="text-sm text-[var(--color-text-secondary)]">{dict.listing.sort}</label>
+              <label className="form-label form-label--compact">{dict.listing.sort}</label>
               <select
                 className="form-select"
                 value={sort}

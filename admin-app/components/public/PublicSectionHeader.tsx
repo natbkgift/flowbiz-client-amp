@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 
 import { cx } from './cx';
 
-type TitleTag = 'h1' | 'h2' | 'h3';
+type TitleTag = 'h1' | 'h2' | 'h3' | 'h4';
 type WrapperTag = 'div' | 'header';
 type ParagraphProps = HTMLAttributes<HTMLParagraphElement> & {
   [key: `data-${string}`]: string | number | undefined;
@@ -40,6 +40,12 @@ export function PublicSectionHeader({
 }) {
   const WrapperTag = as;
   const TitleTag = titleAs;
+  const typeClassesByHeading: Record<TitleTag, string> = {
+    h1: 'type-h1',
+    h2: 'type-h2',
+    h3: 'type-h3',
+    h4: 'type-h4',
+  };
 
   return createElement(
     WrapperTag,
@@ -53,7 +59,7 @@ export function PublicSectionHeader({
     },
     <>
       {kicker ? (
-        <p className={cx('public-section-kicker', kickerClassName)} {...kickerProps}>
+        <p className={cx('public-section-kicker', 'type-label', kickerClassName)} {...kickerProps}>
           {kicker}
         </p>
       ) : null}
@@ -61,12 +67,12 @@ export function PublicSectionHeader({
         TitleTag,
         {
           id: titleId,
-          className: cx('section-title', titleClassName),
+          className: cx('section-title', typeClassesByHeading[titleAs], titleClassName),
         },
         title,
       )}
       {subtitle ? (
-        <p className={cx('section-subtitle', subtitleClassName)} {...subtitleProps}>
+        <p className={cx('section-subtitle', 'type-body', subtitleClassName)} {...subtitleProps}>
           {subtitle}
         </p>
       ) : null}

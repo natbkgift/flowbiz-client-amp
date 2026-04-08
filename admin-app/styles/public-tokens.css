@@ -72,7 +72,69 @@
   --public-copy-measure: 48ch;
   --public-copy-measure-wide: 62ch;
 
+  --public-type-title-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  --public-type-body-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
+
+  --public-type-h1-size: clamp(2.05rem, 3.2vw, 3.3rem);
+  --public-type-h2-size: clamp(1.48rem, 2.05vw, 2.04rem);
+  --public-type-h3-size: clamp(1.18rem, 1.5vw, 1.48rem);
+  --public-type-h4-size: clamp(1.02rem, 1.18vw, 1.16rem);
+  --public-type-body-size: 1rem;
+  --public-type-small-size: 0.94rem;
+  --public-type-label-size: 0.78rem;
+  --public-type-caption-size: 0.82rem;
+
+  --public-type-h1-line: 1.04;
+  --public-type-h2-line: 1.12;
+  --public-type-h3-line: 1.18;
+  --public-type-h4-line: 1.32;
+  --public-type-body-line: 1.76;
+  --public-type-small-line: 1.62;
+  --public-type-label-line: 1.45;
+  --public-type-caption-line: 1.56;
+
+  --public-type-heading-track-tight: -0.04em;
+  --public-type-heading-track: -0.03em;
+  --public-type-heading-track-soft: -0.02em;
+  --public-type-label-track: 0.14em;
+
+  --public-type-flow-paragraph-gap: 16px;
+  --public-type-flow-list-gap: 12px;
+  --public-type-flow-heading-gap: 12px;
+  --public-type-flow-section-gap: 24px;
+  --public-type-list-indent: 20px;
+
+  --public-type-compact-section-title-size: clamp(1.32rem, 1.62vw, 1.64rem);
+  --public-type-compact-section-title-line: 1.16;
+  --public-type-compact-section-subtitle-size: clamp(0.9rem, 0.94vw, 0.94rem);
+  --public-type-compact-section-subtitle-line: 1.58;
+
+  --public-type-home-hero-title-size: clamp(2.05rem, 3.2vw, 3.3rem);
+  --public-type-home-hero-title-mobile-size: clamp(1.4rem, 5.5vw, 1.82rem);
+  --public-type-home-hero-title-max: 11.8ch;
+  --public-type-home-hero-subtitle-size: clamp(0.92rem, 0.98vw, 1rem);
+
   --public-font-weight-regular: 400;
   --public-font-weight-semibold: 600;
   --public-font-weight-bold: 700;
+}
+
+html[lang='th'] {
+  --public-type-title-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
+
+  --public-type-h1-line: 1.14;
+  --public-type-h2-line: 1.2;
+  --public-type-h3-line: 1.26;
+  --public-type-h4-line: 1.34;
+  --public-type-body-line: 1.8;
+  --public-type-small-line: 1.72;
+  --public-type-label-line: 1.5;
+  --public-type-caption-line: 1.58;
+
+  --public-type-heading-track-tight: -0.02em;
+  --public-type-heading-track: -0.018em;
+  --public-type-heading-track-soft: -0.014em;
+
+  --public-type-home-hero-title-size: clamp(1.54rem, 2.32vw, 2.2rem);
+  --public-type-home-hero-title-max: 13ch;
 }

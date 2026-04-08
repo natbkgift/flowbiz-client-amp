@@ -150,13 +150,13 @@ export function SidebarFilter({
       role={isOpen ? 'dialog' : 'complementary'}
       tabIndex={isOpen ? -1 : undefined}
     >
-      <h3 id={headingId} className="mb-6">{dict.filters.heading}</h3>
+      <h3 id={headingId} className="type-h3 mb-6">{dict.filters.heading}</h3>
 
       <div className="filter-section">
-        <h3>{dict.filters.priceRange}</h3>
+        <h3 className="type-h4">{dict.filters.priceRange}</h3>
         <div className="grid gap-3">
           <label>
-            <div className="text-sm text-[var(--color-text-secondary)] mb-1.5">{dict.filters.min}</div>
+            <div className="form-label form-label--compact mb-1.5">{dict.filters.min}</div>
             <input
               className="form-input"
               aria-describedby={priceRangeError ? priceRangeErrorId : undefined}
@@ -167,7 +167,7 @@ export function SidebarFilter({
             />
           </label>
           <label>
-            <div className="text-sm text-[var(--color-text-secondary)] mb-1.5">{dict.filters.max}</div>
+            <div className="form-label form-label--compact mb-1.5">{dict.filters.max}</div>
             <input
               className="form-input"
               aria-describedby={priceRangeError ? priceRangeErrorId : undefined}
@@ -186,7 +186,7 @@ export function SidebarFilter({
       </div>
 
       <div className="filter-section">
-        <h3>{dict.filters.bedrooms}</h3>
+        <h3 className="type-h4">{dict.filters.bedrooms}</h3>
         <div className="chips-group">
           {bedOptions.map((b) => {
             const active = draftBeds.has(b);
@@ -212,7 +212,7 @@ export function SidebarFilter({
       </div>
 
       <div className="filter-section">
-        <h3>{dict.filters.area}</h3>
+        <h3 className="type-h4">{dict.filters.area}</h3>
         <div className="checkbox-group">
           {areaOptions.slice(0, 12).map((a) => (
             <label key={a} className="checkbox-label">

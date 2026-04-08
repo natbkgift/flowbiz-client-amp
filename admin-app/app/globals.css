@@ -231,39 +231,49 @@ html {
 html,
 body {
   overflow-x: hidden;
-  font-size: var(--font-body);
-  line-height: var(--line-height);
+  font-size: var(--public-type-body-size);
+  line-height: var(--public-type-body-line);
   color: var(--color-text);
   background-color: var(--color-bg);
-  font-family: var(--font-sans), 'Inter', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-family: var(--public-type-body-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1 {
-  font-size: var(--font-h1);
-  font-weight: 500;
-  line-height: 1.05;
+  font-size: var(--public-type-h1-size);
+  font-weight: var(--public-font-weight-semibold);
+  line-height: var(--public-type-h1-line);
   color: var(--color-text);
-  letter-spacing: -0.02em;
-  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  letter-spacing: var(--public-type-heading-track-tight);
+  font-family: var(--public-type-title-family);
 }
 
 h2 {
-  font-size: var(--font-h2);
-  font-weight: 500;
-  line-height: 1.15;
+  font-size: var(--public-type-h2-size);
+  font-weight: var(--public-font-weight-semibold);
+  line-height: var(--public-type-h2-line);
   color: var(--color-text);
-  letter-spacing: -0.01em;
-  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  letter-spacing: var(--public-type-heading-track);
+  font-family: var(--public-type-title-family);
 }
 
 h3 {
-  font-size: var(--font-h3);
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: var(--public-type-h3-size);
+  font-weight: var(--public-font-weight-semibold);
+  line-height: var(--public-type-h3-line);
   color: var(--color-text);
-  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  letter-spacing: var(--public-type-heading-track-soft);
+  font-family: var(--public-type-title-family);
+}
+
+h4 {
+  font-size: var(--public-type-h4-size);
+  font-weight: var(--public-font-weight-semibold);
+  line-height: var(--public-type-h4-line);
+  color: var(--color-text);
+  letter-spacing: var(--public-type-heading-track-soft);
+  font-family: var(--public-type-title-family);
 }
 
 a {
@@ -12592,10 +12602,16 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   --line-readable: var(--public-content-measure);
   --measure-max: var(--line-readable);
   --section-space-y: clamp(var(--public-section-space-mobile), 8vw, var(--public-section-space-cinema));
-  --type-h1: var(--font-h1);
-  --type-h2: var(--font-h2);
-  --type-h3: var(--font-h3);
-  --type-body: var(--font-body);
+  --type-h1: var(--public-type-h1-size);
+  --type-h2: var(--public-type-h2-size);
+  --type-h3: var(--public-type-h3-size);
+  --type-h4: var(--public-type-h4-size);
+  --type-body: var(--public-type-body-size);
+  --type-small: var(--public-type-small-size);
+  --type-label: var(--public-type-label-size);
+  --type-caption: var(--public-type-caption-size);
+  --type-paragraph-gap: var(--public-type-flow-paragraph-gap);
+  --type-list-gap: var(--public-type-flow-list-gap);
 }
 
 .layout-shell {
