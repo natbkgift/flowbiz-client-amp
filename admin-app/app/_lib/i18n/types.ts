@@ -77,6 +77,7 @@ export type Dictionary = {
     useSmartFinder: string;
     teamCtaTitle: string;
     teamCtaBody: string;
+    teamCtaTrustNote: string;
     teamCtaPrimary: string;
     teamCtaSecondary: string;
     noPublishedDataTitle: string;
@@ -86,9 +87,12 @@ export type Dictionary = {
   home: {
     heroTitle: string;
     heroSubtitle: string;
-    pathInvest: { title: string; desc: string };
-    pathBuy: { title: string; desc: string };
-    pathLive: { title: string; desc: string };
+    heroPrimaryCta: string;
+    heroSecondaryCta: string;
+    pathInvest: { title: string; desc: string; cta: string };
+    pathBuy: { title: string; desc: string; cta: string };
+    pathLive: { title: string; desc: string; cta: string };
+    pathSell: { title: string; desc: string; cta: string };
     trustTitle: string;
     trustBullets: string[];
     featuredTitle: string;
@@ -100,6 +104,11 @@ export type Dictionary = {
     testimonialsSubtitle: string;
     premiumCtaTitle: string;
     premiumCtaBody: string;
+    premiumCtaPrimary: string;
+    premiumCtaSecondary: string;
+    premiumCtaTrustNote: string;
+    premiumCtaFormHeading: string;
+    premiumCtaFormBody: string;
     pathSectionTitle: string;
     pathSectionSubtitle: string;
     trustSubtitle: string;
