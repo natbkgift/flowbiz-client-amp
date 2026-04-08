@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from apps.api.dependencies.auth import get_current_admin
 from apps.api.routes.home_composer_contract import (
+    default_home_config,
     deep_merge_dict,
     normalize_home_config,
     resolve_home_runtime,
@@ -51,6 +52,26 @@ def _validate_status(value: str) -> str:
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid status"
         )
     return value
+
+
+def _config_has_publishable_content(value: object) -> bool:
+    if not isinstance(value, dict):
+        return False
+
+    normalized = normalize_home_config(value).model_dump(mode="json")
+    return normalized != default_home_config().model_dump(mode="json")
+
+
+def _ensure_home_composer_publishable(config: dict) -> None:
+    if _config_has_publishable_content(config):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={
+            "code": "home_composer_publish_requirements_missing",
+            "errors": ["config must include at least one publishable content block"],
+        },
+    )
 
 
 def _to_payload(row: HomeComposerConfig) -> dict:
@@ -100,6 +121,9 @@ def create_home_composer(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=jsonable_encoder(errors),
         ) from exc
+
+    if status_value == "published":
+        _ensure_home_composer_publishable(normalized)
 
     row = db.scalar(
         select(HomeComposerConfig).where(
@@ -163,6 +187,9 @@ def patch_home_composer(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=jsonable_encoder(errors),
             ) from exc
+
+    if row.status == "published":
+        _ensure_home_composer_publishable(row.config if isinstance(row.config, dict) else {})
 
     if row.status == "published" and row.published_at is None:
         row.published_at = datetime.now(UTC)
@@ -246,6 +273,7 @@ def publish_home_composer(
     row = db.get(HomeComposerConfig, composer_id)
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Home composer not found")
+    _ensure_home_composer_publishable(row.config if isinstance(row.config, dict) else {})
     row.status = "published"
     row.published_at = datetime.now(UTC)
     row.updated_by = admin.email

@@ -149,6 +149,56 @@ def test_b14_admin_content_publish_flow_reflects_about_page(client) -> None:
     )
 
 
+def test_b14_team_member_publish_blocks_missing_bio(client) -> None:
+    headers = _make_admin_headers()
+
+    created = client.post(
+        "/admin/team-members",
+        headers=headers,
+        json={
+            "name": "No Bio Advisor",
+            "role_title": "Advisor",
+            "status": "draft",
+        },
+    )
+    assert created.status_code == 201, created.text
+    member_id = created.json()["id"]
+
+    published = client.post(f"/admin/team-members/{member_id}/publish", headers=headers)
+    assert published.status_code == 422, published.text
+    assert published.json()["detail"] == {
+        "code": "team_member_publish_requirements_missing",
+        "errors": ["bio is required"],
+    }
+
+
+def test_b14_testimonial_publish_blocks_missing_attribution(client) -> None:
+    headers = _make_admin_headers()
+
+    created = client.post(
+        "/admin/testimonials",
+        headers=headers,
+        json={
+            "status": "draft",
+            "persona": "investor",
+            "intent": "invest",
+            "quote": "Needs attribution before publish",
+        },
+    )
+    assert created.status_code == 201, created.text
+    testimonial_id = created.json()["id"]
+
+    published = client.post(
+        f"/admin/testimonials/{testimonial_id}/publish",
+        headers=headers,
+    )
+    assert published.status_code == 422, published.text
+    assert published.json()["detail"] == {
+        "code": "testimonial_publish_requirements_missing",
+        "errors": ["attribution_name is required"],
+    }
+
+
 def test_b14_seed_content_upserts_company_team_testimonials(tmp_path: Path) -> None:
     input_dir = tmp_path / "import"
     input_dir.mkdir(parents=True, exist_ok=True)

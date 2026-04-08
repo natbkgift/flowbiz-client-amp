@@ -1969,6 +1969,64 @@ def update_company_info(
     return CompanyInfoItem.model_validate(info)
 
 
+def _payload_has_text(value: object) -> bool:
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, dict):
+        return any(_payload_has_text(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_payload_has_text(item) for item in value)
+    return False
+
+
+def _team_member_publish_errors(row: TeamMember) -> list[str]:
+    errors: list[str] = []
+    if not str(row.name or "").strip():
+        errors.append("name is required")
+    if not str(row.role_title or "").strip():
+        errors.append("role_title is required")
+    if not _payload_has_text(row.bio):
+        errors.append("bio is required")
+    return errors
+
+
+def _ensure_team_member_publishable(row: TeamMember) -> None:
+    errors = _team_member_publish_errors(row)
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "team_member_publish_requirements_missing",
+                "errors": errors,
+            },
+        )
+
+
+def _testimonial_publish_errors(row: Testimonial) -> list[str]:
+    errors: list[str] = []
+    if not str(row.persona or "").strip():
+        errors.append("persona is required")
+    if not str(row.intent or "").strip():
+        errors.append("intent is required")
+    if not str(row.quote or "").strip():
+        errors.append("quote is required")
+    if not str(row.attribution_name or "").strip():
+        errors.append("attribution_name is required")
+    return errors
+
+
+def _ensure_testimonial_publishable(row: Testimonial) -> None:
+    errors = _testimonial_publish_errors(row)
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "testimonial_publish_requirements_missing",
+                "errors": errors,
+            },
+        )
+
+
 @router.get("/team-members", response_model=TeamMemberListResponse)
 def list_team_members(
     db: Session = Depends(get_db),
@@ -1993,6 +2051,8 @@ def create_team_member(
     if photo_url is not None:
         data["photo_url"] = require_local_media_path(photo_url, field_name="photo_url")
     row = TeamMember(**data)
+    if str(row.status or "").strip().lower() == "active":
+        _ensure_team_member_publishable(row)
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -2030,6 +2090,9 @@ def update_team_member(
     for field, value in updates.items():
         setattr(row, field, value)
 
+    if str(row.status or "").strip().lower() == "active":
+        _ensure_team_member_publishable(row)
+
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -2045,6 +2108,7 @@ def publish_team_member(
     row = db.get(TeamMember, member_id)
     if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team member not found")
+    _ensure_team_member_publishable(row)
     row.status = "active"
     db.add(row)
     db.commit()
@@ -2103,6 +2167,8 @@ def create_testimonial(
     _admin: User = Depends(get_current_admin),
 ) -> TestimonialItem:
     row = Testimonial(**payload.model_dump())
+    if str(row.status or "").strip().lower() == "published":
+        _ensure_testimonial_publishable(row)
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -2136,6 +2202,9 @@ def update_testimonial(
     for field, value in updates.items():
         setattr(row, field, value)
 
+    if str(row.status or "").strip().lower() == "published":
+        _ensure_testimonial_publishable(row)
+
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -2151,6 +2220,7 @@ def publish_testimonial(
     row = db.get(Testimonial, testimonial_id)
     if row is None or row.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Testimonial not found")
+    _ensure_testimonial_publishable(row)
     row.status = "published"
     db.add(row)
     db.commit()

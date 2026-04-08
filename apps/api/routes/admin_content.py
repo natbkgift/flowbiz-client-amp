@@ -1554,6 +1554,40 @@ def _video_by_slug_or_404(db: Session, slug: str) -> ContentVideo:
     return row
 
 
+def _video_publish_checklist(row: ContentVideo) -> dict[str, list[str]]:
+    blocking: list[str] = []
+    warnings: list[str] = []
+
+    if not _localized_value(row.title, "en"):
+        blocking.append("title.en is required")
+    if not any(
+        str(value or "").strip()
+        for value in (row.youtube_url, row.youtube_id, row.video_path)
+    ):
+        blocking.append("one of youtube_url, youtube_id, or video_path is required")
+
+    if not _localized_value(row.title, "th"):
+        warnings.append("title.th is recommended")
+    if not str(row.thumbnail_path or "").strip():
+        warnings.append("thumbnail_path is recommended before publish")
+
+    return {"blocking": blocking, "warnings": warnings}
+
+
+def _ensure_video_publishable(row: ContentVideo) -> dict[str, list[str]]:
+    checklist = _video_publish_checklist(row)
+    if checklist["blocking"]:
+        raise HTTPException(
+            status_code=_HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "message": "Publish checklist failed",
+                "blocking": checklist["blocking"],
+                "warnings": checklist["warnings"],
+            },
+        )
+    return checklist
+
+
 @router.get("/content/videos")
 def list_videos(
     status_filter: str | None = Query(None, alias="status"),
@@ -1624,6 +1658,8 @@ def create_video(
         published_at=_to_utc(payload.published_at) if payload.published_at else None,
     )
 
+    if row.status == "published":
+        _ensure_video_publishable(row)
     if row.status == "published" and row.published_at is None:
         row.published_at = datetime.now(UTC)
 
@@ -1710,6 +1746,8 @@ def patch_video(
     if "published_at" in updates:
         row.published_at = _to_utc(payload.published_at) if payload.published_at else None
 
+    if row.status == "published":
+        _ensure_video_publishable(row)
     if row.status == "published" and row.published_at is None:
         row.published_at = datetime.now(UTC)
 
@@ -1726,13 +1764,14 @@ def publish_video(
     _admin: User = Depends(get_current_admin),
 ) -> dict[str, Any]:
     row = _video_by_slug_or_404(db, slug)
+    checklist = _ensure_video_publishable(row)
     row.status = "published"
     if row.published_at is None:
         row.published_at = datetime.now(UTC)
     db.add(row)
     db.commit()
     db.refresh(row)
-    return {"video": _serialize_video(row)}
+    return {"video": _serialize_video(row), "publish_checklist": checklist}
 
 
 @router.post("/content/videos/{slug}/unpublish")

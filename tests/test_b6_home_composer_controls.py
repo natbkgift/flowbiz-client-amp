@@ -136,6 +136,59 @@ def test_b6_create_patch_publish_unpublish_and_preview(client) -> None:
     assert public_default.json()["source"] == "safe_default"
 
 
+def test_b6_publish_requires_non_default_config(client) -> None:
+    headers = _make_admin_headers()
+
+    created = client.post(
+        "/admin/home-composer",
+        headers=headers,
+        json={
+            "page_key": "home",
+            "locale": "en",
+            "status": "draft",
+            "version": 1,
+            "config": {},
+        },
+    )
+    assert created.status_code == 201, created.text
+    composer_id = created.json()["id"]
+
+    publish = client.post(f"/admin/home-composer/{composer_id}/publish", headers=headers)
+    assert publish.status_code == 422, publish.text
+    assert publish.json()["detail"] == {
+        "code": "home_composer_publish_requirements_missing",
+        "errors": ["config must include at least one publishable content block"],
+    }
+
+    patch_published = client.patch(
+        f"/admin/home-composer/{composer_id}",
+        headers=headers,
+        json={"status": "published"},
+    )
+    assert patch_published.status_code == 422, patch_published.text
+    assert patch_published.json()["detail"] == {
+        "code": "home_composer_publish_requirements_missing",
+        "errors": ["config must include at least one publishable content block"],
+    }
+
+    direct_published = client.post(
+        "/admin/home-composer",
+        headers=headers,
+        json={
+            "page_key": "home",
+            "locale": "th",
+            "status": "published",
+            "version": 1,
+            "config": {},
+        },
+    )
+    assert direct_published.status_code == 422, direct_published.text
+    assert direct_published.json()["detail"] == {
+        "code": "home_composer_publish_requirements_missing",
+        "errors": ["config must include at least one publishable content block"],
+    }
+
+
 def test_b6_safe_default_locale_fallback_and_section_ordering(client) -> None:
     headers = _make_admin_headers()
 
