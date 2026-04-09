@@ -55,6 +55,7 @@ describe('home surface handoff contract', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
     expect(hero).not.toContain('fetchPriority="high"');
+    expect(hero).toContain('SafeCoverImage');
     expect(hero).toContain('data-home-perf="hero-media"');
     expect(hero).toContain('prefetch');
     expect(featuredProjects).toContain('HOME_PROJECT_MEDIA_PRELOAD_COUNT = 2');

@@ -11,6 +11,12 @@ const LOCAL_PREFIXES = ['/media/', '/storage/', '/uploads/', '/assets/', '/image
 const KNOWN_STALE_PUBLIC_MEDIA_PATHS = new Set([
   '/media/library/1abee367-4ebc-4adc-b49d-4220c8df5cd5.png',
   '/media/library/a03637e4-6436-493f-9dce-bdb182b4f96a.png',
+  // Home-surface media refs confirmed as 404 in production; prefer first-party
+  // static fallbacks until the mirrored assets are restored on disk.
+  '/media/project-covers/the-riviera-palm-beach/cover_1789e74af538.jpg',
+  '/media/project-covers/the-riviera-beverly-hills/cover_7cdacbe8818f.webp',
+  '/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg',
+  '/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg',
 ]);
 
 function stripMediaSuffix(value: string): string {

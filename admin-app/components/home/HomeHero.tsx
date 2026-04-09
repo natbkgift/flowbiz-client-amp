@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
 
 import { buildAdvisorWhatsApp } from '@/app/_lib/public-advisory';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 import { withLocale } from '@/app/_lib/i18n/routing';
@@ -223,12 +223,17 @@ export function HomeHero({
               className={`home-hero-slider__media${isActive ? ' home-hero-slider__media--active' : ''}`}
             >
               {loadedSlides.has(index) ? (
-                <Image
+                <SafeCoverImage
                   src={slide.imageSrc}
                   alt={slide.imageAlt ?? (locale === 'th' ? 'ภาพอสังหาริมทรัพย์พัทยาโดย AMP Pattaya' : 'AMP Pattaya Real Estate')}
-                  fill
                   sizes="100vw"
                   className="home-hero-slider__image"
+                  priority={index === 0}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
+                  quality={75}
+                  unoptimized={false}
+                  ssrStartWithPrimary={index === 0}
                 />
               ) : null}
             </div>
