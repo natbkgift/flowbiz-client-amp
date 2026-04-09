@@ -99,7 +99,7 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property_consultation_primary')?.getAttribute('href')).toContain(
       'entity_type=property',
     );
-    expect(container.textContent ?? '').toContain('Review this unit with advisor');
+    expect(container.textContent ?? '').toContain('Speak to an advisor about this unit');
     expect(container.querySelector('#property-confidence-pack')).not.toBeNull();
     expect(container.querySelector('#property-trust-cues')).not.toBeNull();
     expect(container.querySelector('#property-highlights')).not.toBeNull();

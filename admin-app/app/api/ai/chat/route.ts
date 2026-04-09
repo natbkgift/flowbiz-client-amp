@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildApiUpstreamUrl } from '@/app/api/_lib/upstream-api';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,7 +13,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const upstream = new URL('/api/v1/agents/sales_agent_v1/chat', request.nextUrl.origin);
+    const upstream = buildApiUpstreamUrl(['v1', 'agents', 'sales_agent_v1', 'chat'])
+      ?? new URL('/api/v1/agents/sales_agent_v1/chat', request.nextUrl.origin);
     const response = await fetch(upstream, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

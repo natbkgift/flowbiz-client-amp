@@ -497,7 +497,7 @@ export default async function PropertyPage(props: PageProps) {
   ));
   const propertyPrimaryCtaLabel = property.type === 'rent'
     ? (locale === 'th' ? 'เช็กเงื่อนไขเช่าล่าสุด' : 'Check live rental terms')
-    : (locale === 'th' ? 'คุยต่อเกี่ยวกับยูนิตนี้' : 'Review this unit with advisor');
+    : (locale === 'th' ? 'คุยต่อเกี่ยวกับยูนิตนี้' : 'Speak to an advisor about this unit');
   const propertyConsultationHref = withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
     intent: 'project_consultation',
     source: 'property_detail',

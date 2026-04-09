@@ -75,4 +75,37 @@ describe('media proxy route', () => {
     expect(response.headers.get('content-type')).toBe('image/webp');
     expect(response.headers.get('cache-control')).toBe('public, max-age=3600');
   });
+
+  it('returns a local placeholder when upstream media is missing', async () => {
+    delete process.env.LOCAL_MEDIA_ORIGIN;
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    process.env.NEXT_PUBLIC_API_BASE = 'https://amppattaya.com/api';
+
+    const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response('missing', {
+        status: 404,
+        headers: {
+          'content-type': 'text/plain',
+        },
+      }),
+    );
+
+    const request = new NextRequest('http://127.0.0.1:3215/media/import-assets/units-buy/example/missing.jpg');
+    const response = await GET(request, {
+      params: Promise.resolve({ path: ['media', 'import-assets', 'units-buy', 'example', 'missing.jpg'] }),
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://amppattaya.com/media/import-assets/units-buy/example/missing.jpg',
+      expect.objectContaining({
+        method: 'GET',
+        redirect: 'manual',
+        cache: 'no-store',
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe('image/svg+xml');
+    expect(response.headers.get('x-flowbiz-media-fallback')).toBe('1');
+    await expect(response.text()).resolves.toContain('<svg');
+  });
 });

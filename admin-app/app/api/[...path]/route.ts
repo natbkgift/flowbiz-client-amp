@@ -1,6 +1,10 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { buildVersionPayload, readDeployTelemetry } from '../platform/_lib/deploy-telemetry';
 import { buildMediaUpstreamUrl } from '@/app/api/_lib/media-proxy';
+import { buildApiUpstreamUrl, resolveApiUpstreamBase } from '@/app/api/_lib/upstream-api';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,19 +22,16 @@ const HOP_BY_HOP_HEADERS = new Set([
   'upgrade',
 ]);
 
-function resolveUpstreamBase(): string | null {
-  const localApiOrigin = process.env.LOCAL_API_ORIGIN?.trim();
-  if (localApiOrigin && /^https?:\/\//i.test(localApiOrigin)) {
-    return localApiOrigin.replace(/\/+$/, '');
-  }
-
-  const publicApiBase = process.env.NEXT_PUBLIC_API_BASE?.trim();
-  if (publicApiBase && /^https?:\/\//i.test(publicApiBase)) {
-    return publicApiBase.replace(/\/+$/, '');
-  }
-
-  return null;
-}
+const MEDIA_FALLBACK_ASSETS = {
+  project: {
+    contentType: 'image/png',
+    publicPath: ['images', 'project-overview.png'],
+  },
+  property: {
+    contentType: 'image/svg+xml',
+    publicPath: ['images', 'property-placeholder.svg'],
+  },
+} as const;
 
 function buildUpstreamHeaders(request: NextRequest): Headers {
   const headers = new Headers(request.headers);
@@ -50,6 +51,38 @@ function isPlatformDeployHistoryRoute(path: string[]) {
 
 function isMediaRoute(path: string[]) {
   return path[0] === 'media';
+}
+
+function pickMediaFallbackAsset(path: string[]) {
+  const normalizedSegments = path.map((segment) => String(segment || '').toLowerCase());
+  const shouldUseProjectFallback = normalizedSegments.some((segment) => (
+    segment.includes('project')
+    || segment.includes('developer')
+    || segment.includes('area')
+    || segment.includes('cover')
+    || segment.includes('hero')
+  ));
+  return shouldUseProjectFallback ? MEDIA_FALLBACK_ASSETS.project : MEDIA_FALLBACK_ASSETS.property;
+}
+
+async function buildMediaFallbackResponse(request: NextRequest, mediaPath: string[], upstreamUrl: URL) {
+  const asset = pickMediaFallbackAsset(mediaPath);
+  const absolutePath = path.join(process.cwd(), 'public', ...asset.publicPath);
+
+  try {
+    const body = request.method === 'HEAD' ? null : await readFile(absolutePath);
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        'cache-control': 'public, max-age=300',
+        'content-type': asset.contentType,
+        'x-flowbiz-media-fallback': '1',
+        'x-flowbiz-media-upstream': upstreamUrl.toString(),
+      },
+    });
+  } catch {
+    return null;
+  }
 }
 
 async function proxyRequest(
@@ -82,14 +115,14 @@ async function proxyRequest(
     );
   }
 
-  const upstreamBase = resolveUpstreamBase();
+  const upstreamBase = resolveApiUpstreamBase();
   if (!isMediaRoute(path) && !upstreamBase) {
     return NextResponse.json({ detail: 'Not found' }, { status: 404 });
   }
 
   const upstreamUrl = isMediaRoute(path)
     ? new URL(buildMediaUpstreamUrl(path.slice(1), request.nextUrl.search))
-    : new URL(`${upstreamBase}/${path.map(encodeURIComponent).join('/')}`);
+    : buildApiUpstreamUrl(path, request.nextUrl.search)!;
   if (!isMediaRoute(path)) {
     upstreamUrl.search = request.nextUrl.search;
   }
@@ -107,6 +140,12 @@ async function proxyRequest(
 
   try {
     const response = await fetch(upstreamUrl.toString(), init);
+    if (isMediaRoute(path) && response.status === 404 && (request.method === 'GET' || request.method === 'HEAD')) {
+      const fallbackResponse = await buildMediaFallbackResponse(request, path.slice(1), upstreamUrl);
+      if (fallbackResponse) {
+        return fallbackResponse;
+      }
+    }
     const headers = new Headers(response.headers);
     for (const header of HOP_BY_HOP_HEADERS) {
       headers.delete(header);
