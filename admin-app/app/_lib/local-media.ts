@@ -13,32 +13,6 @@ const KNOWN_STALE_PUBLIC_MEDIA_PATHS = new Set([
   '/media/library/a03637e4-6436-493f-9dce-bdb182b4f96a.png',
 ]);
 
-const KNOWN_STALE_PUBLIC_MEDIA_PREFIXES = [
-  // Home-surface media families confirmed as 404 in production; prefer first-party
-  // static fallbacks until the mirrored assets are restored on disk.
-  '/media/project-covers/the-riviera-palm-beach/',
-  '/media/project-covers/the-riviera-beverly-hills/',
-  '/media/project-covers/embassy-life/',
-  '/media/project-covers/avenue-boutique/',
-  '/media/project-covers/aquarous-jomtien-pattaya/',
-  '/media/project-covers/pristine-park-iii/',
-  '/media/project-covers/seaspire-jomtien/',
-  '/media/project-covers/the-lavish/',
-  '/media/project-covers/once-wongamat/',
-  '/media/project-covers/chieftain/',
-  '/media/project-covers/horizon/',
-  '/media/project-covers/wyndham-jomtien-pattaya/',
-  '/media/import-assets/projects/the-riviera-palm-beach/',
-  '/media/import-assets/projects/the-riviera-beverly-hills/',
-  '/media/import-assets/projects/aquarous-jomtien-pattaya/',
-  '/media/import-assets/units-buy/amp-s010126-arom-jomtien/',
-  '/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/',
-  '/media/import-assets/units-buy/amp-s012926-andromeda-condominium/',
-  '/media/import-assets/units-buy/amp-s030526-pty-residence-sai-1/',
-  '/media/import-assets/units-rent/amp-r030926-the-riviera-wongamat-beach/',
-  '/media/import-assets/units-rent/amp-r032026-arcadia-beach-resort/',
-] as const;
-
 function stripMediaSuffix(value: string): string {
   return value.split('#', 1)[0].split('?', 1)[0];
 }
@@ -78,9 +52,7 @@ export function isKnownStalePublicMediaPath(value: string | null | undefined): b
   if (!value) return false;
   const normalized = normalizeLocalMediaPath(value);
   if (!normalized) return false;
-  const stripped = stripMediaSuffix(normalized);
-  return KNOWN_STALE_PUBLIC_MEDIA_PATHS.has(stripped)
-    || KNOWN_STALE_PUBLIC_MEDIA_PREFIXES.some((prefix) => stripped.startsWith(prefix));
+  return KNOWN_STALE_PUBLIC_MEDIA_PATHS.has(stripMediaSuffix(normalized));
 }
 
 export function resolveRenderableLocalMediaPath(value: string | null | undefined): string | null {
