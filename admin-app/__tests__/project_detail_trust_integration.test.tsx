@@ -132,7 +132,7 @@ describe('project detail trust integration', () => {
     expect(screen.queryByRole('heading', { name: 'Cons' })).toBeNull();
     expect(screen.getAllByText(/area context: central pattaya/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/published developer: beta developments/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/check live availability around this project/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /check live availability around this project/i })).toBeTruthy();
     expect(container.querySelector('#project-gallery-status')).not.toBeNull();
     expect(container.querySelector('#project-location-context')).not.toBeNull();
     expect(container.querySelector('#project-gallery-section [data-media-kind="fallback"]')).not.toBeNull();
@@ -171,7 +171,7 @@ describe('project detail trust integration', () => {
     expect(screen.getByText(/district: jomtien/i)).toBeTruthy();
     expect(screen.getByText(/read alpha residence inside the jomtien district context first/i)).toBeTruthy();
     expect(within(verifiedList).getByText(/market snapshot: avg price thb 5.2m • avg rent thb 28k • roi 5.8%/i)).toBeTruthy();
-    expect(screen.getByText(/compare this project with nearby options/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /compare this project with nearby options/i })).toBeTruthy();
     expect(container.querySelector('#project_consultation_primary')).toHaveAttribute(
       'href',
       '/en/contact?intent=project_consultation&source=project_investment_check&project=alpha-residence&projects=alpha-residence&buyer_fit=investor_compare&signal_level=high&msg=I+am+reviewing+Alpha+Residence+and+want+to+compare+its+price%2C+rent%2C+and+investment+context+against+nearby+alternatives.',

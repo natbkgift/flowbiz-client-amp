@@ -7,11 +7,21 @@ import {
 
 export type EventType =
   | 'page_view'
+  | 'view_project'
+  | 'view_property'
+  | 'ai_chat_open'
+  | 'ai_chat_message'
+  | 'ai_recommendation_view'
+  | 'ai_handoff_prompt'
   | 'web_vitals_probe'
   | 'path_entry_click'
+  | 'click_cta'
   | 'cta_click'
+  | 'submit_lead'
   | 'lead_submit'
+  | 'shortlist_add'
   | 'shortlist_action'
+  | 'compare_add'
   | 'compare_action'
   | 'smart_finder_result_click'
   | 'featured_click'
@@ -31,8 +41,19 @@ const SESSION_KEY = 'amp_session_id_v1';
 const DEDUPE_WINDOW_MS = 1200;
 const recentEvents = new Map<string, number>();
 
+export type TrackedEventReceipt = {
+  event_id?: string;
+  event_name: string;
+  session_id: string;
+  path: string;
+};
+
 function safeWindow(): Window | null {
   return typeof window === 'undefined' ? null : window;
+}
+
+function shouldEmitAnalyticsDebugLogs(): boolean {
+  return process.env.NODE_ENV === 'development';
 }
 
 /**
@@ -86,8 +107,15 @@ function getLocale(pathname: string): 'en' | 'th' {
   return inferLocaleFromPath(pathname);
 }
 
+function canonicalizeEventType(eventName: EventType): EventType {
+  if (eventName === 'cta_click') return 'click_cta';
+  if (eventName === 'lead_submit') return 'submit_lead';
+  return eventName;
+}
+
 function buildNormalizedPayload(
   eventName: EventType,
+  rawEventName: EventType,
   page: string,
   payload?: Record<string, unknown>,
 ): ConversionPayload {
@@ -105,7 +133,8 @@ function buildNormalizedPayload(
     device: (base.device as ConversionPayload['device']) ?? device,
     timestamp: new Date().toISOString(),
     context,
-    debug_event_type: eventName,
+    debug_event_type: rawEventName,
+    canonical_event_type: eventName,
   } as ConversionPayload;
 }
 
@@ -135,13 +164,14 @@ function shouldSkipDuplicate(eventName: EventType, page: string, payload: Conver
  * @param page       - The pathname of the page where the event occurred.
  * @param payload    - Optional key-value bag merged into the event body.
  */
-export async function trackEvent(event_type: EventType, page: string, payload?: Record<string, unknown>) {
+export async function trackEvent(event_type: EventType, page: string, payload?: Record<string, unknown>): Promise<TrackedEventReceipt | null> {
   const w = safeWindow();
-  if (!w) return;
+  if (!w) return null;
 
   const session_id = getOrCreateSessionId();
-  const normalizedPayload = buildNormalizedPayload(event_type, page, payload);
-  if (shouldSkipDuplicate(event_type, page, normalizedPayload)) return;
+  const canonicalEventType = canonicalizeEventType(event_type);
+  const normalizedPayload = buildNormalizedPayload(canonicalEventType, event_type, page, payload);
+  if (shouldSkipDuplicate(canonicalEventType, page, normalizedPayload)) return null;
 
   // Enrich every event with active experiment assignments for downstream analysis
   const experiments = getExperimentContext();
@@ -149,7 +179,7 @@ export async function trackEvent(event_type: EventType, page: string, payload?: 
     page,
     locale: normalizedPayload.locale,
     route: normalizedPayload.source_route,
-    event_type,
+    event_type: canonicalEventType,
   });
   const actor = sanitizeConversionPayload({
     anonymous_id: session_id,
@@ -165,15 +195,15 @@ export async function trackEvent(event_type: EventType, page: string, payload?: 
   });
 
   try {
-    if (process.env.NODE_ENV !== 'production') {
-      console.info('[TRACK]', event_type, normalizedPayload);
+    if (shouldEmitAnalyticsDebugLogs()) {
+      console.info('[TRACK]', canonicalEventType, normalizedPayload);
     }
 
     const response = await fetch('/api/v1/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        event_name: event_type,
+        event_name: canonicalEventType,
         path: page,
         locale: normalizedPayload.locale,
         source,
@@ -183,12 +213,28 @@ export async function trackEvent(event_type: EventType, page: string, payload?: 
       }),
       keepalive: true,
     });
-    if (!response.ok && process.env.NODE_ENV !== 'production') {
-      console.warn('[TRACK_FAIL]', event_type, response.status);
+    if (!response.ok && shouldEmitAnalyticsDebugLogs()) {
+      console.warn('[TRACK_FAIL]', canonicalEventType, response.status);
     }
+    if (!response.ok) return null;
+
+    let result: Partial<TrackedEventReceipt> | null = null;
+    try {
+      result = await response.json() as Partial<TrackedEventReceipt>;
+    } catch {
+      result = null;
+    }
+
+    return {
+      event_id: typeof result?.event_id === 'string' ? result.event_id : undefined,
+      event_name: typeof result?.event_name === 'string' ? result.event_name : canonicalEventType,
+      session_id,
+      path: page,
+    };
   } catch {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn('[TRACK_FAIL]', event_type, normalizedPayload);
+    if (shouldEmitAnalyticsDebugLogs()) {
+      console.warn('[TRACK_FAIL]', canonicalEventType, normalizedPayload);
     }
+    return null;
   }
 }

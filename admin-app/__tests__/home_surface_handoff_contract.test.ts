@@ -29,8 +29,8 @@ describe('home surface handoff contract', () => {
 
     expect(page).toContain('Verified listings only');
     expect(page).toContain('No fake or outdated stock');
-    expect(page).toContain('Tell us what you are looking for');
-    expect(page).toContain('Browse Verified Projects');
+    expect(page).toContain('dict.home.premiumCtaFormHeading');
+    expect(page).toContain('dict.home.premiumCtaSecondary');
     expect(page).not.toContain('home-pathways-highlight-row');
     expect(page).not.toContain('home-curated-shell__signal-row');
     expect(page).not.toContain('home-confidence-row');
@@ -59,7 +59,7 @@ describe('home surface handoff contract', () => {
     expect(hero).toContain('prefetch');
     expect(featuredProjects).toContain('HOME_PROJECT_MEDIA_PRELOAD_COUNT = 4');
     expect(featuredProjects).toContain("loading={shouldPreloadMedia ? 'eager' : 'lazy'}");
-    expect(featuredProjects).toContain("fetchPriority={index === 0 ? 'high' : (shouldPreloadMedia ? 'low' : 'auto')}");
+    expect(featuredProjects).toContain("fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}");
     expect(featuredProjects).toContain('quality={60}');
     expect(featuredProjects).toContain('unoptimized={false}');
     expect(featuredProjects).toContain('premium-project-card__cta');
@@ -72,10 +72,10 @@ describe('home surface handoff contract', () => {
     expect(personalization).toContain("intent === 'sell'");
     expect(page).toContain('HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 6');
     expect(page).toContain("loading={shouldPreloadMedia ? 'eager' : 'lazy'}");
-    expect(page).toContain("fetchPriority={group.key === 'sale' && index === 0 ? 'high' : (shouldPreloadMedia ? 'low' : 'auto')}");
+    expect(page).toContain("fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}");
     expect(page).toContain('quality={60}');
     expect(page).toContain('data-home-perf="trust-layer"');
-    expect(page).toContain('data-home-perf="trust-strip"');
+    expect(page).toContain("'data-home-perf': 'trust-strip'");
     expect(page).not.toContain('fetchBlogPosts');
     expect(page).not.toContain('fetchPublishedTestimonials');
     expect(page).not.toContain("dynamic = 'force-dynamic'");

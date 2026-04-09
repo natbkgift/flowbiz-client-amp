@@ -10,6 +10,7 @@ describe('shortlist owner reference', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   it('creates a structured session owner reference when storage is empty', () => {

@@ -50,6 +50,10 @@ def _ensure_sqlite_columns() -> None:
         "inquiries": {
             "follow_up_status": "VARCHAR(32) NOT NULL DEFAULT 'pending'",
             "follow_up_due_at": "DATETIME",
+            "session_id": "VARCHAR(64)",
+            "last_action": "VARCHAR(64)",
+            "last_event_id": "VARCHAR(64)",
+            "nationality": "VARCHAR(80)",
         },
         "seo_page_overrides": {
             "schema_org_url": "VARCHAR(500)",

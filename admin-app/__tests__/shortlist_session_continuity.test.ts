@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { readCachedShortlistForCurrentOwner } from '@/lib/shortlist';
 
@@ -20,6 +20,8 @@ const shortlistFixture = {
 
 describe('shortlist session continuity', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     localStorage.clear();
   });
 

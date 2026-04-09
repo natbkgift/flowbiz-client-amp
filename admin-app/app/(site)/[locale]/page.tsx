@@ -1684,6 +1684,7 @@ export default async function HomePage({
 
   return (
     <main id="main-content" data-emphasis={recommendation.emphasis} data-locale={locale} className="home-page flex flex-col">
+      <div id="amp-ai-page-context" hidden data-page-type="home" data-source-route="home" />
       {enableHomePerfProbe ? <HomePerfProbe locale={locale} /> : null}
 
       {isSectionEnabled('hero') ? (

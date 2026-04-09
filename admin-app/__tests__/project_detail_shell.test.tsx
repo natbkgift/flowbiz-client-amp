@@ -4,7 +4,13 @@ import { describe, expect, it, vi } from 'vitest';
 import ProjectDetailPage from '@/app/(site)/[locale]/projects/[slug]/page';
 
 vi.mock('next/image', () => ({
-  default: ({ fill, unoptimized, priority, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+  default: ({ fill, unoptimized, priority, fetchPriority, loader, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+}));
+
+vi.mock('@/components/analytics/EntityViewTracker', () => ({
+  EntityViewTracker: ({ eventType, entityId, pathname }: { eventType: string; entityId: string; pathname: string }) => (
+    <div data-testid="entity-view-tracker" data-event-type={eventType} data-entity-id={entityId} data-pathname={pathname} />
+  ),
 }));
 
 vi.mock('@/components/shortlist/ShortlistSaveButton', () => ({
@@ -128,6 +134,9 @@ describe('project detail shell', () => {
     expect(container.querySelector('#project-location-context')).not.toBeNull();
     expect(container.querySelector('#project-advisor-brief')).not.toBeNull();
     expect(container.querySelector('#project-mobile-cta')).not.toBeNull();
+    expect(container.querySelector('[data-testid="entity-view-tracker"]')).toHaveAttribute('data-event-type', 'view_project');
+    expect(container.querySelector('[data-testid="entity-view-tracker"]')).toHaveAttribute('data-entity-id', 'project-1');
+    expect(container.querySelector('[data-testid="entity-view-tracker"]')).toHaveAttribute('data-pathname', '/en/projects/alpha-residence');
     expect(container.querySelector('.public-hero__content.public-surface-card')).not.toBeNull();
     expect(container.querySelector('.public-hero__actions .btn.btn-primary')).not.toBeNull();
     expect(container.querySelector('.project-unit-inventory-grid .property-card')).not.toBeNull();

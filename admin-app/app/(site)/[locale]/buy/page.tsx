@@ -77,6 +77,7 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
 
   return (
     <main id="main-content" className="page-template--catalogue buy-page decision-page--confidence">
+      <div id="amp-ai-page-context" hidden data-page-type="listing" data-source-route="buy" />
       <Breadcrumbs
         items={[
           { label: dict.nav.home, href: `/${locale}` },

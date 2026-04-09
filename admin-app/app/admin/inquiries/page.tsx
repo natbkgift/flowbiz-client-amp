@@ -620,16 +620,32 @@ export default function AdminInquiriesPage() {
               <dd>{selected.purpose || selected.intent || "-"}</dd>
             </div>
             <div>
+              <dt>{t.budgetRange}</dt>
+              <dd>{selected.budget_range || selected.budget_band || "-"}</dd>
+            </div>
+            <div>
               <dt>{t.sourcePage}</dt>
               <dd>{selected.source_page || "-"}</dd>
+            </div>
+            <div>
+              <dt>{t.nationality}</dt>
+              <dd>{selected.nationality || "-"}</dd>
             </div>
             <div>
               <dt>{t.createdAt}</dt>
               <dd>{prettyDate(selected.created_at, locale)}</dd>
             </div>
             <div>
+              <dt>{t.aiSession}</dt>
+              <dd>{selected.session_id || "-"}</dd>
+            </div>
+            <div>
               <dt>{t.followUpDueAt}</dt>
               <dd>{prettyDate(selected.follow_up_due_at, locale)}</dd>
+            </div>
+            <div>
+              <dt>{t.lastAction}</dt>
+              <dd>{selected.last_action || "-"}</dd>
             </div>
             <div>
               <dt>{t.emailAction}</dt>
@@ -638,6 +654,14 @@ export default function AdminInquiriesPage() {
             <div>
               <dt>{t.phone}</dt>
               <dd>{selected.phone || "-"}</dd>
+            </div>
+            <div>
+              <dt>{t.device}</dt>
+              <dd>{selected.device || "-"}</dd>
+            </div>
+            <div className="crm-meta-grid__full">
+              <dt>{t.messageSummary}</dt>
+              <dd className="crm-detail-copy-prewrap locale-safe">{selected.message || "-"}</dd>
             </div>
           </dl>
         </section>

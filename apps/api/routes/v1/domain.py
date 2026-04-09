@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from packages.core.ai_agent import list_ai_agents
 from packages.core.database import get_db
 from packages.core.models import Area, AreaStatistic, Developer, Project
 
@@ -334,5 +335,7 @@ def get_developer(
 
 
 @router.get("/agents")
-def list_agents() -> list[dict]:
-    return []
+def list_agents(
+    locale: str = Query(default="en", pattern=r"^(en|th)$"),
+) -> list[dict]:
+    return [item.model_dump(mode="json") for item in list_ai_agents(locale)]

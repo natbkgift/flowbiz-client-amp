@@ -40,12 +40,17 @@ const CookieConsent = dynamic(
   () => import('@/components/ux/CookieConsent').then((mod) => mod.CookieConsent),
   { ssr: false },
 );
+const AIChatWidget = dynamic(
+  () => import('@/components/ai/AIChatWidget').then((mod) => mod.AIChatWidget),
+  { ssr: false },
+);
 
 export function PublicClientEnhancements() {
   const pathname = usePathname() ?? '/';
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showExperienceLayer, setShowExperienceLayer] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
+  const [showAiWidget, setShowAiWidget] = useState(false);
   const showFloatingWhatsApp = shouldRenderFloatingWhatsApp(pathname);
   const showStickyMobileCta = shouldRenderStickyMobileCta(pathname);
   const pathWithoutLocale = pathname.replace(/^\/(en|th)(?=\/|$)/, '') || '/';
@@ -97,6 +102,12 @@ export function PublicClientEnhancements() {
     }
 
     const timer = window.setTimeout(() => setShowExperienceLayer(true), 700);
+    return () => window.clearTimeout(timer);
+  }, [isCalmerSurface, pathname]);
+
+  useEffect(() => {
+    setShowAiWidget(false);
+    const timer = window.setTimeout(() => setShowAiWidget(true), isCalmerSurface ? 420 : 680);
     return () => window.clearTimeout(timer);
   }, [isCalmerSurface, pathname]);
 
@@ -163,10 +174,11 @@ export function PublicClientEnhancements() {
       {showExperienceLayer ? (
         <>
           <ScrollReveal />
-          {showFloatingWhatsApp ? <FloatingWhatsAppCTA /> : null}
+          {showFloatingWhatsApp && !showAiWidget ? <FloatingWhatsAppCTA /> : null}
           {showStickyMobileCta ? <StickyMobileCTA /> : null}
         </>
       ) : null}
+      {showAiWidget ? <AIChatWidget /> : null}
       {showConsent ? <CookieConsent /> : null}
     </>
   );

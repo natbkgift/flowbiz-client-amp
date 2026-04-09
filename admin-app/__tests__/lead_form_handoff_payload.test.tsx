@@ -13,26 +13,43 @@ describe('LeadForm handoff payload', () => {
   });
 
   it('submits normalized intent plus structured CRM context through existing fields', async () => {
-    const fetchMock = vi.fn(async () => ({
-      ok: true,
-      text: async () => JSON.stringify({
-        id: 'inq-1',
-        sales_automation: {
-          confirmation_title: 'We received your request about Alpha Residence',
-          confirmation_body: 'Our advisor will follow up by email or WhatsApp shortly about Alpha Residence.',
-          auto_response_message: 'Got it — you\'re comparing multiple projects. I\'ll prepare a clear side-by-side recommendation for you.',
-          response_channel: 'email_and_whatsapp_if_connected',
-          response_sla_seconds: 5,
-        },
-      }),
-    }));
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (url === '/api/v1/events') {
+        const body = JSON.parse(String(init?.body ?? '{}'));
+        return {
+          ok: true,
+          json: async () => ({
+            event_id: body.event_name === 'submit_lead' ? 'evt-submit-lead' : 'evt-form-submit',
+            event_name: body.event_name,
+          }),
+        };
+      }
+
+      return {
+        ok: true,
+        text: async () => JSON.stringify({
+          id: 'inq-1',
+          sales_automation: {
+            confirmation_title: 'We received your request about Alpha Residence',
+            confirmation_body: 'Our advisor will follow up by email or WhatsApp shortly about Alpha Residence.',
+            auto_response_message: 'Got it — you\'re comparing multiple projects. I\'ll prepare a clear side-by-side recommendation for you.',
+            response_channel: 'email_and_whatsapp_if_connected',
+            response_sla_seconds: 5,
+          },
+        }),
+      };
+    });
 
     vi.stubGlobal('fetch', fetchMock);
 
     render(
       <LeadForm
         heading="Project compare"
+        projectId="11111111-1111-1111-1111-111111111111"
         defaultMessage="I want to compare these projects."
+        defaultBudgetBand="10m_20m"
         inquiryIntent="project_compare"
         inquirySource="compare_hero"
         inquiryTags={['project_scope:alpha_residence', 'project_scope:beta_bay', 'buyer_fit:investor_compare']}
@@ -47,6 +64,7 @@ describe('LeadForm handoff payload', () => {
     fireEvent.change(screen.getByPlaceholderText('Your name'), { target: { value: 'Alex' } });
     fireEvent.change(screen.getByPlaceholderText('Email (optional if phone provided)'), { target: { value: 'alex@example.com' } });
     fireEvent.change(screen.getByPlaceholderText('Phone (optional if email provided)'), { target: { value: '+66891234567' } });
+  fireEvent.change(screen.getByLabelText('Nationality'), { target: { value: 'Thai' } });
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     const calls = fetchMock.mock.calls as unknown as Array<[unknown, unknown?]>;
@@ -64,6 +82,12 @@ describe('LeadForm handoff payload', () => {
     const body = JSON.parse(String(request.body));
 
     expect(body.intent).toBe('project_compare');
+    expect(body.project_id).toBe('11111111-1111-1111-1111-111111111111');
+    expect(body.budget_range).toBe('10m_20m');
+    expect(body.nationality).toBe('Thai');
+    expect(body.session_id).toEqual(expect.any(String));
+    expect(body.last_action).toBe('submit_lead');
+    expect(body.last_event_id).toBe('evt-submit-lead');
     expect(body.tags).toEqual(expect.arrayContaining([
       'intent:project_compare',
       'lead_source:compare_hero',

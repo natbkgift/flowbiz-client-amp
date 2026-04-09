@@ -12,6 +12,36 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function waitForServerExit(child: ChildProcess, timeoutMs: number) {
+  return new Promise<void>((resolve) => {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+    const finalize = () => {
+      if (settled) return;
+      settled = true;
+      child.off('exit', finalize);
+      child.off('close', finalize);
+      resolve();
+    };
+
+    const timer = setTimeout(() => {
+      finalize();
+    }, timeoutMs);
+
+    const wrappedFinalize = () => {
+      clearTimeout(timer);
+      finalize();
+    };
+
+    child.once('exit', wrappedFinalize);
+    child.once('close', wrappedFinalize);
+  });
+}
+
 async function waitForHealth() {
   for (let i = 0; i < 80; i += 1) {
     try {
@@ -79,9 +109,18 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (server) {
-    server.kill('SIGTERM');
-    await sleep(300);
-    if (!server.killed) server.kill('SIGKILL');
+    const child = server;
+    server = null;
+
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGTERM');
+      await waitForServerExit(child, 500);
+    }
+
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGKILL');
+      await waitForServerExit(child, 500);
+    }
   }
 });
 

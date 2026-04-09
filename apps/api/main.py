@@ -24,6 +24,7 @@ from apps.api.routes import (
     admin_users,
 )
 from apps.api.routes.v1 import (
+    ai,
     auth,
     content,
     crm,
@@ -202,6 +203,7 @@ async def runtime_redirect_middleware(request: Request, call_next):
 
 app.include_router(auth.router)
 app.include_router(crm.router)
+app.include_router(ai.router)
 app.include_router(domain.router)
 app.include_router(projects.router)
 app.include_router(content.router)

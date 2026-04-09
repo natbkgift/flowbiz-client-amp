@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
+import { trackEvent } from '@/lib/analytics';
 import { readCachedShortlist } from '@/lib/shortlist';
 
 vi.mock('next/navigation', () => ({
@@ -27,7 +28,9 @@ function createDeferred<T>() {
 describe('ShortlistSaveButton', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     localStorage.clear();
+    vi.mocked(trackEvent).mockReset();
   });
 
   it('saves a property into the session shortlist and shows the shortlist count', async () => {
@@ -61,6 +64,13 @@ describe('ShortlistSaveButton', () => {
     expect(screen.getByRole('link', { name: /view shortlist \(2\)/i }).getAttribute('href')).toBe('/en/shortlist');
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(trackEvent).toHaveBeenCalledWith(
+      'shortlist_add',
+      '/en/buy',
+      expect.objectContaining({
+        entity_id: '11111111-1111-1111-1111-111111111111',
+      }),
+    );
     expect(localStorage.getItem('amp_shortlist_owner_v1')).toBeTruthy();
   });
 
@@ -141,6 +151,13 @@ describe('ShortlistSaveButton', () => {
 
     expect(screen.queryByRole('link', { name: /view shortlist/i })).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(trackEvent).toHaveBeenCalledWith(
+      'click_cta',
+      '/en/buy',
+      expect.objectContaining({
+        entity_id: '33333333-3333-3333-3333-333333333333',
+      }),
+    );
   });
 
   it('syncs the button state from shortlist storage updates across tabs', async () => {

@@ -8,12 +8,13 @@ import { CTA } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { localeFromPathname, withLocale } from '../../app/_lib/i18n/routing';
-import { trackEvent } from '../../lib/analytics';
+import { getOrCreateSessionId, trackEvent } from '../../lib/analytics';
 import { isValidEmail, isValidPhone } from '../../lib/contact-validation';
 import {
   buildLeadAnalyticsPayload,
   buildLeadHandoffSummary,
   buildLeadHandoffTags,
+  inferDeviceType,
   inferSourceRouteFromPath,
   type LeadAnalyticsOptions,
   type LeadHandoff,
@@ -29,6 +30,8 @@ type LeadFormProps = {
   variant?: 'default' | 'compact';
   formId?: string;
   propertyId?: string | null;
+  projectId?: string | null;
+  areaId?: string | null;
   defaultMessage?: string;
   defaultPreferredArea?: string;
   defaultBudgetBand?: string;
@@ -165,6 +168,8 @@ export function LeadForm({
   variant = 'default',
   formId,
   propertyId,
+  projectId,
+  areaId,
   defaultMessage,
   defaultPreferredArea,
   defaultBudgetBand,
@@ -206,12 +211,15 @@ export function LeadForm({
   const qualificationPreviewBody = locale === 'th'
     ? 'บริบทนี้จะถูกแนบไปกับคำขอ เพื่อให้ทีมคัดกรองและตอบกลับด้วยขั้นตอนถัดไปที่ชัดขึ้น'
     : 'This context travels with your request so the team can qualify the clearest next step faster.';
+  const nationalityLabel = locale === 'th' ? 'สัญชาติ' : 'Nationality';
+  const nationalityPlaceholder = locale === 'th' ? 'เช่น ไทย อังกฤษ จีน' : 'e.g. Thai, British, Chinese';
 
   const [didStart, setDidStart] = useState(false);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [nationality, setNationality] = useState('');
   const [budgetBand, setBudgetBand] = useState(resolvedDefaultBudgetBand);
   const [purpose, setPurpose] = useState(resolvedDefaultPurpose);
   const [preferredArea, setPreferredArea] = useState(resolvedDefaultPreferredArea);
@@ -253,6 +261,8 @@ export function LeadForm({
     ...buildLeadHandoffSummary(locale, handoff),
     ...(contextSummary ?? []),
   ]), [contextSummary, handoff, locale]);
+  const resolvedProjectId = projectId ?? (handoff?.entityType === 'project' ? handoff.entityId ?? null : null);
+  const resolvedAreaId = areaId ?? (handoff?.entityType === 'area' ? handoff.entityId ?? null : null);
 
   const qualificationPreviewLines = useMemo(() => {
     const previewLines = uniqueLines([
@@ -393,9 +403,10 @@ export function LeadForm({
       leadTier: leadScore.tier,
       leadScore: leadScore.total,
     });
+    const sessionId = getOrCreateSessionId();
 
-    trackEvent('form_submit', pathname, leadEventPayload);
-    trackEvent('lead_submit', pathname, leadEventPayload);
+    void trackEvent('form_submit', pathname, leadEventPayload);
+    const submitEvent = await trackEvent('submit_lead', pathname, leadEventPayload);
 
     setStatus({ state: 'submitting' });
 
@@ -450,11 +461,19 @@ export function LeadForm({
           message: composedMessage,
           consent_given: true,
           intent: effectiveInquiryIntent,
-          budget_band: budgetBand || null,
+          budget_range: budgetBand || null,
+          nationality: nationality.trim() || null,
           timeline: timeframe || null,
           // Operational metadata (not user PII)
           property_id: propertyId ?? null,
+          project_id: resolvedProjectId ?? null,
+          area_id: resolvedAreaId ?? null,
           source_page: safeSourcePage(),
+          session_id: sessionId,
+          last_action: submitEvent?.event_name ?? 'submit_lead',
+          last_event_id: submitEvent?.event_id ?? null,
+          referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+          device: inferDeviceType(typeof window !== 'undefined' ? window.innerWidth : null),
           website: website.trim() || null,
           submit_timestamp: submitIso,
           locale,
@@ -494,7 +513,9 @@ export function LeadForm({
         responseSlaSeconds: parsed?.sales_automation?.response_sla_seconds,
       }));
       // Attribute conversion to active experiments
-      trackExperimentOutcomes('form_submit', 1, trackEvent, pathname);
+      trackExperimentOutcomes('form_submit', 1, (eventType, page, payload) => {
+        void trackEvent(eventType, page, payload);
+      }, pathname);
     } catch (err) {
       trackEvent('form_error', pathname, buildLeadEventPayload({
         leadTier: leadScore.tier,
@@ -618,6 +639,19 @@ export function LeadForm({
               </p>
             ) : null}
           </div>
+        </div>
+        <div>
+          <label htmlFor="lead-nationality" className="form-label">
+            {nationalityLabel}
+          </label>
+          <input
+            id="lead-nationality"
+            className="form-input"
+            name="nationality"
+            placeholder={nationalityPlaceholder}
+            value={nationality}
+            onChange={(e) => setNationality(e.target.value)}
+          />
         </div>
         {isCompact ? (
           <div>

@@ -50,6 +50,17 @@ function projectSummary(item: SalesAutomationItem): string {
   return item.projects.map(decodeProjectName).join(", ");
 }
 
+function extractTagValue(tags: string[] | null | undefined, prefix: string): string | null {
+  const match = (tags ?? []).find((tag) => tag.startsWith(prefix));
+  return match ? match.slice(prefix.length) : null;
+}
+
+function extractTagValues(tags: string[] | null | undefined, prefix: string): string[] {
+  return (tags ?? [])
+    .filter((tag) => tag.startsWith(prefix))
+    .map((tag) => tag.slice(prefix.length));
+}
+
 export function InquiryAdvisorAssistPanel({
   t,
   locale,
@@ -61,6 +72,19 @@ export function InquiryAdvisorAssistPanel({
 }) {
   const automation = selected.sales_automation;
   if (!automation) return null;
+
+  const aiTier = extractTagValue(selected.tags, 'lead_tier:');
+  const aiSignals = extractTagValues(selected.tags, 'ai_signal:');
+  const budgetRange = selected.budget_range || selected.budget_band || '-';
+  const showAiContext = Boolean(
+    selected.session_id
+    || selected.last_action
+    || selected.message
+    || selected.nationality
+    || selected.device
+    || aiTier
+    || aiSignals.length,
+  );
 
   return (
     <section aria-label={t.advisorAssist} className="crm-detail-section">
@@ -103,6 +127,52 @@ export function InquiryAdvisorAssistPanel({
           <dd>{prettyDate(automation.next_follow_up_at, locale)}</dd>
         </div>
       </dl>
+
+      {showAiContext ? (
+        <div className="crm-assist-card">
+          <h4>{t.aiLeadContext}</h4>
+          <dl className="crm-meta-grid crm-meta-grid--detail crm-meta-grid--assist">
+            <div>
+              <dt>{t.aiSession}</dt>
+              <dd>{selected.session_id || '-'}</dd>
+            </div>
+            <div>
+              <dt>{t.lastAction}</dt>
+              <dd>{humanizeToken(locale, selected.last_action)}</dd>
+            </div>
+            <div>
+              <dt>{t.budgetRange}</dt>
+              <dd>{budgetRange}</dd>
+            </div>
+            <div>
+              <dt>{t.nationality}</dt>
+              <dd>{selected.nationality || '-'}</dd>
+            </div>
+            <div>
+              <dt>{t.device}</dt>
+              <dd>{humanizeToken(locale, selected.device)}</dd>
+            </div>
+            <div>
+              <dt>{t.priorityLabel}</dt>
+              <dd>{humanizeToken(locale, aiTier)}</dd>
+            </div>
+          </dl>
+          {aiSignals.length ? (
+            <p className="crm-assist-copy">
+              <strong>{t.signalLevel}: </strong>
+              {aiSignals.map((signal) => humanizeToken(locale, signal)).join(', ')}
+            </p>
+          ) : null}
+          {selected.message ? (
+            <div>
+              <p className="crm-assist-copy">
+                <strong>{t.messageSummary}</strong>
+              </p>
+              <p className="crm-assist-copy crm-assist-copy--prewrap">{selected.message}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="crm-assist-stack">
         <div className="crm-assist-card">

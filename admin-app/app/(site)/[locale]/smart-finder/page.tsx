@@ -468,7 +468,7 @@ export default async function SmartFinderPage(
                         className="btn btn-cta"
                         href={compareTopHref}
                         id="smart_finder_compare_top_results"
-                        data-amp-event-type="compare_action"
+                        data-amp-event-type="compare_add"
                         data-amp-event-payload={JSON.stringify({
                           source_route: 'smart-finder',
                           cta_type: 'primary',

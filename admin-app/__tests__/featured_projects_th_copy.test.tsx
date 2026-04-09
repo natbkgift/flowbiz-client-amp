@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { FeaturedProjects } from '@/components/home/FeaturedProjects';
+
+vi.mock('next/image', () => ({
+  default: ({ fill, unoptimized, priority, fetchPriority, loader, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+}));
 
 describe('FeaturedProjects Thai copy', () => {
   it('keeps the empty-state handoff localized without shortlist jargon', () => {

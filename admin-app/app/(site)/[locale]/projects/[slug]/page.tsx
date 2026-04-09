@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { buildAdvisorWhatsApp, buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { EntityViewTracker } from '@/components/analytics/EntityViewTracker';
 import { Container } from '@/components/layout/Container';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
@@ -1278,6 +1279,24 @@ export default async function ProjectDetailPage(
 
   return (
     <main className="section decision-page decision-page--project decision-page--confidence" id="main-content">
+      <div
+        id="amp-ai-page-context"
+        hidden
+        data-page-type="project"
+        data-source-route="project"
+        data-entity-type="project"
+        data-entity-id={String(project.id)}
+        data-entity-name={project.name}
+        data-project-id={String(project.id)}
+      />
+      <EntityViewTracker
+        eventType="view_project"
+        pathname={withLocale(locale, `/projects/${project.slug}`)}
+        sourceRoute="project"
+        entityType="project"
+        entityId={project.id}
+        entityName={project.name}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
@@ -1783,6 +1802,7 @@ export default async function ProjectDetailPage(
               <LeadForm
                 locale={locale}
                 heading={projectDecisionCta.leadHeading}
+                projectId={project.id}
                 defaultPurpose={hasInvestmentView ? 'invest' : 'buy'}
                 defaultPreferredArea={project.area?.name ?? undefined}
                 defaultMessage={projectDecisionCta.leadMessage}

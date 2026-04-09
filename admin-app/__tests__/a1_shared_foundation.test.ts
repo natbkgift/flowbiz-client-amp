@@ -70,8 +70,7 @@ describe('A1 shared foundation guards', () => {
     const localMedia = read('components/media/LocalMediaImage.tsx');
     const safeCover = read('components/media/SafeCoverImage.tsx');
 
-    expect(localMedia).toContain('raw.startsWith("/media/")');
-    expect(localMedia).toContain('raw.startsWith("/storage/")');
+    expect(localMedia).toContain("const LOCAL_PREFIXES = ['/media/', '/storage/'");
     expect(localMedia).toContain('/images/property-placeholder.svg');
     expect(localMedia).toContain('/images/project-overview.png');
     expect(safeCover).toContain('/images/property-placeholder.svg');

@@ -560,7 +560,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             <Link
               className="btn btn-cta"
               href={compareHref ?? withLocale(locale, '/compare')}
-              data-amp-event-type="compare_action"
+              data-amp-event-type="compare_add"
               data-amp-event-payload={JSON.stringify({
                 source_route: 'shortlist',
                 cta_type: 'primary',

@@ -833,6 +833,10 @@ class Inquiry(Base):
     utm_content: Mapped[str | None] = mapped_column(String(200), nullable=True)
     referrer: Mapped[str | None] = mapped_column(String(500), nullable=True)
     device: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    last_action: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_event_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    nationality: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
     email_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     phone_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)

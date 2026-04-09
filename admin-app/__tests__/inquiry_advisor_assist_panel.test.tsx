@@ -15,8 +15,14 @@ describe('InquiryAdvisorAssistPanel', () => {
           name: 'Alex',
           email: 'alex@example.com',
           phone: null,
+          message: 'AI qualification summary\n\nRecent buyer brief:\nNeed a viewing this week.',
+          nationality: 'Thai',
           status: 'new',
           source_page: '/en/contact',
+          session_id: 'ai-session-1',
+          last_action: 'submit_lead',
+          budget_range: '10m_20m',
+          device: 'mobile',
           intent: 'project_compare',
           purpose: 'project_compare',
           follow_up_status: 'pending',
@@ -27,6 +33,7 @@ describe('InquiryAdvisorAssistPanel', () => {
           email_url: 'mailto:alex@example.com',
           is_spam_hint: false,
           is_duplicate_hint: false,
+          tags: ['lead_tier:hot', 'ai_signal:viewing_requested', 'ai_signal:price_requested'],
           sales_automation: {
             locale: 'en',
             intent: 'project_compare',
@@ -69,5 +76,8 @@ describe('InquiryAdvisorAssistPanel', () => {
     expect(screen.getByText(/push toward conversion/i)).toBeTruthy();
     expect(screen.getByText(/shall i send the details now/i)).toBeTruthy();
     expect(screen.getByText(/i can break down the key differences/i)).toBeTruthy();
+    expect(screen.getByText(/ai-session-1/i)).toBeTruthy();
+    expect(screen.getByText(/10m_20m/i)).toBeTruthy();
+    expect(screen.getByText(/need a viewing this week/i)).toBeTruthy();
   });
 });

@@ -8,7 +8,13 @@ const propertyState = vi.hoisted(() => ({
 }));
 
 vi.mock('next/image', () => ({
-  default: ({ fill, unoptimized, priority, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+  default: ({ fill, unoptimized, priority, fetchPriority, loader, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+}));
+
+vi.mock('@/components/analytics/EntityViewTracker', () => ({
+  EntityViewTracker: ({ eventType, entityId, pathname }: { eventType: string; entityId: string; pathname: string }) => (
+    <div data-testid="entity-view-tracker" data-event-type={eventType} data-entity-id={entityId} data-pathname={pathname} />
+  ),
 }));
 
 vi.mock('@/components/shortlist/ShortlistSaveButton', () => ({
@@ -105,6 +111,9 @@ describe('property detail shell', () => {
     expect(container.querySelector('#property-direct-channels')).not.toBeNull();
     expect(container.querySelector('#property-lead-form')).not.toBeNull();
     expect(container.querySelector('#property-mobile-cta')).not.toBeNull();
+    expect(container.querySelector('[data-testid="entity-view-tracker"]')).toHaveAttribute('data-event-type', 'view_property');
+    expect(container.querySelector('[data-testid="entity-view-tracker"]')).toHaveAttribute('data-entity-id', 'property-1');
+    expect(container.querySelector('[data-testid="entity-view-tracker"]')).toHaveAttribute('data-pathname', '/en/property/azure-condo');
     expect(container.querySelector('#property-hero.public-surface-card')).not.toBeNull();
     expect(container.querySelector('#property-primary-actions.public-action-row')).not.toBeNull();
     expect(container.querySelector('#property-primary-actions .btn.btn-primary')).not.toBeNull();

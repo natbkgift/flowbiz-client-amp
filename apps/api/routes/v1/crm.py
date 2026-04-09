@@ -8,14 +8,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
-from sqlalchemy import and_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from packages.core.audit import write_audit_log
 from packages.core.crm_contact_actions import build_contact_action_urls
 from packages.core.crm_follow_up import CANONICAL_FOLLOW_UP_STATUSES
 from packages.core.database import get_db
-from packages.core.models import Booking, Inquiry, Property, Viewing
+from packages.core.models import AnalyticsEvent, Area, Booking, Inquiry, Project, Property, Viewing
 from packages.core.sales_automation import (
     build_advisor_summary_note,
     build_sales_automation_snapshot,
@@ -34,12 +34,21 @@ router = APIRouter(prefix="/v1", tags=["crm"])
 class InquiryCreate(BaseModel):
     name: str
     property_id: UUID | None = None
+    project_id: UUID | None = None
+    area_id: UUID | None = None
     email: str | None = None
     phone: str | None = None
     message: str
+    nationality: str | None = None
     source_page: str | None = None
+    session_id: str | None = None
+    last_action: str | None = None
+    last_event_id: UUID | None = None
+    referrer: str | None = None
+    device: str | None = None
     intent: str = "general"
     budget_band: str | None = None
+    budget_range: str | None = None
     timeline: str | None = None
     persona: str | None = None
     tags: list[str] | None = None
@@ -109,6 +118,27 @@ def _normalize_campaign_name(value: str | None) -> str | None:
     text = re.sub(r"\s+", "_", text)
     text = text.replace(":", "-")
     return text[:128]
+
+
+def _normalize_text(value: str | None, *, limit: int | None = None) -> str | None:
+    text = re.sub(r"\s+", " ", str(value or "").strip())
+    if not text:
+        return None
+    return text[:limit] if limit is not None else text
+
+
+def _normalize_lookup_text(value: str | None) -> str | None:
+    text = _normalize_text(value)
+    return text.lower() if text else None
+
+
+def _normalize_email_value(value: str | None) -> str | None:
+    return _normalize_lookup_text(value)
+
+
+def _normalize_phone_value(value: str | None) -> str | None:
+    text = re.sub(r"[^0-9+]", "", str(value or "").strip())
+    return text or None
 
 
 def _normalize_call_requested(value: str | bool | None) -> str | None:
@@ -305,8 +335,26 @@ def _infer_inventory_source(offer_family: str | None, property_row: Property | N
 
 
 def _enrich_inquiry_payload(payload: InquiryCreate, property_row: Property | None) -> InquiryCreate:
+    payload.name = _normalize_text(payload.name, limit=200) or ""
+    payload.email = _normalize_text(payload.email, limit=255)
+    payload.phone = _normalize_text(payload.phone, limit=50)
+    payload.message = _normalize_text(payload.message) or ""
+    payload.nationality = _normalize_text(payload.nationality, limit=80)
+    payload.persona = _normalize_text(payload.persona, limit=32)
     payload.source_page = _normalize_source_page(payload.source_page)
+    payload.referrer = _normalize_text(payload.referrer, limit=500)
+    payload.device = _normalize_token(payload.device)
+    payload.session_id = _normalize_text(payload.session_id, limit=64)
+    payload.last_action = _normalize_token(payload.last_action)
     payload.intent = _normalize_intent(payload.intent)
+
+    budget_value = _normalize_text(payload.budget_range or payload.budget_band, limit=32)
+    payload.budget_range = budget_value
+    payload.budget_band = budget_value
+
+    if property_row is not None:
+        payload.project_id = property_row.project_id or payload.project_id
+        payload.area_id = property_row.area_id or payload.area_id
 
     query_params = _source_query_params(payload.source_page)
     lead_source = _normalize_token(_extract_tag_value(payload.tags, "lead_source:")) or _infer_lead_source(payload.source_page)
@@ -376,8 +424,43 @@ def _compose_inquiry_tags(payload: InquiryCreate) -> list[str]:
         _append_tag(tags, seen, f"call_requested:{call_requested}")
     if lead_tier in _ALLOWED_LEAD_TIERS:
         _append_tag(tags, seen, f"lead_tier:{lead_tier}")
+    _append_tag(tags, seen, "lifecycle:new")
+    if payload.property_id is not None:
+        _append_tag(tags, seen, f"property_id:{payload.property_id}")
+    if payload.project_id is not None:
+        _append_tag(tags, seen, f"project_id:{payload.project_id}")
+    if payload.area_id is not None:
+        _append_tag(tags, seen, f"area_id:{payload.area_id}")
+    if payload.last_action:
+        _append_tag(tags, seen, f"last_action:{payload.last_action}")
 
     return tags
+
+
+def _build_payload_dedupe_signature(payload: InquiryCreate) -> tuple[str | None, ...]:
+    return (
+        _normalize_lookup_text(payload.name),
+        _normalize_lookup_text(payload.message),
+        _normalize_email_value(payload.email),
+        _normalize_phone_value(payload.phone),
+        _normalize_lookup_text(payload.source_page),
+        str(payload.property_id) if payload.property_id is not None else None,
+        str(payload.project_id) if payload.project_id is not None else None,
+        str(payload.area_id) if payload.area_id is not None else None,
+    )
+
+
+def _build_inquiry_dedupe_signature(inquiry: Inquiry) -> tuple[str | None, ...]:
+    return (
+        _normalize_lookup_text(inquiry.name),
+        _normalize_lookup_text(inquiry.message),
+        _normalize_email_value(inquiry.email),
+        _normalize_phone_value(inquiry.phone),
+        _normalize_lookup_text(inquiry.source_page),
+        str(inquiry.property_id) if inquiry.property_id is not None else None,
+        str(inquiry.project_id) if inquiry.project_id is not None else None,
+        str(inquiry.area_id) if inquiry.area_id is not None else None,
+    )
 
 
 def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryItem:
@@ -393,19 +476,28 @@ def _to_inquiry_item(inquiry: Inquiry, *, dedupe_hint: bool = False) -> InquiryI
     return InquiryItem(
         id=inquiry.id,
         property_id=inquiry.property_id,
+        project_id=inquiry.project_id,
+        area_id=inquiry.area_id,
         advisor_user_id=inquiry.advisor_user_id,
         duplicate_of_inquiry_id=inquiry.duplicate_of_inquiry_id,
         name=inquiry.name,
         email=inquiry.email,
         phone=inquiry.phone,
         message=inquiry.message,
+        nationality=inquiry.nationality,
         source_page=inquiry.source_page,
+        session_id=inquiry.session_id,
+        last_action=inquiry.last_action,
+        last_event_id=inquiry.last_event_id,
+        referrer=inquiry.referrer,
+        device=inquiry.device,
         intent=inquiry.intent,
         purpose=inquiry.intent,
         score=inquiry.score,
         status=inquiry.status,
         persona=inquiry.persona,
         budget_band=inquiry.budget_band,
+        budget_range=inquiry.budget_band,
         timeline=inquiry.timeline,
         follow_up_status=inquiry.follow_up_status,
         follow_up_due_at=inquiry.follow_up_due_at,
@@ -474,30 +566,67 @@ def create_inquiry(
     db: Session = Depends(get_db),
 ) -> InquiryItem:
     property_row: Property | None = None
+    project_row: Project | None = None
+    area_row: Area | None = None
+    event_row: AnalyticsEvent | None = None
     if payload.property_id is not None:
         property_row = db.get(Property, payload.property_id)
         if property_row is None or property_row.status != "active":
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property not found")
 
+    if payload.project_id is not None:
+        project_row = db.get(Project, payload.project_id)
+        if project_row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    if payload.area_id is not None:
+        area_row = db.get(Area, payload.area_id)
+        if area_row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Area not found")
+
+    if payload.last_event_id is not None:
+        event_row = db.get(AnalyticsEvent, payload.last_event_id)
+
     payload = _enrich_inquiry_payload(payload, property_row)
+    if event_row is not None:
+        payload.session_id = payload.session_id or event_row.session_id
+        payload.last_action = payload.last_action or _normalize_token(event_row.event_type)
+
+    if property_row is not None:
+        payload.project_id = property_row.project_id or payload.project_id
+        payload.area_id = property_row.area_id or payload.area_id
+    if payload.project_id is not None and project_row is None:
+        project_row = db.get(Project, payload.project_id)
+        if project_row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if payload.area_id is not None and area_row is None:
+        area_row = db.get(Area, payload.area_id)
+        if area_row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Area not found")
 
     now = datetime.now(UTC)
     dedupe_since = now - timedelta(minutes=10)
+    payload_email_hash = _hash_text(payload.email)
+    payload_phone_hash = _hash_text(payload.phone)
+    dedupe_signature = _build_payload_dedupe_signature(payload)
 
-    dedupe = db.scalar(
-        select(Inquiry)
-        .where(
-            and_(
-                Inquiry.name == payload.name,
-                Inquiry.message == payload.message,
-                Inquiry.email == payload.email,
-                Inquiry.phone == payload.phone,
-                Inquiry.source_page == payload.source_page,
-                Inquiry.created_at >= dedupe_since,
-            )
-        )
-        .order_by(Inquiry.created_at.desc())
-        .limit(1)
+    dedupe_query = select(Inquiry).where(Inquiry.created_at >= dedupe_since)
+    candidate_filters = []
+    if payload_email_hash is not None:
+        candidate_filters.append(Inquiry.email_hash == payload_email_hash)
+    if payload_phone_hash is not None:
+        candidate_filters.append(Inquiry.phone_hash == payload_phone_hash)
+    if payload.source_page is not None:
+        candidate_filters.append(Inquiry.source_page == payload.source_page)
+    if candidate_filters:
+        dedupe_query = dedupe_query.where(or_(*candidate_filters))
+
+    dedupe_candidates = db.scalars(
+        dedupe_query.order_by(Inquiry.created_at.desc()).limit(20)
+    ).all()
+    dedupe = next(
+        (candidate for candidate in dedupe_candidates if _build_inquiry_dedupe_signature(candidate) == dedupe_signature),
+        None,
     )
     if dedupe is not None:
         response.headers["X-Inquiry-Deduped"] = "true"
@@ -506,21 +635,29 @@ def create_inquiry(
     inquiry = Inquiry(
         intent=payload.intent or "general",
         property_id=payload.property_id,
-        name=payload.name.strip(),
-        email=(payload.email or "").strip() or None,
-        phone=(payload.phone or "").strip() or None,
-        message=payload.message.strip(),
-        source_page=(payload.source_page or "").strip() or None,
+        project_id=payload.project_id,
+        area_id=payload.area_id,
+        name=payload.name,
+        email=payload.email,
+        phone=payload.phone,
+        message=payload.message,
+        nationality=payload.nationality,
+        source_page=payload.source_page,
+        session_id=payload.session_id,
+        last_action=payload.last_action,
+        last_event_id=str(payload.last_event_id) if payload.last_event_id is not None else None,
+        referrer=payload.referrer,
+        device=payload.device,
         score=max(0, min(int(payload.lead_score or 0), 100)),
         status="new",
-        budget_band=(payload.budget_band or "").strip() or None,
-        timeline=(payload.timeline or "").strip() or None,
+        budget_band=payload.budget_band,
+        timeline=_normalize_text(payload.timeline, limit=32),
         follow_up_status=CANONICAL_FOLLOW_UP_STATUSES[0],
-        persona=(payload.persona or "").strip() or None,
+        persona=payload.persona,
         submit_timestamp=now,
         first_touch_timestamp=now,
-        email_hash=_hash_text(payload.email),
-        phone_hash=_hash_text(payload.phone),
+        email_hash=payload_email_hash,
+        phone_hash=payload_phone_hash,
         tags=_compose_inquiry_tags(payload),
     )
     automation = build_sales_automation_snapshot(
@@ -538,6 +675,20 @@ def create_inquiry(
     inquiry.tags = list(dict.fromkeys([*(inquiry.tags or []), *automation.as_tags()]))
     db.add(inquiry)
     db.flush()
+    write_audit_log(
+        db,
+        actor_user_id=None,
+        entity_type="inquiry",
+        entity_id=str(inquiry.id),
+        action="follow_up_queued",
+        diff={
+            "follow_up_status": inquiry.follow_up_status,
+            "follow_up_due_at": inquiry.follow_up_due_at.isoformat() if inquiry.follow_up_due_at else None,
+            "last_action": inquiry.last_action,
+            "last_event_id": inquiry.last_event_id,
+            "session_id": inquiry.session_id,
+        },
+    )
     write_audit_log(
         db,
         actor_user_id=None,

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
+import { EntityViewTracker } from '@/components/analytics/EntityViewTracker';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -589,6 +590,25 @@ export default async function PropertyPage(props: PageProps) {
 
   return (
     <main className="section decision-page decision-page--property" id="main-content">
+      <div
+        id="amp-ai-page-context"
+        hidden
+        data-page-type="property"
+        data-source-route="property"
+        data-entity-type="property"
+        data-entity-id={String(property.id)}
+        data-entity-name={property.title}
+        data-property-id={String(property.id)}
+        data-project-id={property.project_id ? String(property.project_id) : undefined}
+      />
+      <EntityViewTracker
+        eventType="view_property"
+        pathname={withLocale(locale, `/property/${params.slug}`)}
+        sourceRoute="property"
+        entityType="property"
+        entityId={property.id}
+        entityName={property.title}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Container>
         <Breadcrumbs

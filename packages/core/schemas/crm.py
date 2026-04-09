@@ -43,19 +43,28 @@ class InquiryItem(BaseModel):
 
     id: UUID
     property_id: UUID | None = None
+    project_id: UUID | None = None
+    area_id: UUID | None = None
     advisor_user_id: UUID | None = None
     duplicate_of_inquiry_id: UUID | None = None
     name: str
     email: str | None = None
     phone: str | None = None
     message: str
+    nationality: str | None = None
     source_page: str | None = None
+    session_id: str | None = None
+    last_action: str | None = None
+    last_event_id: str | None = None
+    referrer: str | None = None
+    device: str | None = None
     intent: str | None = None
     purpose: str | None = None
     score: int = 0
     status: str
     persona: str | None = None
     budget_band: str | None = None
+    budget_range: str | None = None
     timeline: str | None = None
     follow_up_status: str | None = None
     follow_up_due_at: datetime | None = None

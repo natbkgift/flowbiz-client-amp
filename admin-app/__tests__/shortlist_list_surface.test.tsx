@@ -119,6 +119,7 @@ describe('ShortlistListSurface', () => {
         '/en/compare?ids=project-1%2Cproject-2&intent=project_compare&source=shortlist_compare&projects=Alpha+Project%2CBeta+Project&buyer_fit=shortlist_narrowing&signal_level=medium',
       );
     });
+    expect(screen.getByRole('link', { name: /compare 2 saved projects/i }).getAttribute('data-amp-event-type')).toBe('compare_add');
     expect(screen.getByText(/best next move: compare 2 saved projects/i)).toBeTruthy();
     expect(screen.getByRole('heading', { name: /turn this shortlist into the next decision round/i })).toBeTruthy();
     expect(screen.getByText('2 compare-ready projects')).toBeTruthy();

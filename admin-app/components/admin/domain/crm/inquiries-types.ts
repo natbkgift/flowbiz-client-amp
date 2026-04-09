@@ -36,13 +36,25 @@ export type SalesAutomationItem = {
 
 export type InquiryItem = {
   id: string;
+  property_id?: string | null;
+  project_id?: string | null;
+  area_id?: string | null;
   name: string;
   email: string | null;
   phone: string | null;
+  message?: string | null;
+  nationality?: string | null;
   status: string;
   source_page: string | null;
+  session_id?: string | null;
+  last_action?: string | null;
+  last_event_id?: string | null;
+  referrer?: string | null;
+  device?: string | null;
   intent: string | null;
   purpose: string | null;
+  budget_band?: string | null;
+  budget_range?: string | null;
   follow_up_status: string | null;
   follow_up_due_at: string | null;
   tags?: string[] | null;

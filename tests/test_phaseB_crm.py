@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 
 from apps.api.routes.admin_crm import _spam_filter_clause
 from packages.core.database import SessionLocal
-from packages.core.models import AuditLog, Inquiry, Property
+from packages.core.models import AnalyticsEvent, Area, AuditLog, Inquiry, Project, Property
 from packages.core.sales_automation import (
     build_advisor_summary_note,
     build_sales_automation_snapshot,
@@ -20,6 +20,66 @@ def _login_token(client) -> str:
     )
     assert resp.status_code == 200
     return resp.json()["access_token"]
+
+
+def _seed_inquiry_context() -> dict[str, str]:
+    unique = uuid4().hex[:8]
+    with SessionLocal() as db:
+        area = Area(
+            slug=f"crm-area-{unique}",
+            name=f"CRM Area {unique}",
+            status="published",
+        )
+        db.add(area)
+        db.flush()
+
+        project = Project(
+            slug=f"crm-project-{unique}",
+            name=f"CRM Project {unique}",
+            status="published",
+            property_type="condo",
+            area_id=area.id,
+        )
+        db.add(project)
+        db.flush()
+
+        property_row = Property(
+            source_id=f"crm-property-{unique}",
+            slug=f"crm-property-{unique}",
+            title=f"CRM Property {unique}",
+            type="new",
+            property_type="condo",
+            status="active",
+            price=4500000,
+            address="CRM Test Address",
+            city="Pattaya",
+            area_id=area.id,
+            project_id=project.id,
+        )
+        db.add(property_row)
+        db.flush()
+
+        event = AnalyticsEvent(
+            event_type="submit_lead",
+            page=f"/en/projects/{project.slug}",
+            session_id=f"session-{unique}",
+            payload={"entity_id": str(project.id)},
+        )
+        db.add(event)
+        db.commit()
+        db.refresh(area)
+        db.refresh(project)
+        db.refresh(property_row)
+        db.refresh(event)
+
+        return {
+            "area_id": str(area.id),
+            "project_id": str(project.id),
+            "project_slug": project.slug,
+            "property_id": str(property_row.id),
+            "event_id": str(event.id),
+            "session_id": str(event.session_id),
+        }
 
 
 def test_create_inquiry_and_schedule_viewing(client):
@@ -151,6 +211,101 @@ def test_inquiry_retry_is_deduped_not_lost(client):
     assert body2["status"] != "lost"
     if r2.headers.get("X-Inquiry-Deduped") == "true":
         assert body2["id"] == body1["id"]
+
+
+def test_inquiry_canonical_payload_persists_event_linkage_and_follow_up_queue(client):
+    context = _seed_inquiry_context()
+    unique = uuid4().hex[:8]
+
+    response = client.post(
+        "/v1/inquiries",
+        json={
+            "name": f"  Canonical Lead {unique}  ",
+            "email": f"canonical-{unique}@example.com ",
+            "phone": "+66 89 111 22 33",
+            "message": "  Need a project walkthrough and next steps.  ",
+            "nationality": " Thai ",
+            "source_page": f"https://amppattaya.com/en/projects/{context['project_slug']}?source=compare_hero",
+            "property_id": context["property_id"],
+            "project_id": context["project_id"],
+            "area_id": context["area_id"],
+            "last_event_id": context["event_id"],
+            "budget_range": "10m_20m",
+            "intent": "project_compare",
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    inquiry = response.json()
+    assert inquiry["project_id"] == context["project_id"]
+    assert inquiry["area_id"] == context["area_id"]
+    assert inquiry["property_id"] == context["property_id"]
+    assert inquiry["budget_range"] == "10m_20m"
+    assert inquiry["budget_band"] == "10m_20m"
+    assert inquiry["nationality"] == "Thai"
+    assert inquiry["session_id"] == context["session_id"]
+    assert inquiry["last_action"] == "submit_lead"
+    assert inquiry["last_event_id"] == context["event_id"]
+    assert inquiry["follow_up_status"]
+
+    inquiry_id = UUID(inquiry["id"])
+    with SessionLocal() as db:
+        stored = db.get(Inquiry, inquiry_id)
+        assert stored is not None
+        assert str(stored.project_id) == context["project_id"]
+        assert str(stored.area_id) == context["area_id"]
+        assert stored.budget_band == "10m_20m"
+        assert stored.nationality == "Thai"
+        assert stored.session_id == context["session_id"]
+        assert stored.last_action == "submit_lead"
+        assert stored.last_event_id == context["event_id"]
+
+        queued_audit = db.scalar(
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "inquiry",
+                AuditLog.entity_id == str(inquiry_id),
+                AuditLog.action == "follow_up_queued",
+            )
+            .limit(1)
+        )
+        assert queued_audit is not None
+
+
+def test_inquiry_dedupe_normalizes_case_spacing_and_phone_format(client):
+    context = _seed_inquiry_context()
+    unique = uuid4().hex[:8]
+
+    first_payload = {
+        "name": f"Alex Example {unique}",
+        "email": f"Alex-{unique}@Example.com",
+        "phone": "+66 89 123 4567",
+        "message": "Need more info about this project.",
+        "source_page": f"/en/projects/{context['project_slug']}",
+        "project_id": context["project_id"],
+        "area_id": context["area_id"],
+        "property_id": context["property_id"],
+        "intent": "project_consultation",
+    }
+    second_payload = {
+        "name": f"  alex example {unique}  ",
+        "email": f"alex-{unique}@example.com ",
+        "phone": "+66-89-123-4567",
+        "message": "Need   more info about this project.",
+        "source_page": f"https://amppattaya.com/en/projects/{context['project_slug']}",
+        "project_id": context["project_id"],
+        "area_id": context["area_id"],
+        "property_id": context["property_id"],
+        "intent": "project_consultation",
+    }
+
+    first = client.post("/v1/inquiries", json=first_payload)
+    assert first.status_code == 201, first.text
+
+    second = client.post("/v1/inquiries", json=second_payload)
+    assert second.status_code == 201, second.text
+    assert second.headers.get("X-Inquiry-Deduped") == "true"
+    assert second.json()["id"] == first.json()["id"]
 
 
 def test_admin_can_list_inquiries_and_viewings(client):
