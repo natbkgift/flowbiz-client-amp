@@ -506,26 +506,14 @@ export default async function HomePage({
     });
 
     return sortedProjects.filter((project) => {
-      const projectMedia = {
-        cover_image_url: project.cover_image_url ?? null,
-        hero_image_url: (project as typeof project & { hero_image_url?: string | null }).hero_image_url ?? null,
-        images: (project as typeof project & { images?: Array<string | null | undefined> | null }).images ?? null,
-      };
-      const hasRenderableMedia = Boolean(pickRenderableLocalMedia(projectMedia));
       const hasStartingPrice = toFiniteNumber(project.starting_price) != null;
 
-      return Boolean(project.slug && project.name.trim() && hasRenderableMedia && hasStartingPrice);
+      return Boolean(project.slug && project.name.trim() && hasStartingPrice);
     });
   }
 
   function buildRenderableHomeProperties(properties: PropertyListItem[]) {
     return properties.filter((property) => {
-      const propertyMedia = {
-        cover_image: property.cover_image ?? null,
-        local_images: property.local_images ?? null,
-        images: property.images ?? null,
-      };
-      const hasRenderableMedia = Boolean(pickRenderableLocalMedia(propertyMedia));
       const hasCoreMetadata = Boolean(
         property.slug
         && property.title.trim()
@@ -533,7 +521,7 @@ export default async function HomePage({
         && (String(property.city ?? '').trim() || String(property.address ?? '').trim()),
       );
 
-      return hasRenderableMedia && hasCoreMetadata;
+      return hasCoreMetadata;
     });
   }
 
