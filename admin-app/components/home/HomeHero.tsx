@@ -85,7 +85,7 @@ export function HomeHero({
       return slides.map((slide, index) => ({
         ...slide,
         key: slide.key || `hero-slide-${index + 1}`,
-        imageSrc: (resolveRenderableLocalMediaPath(slide.imageSrc) ?? slide.imageSrc) || HERO_FALLBACK_IMAGE,
+        imageSrc: resolveRenderableLocalMediaPath(slide.imageSrc) || HERO_FALLBACK_IMAGE,
         imageAlt: slide.imageAlt || (locale === 'th' ? 'ภาพประกอบอสังหาริมทรัพย์พัทยา' : 'AMP Pattaya Real Estate'),
       }));
     }

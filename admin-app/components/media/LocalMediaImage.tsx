@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 
 import {
+  isKnownStalePublicMediaPath,
   pickRenderableLocalMedia,
   resolveRenderableLocalMediaPath,
   type LocalMediaInput,
@@ -17,6 +18,7 @@ function normalizeRuntimeLocalPath(value: string | null | undefined): string | n
   const renderable = resolveRenderableLocalMediaPath(value);
   if (renderable) return renderable;
   if (!value) return null;
+  if (isKnownStalePublicMediaPath(value)) return null;
   const raw = String(value).trim();
   if (!raw) return null;
   if (raw.startsWith('//') || raw.includes('://')) return null;
@@ -72,7 +74,7 @@ export function LocalMediaImage({
     }
 
     const picked = pickRenderableLocalMedia(media);
-    return normalizeRuntimeLocalPath(picked) ?? picked;
+    return normalizeRuntimeLocalPath(picked);
   }, [media]);
   const safeAlt = (alt && alt.trim()) || altFallback || 'Property image';
   const resolvedFallback = [fallbackSrc, DEFAULT_FALLBACK_SRC, CONTRACT_IMAGE_FALLBACK_SRC].find(

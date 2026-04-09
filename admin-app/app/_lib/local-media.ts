@@ -15,6 +15,16 @@ const KNOWN_STALE_PUBLIC_MEDIA_PATHS = new Set([
   // static fallbacks until the mirrored assets are restored on disk.
   '/media/project-covers/the-riviera-palm-beach/cover_1789e74af538.jpg',
   '/media/project-covers/the-riviera-beverly-hills/cover_7cdacbe8818f.webp',
+  '/media/project-covers/embassy-life/cover_9ec84c2a667c.jpg',
+  '/media/project-covers/avenue-boutique/cover_342167dd4443.jpg',
+  '/media/project-covers/aquarous-jomtien-pattaya/cover_57bb60153ffc.jpg',
+  '/media/project-covers/pristine-park-iii/cover_37f272a13863.jpg',
+  '/media/project-covers/seaspire-jomtien/cover_b40e08123c81.jpg',
+  '/media/project-covers/the-lavish/cover_c363e8835b38.webp',
+  '/media/project-covers/once-wongamat/cover_b4ef0491685f.jpg',
+  '/media/project-covers/chieftain/cover_2a1d8ab95997.jpg',
+  '/media/project-covers/horizon/cover_64a53f498421.jpg',
+  '/media/project-covers/wyndham-jomtien-pattaya/cover_f20721152575.jpg',
   '/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg',
   '/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg',
 ]);

@@ -14,6 +14,8 @@ describe('public media render guard', () => {
     expect(resolveRenderableLocalMediaPath('/media/library/a03637e4-6436-493f-9dce-bdb182b4f96a.png?v=batch3')).toBeNull();
     expect(resolveRenderableLocalMediaPath('/media/project-covers/the-riviera-palm-beach/cover_1789e74af538.jpg')).toBeNull();
     expect(resolveRenderableLocalMediaPath('/media/project-covers/the-riviera-beverly-hills/cover_7cdacbe8818f.webp')).toBeNull();
+    expect(resolveRenderableLocalMediaPath('/media/project-covers/once-wongamat/cover_b4ef0491685f.jpg')).toBeNull();
+    expect(resolveRenderableLocalMediaPath('/media/project-covers/aquarous-jomtien-pattaya/cover_57bb60153ffc.jpg')).toBeNull();
     expect(resolveRenderableLocalMediaPath('/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_243dee6db6de.jpg')).toBeNull();
     expect(resolveRenderableLocalMediaPath('/media/import-assets/units-buy/amp-s020126-grand-solaire-pattaya/asset_519ffbb705c0.jpg')).toBeNull();
     expect(resolveImageUrl('/media/library/1abee367-4ebc-4adc-b49d-4220c8df5cd5.png')).toBeNull();
