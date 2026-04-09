@@ -30,9 +30,7 @@ ALLOWED_FURNISHING_VALUES = {
 
 
 def _normalize_token(value: str | None) -> str:
-    return "_".join(
-        str(value or "").strip().lower().replace("-", " ").replace("_", " ").split()
-    )
+    return "_".join(str(value or "").strip().lower().replace("-", " ").replace("_", " ").split())
 
 
 def validate_property_fields(
@@ -93,9 +91,7 @@ def validate_property_fields(
     elif normalized_price_period and normalized_price_period not in ALLOWED_PRICE_PERIODS:
         errors.append("price_period must be one of day, week, month, or year")
     if normalized_furnishing and normalized_furnishing not in ALLOWED_FURNISHING_VALUES:
-        errors.append(
-            "furnishing must be one of unfurnished, partial, or fully_furnished"
-        )
+        errors.append("furnishing must be one of unfurnished, partial, or fully_furnished")
     if normalized_view and normalized_view not in ALLOWED_VIEW_VALUES:
         errors.append("view must be a supported view token")
     if features is not None and not isinstance(features, dict):

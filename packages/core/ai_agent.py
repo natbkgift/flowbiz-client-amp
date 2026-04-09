@@ -216,16 +216,13 @@ def _localized_copy(locale: str) -> dict[str, str]:
             " advisor handoff without fabricating inventory or pricing."
         ),
         "ask_intent": (
-            "First, what is the main goal for this session: buy, invest, rent,"
-            " or compare options?"
+            "First, what is the main goal for this session: buy, invest, rent, or compare options?"
         ),
         "ask_budget_range": (
-            "What budget range should this stay inside so the next step remains"
-            " realistic?"
+            "What budget range should this stay inside so the next step remains realistic?"
         ),
         "ask_timeframe": (
-            "What timeline are you working against: now, 1-3 months, or still"
-            " researching?"
+            "What timeline are you working against: now, 1-3 months, or still researching?"
         ),
         "ask_preferred_area": (
             "Is there a preferred area or district I should keep this anchored to?"
@@ -234,12 +231,9 @@ def _localized_copy(locale: str) -> dict[str, str]:
             "What property type should I keep this inside: condo, house, or villa?"
         ),
         "ask_buyer_type": (
-            "Is this for an owner-occupier, investor, renter, or are you still"
-            " undecided?"
+            "Is this for an owner-occupier, investor, renter, or are you still undecided?"
         ),
-        "ask_contact_method": (
-            "Before handoff, please leave one contact route: email or phone."
-        ),
+        "ask_contact_method": ("Before handoff, please leave one contact route: email or phone."),
         "ready": (
             "The core context is now strong enough for advisor handoff or for the"
             " recommendation layer in the next slice."
@@ -795,8 +789,7 @@ def _context_anchor(
             "ผมจะเน้น trade-off และ next step จากสิ่งที่เพิ่งถูกเพิ่มเข้า compare"
             if locale == "th"
             else (
-                "I'll stay focused on trade-offs and next steps from what was just"
-                " added to compare"
+                "I'll stay focused on trade-offs and next steps from what was just added to compare"
             )
         )
     if recent_action == "shortlist_add":

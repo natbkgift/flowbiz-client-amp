@@ -1561,8 +1561,7 @@ def _video_publish_checklist(row: ContentVideo) -> dict[str, list[str]]:
     if not _localized_value(row.title, "en"):
         blocking.append("title.en is required")
     if not any(
-        str(value or "").strip()
-        for value in (row.youtube_url, row.youtube_id, row.video_path)
+        str(value or "").strip() for value in (row.youtube_url, row.youtube_id, row.video_path)
     ):
         blocking.append("one of youtube_url, youtube_id, or video_path is required")
 

@@ -466,7 +466,11 @@ def admin_publish_project(
         db,
         [
             p
-            for p in [row.cover_image_url, row.hero_image_url, *((row.images or []) if isinstance(row.images, list) else [])]
+            for p in [
+                row.cover_image_url,
+                row.hero_image_url,
+                *((row.images or []) if isinstance(row.images, list) else []),
+            ]
             if isinstance(p, str) and p.strip().startswith("/media/")
         ],
     )

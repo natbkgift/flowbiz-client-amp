@@ -1390,7 +1390,9 @@ def update_property(
     validation_errors = validate_property_fields(
         property_type=data.get("property_type", prop.property_type),
         transaction_type=data.get("type", prop.type),
-        price=data.get("price", float(prop.price) if isinstance(prop.price, Decimal) else prop.price),
+        price=data.get(
+            "price", float(prop.price) if isinstance(prop.price, Decimal) else prop.price
+        ),
         currency=data.get("currency", prop.currency),
         price_period=data.get("price_period", prop.price_period),
         bedrooms=data.get("bedrooms", prop.bedrooms),

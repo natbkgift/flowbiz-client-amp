@@ -109,8 +109,10 @@ def _build_publishable_project_payload(
         "summary": summary or {"en": {"title": "Project Summary"}, "th": {"title": "สรุปโครงการ"}},
         "highlights": highlights or ["near_beach", "sea_view"],
         "amenities": amenities or ["pool", "gym"],
-        "investment_snapshot": investment_snapshot or {"source": "Internal Desk", "updated_at": "2026-02-27"},
-        "location": location or {"label": "Central Pattaya", "context": {"en": "Beachfront corridor"}},
+        "investment_snapshot": investment_snapshot
+        or {"source": "Internal Desk", "updated_at": "2026-02-27"},
+        "location": location
+        or {"label": "Central Pattaya", "context": {"en": "Beachfront corridor"}},
     }
 
 

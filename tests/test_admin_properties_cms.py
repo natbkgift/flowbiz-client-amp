@@ -433,8 +433,12 @@ def test_publish_and_bulk_status_reject_db_seeded_invalid_property_fields(
     cover = f"/media/library/{uuid4()}.jpg"
     _add_media_asset(path=cover, rights_status="approved", approval_status="approved")
 
-    publish_created = _create_property(client, headers, slug=f"publish-invalid-{uuid4()}", cover=cover)
-    bulk_created = _create_property(client, headers, slug=f"bulk-status-invalid-{uuid4()}", cover=cover)
+    publish_created = _create_property(
+        client, headers, slug=f"publish-invalid-{uuid4()}", cover=cover
+    )
+    bulk_created = _create_property(
+        client, headers, slug=f"bulk-status-invalid-{uuid4()}", cover=cover
+    )
 
     with SessionLocal() as db:
         publish_row = db.get(Property, UUID(publish_created["id"]))

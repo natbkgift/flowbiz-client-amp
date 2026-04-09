@@ -1244,16 +1244,15 @@ def admin_dashboard_health_summary(
     conversion_successes_7d = int(conversion_counts_7d.get("form_success") or 0)
     conversion_errors_7d = int(conversion_counts_7d.get("form_error") or 0)
     conversion_rate_7d = conversion_funnel.get("success_rate_7d")
-    conversion_top_source = str(
-        conversion_funnel.get("top_lead_source_7d")
-        or conversion_funnel.get("top_source_route_7d")
-        or ""
-    ).strip() or None
-    if (
-        conversion_starts_7d == 0
-        and conversion_submits_7d == 0
-        and conversion_successes_7d == 0
-    ):
+    conversion_top_source = (
+        str(
+            conversion_funnel.get("top_lead_source_7d")
+            or conversion_funnel.get("top_source_route_7d")
+            or ""
+        ).strip()
+        or None
+    )
+    if conversion_starts_7d == 0 and conversion_submits_7d == 0 and conversion_successes_7d == 0:
         conversion_status = "unknown"
         conversion_summary = "No inquiry funnel events recorded in the last 7 days."
         warnings.append("lead_funnel_events_missing")

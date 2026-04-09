@@ -16,9 +16,7 @@ def _ai_event_payload(ai_session_id: str | None) -> dict:
 
 def _unique_future_now(month: int, day: int, hour: int) -> datetime:
     minute_offset = int(uuid4().hex[:4], 16) % 720
-    return datetime(2035, month, day, hour, 0, tzinfo=UTC) + timedelta(
-        minutes=minute_offset
-    )
+    return datetime(2035, month, day, hour, 0, tzinfo=UTC) + timedelta(minutes=minute_offset)
 
 
 def test_ai_chat_uses_session_memory_to_avoid_repeating_questions(client):

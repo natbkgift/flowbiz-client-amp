@@ -190,9 +190,7 @@ def _source_query_params(source_page: str | None) -> dict[str, str]:
 
     query = parse_qs(urlparse(normalized).query)
     return {
-        key: values[0]
-        for key, values in query.items()
-        if values and str(values[0] or "").strip()
+        key: values[0] for key, values in query.items() if values and str(values[0] or "").strip()
     }
 
 
@@ -287,7 +285,12 @@ def _infer_lead_type(payload: InquiryCreate) -> str:
         return "investor"
     if purpose == "sell" or user_intent == "sell" or intent == "sell":
         return "owner"
-    if purpose == "buy" or user_intent == "buy" or intent in {"buy", "project_consultation", "project_shortlist", "project_compare", "viewing"}:
+    if (
+        purpose == "buy"
+        or user_intent == "buy"
+        or intent
+        in {"buy", "project_consultation", "project_shortlist", "project_compare", "viewing"}
+    ):
         return "buyer"
     return "undecided"
 
@@ -304,13 +307,21 @@ def _infer_offer_family(payload: InquiryCreate, property_row: Property | None) -
     purpose = _normalize_token(_extract_tag_value(payload.tags, "purpose:"))
     entity_type = _normalize_token(_extract_tag_value(payload.tags, "entity_type:"))
     source_route = _normalize_token(_extract_tag_value(payload.tags, "source_route:"))
-    has_project_scope = bool(_extract_tag_value(payload.tags, "project:")) or bool(_extract_tag_value(payload.tags, "project_scope:"))
+    has_project_scope = bool(_extract_tag_value(payload.tags, "project:")) or bool(
+        _extract_tag_value(payload.tags, "project_scope:")
+    )
 
     if purpose == "rent":
         return "rental"
     if entity_type == "project" or source_route == "project" or has_project_scope:
         return "new_project"
-    if entity_type in {"shortlist", "recommendation", "area", "route"} or source_route in {"compare", "shortlist", "contact", "shared", "area_guide"}:
+    if entity_type in {"shortlist", "recommendation", "area", "route"} or source_route in {
+        "compare",
+        "shortlist",
+        "contact",
+        "shared",
+        "area_guide",
+    }:
         return "discovery"
     return "discovery"
 
@@ -357,17 +368,28 @@ def _enrich_inquiry_payload(payload: InquiryCreate, property_row: Property | Non
         payload.area_id = property_row.area_id or payload.area_id
 
     query_params = _source_query_params(payload.source_page)
-    lead_source = _normalize_token(_extract_tag_value(payload.tags, "lead_source:")) or _infer_lead_source(payload.source_page)
+    lead_source = _normalize_token(
+        _extract_tag_value(payload.tags, "lead_source:")
+    ) or _infer_lead_source(payload.source_page)
     locale = _normalize_token(payload.locale) or _infer_locale(payload.source_page)
     lead_type = _normalize_token(payload.lead_type) or _infer_lead_type(payload)
-    offer_family = _normalize_token(payload.offer_family) or _infer_offer_family(payload, property_row)
-    inventory_source = _normalize_token(payload.inventory_source) or _infer_inventory_source(offer_family, property_row)
+    offer_family = _normalize_token(payload.offer_family) or _infer_offer_family(
+        payload, property_row
+    )
+    inventory_source = _normalize_token(payload.inventory_source) or _infer_inventory_source(
+        offer_family, property_row
+    )
     source_platform = _normalize_source_platform_hint(payload.source_platform)
     if source_platform is None:
-        source_platform = _normalize_source_platform_hint(
-            query_params.get("utm_source") or query_params.get("source")
-        ) or "website"
-    campaign_name = payload.campaign_name or query_params.get("utm_campaign") or query_params.get("campaign")
+        source_platform = (
+            _normalize_source_platform_hint(
+                query_params.get("utm_source") or query_params.get("source")
+            )
+            or "website"
+        )
+    campaign_name = (
+        payload.campaign_name or query_params.get("utm_campaign") or query_params.get("campaign")
+    )
 
     normalized_tags = list(payload.tags or [])
     if lead_source and not _extract_tag_value(normalized_tags, "lead_source:"):
@@ -376,9 +398,17 @@ def _enrich_inquiry_payload(payload: InquiryCreate, property_row: Property | Non
     payload.tags = normalized_tags or None
     payload.locale = locale if locale in _ALLOWED_LOCALES else payload.locale
     payload.lead_type = lead_type if lead_type in _ALLOWED_LEAD_TYPES else payload.lead_type
-    payload.offer_family = offer_family if offer_family in _ALLOWED_OFFER_FAMILIES else payload.offer_family
-    payload.inventory_source = inventory_source if inventory_source in _ALLOWED_INVENTORY_SOURCES else payload.inventory_source
-    payload.source_platform = source_platform if source_platform in _ALLOWED_SOURCE_PLATFORMS else payload.source_platform
+    payload.offer_family = (
+        offer_family if offer_family in _ALLOWED_OFFER_FAMILIES else payload.offer_family
+    )
+    payload.inventory_source = (
+        inventory_source
+        if inventory_source in _ALLOWED_INVENTORY_SOURCES
+        else payload.inventory_source
+    )
+    payload.source_platform = (
+        source_platform if source_platform in _ALLOWED_SOURCE_PLATFORMS else payload.source_platform
+    )
     payload.campaign_name = campaign_name
 
     return payload
@@ -621,11 +651,13 @@ def create_inquiry(
     if candidate_filters:
         dedupe_query = dedupe_query.where(or_(*candidate_filters))
 
-    dedupe_candidates = db.scalars(
-        dedupe_query.order_by(Inquiry.created_at.desc()).limit(20)
-    ).all()
+    dedupe_candidates = db.scalars(dedupe_query.order_by(Inquiry.created_at.desc()).limit(20)).all()
     dedupe = next(
-        (candidate for candidate in dedupe_candidates if _build_inquiry_dedupe_signature(candidate) == dedupe_signature),
+        (
+            candidate
+            for candidate in dedupe_candidates
+            if _build_inquiry_dedupe_signature(candidate) == dedupe_signature
+        ),
         None,
     )
     if dedupe is not None:
@@ -683,7 +715,9 @@ def create_inquiry(
         action="follow_up_queued",
         diff={
             "follow_up_status": inquiry.follow_up_status,
-            "follow_up_due_at": inquiry.follow_up_due_at.isoformat() if inquiry.follow_up_due_at else None,
+            "follow_up_due_at": inquiry.follow_up_due_at.isoformat()
+            if inquiry.follow_up_due_at
+            else None,
             "last_action": inquiry.last_action,
             "last_event_id": inquiry.last_event_id,
             "session_id": inquiry.session_id,

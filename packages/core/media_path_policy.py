@@ -6,9 +6,7 @@ MEDIA_PUBLIC_PREFIX = "/media"
 MEDIA_LIBRARY_PREFIX = f"{MEDIA_PUBLIC_PREFIX}/library"
 MEDIA_VARIANT_PREFIX = f"{MEDIA_LIBRARY_PREFIX}/variants"
 DEFAULT_MEDIA_FALLBACK_ASSET_ID = "05032d16-54ae-45f4-bb89-3ae1fc2fa52f"
-DEFAULT_LOCAL_MEDIA_FALLBACK = (
-    f"{MEDIA_VARIANT_PREFIX}/{DEFAULT_MEDIA_FALLBACK_ASSET_ID}.webp"
-)
+DEFAULT_LOCAL_MEDIA_FALLBACK = f"{MEDIA_VARIANT_PREFIX}/{DEFAULT_MEDIA_FALLBACK_ASSET_ID}.webp"
 
 _USAGE_SCOPE_BY_ENTITY_FIELD = {
     ("project", "cover_image_url"): "project-card",
@@ -49,10 +47,7 @@ def media_variant_prefix(media_public_prefix: str | None = None) -> str:
 
 
 def default_media_fallback(media_public_prefix: str | None = None) -> str:
-    return (
-        f"{media_variant_prefix(media_public_prefix)}/"
-        f"{DEFAULT_MEDIA_FALLBACK_ASSET_ID}.webp"
-    )
+    return f"{media_variant_prefix(media_public_prefix)}/{DEFAULT_MEDIA_FALLBACK_ASSET_ID}.webp"
 
 
 def is_local_media_path(value: str | None, *, media_public_prefix: str | None = None) -> bool:

@@ -108,11 +108,11 @@ def build_ai_optimization_summary(
 
     for row in event_rows:
         analytics_session_id = _normalize_key(row.session_id)
-        session_id = _event_ai_session_id(row) or (
-            analytics_to_ai_session.get(analytics_session_id)
-            if analytics_session_id
-            else None
-        ) or analytics_session_id
+        session_id = (
+            _event_ai_session_id(row)
+            or (analytics_to_ai_session.get(analytics_session_id) if analytics_session_id else None)
+            or analytics_session_id
+        )
         if not session_id:
             continue
         stats = sessions.setdefault(session_id, _SessionStats())

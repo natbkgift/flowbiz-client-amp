@@ -542,9 +542,7 @@ def build_sales_automation_snapshot(
         if primary_label
         else "We received your request"
     )
-    confirmation_body = (
-        _confirmation_body(locale, primary_label, response_channel)
-    )
+    confirmation_body = _confirmation_body(locale, primary_label, response_channel)
     return SalesAutomationSnapshot(
         locale=locale,
         intent=normalized_intent,
