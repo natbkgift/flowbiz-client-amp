@@ -7,6 +7,7 @@ import { toRuntimeLocalMediaPath } from '@/app/_lib/local-media';
 const DEFAULT_FALLBACK_SRC = '/images/project-overview.png';
 const CONTRACT_FALLBACK_SRC = '/images/property-exterior.png';
 const LOCAL_SAFE_FALLBACK_SRC = '/images/property-placeholder.svg';
+const RUNTIME_MEDIA_PREFIX = '/api/media/';
 
 function normalizeSrc(raw: string | null | undefined): string | null {
   if (!raw) return null;
@@ -17,6 +18,11 @@ function normalizeSrc(raw: string | null | undefined): string | null {
 
 function passthroughLoader({ src }: ImageLoaderProps): string {
   return src;
+}
+
+function shouldBypassOptimization(src: string | null | undefined, unoptimized: boolean): boolean {
+  if (unoptimized) return true;
+  return String(src ?? '').trim().startsWith(RUNTIME_MEDIA_PREFIX);
 }
 
 /**
@@ -66,6 +72,7 @@ export function SafeCoverImage({
     ssrStartWithPrimary ? (initial ?? primaryFallback) : primaryFallback,
   );
   const [fallbackIndex, setFallbackIndex] = useState(0);
+  const shouldUsePassthroughLoader = shouldBypassOptimization(currentSrc, unoptimized);
 
   useEffect(() => {
     setFallbackIndex(0);
@@ -83,8 +90,8 @@ export function SafeCoverImage({
       loading={loading}
       fetchPriority={fetchPriority}
       quality={quality}
-      loader={unoptimized ? passthroughLoader : undefined}
-      unoptimized={unoptimized}
+      loader={shouldUsePassthroughLoader ? passthroughLoader : undefined}
+      unoptimized={shouldUsePassthroughLoader}
       onError={() => {
         if (initial && currentSrc === initial) {
           setFallbackIndex(0);
