@@ -99,12 +99,15 @@ function localizeAreaLabel(locale: 'en' | 'th', value: string | null | undefined
 function localizeProjectStatus(locale: 'en' | 'th', value: string | null | undefined): string | null {
   const normalized = String(value ?? '').trim().toLowerCase();
   if (!normalized) return null;
-  if (locale !== 'th') return normalized;
 
-  if (normalized === 'published') return 'เผยแพร่แล้ว';
-  if (normalized === 'draft') return 'ฉบับร่าง';
-  if (normalized === 'archived') return 'เก็บถาวร';
-  return normalized;
+  if (locale === 'th') {
+    if (normalized === 'published') return 'เปิดขาย';
+    if (normalized === 'archived') return 'ปิดการขาย';
+    return null;
+  }
+  if (normalized === 'published') return 'Available';
+  if (normalized === 'archived') return 'Sold Out';
+  return null;
 }
 
 function resolveProjectArea(project: Record<string, unknown>): string | null {
@@ -387,7 +390,7 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
         signals={[]}
         primaryAction={{
           href: withLocaleQuery(locale, '/contact', { intent: 'shortlist', source: 'projects_hero' }),
-          label: locale === 'th' ? 'คุยกับที่ปรึกษา' : dict.cta.speakToAdvisor,
+          label: dict.cta.speakToAdvisor,
           eventPayload: { cta: 'projects_shortlist', from: 'projects_hero' },
           prefetch: false,
         }}

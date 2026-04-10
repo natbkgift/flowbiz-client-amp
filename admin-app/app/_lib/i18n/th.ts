@@ -61,6 +61,8 @@ export const th: Dictionary = {
     home: 'หน้าแรก',
     invest: 'ลงทุน',
     buy: 'ซื้อสำหรับชาวต่างชาติ',
+    rent: 'เช่า',
+    sell: 'ขาย',
     live: 'อยู่จริง',
     projects: 'โครงการ',
     areaGuide: 'ไกด์พื้นที่',
@@ -151,7 +153,7 @@ export const th: Dictionary = {
     heroSecondaryCta: thMessaging.ctaLanguage.reviewProjects,
     pathInvest: {
       title: 'ลงทุน',
-      desc: 'เทียบโครงการเปิดขายและ resale ผ่านราคาเข้า ดีมานด์เช่า และ downside ที่มองเห็นได้',
+      desc: 'เทียบโครงการเปิดขายและมือสอง ผ่านราคาเข้า ดีมานด์เช่า และความเสี่ยงที่มองเห็นได้',
       cta: 'เปิดเส้นทางลงทุน',
     },
     pathBuy: {
@@ -193,7 +195,7 @@ export const th: Dictionary = {
     pathSectionTitle: 'เริ่มจากเส้นทางที่ตรงกับโจทย์ของคุณ',
     pathSectionSubtitle: 'เลือกซื้อ ลงทุน เช่า/อยู่จริง หรือขาย เพื่อให้หน้าถัดไปและรายการคัดไว้แคบลงตั้งแต่ต้น',
     trustSubtitle: 'เน้นความน่าเชื่อถือ กระบวนการชัดเจน และความโปร่งใส',
-    heroPanelTitle: 'Pattaya',
+    heroPanelTitle: 'พัทยา',
     heroPanelMeta: 'บริบทการลงทุน • ความชัดเจนการถือครอง • ที่ปรึกษา',
     featuredCentralTitle: 'พัทยากลาง',
     featuredCentralSubtitle: 'ตัวเลือกโครงการใหม่และมือสอง',
@@ -216,7 +218,7 @@ export const th: Dictionary = {
         body: 'เห็นชัดว่างบของคุณเปิดตัวเลือกอะไรได้จริง และจุดไหนที่การขยับงบไม่คุ้ม',
       },
       {
-        title: 'เช็กเส้นทางถือครองก่อน commit',
+        title: 'เช็กเส้นทางถือครองก่อนตัดสินใจ',
         body: 'โควตา การโอน และเอกสารควรถูกทำให้ชัดก่อนจะยกยูนิตใดขึ้นเป็นตัวจริง',
       },
       {
@@ -235,7 +237,7 @@ export const th: Dictionary = {
       {
         key: 'years',
         label: 'ขั้นตอนสำหรับต่างชาติ',
-        value: 'โควตา การโอน และเอกสารถูกอธิบายก่อนคุณ commit',
+        value: 'โควตา การโอน และเอกสารถูกอธิบายก่อนคุณตัดสินใจ',
       },
       {
         key: 'clients',
@@ -285,7 +287,7 @@ export const th: Dictionary = {
       supportNote:
         'ส่งงบประมาณ ทำเล และช่วงเวลาเพียงครั้งเดียว แล้วทีมจะตอบกลับด้วยรายการคัดไว้ที่พร้อมคุยต่อเรื่องโควตาต่างชาติ ค่าโอน และขั้นถัดไป',
       primaryActionLabel: 'เริ่มให้ทีมคัดตัวเลือกฝั่งซื้อ',
-      secondaryActionLabel: 'ดูโครงการที่เผยแพร่แล้ว',
+      secondaryActionLabel: 'ดูโครงการทั้งหมด',
       signals: {
         bestForTitle: 'ผู้ซื้อต่างชาติที่ต้องการรายการพร้อมขั้นถัดไปที่ชัด',
         bestForBody:
@@ -708,7 +710,7 @@ export const th: Dictionary = {
     supportNote:
       'ใช้หน้านี้เพื่อตัดสินใจเรื่องทำเล งบ และช่วงย้ายเข้าก่อน แล้วค่อยส่งรายละเอียดการเช่าครั้งเดียวเพื่อรับรายการที่ควรนัดดูต่อ',
     primaryAction: 'ส่งรายละเอียดการเช่า',
-    secondaryAction: 'ดูรายการเช่าที่เผยแพร่แล้ว',
+    secondaryAction: 'ดูรายการเช่าทั้งหมด',
     availabilityProof: 'ตรวจก่อนว่ายังมียูนิตเปิดอยู่ก่อนคุยต่อ',
     moveInProof: 'คุยเรื่องย้ายเข้าและเงื่อนไขเช่าก่อนนัด',
     whatsAppMessage:
@@ -728,7 +730,7 @@ export const th: Dictionary = {
       'ดูรายการเช่าพัทยาโดยมีบริบทเรื่องทำเล ช่วงย้ายเข้า และเงื่อนไขเช่าชัดขึ้นก่อนส่งรายละเอียดให้ทีม',
     areaTitle: 'เลือกโซนพัทยาให้ตรงวิธีใช้ชีวิตก่อนนัดดูห้อง',
     areaDesc:
-      'เริ่มจากไลฟ์สไตล์ การเดินทาง และระยะเวลาพักอาศัย เพื่อกรองว่า Central Pattaya, Jomtien หรือ Pratumnak เหมาะกับคุณจริง',
+      'เริ่มจากไลฟ์สไตล์ การเดินทาง และระยะเวลาพักอาศัย เพื่อกรองว่าพัทยากลาง จอมเทียน หรือพระตำหนัก เหมาะกับคุณจริง',
     featuredTitle: 'รายการเช่าที่ควรสแกนต่อ',
     featuredSubtitle:
       'ใช้รายการนี้เป็นการคัดรอบแรกก่อน แล้วค่อยให้ทีมช่วยเมื่อเริ่มเหลือตัวเลือกที่ควรดูจริง',
@@ -751,7 +753,7 @@ export const th: Dictionary = {
     subtitle: 'พาร์ทเนอร์และบริการที่ผ่านการคัดกรอง สำหรับผู้ซื้อชาวต่างชาติ',
     category: 'หมวดหมู่',
     featuredTitle: 'บริการแนะนำ',
-    featuredSubtitle: 'รายการที่เผยแพร่แล้ว',
+    featuredSubtitle: 'รายการแนะนำ',
     noListings: 'ยังไม่มีรายการ',
   },
   projectsPage: {
@@ -767,7 +769,7 @@ export const th: Dictionary = {
       primaryActionLabel: 'ขอคำแนะนำคัดโครงการ',
     },
     proofs: {
-      publishedProjectsTemplate: '{count} โครงการที่เผยแพร่แล้ว',
+      publishedProjectsTemplate: '{count} โครงการที่เปิดขาย',
       entryFromPrefix: 'เริ่มต้น',
       luxuryProjectsTemplate: '{count} โครงการกลุ่มลักชัวรี',
       verifiedData: 'ข้อมูลตรวจสอบแล้ว',
@@ -778,7 +780,7 @@ export const th: Dictionary = {
       areaFallback: 'พัทยา',
       entryLabel: 'เริ่ม',
       statusLabel: 'สถานะ',
-      publishedStatus: 'โครงการที่เผยแพร่แล้ว',
+      publishedStatus: 'เปิดขาย',
       reviewAction: 'ดูสรุปโครงการ',
     },
     empty: {
@@ -846,30 +848,30 @@ export const th: Dictionary = {
       subtitle: 'ลำดับการทำงานและหลักการตัดสินใจที่ทีมใช้เมื่อรับโจทย์จริง',
       relatedTitle: 'ขั้นถัดไปที่เกี่ยวข้อง',
       relatedBullets: [
-        'กลับไปดูทีมและบทบาทที่เผยแพร่แล้ว',
-        'ดูเสียงจากลูกค้าที่เผยแพร่แล้วก่อนส่งรายละเอียด',
-        'ไปต่อที่ contact เมื่อพร้อมอธิบายงบ เป้าหมาย และทำเล',
+        'กลับไปดูทีมและความเชี่ยวชาญของแต่ละคน',
+        'อ่านรีวิวจากลูกค้าก่อนส่งรายละเอียด',
+        'ไปต่อที่หน้าติดต่อเมื่อพร้อมอธิบายงบ เป้าหมาย และทำเล',
       ],
       actionLabel: 'เปิดหน้าเราทำงานอย่างไร',
     },
     teamSection: {
-      title: 'ทีมที่เผยแพร่แล้ว',
-      subtitle: 'แสดงเฉพาะสมาชิกทีมที่เผยแพร่แล้วจากหลังบ้าน',
-      bioFallback: 'โปรไฟล์ทีมจะอัปเดตจาก CMS โดยตรง',
-      emptyTitle: 'ทีมจะปรากฏที่นี่เมื่อมีการเผยแพร่',
-      emptyBody: 'เพิ่มหรือเผยแพร่สมาชิกทีมจากหลังบ้าน แล้วหน้านี้จะอัปเดตตามจริง',
+      title: 'ทีมของเรา',
+      subtitle: 'รู้จักทีมที่ปรึกษาของ AMP ที่พร้อมดูแลคุณ',
+      bioFallback: 'ที่ปรึกษา AMP ประจำพัทยา',
+      emptyTitle: 'กำลังอัปเดตข้อมูลทีม',
+      emptyBody: 'ข้อมูลทีมกำลังอัปเดต กรุณากลับมาอีกครั้งในภายหลัง',
     },
     proofSection: {
-      title: 'สัญญาณยืนยันการเผยแพร่',
-      subtitle: 'สัญญาณที่ช่วยยืนยันว่าหน้านี้ผูกกับข้อมูลที่เผยแพร่จริง',
+      title: 'ทำไมถึงเชื่อถือ AMP ได้',
+      subtitle: 'ข้อมูลจริงที่ยืนยันความน่าเชื่อถือของบริการ',
     },
     reviewsSection: {
-      title: 'เสียงจากลูกค้าที่เผยแพร่แล้ว',
-      subtitle: 'ใช้เฉพาะคำรับรองที่เผยแพร่แล้วจากหลังบ้าน',
+      title: 'เสียงจากลูกค้า',
+      subtitle: 'สิ่งที่ลูกค้าพูดถึงประสบการณ์กับ AMP',
       attributionFallback: 'ลูกค้า AMP',
-      contextFallback: 'รีวิวที่เผยแพร่แล้วจากระบบ',
-      emptyTitle: 'รีวิวจะปรากฏเมื่อมีการเผยแพร่',
-      emptyBody: 'เผยแพร่คำรับรองจากหลังบ้านแล้วส่วนนี้จะอัปเดตอัตโนมัติ',
+      contextFallback: 'ลูกค้า AMP Pattaya',
+      emptyTitle: 'กำลังอัปเดตรีวิว',
+      emptyBody: 'รีวิวจากลูกค้ากำลังอัปเดต กรุณากลับมาอีกครั้งในภายหลัง',
     },
   },
   deepReview: {
@@ -898,10 +900,10 @@ export const th: Dictionary = {
     invest: 'ลงทุน',
     budgetLabel: 'งบประมาณ',
     budgetSelect: 'เลือกงบประมาณ',
-    budgetUnder3m: 'ต่ำกว่า 3M THB',
-    budget3to5m: '3–5M THB',
-    budget5to8m: '5–8M THB',
-    budget8mPlus: '8M+ THB',
+    budgetUnder3m: 'ต่ำกว่า 3 ล้านบาท',
+    budget3to5m: '3–5 ล้านบาท',
+    budget5to8m: '5–8 ล้านบาท',
+    budget8mPlus: '8 ล้านบาทขึ้นไป',
     budgetNotSure: 'ยังไม่แน่ใจ',
     timelineLabel: 'ไทม์ไลน์',
     timelineSelect: 'เลือกไทม์ไลน์',
@@ -948,7 +950,7 @@ export const th: Dictionary = {
     viewProject: 'ดูโครงการ',
     compare: 'เปรียบเทียบ',
     noProjects: 'ไม่พบข้อมูลโครงการ',
-    noProjectsDescription: 'ถ้ายังไม่มีโครงการที่เผยแพร่ในระบบ ให้เริ่มจากหน้าโครงการ',
+    noProjectsDescription: 'ยังไม่พบโครงการ ลองเริ่มจากหน้าโครงการแทน',
     goToProjects: 'ไปหน้าโครงการ',
     notesTitle: 'หมายเหตุ (v1)',
     notesDescription: 'ตอนนี้คะแนนใช้ข้อมูลที่มีอยู่ เช่น ผลตอบแทนและราคาเฉลี่ยของพื้นที่ และยังไม่รวมข้อมูลปีสร้างหรือโควต้าจริง',
@@ -982,7 +984,7 @@ export const th: Dictionary = {
     interestedHeading: 'สนใจอสังหาฯ นี้?',
     interestedMessage: 'ผม/ดิฉัน สนใจอสังหาฯ นี้ กรุณาติดต่อกลับ',
     projectNotFound: 'ไม่พบโครงการ',
-    projectMayBeUnpublished: 'โครงการนี้อาจยังไม่ได้เผยแพร่',
+    projectMayBeUnpublished: 'ไม่พบข้อมูลโครงการนี้',
     projectMetaDescription: 'ภาพรวมโครงการพร้อมคำแนะนำสำหรับผู้ซื้อชาวต่างชาติ',
     projectSubtitle: 'คำแนะนำสำหรับผู้ซื้อชาวต่างชาติ พร้อมขั้นตอนถัดไปที่ชัดเจน',
     galleryPhoto: 'รูปภาพทรัพย์สิน',
@@ -1157,8 +1159,8 @@ export const th: Dictionary = {
     termsOfService: 'ข้อกำหนดการใช้บริการ',
     pdpaNotice: 'สอดคล้องกับ PDPA และ GDPR',
     contactEmail: '',
-    facebookUrl: 'https://facebook.com/flowbiz',
-    facebookLabel: 'facebook.com/flowbiz',
+    facebookUrl: 'https://facebook.com/amppattaya',
+    facebookLabel: 'facebook.com/amppattaya',
   },
   listing: {
     filtersAndSort: 'ตัวกรองและจัดเรียง',
@@ -1173,8 +1175,8 @@ export const th: Dictionary = {
     listings: 'รายการ',
     viewDetails: 'ดูรายละเอียด',
     projectsSubtitle: 'จัดกลุ่มตามโครงการ / ชื่ออาคาร',
-    publishedProjects: 'โครงการที่เผยแพร่แล้ว',
-    exploreProjectsDesc: 'สำรวจโครงการที่เผยแพร่ในพัทยา',
+    publishedProjects: 'โครงการทั้งหมด',
+    exploreProjectsDesc: 'สำรวจโครงการในพัทยา',
     startingFrom: 'เริ่มต้น',
   },
   filters: {

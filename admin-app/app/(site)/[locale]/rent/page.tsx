@@ -41,6 +41,19 @@ export default async function RentPage(props: { params: Promise<{ locale: string
     res = { data: [], meta: { page: 1, limit: 60, total: 0 } };  // graceful degradation
   }
 
+  // Safety-net: exclude non-Pattaya-area listings, seed/test data, and miscategorised sale listings
+  const PATTAYA_CITIES = ['pattaya', 'jomtien', 'na jomtien', 'bang lamung', 'banglamung', 'wongamat', 'pratumnak', 'bang saray', 'huay yai', 'khao talo'];
+  const MAX_REASONABLE_MONTHLY_RENT = 500_000; // THB – anything above is almost certainly a sale price
+  const pattayaListings = (res.data ?? []).filter((item) => {
+    const title = (item.title ?? '').toLowerCase();
+    if (title.includes('seed listing') || title.includes('seed content')) return false;
+    if (title.includes('for sale')) return false;
+    const price = typeof item.price === 'number' && Number.isFinite(item.price) ? item.price : 0;
+    if (price > MAX_REASONABLE_MONTHLY_RENT) return false;
+    const city = (item.city ?? '').toLowerCase();
+    return !city || PATTAYA_CITIES.some((allowed) => city.includes(allowed));
+  });
+
   const rentProofs = [dict.rent.availabilityProof, dict.rent.moveInProof, ...advisoryProofs].slice(0, 4);
 
   return (
@@ -108,7 +121,7 @@ export default async function RentPage(props: { params: Promise<{ locale: string
             <h2 className="section-title">{dict.rent.featuredTitle}</h2>
             <p className="section-subtitle">{dict.rent.featuredSubtitle}</p>
           </div>
-          <ListingGrid items={res.data ?? []} />
+          <ListingGrid items={pattayaListings} />
         </Container>
       </section>
 

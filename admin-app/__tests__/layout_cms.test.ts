@@ -45,6 +45,6 @@ describe("layout cms resolver", () => {
       },
     });
     const resolved = resolveLayoutCms("en", en, raw);
-    expect(resolved.footer.contact.facebookUrl).toBe("https://facebook.com/flowbiz");
+    expect(resolved.footer.contact.facebookUrl).toBe("https://facebook.com/amppattaya");
   });
 });

@@ -55,17 +55,26 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     res = { data: [], meta: { page: 1, limit: 60, total: 0 } };  // graceful degradation
   }
 
-  const featuredItems = (res.data ?? []).slice(0, 3);
-  const hiddenItemCount = Math.max(0, (res.data?.length ?? 0) - featuredItems.length);
-  const liveEntryPrice = (res.data ?? [])
+  // Safety-net: exclude non-Pattaya-area listings and seed/test data
+  const PATTAYA_CITIES = ['pattaya', 'jomtien', 'na jomtien', 'bang lamung', 'banglamung', 'wongamat', 'pratumnak', 'bang saray', 'huay yai', 'khao talo'];
+  const data = (res.data ?? []).filter((item) => {
+    const title = (item.title ?? '').toLowerCase();
+    if (title.includes('seed listing') || title.includes('seed content')) return false;
+    const city = (item.city ?? '').toLowerCase();
+    return !city || PATTAYA_CITIES.some((allowed) => city.includes(allowed));
+  });
+
+  const featuredItems = data.slice(0, 3);
+  const hiddenItemCount = Math.max(0, data.length - featuredItems.length);
+  const liveEntryPrice = data
     .map((item) => item.price)
     .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0)
     .sort((left, right) => left - right)[0] ?? null;
-  const luxuryReadyCount = (res.data ?? []).filter((item) =>
+  const luxuryReadyCount = data.filter((item) =>
     typeof item.price === 'number' && Number.isFinite(item.price) && item.price >= 10_000_000
   ).length;
   const buyProofs = [
-    applyCountTemplate(copy.proofReadyListingsTemplate, res.data?.length ?? 0),
+    applyCountTemplate(copy.proofReadyListingsTemplate, data.length),
     liveEntryPrice
       ? `${copy.entryFromPrefix} THB ${Math.round(liveEntryPrice).toLocaleString()}`
       : null,

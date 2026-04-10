@@ -12,6 +12,24 @@ import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton'
 
 const PROPERTY_CARD_FALLBACK = '/images/property-placeholder.svg';
 
+/** Strip syndication suffixes (e.g. "- #RT04076 | Renthai") from property titles. */
+function cleanPropertyTitle(raw: string): string {
+  return raw
+    .replace(/\s*-\s*#[A-Z0-9]+\s*\|\s*\w+$/i, '')
+    .replace(/\s*\|\s*Renthai$/i, '')
+    .trim() || raw;
+}
+
+/** Pick the best available localized title for a property. */
+function resolvePropertyTitle(
+  locale: 'en' | 'th',
+  item: PropertyListItem & { title_i18n?: Record<string, string> | null },
+): string {
+  const localized = item.title_i18n?.[locale] || item.title_i18n?.en || item.title_i18n?.th;
+  const raw = String(localized || item.title || '').trim();
+  return cleanPropertyTitle(raw);
+}
+
 type PropertyDecisionSignal = {
   transactionLabel: string;
   priceLabel: string;
@@ -124,6 +142,7 @@ export function PropertyCard({
   dict: Dictionary;
   locale: 'en' | 'th';
 }) {
+  const displayTitle = resolvePropertyTitle(locale, item as PropertyListItem & { title_i18n?: Record<string, string> | null });
   const href = item.slug
     ? withLocale(locale, `/property/${encodeURIComponent(item.slug)}`)
     : withLocale(locale, item.type === 'rent' ? '/rent' : '/buy');
@@ -140,7 +159,7 @@ export function PropertyCard({
         <div className="card-image property-card__media">
           <SafeCoverImage
             src={img}
-            alt={item.title}
+            alt={displayTitle}
             fallbackSrc={PROPERTY_CARD_FALLBACK}
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover property-card__image"
@@ -166,7 +185,7 @@ export function PropertyCard({
             <div className="card-price property-card__price">{formatPriceTHB(Number(item.price), locale)}</div>
           </div>
           <div className="property-card__copy">
-            <div className="card-title property-card__title">{item.title}</div>
+            <div className="card-title property-card__title">{displayTitle}</div>
             <div className="card-location property-card__location">{propertyLocation}</div>
           </div>
           <div
