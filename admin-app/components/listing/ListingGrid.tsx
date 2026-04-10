@@ -74,17 +74,17 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
   const smartFinderPrompt = noResultsPromptVisible
     ? {
         variant: 'empty' as const,
-        kicker: locale === 'th' ? 'Undecided moment' : 'Undecided moment',
-        title: locale === 'th' ? 'ตัวกรองชุดนี้ยังไม่เหลือ listing ที่พร้อมตัดสินใจต่อ' : 'This filter set is not leaving you with a decision-ready listing',
+        kicker: locale === 'th' ? 'ช่วงที่ยังลังเล' : 'Undecided moment',
+        title: locale === 'th' ? 'ตัวกรองชุดนี้ยังไม่เหลือตัวเลือกที่พร้อมให้ตัดสินใจต่อ' : 'This filter set is not leaving you with a decision-ready listing',
         body: locale === 'th'
-          ? 'ถ้าโจทย์เริ่มแคบเกินไป ให้ใช้ Smart Finder เพื่อจัด intent ใหม่ก่อน แล้วค่อยกลับมาดู live inventory อีกครั้ง'
+          ? 'ถ้าเงื่อนไขเริ่มแคบเกินไป ให้ใช้ตัวช่วยคัดตัวเลือกช่วยจัดโจทย์ใหม่ก่อน แล้วค่อยกลับมาดูรายการอีกครั้ง'
           : 'If the brief has become too narrow, use Smart Finder to reframe the intent before you come back to the live inventory.',
         lines: [
           locale === 'th'
-            ? 'Smart Finder เหมาะเมื่อคุณยังไม่มั่นใจเรื่องงบ เวลา หรือกรอบการใช้งานหลักของทรัพย์ที่ต้องการ'
+            ? 'ตัวช่วยคัดตัวเลือกเหมาะเมื่อคุณยังไม่มั่นใจเรื่องงบ เวลา หรือรูปแบบการใช้งานหลักของทรัพย์ที่ต้องการ'
             : 'Smart Finder works best when budget, timing, or primary use case is still uncertain.',
           locale === 'th'
-            ? 'ถ้าต้องการกลับไปสแกนคลังเดิม ให้รีเซ็ตกลับสู่หน้า listing หลักของเส้นทางนี้'
+            ? 'ถ้าต้องการกลับไปดูคลังเดิม ให้รีเซ็ตกลับสู่หน้ารายการหลักของเส้นทางนี้'
             : 'If you want the live catalogue back, reset to the base listing route for this path.',
         ],
         primaryHref: withLocaleQuery(locale, '/smart-finder', {
@@ -95,22 +95,22 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
         }),
         primaryLabel: dict.advisory.useSmartFinder,
         secondaryHref: listingBaseHref,
-        secondaryLabel: locale === 'th' ? 'รีเซ็ตกลับสู่ listing ทั้งหมด' : 'Reset to the full listing set',
+        secondaryLabel: locale === 'th' ? 'รีเซ็ตกลับสู่รายการทั้งหมด' : 'Reset to the full listing set',
       }
     : broadResultsPromptVisible
       ? {
           variant: 'broad' as const,
-          kicker: locale === 'th' ? 'Recommendation prompt' : 'Recommendation prompt',
-          title: locale === 'th' ? 'ผลลัพธ์ยังกว้างเกินไปสำหรับเปิดการ์ดต่อแบบสุ่ม' : 'The result set is still too broad to keep opening cards at random',
+          kicker: locale === 'th' ? 'จุดที่ควรบีบโจทย์ให้ชัด' : 'Recommendation prompt',
+          title: locale === 'th' ? 'ผลลัพธ์ยังกว้างเกินไปสำหรับการเปิดดูทีละการ์ดแบบสุ่ม' : 'The result set is still too broad to keep opening cards at random',
           body: locale === 'th'
-            ? 'ถ้ายังแยกไม่ออกว่าควรเริ่มจากยูนิตแบบไหน ให้ใช้ Smart Finder ช่วยบีบ intent ก่อน แล้วค่อยกลับมาสแกนการ์ดที่เหลือ'
+            ? 'ถ้ายังแยกไม่ออกว่าควรเริ่มจากยูนิตแบบไหน ให้ใช้ตัวช่วยคัดตัวเลือกช่วยบีบโจทย์ก่อน แล้วค่อยกลับมาสแกนการ์ดที่เหลือ'
             : 'If you still cannot tell which unit profile deserves the next click, let Smart Finder compress the brief first and then come back to scan the remaining cards.',
           lines: [
             locale === 'th'
-              ? 'ใช้ Smart Finder เมื่อชุดผลลัพธ์ยังดู “ถูกทั้งหมดนิดหน่อย” มากกว่าจะมีตัวเต็งที่ชัดจริง'
+              ? 'ใช้ตัวช่วยคัดตัวเลือกเมื่อชุดผลลัพธ์ยังดู “พอได้หลายตัว” มากกว่าจะมีตัวเต็งที่ชัดจริง'
               : 'Use Smart Finder when the live set still feels vaguely right across too many options.',
             locale === 'th'
-              ? 'กลับมาที่ listing shell นี้เมื่อ brief แคบพอสำหรับเทียบ trade-off ระดับยูนิตจริง'
+              ? 'กลับมาที่หน้ารายการนี้เมื่อโจทย์แคบพอสำหรับเทียบข้อได้เปรียบและข้อแลกเปลี่ยนระดับยูนิต'
               : 'Come back to this listing shell once the brief is narrow enough for real unit-level tradeoffs.',
           ],
           primaryHref: withLocaleQuery(locale, '/smart-finder', {
@@ -157,7 +157,7 @@ export function ListingGrid({ items }: { items: PropertyListItem[] }) {
               <div className="results-count">{sorted.length} {dict.listing.results}</div>
               <p className="results-header__note">
                 {locale === 'th'
-                  ? 'สแกนการ์ดก่อน เปิดรายละเอียดเมื่อยูนิตนั้นผ่าน first pass แล้วค่อยบันทึกลง shortlist'
+                  ? 'สแกนการ์ดก่อน เปิดรายละเอียดเมื่อยูนิตนั้นผ่านการคัดรอบแรกแล้วค่อยบันทึกไว้'
                   : 'Scan the cards first. Open details when a unit survives the first pass, then save it to the shortlist.'}
               </p>
               <div className="results-header__summary" aria-label={locale === 'th' ? 'สรุปผลลัพธ์ปัจจุบัน' : 'Current result summary'}>

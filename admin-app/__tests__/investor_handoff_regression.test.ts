@@ -412,7 +412,7 @@ describe('investor handoff regression', () => {
       }),
     );
 
-    expect(screen.getByRole('heading', { name: /สรุปการประเมิน buying cost ที่ส่งต่อมาจาก estimator/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /สรุปการประเมินค่าใช้จ่ายซื้อที่ส่งต่อมาจากเครื่องคำนวณ/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /สรุปบริบทนักลงทุนที่ส่งต่อมา/i })).toBeTruthy();
     expect(screen.getByText(/ราคาซื้อเป้าหมาย: ฿8,200,000/i)).toBeTruthy();
     expect(screen.getByText(/บริบทการซื้อ: บริบทการซื้อแบบผู้ซื้อต่างชาติ/i)).toBeTruthy();

@@ -7,9 +7,9 @@ function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
       title: 'มุมมองโครงการ',
-      subtitle: 'บริบทของโครงการ สัญญาณสำหรับ shortlist และเส้นทางถัดไปจากทีมที่ปรึกษา',
+      subtitle: 'บริบทของโครงการ สัญญาณสำหรับรายการคัดไว้ และเส้นทางถัดไปจากทีมที่ปรึกษา',
       contact: 'คุยกับที่ปรึกษา',
-      finder: 'ใช้ Smart Finder',
+      finder: 'ใช้ตัวช่วยคัดตัวเลือก',
       loading: 'AMP Project View',
     };
   }

@@ -64,7 +64,7 @@ export default async function InvestmentPage(props: { params: Promise<{ locale: 
             kicker: dict.advisory.trustSignal,
             title: locale === 'th' ? 'มีทั้งความรู้เรื่องการถือครองและการปิดดีล' : 'Ownership context with execution support',
             body: locale === 'th'
-              ? 'เราเชื่อมข้อมูลเชิงกฎหมายกับการคัด inventory และ flow ปิดดีลให้ต่อกัน'
+              ? 'เราเชื่อมข้อมูลเชิงกฎหมายกับการคัดตัวเลือกและขั้นตอนปิดดีลให้ต่อกัน'
               : 'We connect legal framing, inventory curation, and execution steps in one advisory workflow.',
             icon: 'shield',
           },

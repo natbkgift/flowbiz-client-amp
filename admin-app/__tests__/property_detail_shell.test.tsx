@@ -135,13 +135,15 @@ describe('property detail shell', () => {
     expect(markup).toContain('สัญญาณช่วยตัดสินใจระดับยูนิต');
     expect(markup).toContain('จุดเด่นระดับยูนิต');
     expect(markup).toContain('อ่านทำเลนี้อย่างไร');
-    expect(markup).toContain('เหตุผลที่ยูนิตนี้ควรอยู่ต่อใน shortlist');
+    expect(markup).toContain('เหตุผลที่ยูนิตนี้ควรอยู่ต่อในรายการคัดไว้');
     expect(markup).toContain('เครื่องมือช่วยตัดสินใจและทางไปต่อ');
     expect(markup).toContain('คุยต่อเกี่ยวกับยูนิตนี้');
     expect(markup).toContain('ไปหน้าเปรียบเทียบ');
-    expect(markup).toContain('การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิต');
+    expect(markup).toContain('การส่งรายละเอียดจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิต');
     expect(markup).not.toContain('inventory');
     expect(markup).not.toContain('listing brief');
+    expect(markup).not.toContain('เหตุผลที่ยูนิตนี้ควรอยู่ต่อใน shortlist');
+    expect(markup).not.toContain('การส่งบรีฟจากหน้านี้');
     expect(markup).not.toContain('next move');
   });
 

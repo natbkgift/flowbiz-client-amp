@@ -51,17 +51,24 @@ export function Footer({
     : facebookLabelRaw;
   const showFacebookLink = facebookUrl && !/flowbiz/i.test(facebookUrl);
   const brandTitle = locale === 'th'
-    ? 'ที่ปรึกษาอสังหาฯ พัทยา'
-    : 'Pattaya real estate advisory';
+    ? 'ที่ปรึกษาอสังหาริมทรัพย์พัทยา'
+    : 'Pattaya property advisory';
   const brandBody = locale === 'th'
-    ? 'โครงการ ยูนิต และคำแนะนำสำหรับซื้อ ลงทุน เช่า หรือขายในพัทยา'
-    : 'Projects, units, and guidance for buying, investing, renting, or selling in Pattaya.';
+    ? 'คัดโครงการ ยูนิต และขั้นตอนถัดไปให้ชัดขึ้น สำหรับการซื้อ ลงทุน เช่า หรือขายในพัทยา'
+    : 'Curated projects, units, and next-step guidance for buying, investing, renting, or selling in Pattaya.';
   const routeLinks = quickLinks.filter((item) => ['/invest', '/buy', '/rent', '/sell', '/projects', '/area-guide'].includes(item.href));
   const footerRouteLinks = routeLinks.filter((item) => ['/buy', '/invest', '/rent', '/sell', '/projects'].includes(item.href));
+  const planningLinks = [
+    { href: '/smart-finder', label: locale === 'th' ? 'ตัวช่วยคัดตัวเลือก' : 'Smart Finder' },
+    { href: '/compare', label: locale === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare projects' },
+    { href: '/buying-cost-estimator', label: locale === 'th' ? 'ประเมินค่าใช้จ่ายก่อนซื้อ' : 'Buying cost estimator' },
+    { href: '/how-we-work', label: locale === 'th' ? 'วิธีที่ AMP ทำงาน' : 'How AMP works' },
+  ];
   const contactLinks = [
     { href: withLocale(locale, '/contact'), label: locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor' },
     { href: CTA.whatsAppUrl, label: dict.cta.whatsapp, external: true },
   ];
+  const trustSignals = dict.messaging.trustLanguage.proofs.slice(0, 4);
 
   return (
     <footer className="site-footer footer" role="contentinfo" data-locale={locale}>
@@ -71,6 +78,23 @@ export function Footer({
             <p className="footer-column-title" style={{ marginBottom: '12px' }}>{dict.brand.name}</p>
             <h3>{brandTitle}</h3>
             <p className="text-muted-on-dark">{brandBody}</p>
+            <p className="footer-brand__promise">{dict.messaging.valueProposition.shortlistPromise}</p>
+            <div
+              className="footer-signal-list"
+              aria-label={locale === 'th' ? 'เหตุผลที่ลูกค้าใช้ AMP Pattaya' : 'Reasons clients work with AMP Pattaya'}
+            >
+              {trustSignals.map((signal) => (
+                <span key={signal} className="footer-signal">{signal}</span>
+              ))}
+            </div>
+            <div className="footer-brand__actions">
+              <Link href={withLocale(locale, '/contact')} prefetch={false} className="footer-action footer-action--primary">
+                {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
+              </Link>
+              <Link href={withLocale(locale, '/projects')} prefetch={false} className="footer-action footer-action--secondary">
+                {locale === 'th' ? 'ดูโครงการที่เปิดอยู่' : 'View live projects'}
+              </Link>
+            </div>
           </div>
 
           <div className="footer-columns">
@@ -78,6 +102,17 @@ export function Footer({
               <p className="footer-column-title">{locale === 'th' ? 'เส้นทางหลัก' : 'Core routes'}</p>
               <ul className="footer-links">
                 {footerRouteLinks.map((item) => (
+                  <li key={item.href}>
+                    <Link href={withLocale(locale, item.href)} prefetch={false}>{item.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="footer-column-title">{locale === 'th' ? 'วางแผนและตัดสินใจ' : 'Plan and decide'}</p>
+              <ul className="footer-links">
+                {planningLinks.map((item) => (
                   <li key={item.href}>
                     <Link href={withLocale(locale, item.href)} prefetch={false}>{item.label}</Link>
                   </li>

@@ -145,7 +145,7 @@ export default async function SmartFinderPage(
 
   const headerTitle = dict.smartFinder.title;
   const headerSubtitle = locale === 'th'
-    ? 'ตอบ 5 คำถามเพื่อจัดกรอบโครงการที่ควรดูต่อ ก่อนย้ายไป compare หรือคุยกับทีม'
+    ? 'ตอบ 5 คำถามเพื่อจัดกรอบโครงการที่ควรดูต่อ ก่อนย้ายไปหน้าเปรียบเทียบหรือคุยกับทีม'
     : 'Answer 5 questions to narrow which projects deserve a closer look before compare or advisor review.';
   const selectionSummary = describeFinderSelection(locale, {
     purpose,
@@ -188,9 +188,9 @@ export default async function SmartFinderPage(
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเริ่มจาก intent ก่อน inventory' : 'Buyers who want to start from intent, not inventory',
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเริ่มจากโจทย์ก่อนเปิดดูตัวเลือก' : 'Buyers who want to start from intent, not inventory',
             body: locale === 'th'
-              ? 'เครื่องมือนี้ช่วยคัดกรอบตัดสินใจเบื้องต้นก่อนที่ทีมจะลงลึกไปยัง shortlist จริง'
+              ? 'เครื่องมือนี้ช่วยคัดกรอบตัดสินใจเบื้องต้นก่อนที่ทีมจะลงลึกไปยังรายการคัดไว้จริง'
               : 'This tool helps qualify the decision before the team moves into a deeper shortlist.',
             icon: 'trend',
           },
@@ -255,7 +255,7 @@ export default async function SmartFinderPage(
               <h2 className="card-title">{locale === 'th' ? 'หน้านี้ช่วยตัดสินใจอะไร' : 'What this route clarifies'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
-                  ? 'Smart Finder ควรช่วยจัดกรอบ intent, งบ, และระดับความเสี่ยงก่อนที่คุณจะเปิด inventory หรือ compare'
+                  ? 'เครื่องมือนี้ควรช่วยจัดกรอบโจทย์ งบ และระดับความเสี่ยงก่อนที่คุณจะเปิดดูรายการหรือหน้าเปรียบเทียบ'
                   : 'Smart Finder should sharpen intent, budget, and risk tolerance before you move into inventory or compare.'}
               </p>
             </section>
@@ -264,8 +264,8 @@ export default async function SmartFinderPage(
               <h2 className="card-title">{locale === 'th' ? 'บริบทที่เก็บได้ตอนนี้' : 'Context captured so far'}</h2>
               <p className="card-subtitle">
                 {selectionSummary.length
-                  ? (locale === 'th' ? 'คำตอบที่เลือกไว้ตอนนี้จะถูกใช้ต่อในผลลัพธ์และการ handoff รอบถัดไป' : 'The answers selected so far will carry forward into the results and the next handoff step.')
-                  : (locale === 'th' ? 'เมื่อเริ่มตอบคำถาม สรุป brief จะเริ่มชัดขึ้นที่บล็อกนี้' : 'As soon as you start answering, the current brief will collect here.')}
+                  ? (locale === 'th' ? 'คำตอบที่เลือกไว้ตอนนี้จะถูกใช้ต่อในผลลัพธ์และการส่งต่อรอบถัดไป' : 'The answers selected so far will carry forward into the results and the next handoff step.')
+                  : (locale === 'th' ? 'เมื่อเริ่มตอบคำถาม สรุปรายละเอียดจะเริ่มชัดขึ้นที่บล็อกนี้' : 'As soon as you start answering, the current brief will collect here.')}
               </p>
               {selectionSummary.length ? (
                 <ul className="bullet-list mt-3">
@@ -280,7 +280,7 @@ export default async function SmartFinderPage(
               <h2 className="card-title">{locale === 'th' ? 'ทางไปต่อหลังได้ผลลัพธ์' : 'Best next move after results'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
-                  ? 'ถ้าผลลัพธ์แคบพอ ให้ยกระดับไป compare หรือเปิด project detail; ถ้ายังไม่ชัด ให้ส่ง brief เดิมต่อให้ที่ปรึกษา'
+                  ? 'ถ้าผลลัพธ์แคบพอ ให้ยกระดับไปหน้าเปรียบเทียบหรือเปิดหน้าโครงการ; ถ้ายังไม่ชัด ให้ส่งรายละเอียดเดิมต่อให้ที่ปรึกษา'
                   : 'If the output is narrow enough, move into compare or project detail; if it is still broad, send the same brief to an advisor.'}
               </p>
             </section>
@@ -458,7 +458,7 @@ export default async function SmartFinderPage(
                   <h3 className="card-title">{dict.smartFinder.resultsTitle}</h3>
                   <p className="card-subtitle">
                     {locale === 'th'
-                      ? 'ผลลัพธ์ชุดนี้ช่วยบอกว่าควรเปิดโครงการไหนต่อ หรือพร้อมย้ายไป compare แล้วหรือยัง'
+                      ? 'ผลลัพธ์ชุดนี้ช่วยบอกว่าควรเปิดโครงการไหนต่อ หรือพร้อมย้ายไปหน้าเปรียบเทียบแล้วหรือยัง'
                       : 'These results are meant to show which projects deserve the next click and whether the set is already ready for compare.'}
                   </p>
                   {results?.query_hash ? <p className="guided-dialog__step">query_hash: {results.query_hash}</p> : null}
@@ -492,7 +492,7 @@ export default async function SmartFinderPage(
                       </Link>
                     ) : null}
                     <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-                      {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                      {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกเพิ่ม' : 'Browse shortlist-ready listings'}
                     </Link>
                   </div>
 
@@ -501,17 +501,17 @@ export default async function SmartFinderPage(
                       <span className="insight-list__body">
                         {compareTopHref
                           ? (locale === 'th'
-                              ? 'ถ้าผลลัพธ์ชุดนี้ดูใกล้เคียงกันพอแล้ว ให้เทียบ top suggestions ในหน้า compare เดิมต่อทันที'
+                              ? 'ถ้าผลลัพธ์ชุดนี้ดูใกล้เคียงกันพอแล้ว ให้เทียบตัวเลือกแนะนำชุดบนหน้าเปรียบเทียบต่อได้ทันที'
                               : 'If this result set already feels narrow enough, move the top suggestions straight into the existing compare route.')
                           : (locale === 'th'
-                              ? 'ถ้าผลลัพธ์ยังมีเพียง 1 ตัวเลือก ให้เปิด project detail หรือ browse inventory ต่อเพื่อหาตัวเทียบเพิ่ม'
+                              ? 'ถ้าผลลัพธ์ยังมีเพียง 1 ตัวเลือก ให้เปิดหน้าโครงการหรือดูรายการต่อเพื่อหาตัวเทียบเพิ่ม'
                               : 'If there is only one result so far, open the project detail or browse inventory to find a second live comparison candidate.')}
                       </span>
                     </div>
                     <div className="insight-list__item">
                       <span className="insight-list__body">
                         {locale === 'th'
-                          ? 'Smart Finder มีหน้าที่คัดกรอบการตัดสินใจ ไม่ได้แทนการอ่าน fact pattern ระดับโครงการหรือการคุยกับทีม'
+                          ? 'เครื่องมือนี้มีหน้าที่คัดกรอบการตัดสินใจ ไม่ได้แทนการอ่านข้อเท็จจริงระดับโครงการหรือการคุยกับทีม'
                           : 'Smart Finder is meant to frame the decision, not replace project-level fact checking or the advisor conversation.'}
                       </span>
                     </div>
@@ -525,7 +525,7 @@ export default async function SmartFinderPage(
                     </h3>
                     <p className="section-subtitle">
                       {locale === 'th'
-                        ? 'เราเก็บ brief ที่คุณเลือกไว้แล้ว คุณสามารถลองใหม่อีกครั้ง เริ่มใหม่ หรือส่งบริบทนี้ต่อให้ที่ปรึกษาได้โดยไม่ต้องเดาเพิ่ม'
+                        ? 'เราเก็บรายละเอียดที่คุณเลือกไว้แล้ว คุณสามารถลองใหม่อีกครั้ง เริ่มใหม่ หรือส่งบริบทนี้ต่อให้ที่ปรึกษาได้โดยไม่ต้องเดาเพิ่ม'
                         : 'Your current brief is still intact. You can retry, start over, or hand this context to an advisor without guessing from a blank screen.'}
                     </p>
                     <div className="cta-row mt-4">
@@ -557,7 +557,7 @@ export default async function SmartFinderPage(
                         {dict.cta.speakToAdvisor}
                       </Link>
                       <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
-                        {locale === 'th' ? 'ดู inventory เพิ่ม' : 'Browse more inventory'}
+                        {locale === 'th' ? 'ดูตัวเลือกเพิ่ม' : 'Browse more inventory'}
                       </Link>
                     </div>
                   </div>
@@ -599,7 +599,7 @@ export default async function SmartFinderPage(
                             {dict.smartFinder.viewProject}
                           </Link>
                           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-                            {locale === 'th' ? 'ดู inventory เพิ่ม' : 'Browse more inventory'}
+                            {locale === 'th' ? 'ดูตัวเลือกเพิ่ม' : 'Browse more inventory'}
                           </Link>
                         </div>
                       </div>

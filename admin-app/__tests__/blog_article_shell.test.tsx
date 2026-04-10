@@ -54,7 +54,7 @@ describe('blog article shell', () => {
 
     expect(markup).toContain('blog_consultation_primary');
     expect(markup).toContain('blog-next-step-links');
-    expect(markup).toContain('ส่งบรีฟให้ที่ปรึกษา');
+    expect(markup).toContain('ส่งรายละเอียดให้ที่ปรึกษา');
     expect(markup).toContain('แปลงบทความเป็นแผนต่อ');
     expect(markup).toContain('อ่านมุมมองการลงทุนต่อ');
     expect(markup).toContain('คู่มือทำเล');

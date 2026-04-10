@@ -88,20 +88,20 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
     buyer: {
       eyebrow: locale === 'th' ? 'เส้นทางอยู่อาศัย' : 'Lifestyle track',
       title: locale === 'th'
-        ? 'เริ่มจากยูนิตที่อยู่จริงได้ก่อน แล้วค่อยลงลึกเฉพาะสิ่งที่ยังไม่ชัด'
+        ? 'เริ่มจากตัวเลือกที่อยู่จริงได้ก่อน แล้วค่อยลงลึกเฉพาะจุดที่ยังไม่ชัด'
         : 'Open the livable inventory first, then go deeper only where you still need certainty.',
       copy: locale === 'th'
-        ? 'ลำดับนี้ช่วยให้ผู้ซื้ออยู่อาศัยจริงเห็นทำเลและตัวเลือกที่ใช้งานได้ก่อน ไม่ต้องไหลไปกับหน้าเนื้อหาที่ยาวเกินจำเป็น'
+        ? 'ลำดับนี้ช่วยให้ผู้ซื้อเพื่ออยู่อาศัยเห็นทำเลและตัวเลือกที่พร้อมไปต่อก่อน โดยไม่ต้องไหลไปกับข้อมูลยาวเกินจำเป็น'
         : 'This order gets end-users and retirees into workable locations and ready options before the long-scroll content takes over.',
       order: ['buyer', 'investor', 'seller'] as RailAudience[],
     },
     investor: {
       eyebrow: locale === 'th' ? 'มุมมองนักลงทุน' : 'Investor lens',
       title: locale === 'th'
-        ? 'เริ่มจากสัญญาณผลตอบแทนก่อน แล้วค่อยเปิดยูนิตที่เหมาะกับแผนลงทุน'
+        ? 'เริ่มจากสัญญาณผลตอบแทนก่อน แล้วค่อยเปิดตัวเลือกที่ตรงแผนลงทุน'
         : 'Start with yield signals first, then open the inventory that fits the thesis.',
       copy: locale === 'th'
-        ? 'ลำดับนี้ยกเรื่องผลตอบแทนและภาพตลาดขึ้นก่อน เพื่อให้นักลงทุนคัดความเสี่ยงและจังหวะได้ก่อนเปิดดูยูนิตจำนวนมาก'
+        ? 'ลำดับนี้ยกภาพผลตอบแทนและบริบทตลาดขึ้นก่อน เพื่อให้นักลงทุนคัดความเสี่ยงและจังหวะได้ก่อนเปิดดูหลายยูนิต'
         : 'This order leads with ROI and market context so investors can filter risk and timing before opening more listings.',
       order: ['investor', 'buyer', 'seller'] as RailAudience[],
     },
@@ -111,7 +111,7 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
         ? 'เริ่มจากความมั่นใจเรื่องการประเมินราคา แล้วค่อยตัดสินใจว่าจะขายหรือปล่อยเช่า'
         : 'Start from valuation confidence, then decide whether to sell or rent out.',
       copy: locale === 'th'
-        ? 'เส้นทางนี้เหมาะกับเจ้าของทรัพย์ที่ต้องการประเมินราคา วางตำแหน่ง และเลือกทางไปต่ออย่างมีเหตุผลก่อนส่งบรีฟ'
+        ? 'เส้นทางนี้เหมาะกับเจ้าของทรัพย์ที่ต้องการประเมินราคา วางตำแหน่ง และเลือกทางไปต่ออย่างมีเหตุผลก่อนส่งรายละเอียดให้ทีม'
         : 'This route is built for owners who need a clearer valuation brief, positioning read, and next-step decision before they hand anything off.',
       order: ['seller', 'buyer', 'investor'] as RailAudience[],
     },
@@ -121,8 +121,8 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
     buyer: {
       key: 'buyer' as const,
       eyebrow: locale === 'th' ? 'ซื้ออยู่เอง' : 'Buyer',
-      label: locale === 'th' ? 'เปิดยูนิตที่พร้อมซื้อ' : 'Open buy-ready inventory',
-      detail: locale === 'th' ? 'เช็กเงื่อนไขและตัวเลือกคัดสรร' : 'Checklist and curated options',
+      label: locale === 'th' ? 'เปิดตัวเลือกที่พร้อมซื้อ' : 'Open buy-ready inventory',
+      detail: locale === 'th' ? 'เช็กเงื่อนไขและรายการที่คัดไว้' : 'Checklist and curated options',
       href: withLocale(locale, '/buy?source=home_mobile_buyer'),
       eventPayload: { cta: 'home_mobile_buyer', from: 'home_mobile_intent_rail' },
     },
@@ -130,14 +130,14 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
       key: 'investor' as const,
       eyebrow: locale === 'th' ? 'ลงทุน' : 'Investor',
       label: locale === 'th' ? 'เปิดเส้นทางลงทุน' : 'Open ROI / investment path',
-      detail: locale === 'th' ? 'ภาพตลาดและแนวทางลงทุน' : 'Market brief and investment path',
+      detail: locale === 'th' ? 'ภาพตลาดและกรอบการลงทุน' : 'Market brief and investment path',
       href: withLocale(locale, '/invest?source=home_mobile_investor'),
       eventPayload: { cta: 'home_mobile_investor', from: 'home_mobile_intent_rail' },
     },
     seller: {
       key: 'seller' as const,
       eyebrow: locale === 'th' ? 'ขาย' : 'Seller',
-      label: locale === 'th' ? 'เริ่มบรีฟประเมินราคา' : 'Start valuation brief',
+      label: locale === 'th' ? 'เริ่มประเมินฝั่งผู้ขาย' : 'Start valuation brief',
       detail: locale === 'th' ? 'ประเมินราคาและทางเลือกของเจ้าของทรัพย์' : 'Owner pricing and next-step guidance',
       href: withLocale(locale, '/sell?source=home_mobile_seller'),
       eventPayload: { cta: 'home_mobile_seller', from: 'home_mobile_intent_rail' },
@@ -148,10 +148,10 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
     : {
         eyebrow: locale === 'th' ? 'เส้นทางหลักบนมือถือ' : 'Mobile shortlist paths',
         title: locale === 'th'
-          ? 'เลือกเส้นทางที่ตรงโจทย์ก่อน แล้วค่อยไปยังขั้นตอนถัดไปที่เหมาะกว่า'
+          ? 'เลือกเส้นทางที่ตรงโจทย์ก่อน แล้วค่อยให้หน้าถัดไปแคบลงเอง'
           : 'Choose the path that fits first, then let the next step tighten around it.',
         copy: locale === 'th'
-          ? 'บล็อกนี้จะจัดลำดับตามความสนใจ เพื่อพาคุณไปยังเส้นทางซื้อ ลงทุน หรือขายที่เหมาะกว่า'
+          ? 'บล็อกนี้จะจัดลำดับตามสิ่งที่คุณกำลังมองหา เพื่อพาไปยังเส้นทางซื้อ ลงทุน หรือขายที่เหมาะกว่า'
           : 'This block settles around intent so you land in the most relevant buyer, investor, or seller route.',
         order: ['buyer', 'investor', 'seller'] as RailAudience[],
       };
@@ -185,9 +185,9 @@ export function HomeMobileIntentRail({ locale }: { locale: 'en' | 'th' }) {
               <div className="home-mobile-intent-chip__header">
                 <span className="home-mobile-intent-chip__eyebrow">{item.eyebrow}</span>
                 {isActive ? (
-                  <span className="home-mobile-intent-chip__flag">
-                    {locale === 'th' ? 'แนะนำตอนนี้' : 'Recommended now'}
-                  </span>
+                <span className="home-mobile-intent-chip__flag">
+                    {locale === 'th' ? 'เหมาะสุดตอนนี้' : 'Recommended now'}
+                </span>
                 ) : null}
               </div>
               <strong className="home-mobile-intent-chip__label">{item.label}</strong>

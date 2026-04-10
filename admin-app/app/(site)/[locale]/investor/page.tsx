@@ -52,9 +52,9 @@ export default async function InvestorPage(props: { params: Promise<{ locale: st
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เริ่มจาก smart finder หรือขอแผนลงทุน' : 'Start with Smart Finder or request a plan',
+            title: locale === 'th' ? 'เริ่มจากตัวช่วยคัดตัวเลือก หรือขอแผนลงทุน' : 'Start with Smart Finder or request a plan',
             body: locale === 'th'
-              ? 'เลือกวิธีที่ตรงกับจังหวะของคุณ แล้วค่อยพาไปสู่ shortlist ที่ลึกขึ้น'
+              ? 'เลือกวิธีที่ตรงกับจังหวะของคุณ แล้วค่อยพาไปสู่รายการคัดไว้ที่ลึกขึ้น'
               : 'Use the tool for self-qualification first, then move into a deeper advisory shortlist.',
             icon: 'check',
           },

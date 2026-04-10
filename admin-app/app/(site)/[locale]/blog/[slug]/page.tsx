@@ -132,7 +132,7 @@ export default async function BlogArticlePage(
     },
     {
       href: withLocaleQuery(locale, '/contact', { intent: 'content_consultation', article: post.slug }),
-      title: locale === 'th' ? 'ส่งบรีฟให้ที่ปรึกษา' : 'Send the brief to an advisor',
+      title: locale === 'th' ? 'ส่งรายละเอียดให้ที่ปรึกษา' : 'Send the brief to an advisor',
       body: locale === 'th' ? 'แปลงสิ่งที่อ่านเป็นรายการคัดไว้ โดยส่งงบ จุดประสงค์ และทำเลที่กำลังพิจารณา' : 'Turn the article into a shortlist conversation by sharing your budget, purpose, and preferred area.',
     },
   ];
@@ -151,7 +151,7 @@ export default async function BlogArticlePage(
             kicker: locale === 'th' ? 'ตีความให้ใช้งานได้' : 'Built for action',
             title: locale === 'th' ? 'อ่านแล้วไปต่อได้ทันที' : 'Read it, then move directly into the next step',
             body: locale === 'th'
-              ? 'บทความนี้ออกแบบมาเพื่อช่วยให้คุณคุยกับที่ปรึกษา, เทียบตัวเลือก, หรือขอ shortlist ได้ต่อทันที'
+              ? 'บทความนี้ออกแบบมาเพื่อช่วยให้คุณคุยกับที่ปรึกษา เทียบตัวเลือก หรือขอรายการคัดไว้ได้ต่อทันที'
               : 'This article is meant to shorten the distance between reading, comparing options, and asking for an advisor-led shortlist.',
             icon: 'check',
           },
@@ -167,7 +167,7 @@ export default async function BlogArticlePage(
             kicker: locale === 'th' ? 'จังหวะถัดไป' : 'Next move',
             title: locale === 'th' ? 'ต่อไปยังรายการคัดไว้หรือหน้าติดต่อ' : 'Continue into shortlist or advisor contact',
             body: locale === 'th'
-              ? 'หากเนื้อหานี้ตรงโจทย์ ให้ส่งบรีฟของคุณเพื่อให้ทีมคัดรายการที่เหมาะสม'
+              ? 'หากเนื้อหานี้ตรงโจทย์ ให้ส่งรายละเอียดของคุณเพื่อให้ทีมคัดรายการที่เหมาะสม'
               : 'If this topic matches your brief, send your requirements and let the team translate it into a tighter shortlist.',
             icon: 'shield',
           },

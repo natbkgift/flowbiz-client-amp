@@ -35,8 +35,8 @@ export function ShortlistSaveButton({
     const fallback =
       locale === 'th'
         ? action === 'remove'
-          ? 'ตรวจสอบการเชื่อมต่อแล้วลองนำออกจาก shortlist อีกครั้ง'
-          : 'ตรวจสอบการเชื่อมต่อแล้วลองบันทึก shortlist อีกครั้ง'
+          ? 'ตรวจสอบการเชื่อมต่อแล้วลองนำออกจากรายการคัดไว้อีกครั้ง'
+          : 'ตรวจสอบการเชื่อมต่อแล้วลองบันทึกลงรายการคัดไว้อีกครั้ง'
         : action === 'remove'
           ? 'Check your connection and try removing this item again.'
           : 'Check your connection and try saving this item again.';
@@ -50,13 +50,13 @@ export function ShortlistSaveButton({
 
     if (statusCode && statusCode >= 500) {
       return locale === 'th'
-        ? 'ระบบ shortlist ใช้งานไม่ได้ชั่วคราว กรุณาลองใหม่อีกครั้ง'
+        ? 'ระบบรายการคัดไว้ใช้งานไม่ได้ชั่วคราว กรุณาลองใหม่อีกครั้ง'
         : 'Shortlist is temporarily unavailable. Please try again.';
     }
 
     if (statusCode && statusCode >= 400) {
       return locale === 'th'
-        ? 'ข้อมูล shortlist เปลี่ยนไประหว่างทำรายการ กรุณาลองใหม่อีกครั้ง'
+        ? 'ข้อมูลรายการคัดไว้เปลี่ยนไประหว่างทำรายการ กรุณาลองใหม่อีกครั้ง'
         : 'Your shortlist changed before we could update it. Please try again.';
     }
 
@@ -85,7 +85,7 @@ export function ShortlistSaveButton({
       })
       .catch(() => {
         if (!isActive) return;
-        setError(locale === 'th' ? 'ยังโหลด shortlist ไม่สำเร็จ' : 'Unable to load shortlist yet.');
+        setError(locale === 'th' ? 'ยังโหลดรายการคัดไว้ไม่สำเร็จ' : 'Unable to load shortlist yet.');
       });
 
     return () => {
@@ -124,9 +124,9 @@ export function ShortlistSaveButton({
     if (pendingAction === 'save') return locale === 'th' ? 'กำลังบันทึก…' : 'Saving…';
     if (pendingAction === 'remove') return locale === 'th' ? 'กำลังนำออก…' : 'Removing…';
     if (isSaved) {
-      return locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist';
+      return locale === 'th' ? 'นำออกจากรายการคัดไว้' : 'Remove from shortlist';
     }
-    return locale === 'th' ? 'บันทึกลง shortlist' : 'Save to shortlist';
+    return locale === 'th' ? 'บันทึกลงรายการคัดไว้' : 'Save to shortlist';
   }, [isSaved, locale, pendingAction]);
 
   async function handleClick() {
@@ -140,7 +140,7 @@ export function ShortlistSaveButton({
         trackEvent('click_cta', pathname, {
           source_route: sourceSurface === 'property_detail' ? 'property' : 'shared',
           cta_type: 'secondary',
-          cta_label: locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist',
+          cta_label: locale === 'th' ? 'นำออกจากรายการคัดไว้' : 'Remove from shortlist',
           entity_type: 'property',
           entity_id: propertyId,
           user_intent: 'research',
@@ -161,7 +161,7 @@ export function ShortlistSaveButton({
         trackEvent('shortlist_add', pathname, {
           source_route: sourceSurface === 'property_detail' ? 'property' : 'shared',
           cta_type: 'secondary',
-          cta_label: locale === 'th' ? 'บันทึกลง shortlist' : 'Save to shortlist',
+          cta_label: locale === 'th' ? 'บันทึกลงรายการคัดไว้' : 'Save to shortlist',
           entity_type: 'property',
           entity_id: propertyId,
           user_intent: 'research',
@@ -192,7 +192,7 @@ export function ShortlistSaveButton({
       {typeof itemCount === 'number' && itemCount > 0 ? (
         <div>
           <Link className="shortlist-inline-link" href={withLocale(locale, '/shortlist')}>
-            {locale === 'th' ? `ดู shortlist (${itemCount})` : `View shortlist (${itemCount})`}
+            {locale === 'th' ? `ดูรายการคัดไว้ (${itemCount})` : `View shortlist (${itemCount})`}
           </Link>
         </div>
       ) : null}

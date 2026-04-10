@@ -41,10 +41,10 @@ export function YieldCalculator({ locale }: { locale: 'en' | 'th' }) {
         grossYield: 'อัตราผลตอบแทนขั้นต้น',
         netYield: 'อัตราผลตอบแทนสุทธิ',
         paybackYears: 'ระยะเวลาคืนทุน (ปี)',
-        summaryTitle: 'ส่งต่อ brief นี้ไปยัง compare หรือที่ปรึกษา',
-        summaryBody: 'ตัวเลขชุดเดียวกันจะถูกพาไปต่อทั้ง compare flow และ contact handoff โดยไม่ต้องกรอกใหม่',
-        goToCompare: 'เปิด compare พร้อม brief นี้',
-        talkToAdvisor: 'ส่ง brief ให้ที่ปรึกษา',
+        summaryTitle: 'ส่งต่อข้อมูลชุดนี้ไปยังหน้าเปรียบเทียบหรือที่ปรึกษา',
+        summaryBody: 'ตัวเลขชุดเดียวกันจะถูกพาไปต่อทั้งหน้าเปรียบเทียบและหน้าติดต่อ โดยไม่ต้องกรอกใหม่',
+        goToCompare: 'เปิดหน้าเปรียบเทียบพร้อมข้อมูลนี้',
+        talkToAdvisor: 'ส่งข้อมูลนี้ให้ที่ปรึกษา',
       }
     : {
         purchasePrice: 'Purchase price',

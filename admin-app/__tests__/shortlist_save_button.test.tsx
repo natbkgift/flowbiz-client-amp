@@ -293,7 +293,7 @@ describe('ShortlistSaveButton', () => {
     } as Response);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /นำออกจาก shortlist/i })).toBeTruthy();
+      expect(screen.getByRole('button', { name: /นำออกจากรายการคัดไว้/i })).toBeTruthy();
     });
 
     expect(readCachedShortlist()).toMatchObject({ id: 'shortlist-th' });

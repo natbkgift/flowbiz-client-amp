@@ -56,9 +56,9 @@ describe('contact page shell', () => {
 
     expect(screen.getByRole('heading', { name: /คุยกับ AMP Pattaya เพื่อไปขั้นถัดไปที่ชัดกว่า/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /เริ่มจากเส้นทางที่ตรงกับโจทย์/i })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: /หลังส่ง brief แล้วจะเกิดอะไรขึ้น/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /หลังส่งรายละเอียดแล้วจะเกิดอะไรขึ้น/i })).toBeTruthy();
     expect(screen.getByText('แผนลงทุน')).toBeTruthy();
-    expect(screen.getByText('Shortlist ที่คัดตามโจทย์')).toBeTruthy();
+    expect(screen.getByText('รายการคัดไว้ตามโจทย์')).toBeTruthy();
   });
 
   it('localizes the Thai investment-plan route without falling back to English hero copy', async () => {
@@ -70,7 +70,7 @@ describe('contact page shell', () => {
     );
 
     expect(screen.getByRole('heading', { name: /คุยแผนลงทุนพัทยา โดยมีบริบทพร้อมแล้ว/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /ส่ง brief การลงทุน/i }).getAttribute('href')).toBe('#contact-form');
+    expect(screen.getByRole('link', { name: /ส่งรายละเอียดการลงทุน/i }).getAttribute('href')).toBe('#contact-form');
     expect(screen.getByRole('heading', { name: /ส่งต่อโจทย์การลงทุน/i })).toBeTruthy();
   });
 

@@ -47,6 +47,9 @@ describe('A1 shared foundation guards', () => {
     expect(footer).toContain('dict.common.privacyPolicy');
     expect(footer).toContain('CTA.whatsAppUrl');
     expect(footer).toContain('dict.common.facebookUrl');
+    expect(footer).toContain('footer-brand__promise');
+    expect(footer).toContain('footer-signal-list');
+    expect(footer).toContain('footer-action footer-action--primary');
     expect(enDict).toContain("facebookUrl: 'https://facebook.com/flowbiz'");
     expect(enDict).toContain("contactEmail: ''");
   });

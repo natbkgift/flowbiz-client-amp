@@ -190,17 +190,17 @@ function buildDecisionSupportSummary(input: {
           ? `การตัดสินใจยังขึ้นกับทำเลอยู่ เพราะชุดนี้ครอบ ${input.areaComparisons.length} ทำเลที่แตกต่างกัน`
           : `Location is still an active decision variable because this set spans ${input.areaComparisons.length} different areas.`)
       : (input.locale === 'th'
-          ? 'ชุดนี้ยังอยู่ในทำเลเดียวกันเป็นหลัก ดังนั้นน้ำหนักการตัดสินใจรอบนี้ควรอยู่ที่ความต่างของโครงการและความครบของ snapshot'
+          ? 'ชุดนี้ยังอยู่ในทำเลเดียวกันเป็นหลัก ดังนั้นน้ำหนักการตัดสินใจรอบนี้ควรอยู่ที่ความต่างของโครงการและความครบของข้อมูล'
           : 'This set is still concentrated in one area, so the next decision weight should stay on project-level trade-offs and snapshot completeness.'),
     input.locale === 'th'
-      ? `${roiCount}/${input.items.length} โครงการมี ROI snapshot และ ${areaStatsCount}/${input.items.length} โครงการมีราคา/ค่าเช่าเพียงพอสำหรับใช้เทียบเชิงบริบท`
+      ? `${roiCount}/${input.items.length} โครงการมีข้อมูลผลตอบแทนล่าสุด และ ${areaStatsCount}/${input.items.length} โครงการมีราคา/ค่าเช่าเพียงพอสำหรับใช้เทียบเชิงบริบท`
       : `${roiCount}/${input.items.length} projects currently expose ROI snapshots, and ${areaStatsCount}/${input.items.length} projects have enough price or rent context for side-by-side reading.`,
     roiCount === input.items.length && areaStatsCount === input.items.length
       ? (input.locale === 'th'
-          ? 'เมื่อ snapshot ครบทุกตัวเลือกแล้ว บล็อกนี้ช่วยชี้ว่าควรพาโครงการไหนไปคุยเชิงลึกต่อ ไม่ได้ชี้ว่าควรซื้อโครงการใด'
+          ? 'เมื่อข้อมูลครบทุกตัวเลือกแล้ว บล็อกนี้ช่วยชี้ว่าควรพาโครงการไหนไปคุยเชิงลึกต่อ ไม่ได้ชี้ว่าควรซื้อโครงการใด'
           : 'With snapshot coverage across all options, this layer helps you decide which project deserves deeper discussion next, not which project to buy.')
       : (input.locale === 'th'
-          ? 'เมื่อ snapshot บางส่วนยังขาด ให้ใช้ summary นี้เพื่อระบุคำถามค้างก่อนยกระดับไป advisor review เดิม'
+          ? 'เมื่อข้อมูลบางส่วนยังขาด ให้ใช้สรุปนี้เพื่อระบุคำถามค้างก่อนยกระดับไปคุยกับที่ปรึกษาในเส้นทางเดิม'
           : 'When some snapshot fields are still missing, use this summary to identify the open questions before escalating through the existing advisor review path.'),
   ];
 }
@@ -212,8 +212,8 @@ function buildCompareReadinessLines(input: {
 }): { verified: string[]; next: string[]; handoff: string[] } {
   const verified = input.locale === 'th'
     ? [
-        'หน้า compare นี้จะเริ่มมีน้ำหนักเมื่อมีอย่างน้อย 2 โครงการในเฟรมเดียวกัน',
-        'เราใช้หน้าเดิมเพื่ออ่านความต่างเชิงทำเล, snapshot, และ risk side by side ไม่ใช่เพื่อสรุปว่าโครงการไหนชนะทันที',
+        'หน้าเปรียบเทียบนี้จะเริ่มมีน้ำหนักเมื่อมีอย่างน้อย 2 โครงการในเฟรมเดียวกัน',
+        'เราใช้หน้าเดิมเพื่ออ่านความต่างเชิงทำเล ข้อมูล และความเสี่ยงแบบวางเทียบกัน ไม่ใช่เพื่อสรุปว่าโครงการไหนชนะทันที',
       ]
     : [
         'This compare route becomes decision-useful once at least 2 projects are in the same frame.',
@@ -222,8 +222,8 @@ function buildCompareReadinessLines(input: {
 
   const next = input.locale === 'th'
     ? [
-        'ถ้ายังไม่มีตัวเลือกพอ ให้เริ่มจาก Smart Finder เพื่อจัดกรอบ intent ก่อน แล้วค่อยกลับมา compare',
-        'ถ้ามี shortlist อยู่แล้ว ให้เลือกโครงการที่น่าเข้าสู่รอบตัดสินใจจริง 2-3 ตัวเลือก',
+        'ถ้ายังไม่มีตัวเลือกพอ ให้เริ่มจากตัวช่วยคัดตัวเลือกเพื่อจัดกรอบโจทย์ก่อน แล้วค่อยกลับมาหน้าเปรียบเทียบ',
+        'ถ้ามีรายการคัดไว้อยู่แล้ว ให้เลือกโครงการที่น่าเข้าสู่รอบตัดสินใจจริง 2-3 ตัวเลือก',
       ]
     : [
         'If you do not yet have enough options, use Smart Finder to shape the intent first and then return to compare.',
@@ -233,12 +233,12 @@ function buildCompareReadinessLines(input: {
   const handoffBase = input.investorContextPresent && input.briefFacts.length
     ? [
         input.locale === 'th'
-          ? 'เมื่อมี investment brief แล้ว ระบบจะพก context นี้ต่อไปยัง shortlist และ advisor handoff โดยไม่ต้องกรอกซ้ำ'
+          ? 'เมื่อมีชุดตัวเลขการลงทุนแล้ว ระบบจะพกบริบทนี้ต่อไปยังรายการคัดไว้และการส่งต่อให้ที่ปรึกษาโดยไม่ต้องกรอกซ้ำ'
           : 'When an investment brief exists, the same context carries forward into shortlist review and advisor handoff without re-entry.',
       ]
     : [
         input.locale === 'th'
-          ? 'ยังไม่มี investment brief แนบมากับหน้านี้ ดังนั้น step ที่คุ้มที่สุดตอนนี้คือคัดตัวเลือกให้พอสำหรับการเทียบ'
+          ? 'ยังไม่มีชุดตัวเลขการลงทุนแนบมากับหน้านี้ ดังนั้นขั้นที่คุ้มที่สุดตอนนี้คือคัดตัวเลือกให้พอสำหรับการเทียบ'
           : 'No investment brief is attached to this page yet, so the highest-value next move is to assemble enough candidates for a real comparison.',
       ];
 
@@ -282,12 +282,12 @@ function getCompareSupportNote(input: {
 
   if (fromShortlist) {
     return input.locale === 'th'
-      ? 'หลังอ่านตารางนี้แล้ว คุณส่ง shortlist เดิมพร้อม compare brief ชุดเดียวกันให้ทีมต่อได้เลย โดยไม่ต้องเริ่มอธิบายใหม่'
+      ? 'หลังอ่านตารางนี้แล้ว คุณส่งรายการคัดไว้เดิมพร้อมกรอบการเปรียบเทียบชุดเดียวกันให้ทีมต่อได้เลย โดยไม่ต้องเริ่มอธิบายใหม่'
       : 'After reading this table, you can send the same shortlist and compare brief to the team without rebuilding the context.';
   }
 
   return input.locale === 'th'
-    ? 'เมื่อพร้อมคุยกับทีม ระบบจะพกชุดโครงการที่กำลังเทียบอยู่หน้านี้ต่อไปยัง contact route โดยไม่ต้องกรอก context ซ้ำ'
+    ? 'เมื่อพร้อมคุยกับทีม ระบบจะพกชุดโครงการที่กำลังเทียบอยู่หน้านี้ต่อไปยังหน้าติดต่อโดยไม่ต้องกรอกบริบทซ้ำ'
     : 'When you are ready to contact the team, the current compare set carries into the contact route without rebuilding the brief.';
 }
 
@@ -299,14 +299,14 @@ function getCompareRecoveryCopy(input: {
   if (input.locale === 'th') {
     if (input.resolvedCount === 1) {
       return {
-        title: 'ลิงก์ compare นี้เหลือโครงการที่ใช้งานได้เพียง 1 โครงการ',
-        body: 'compare จะเริ่มมีน้ำหนักเมื่อมีอย่างน้อย 2 โครงการที่ยัง resolve ได้ในเฟรมเดียวกัน ดังนั้นตอนนี้ควรกลับไปเติม shortlist เดิมหรือคัดตัวเลือกใหม่ก่อน',
+        title: 'ลิงก์หน้าเปรียบเทียบนี้เหลือโครงการที่ใช้งานได้เพียง 1 โครงการ',
+        body: 'หน้าการเปรียบเทียบจะเริ่มมีน้ำหนักเมื่อมีอย่างน้อย 2 โครงการที่ยังดึงขึ้นมาได้ในเฟรมเดียวกัน ดังนั้นตอนนี้ควรกลับไปเติมรายการคัดไว้เดิมหรือคัดตัวเลือกใหม่ก่อน',
       };
     }
 
     return {
-      title: input.missingCount > 0 ? 'ลิงก์ compare นี้ไม่สามารถโหลดโครงการเดิมได้ครบ' : 'ลิงก์ compare นี้ยังไม่พร้อมสำหรับการตัดสินใจ',
-      body: 'บางโครงการอาจถูกถอดออกหรือ snapshot ใช้งานไม่ได้แล้ว ให้กลับไป shortlist เดิมหรือเลือกตัวเลือกใหม่ก่อนเปิด compare อีกครั้ง',
+      title: input.missingCount > 0 ? 'ลิงก์หน้าเปรียบเทียบนี้ไม่สามารถโหลดโครงการเดิมได้ครบ' : 'ลิงก์หน้าเปรียบเทียบนี้ยังไม่พร้อมสำหรับการตัดสินใจ',
+      body: 'บางโครงการอาจถูกถอดออกหรือข้อมูลใช้งานไม่ได้แล้ว ให้กลับไปรายการคัดไว้เดิมหรือเลือกตัวเลือกใหม่ก่อนเปิดหน้าเปรียบเทียบอีกครั้ง',
     };
   }
 
@@ -413,15 +413,15 @@ export default async function ComparePage(
               kicker: dict.advisory.bestFor,
               title: locale === 'th' ? 'ผู้ซื้อที่ต้องการเทียบโครงการบนเกณฑ์เดียวกัน' : 'Buyers comparing projects on one frame',
               body: locale === 'th'
-                ? 'เหมาะกับผู้ที่ยังไม่มั่นใจว่าจะใช้ inventory ชุดไหนเป็น shortlist หลัก'
+                ? 'เหมาะกับผู้ที่ยังไม่มั่นใจว่าจะใช้ชุดโครงการไหนเป็นรายการคัดไว้หลัก'
                 : 'Best for buyers who want to frame strengths, weaknesses, and risk side by side first.',
               icon: 'trend',
             },
             {
               kicker: dict.advisory.nextStep,
-              title: locale === 'th' ? 'เริ่มจาก Smart Finder แล้วค่อยเทียบ' : 'Use Smart Finder before comparing',
+              title: locale === 'th' ? 'เริ่มจากเครื่องมือช่วยคัดแล้วค่อยเทียบ' : 'Use Smart Finder before comparing',
               body: locale === 'th'
-                ? 'ถ้ายังมีโครงการไม่พอสำหรับเทียบ ระบบจะพาคุณกลับไปหา inventory ที่เหมาะกว่า'
+                ? 'ถ้ายังมีโครงการไม่พอสำหรับเทียบ ระบบจะพาคุณกลับไปหาชุดตัวเลือกที่เหมาะกว่า'
                 : 'If you do not have enough projects yet, the tool should push you back into discovery first.',
               icon: 'check',
             },
@@ -466,10 +466,10 @@ export default async function ComparePage(
           <Container>
             <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack compare-readiness-pack mb-4">
               <section className="authority-card reveal compare-readiness-card compare-readiness-card--verified">
-                <h2 className="card-title">{locale === 'th' ? 'เมื่อไรหน้า compare จะเริ่มคุ้มค่า' : 'When compare becomes useful'}</h2>
+                <h2 className="card-title">{locale === 'th' ? 'เมื่อไรหน้าเปรียบเทียบจะเริ่มคุ้มค่า' : 'When compare becomes useful'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'เริ่มจากสิ่งที่ยืนยันได้ก่อน เพื่อไม่ให้ compare กลายเป็นหน้าที่มีแต่ตารางเปล่า'
+                    ? 'เริ่มจากสิ่งที่ยืนยันได้ก่อน เพื่อไม่ให้หน้าตารางนี้กลายเป็นหน้าที่มีแต่ตารางเปล่า'
                     : 'Start from the conditions that make this route decision-useful instead of opening an empty table.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -497,7 +497,7 @@ export default async function ComparePage(
                 <h2 className="card-title">{locale === 'th' ? 'บริบทที่จะถูกพกต่อไป' : 'Context that carries forward'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'เมื่อคุณมี brief จาก calculator หรือ intent ชัดขึ้น ระบบจะพกข้อมูลนี้ต่อไปยัง shortlist และ advisor handoff'
+                    ? 'เมื่อคุณมีชุดตัวเลขจากเครื่องมือคำนวณหรือโจทย์ผู้ซื้อชัดขึ้น ระบบจะพกข้อมูลนี้ต่อไปยังรายการคัดไว้และการส่งต่อให้ที่ปรึกษา'
                     : 'Calculator or buyer-intent context can travel forward into shortlist review and advisor handoff once it exists.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -510,10 +510,10 @@ export default async function ComparePage(
 
             {investorContextPresent ? (
               <div className="authority-card reveal compare-flow-card compare-readiness-brief-card mb-4">
-                <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ส่งมาจาก calculator' : 'Investment brief carried from calculator'}</h2>
+                <h2 className="card-title">{locale === 'th' ? 'ชุดตัวเลขการลงทุนที่ส่งมาจากเครื่องมือคำนวณ' : 'Investment brief carried from calculator'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'คุณยังมีโครงการไม่พอสำหรับเทียบ แต่ brief ตัวเลขจะถูกเก็บไว้ต่อเมื่อไป browse, shortlist หรือส่งให้ advisor'
+                    ? 'คุณยังมีโครงการไม่พอสำหรับเทียบ แต่ชุดตัวเลขนี้จะถูกเก็บไว้ต่อเมื่อไปดูโครงการ บันทึกรายการคัดไว้ หรือส่งให้ที่ปรึกษา'
                     : 'You do not have enough projects to compare yet, but the calculator brief is preserved for browsing, shortlisting, and advisor handoff.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -563,11 +563,11 @@ export default async function ComparePage(
               <div className="cta-strip compare-empty-followup reveal">
                 <div className="cta-strip__text">
                   {locale === 'th'
-                    ? 'ถ้ายังอยากดู inventory ก่อน compare ให้ไปที่ browse listings แล้วค่อยกลับมาเมื่อมีอย่างน้อย 2 โครงการในเฟรมเดียวกัน'
+                    ? 'ถ้ายังอยากดูตัวเลือกเพิ่มก่อนเทียบ ให้ไปดูรายการทั้งหมดก่อน แล้วค่อยกลับมาเมื่อมีอย่างน้อย 2 โครงการในเฟรมเดียวกัน'
                     : 'If you want to inspect live inventory before comparing, browse listings first and return once at least 2 projects belong in the same frame.'}
                 </div>
                 <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')}>
-                  {locale === 'th' ? 'ดู listings ที่ save เข้า shortlist ได้' : 'Browse shortlist-ready listings'}
+                  {locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกเพิ่ม' : 'Browse shortlist-ready listings'}
                 </Link>
               </div>
             )}
@@ -609,9 +609,9 @@ export default async function ComparePage(
           signals={[
             {
               kicker: dict.advisory.bestFor,
-              title: locale === 'th' ? 'ลิงก์ compare ต้องมีอย่างน้อย 2 โครงการที่ยังใช้งานได้' : 'Compare needs at least 2 live projects in the frame',
+              title: locale === 'th' ? 'ลิงก์หน้าเปรียบเทียบต้องมีอย่างน้อย 2 โครงการที่ยังใช้งานได้' : 'Compare needs at least 2 live projects in the frame',
               body: locale === 'th'
-                ? 'ถ้าบางโครงการหายไปหรือ snapshot ใช้งานไม่ได้ หน้านี้ควรพากลับไปเติมตัวเลือกก่อน ไม่ใช่ค้างอยู่บนหน้าเปล่า'
+                ? 'ถ้าบางโครงการหายไปหรือข้อมูลบางชุดใช้งานไม่ได้ หน้านี้ควรพากลับไปเติมตัวเลือกก่อน ไม่ใช่ค้างอยู่บนหน้าเปล่า'
                 : 'If some projects disappear or their snapshots fail, this route should send you back to a stronger candidate set instead of leaving you on a broken screen.',
               icon: 'trend',
             },
@@ -623,9 +623,9 @@ export default async function ComparePage(
             },
             {
               kicker: dict.advisory.trustSignal,
-              title: locale === 'th' ? 'brief เดิมยังพกต่อไปได้' : 'The existing brief still carries forward',
+              title: locale === 'th' ? 'รายละเอียดเดิมยังพกต่อไปได้' : 'The existing brief still carries forward',
               body: locale === 'th'
-                ? 'ถ้าคุณมาจาก calculator หรือมี context อยู่แล้ว ระบบยังพกข้อมูลชุดเดิมต่อไปยัง advisor handoff ได้'
+                ? 'ถ้าคุณมาจากเครื่องมือคำนวณหรือมีบริบทอยู่แล้ว ระบบยังพกข้อมูลชุดเดิมต่อไปยังการส่งต่อให้ที่ปรึกษาได้'
                 : 'If you came from calculator or already carry investor context, the same brief can still move into advisor handoff.',
               icon: 'shield',
             },
@@ -665,7 +665,7 @@ export default async function ComparePage(
             },
           } : null}
           supportNote={locale === 'th'
-            ? 'ถ้าลิงก์ compare นี้เก่าหรือ snapshot บางตัวหาย ระบบจะไม่ทิ้งคุณไว้บนหน้าเสีย แต่จะพากลับไปยังขั้นถัดไปที่ยังใช้งานได้'
+            ? 'ถ้าลิงก์หน้าเปรียบเทียบนี้เก่าหรือข้อมูลบางตัวหาย ระบบจะไม่ทิ้งคุณไว้บนหน้าเสีย แต่จะพากลับไปยังขั้นถัดไปที่ยังใช้งานได้'
             : 'If this compare link is stale or some snapshots disappear, the route should recover into a usable next step instead of leaving you on a broken page.'}
         />
 
@@ -685,10 +685,10 @@ export default async function ComparePage(
 
             <div id="compare-readiness-pack" className="signal-grid signal-grid--three-up decision-pack compare-recovery-readiness mb-4">
               <section className="authority-card reveal compare-recovery-card compare-recovery-card--status">
-                <h2 className="card-title">{locale === 'th' ? 'เกิดอะไรขึ้นกับ compare ชุดนี้' : 'What changed in this compare set'}</h2>
+                <h2 className="card-title">{locale === 'th' ? 'เกิดอะไรขึ้นกับชุดเปรียบเทียบนี้' : 'What changed in this compare set'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'หน้านี้ยังเปิดอยู่ แต่จำนวนโครงการที่ resolve ได้ไม่พอสำหรับตารางเทียบที่เชื่อถือได้'
+                    ? 'หน้านี้ยังเปิดอยู่ แต่จำนวนโครงการที่ดึงขึ้นมาได้ไม่พอสำหรับตารางเทียบที่เชื่อถือได้'
                     : 'This route is still available, but the number of live projects is no longer enough for a credible side-by-side compare.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -701,7 +701,7 @@ export default async function ComparePage(
                 <h2 className="card-title">{locale === 'th' ? 'ขั้นถัดไปที่คุ้มกว่า' : 'Higher-value next move'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'กลับไป shortlist เดิมหรือเพิ่มตัวเลือกใหม่ก่อน เพื่อให้ compare รอบถัดไปมีน้ำหนักจริง'
+                    ? 'กลับไปรายการคัดไว้เดิมหรือเพิ่มตัวเลือกใหม่ก่อน เพื่อให้รอบเทียบถัดไปมีน้ำหนักจริง'
                     : 'Return to the shortlist or add a fresh option first so the next compare round is actually decision-useful.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -713,7 +713,7 @@ export default async function ComparePage(
                 <h2 className="card-title">{locale === 'th' ? 'ถ้าต้องการคุยกับทีมตอนนี้' : 'If you need the team now'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'investment brief ที่พกมาจากหน้าเดิมยังส่งต่อไป advisor ได้ แม้ compare ชุดนี้จะยังไม่สมบูรณ์'
+                    ? 'ชุดตัวเลขการลงทุนที่พกมาจากหน้าเดิมยังส่งต่อไปยังที่ปรึกษาได้ แม้ชุดเปรียบเทียบนี้จะยังไม่สมบูรณ์'
                     : 'Any investor brief carried into this route can still move into advisor handoff even when the compare set is no longer complete.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -726,10 +726,10 @@ export default async function ComparePage(
 
             {investorContextPresent ? (
               <div className="authority-card reveal compare-flow-card compare-recovery-brief-card mb-4">
-                <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ยังพกต่อได้' : 'Investment brief that still carries forward'}</h2>
+                <h2 className="card-title">{locale === 'th' ? 'ชุดตัวเลขการลงทุนที่ยังพกต่อได้' : 'Investment brief that still carries forward'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'แม้ compare ชุดนี้จะยังเปิดตารางไม่ได้ แต่ชุดตัวเลขจาก calculator หรือ brief เดิมยังส่งต่อให้ทีมได้ทันที'
+                    ? 'แม้ชุดเปรียบเทียบนี้จะยังเปิดตารางไม่ได้ แต่ชุดตัวเลขจากเครื่องมือคำนวณหรือรายละเอียดเดิมยังส่งต่อให้ทีมได้ทันที'
                     : 'Even though this compare set cannot open a full table right now, the calculator or investor brief can still move straight into the team handoff.'}
                 </p>
                 <ul className="bullet-list mt-3">
@@ -817,17 +817,17 @@ export default async function ComparePage(
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'นักลงทุนที่ต้องการคัด winner จาก shortlist' : 'Investors narrowing the shortlist to a winner',
+            title: locale === 'th' ? 'นักลงทุนที่ต้องการคัดตัวเลือกสุดท้ายจากรายการคัดไว้' : 'Investors narrowing the shortlist to a winner',
             body: locale === 'th'
-              ? 'เหมาะกับการเทียบ strengths, weaknesses และ risk level ก่อนเข้าสู่การเจรจา'
+              ? 'เหมาะกับการเทียบจุดแข็ง จุดอ่อน และระดับความเสี่ยงก่อนเข้าสู่การเจรจา'
               : 'Best for weighing strengths, weaknesses, and risk before moving into negotiation.',
             icon: 'trend',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'เทียบแล้วค่อยคุยกับทีมต่อเรื่อง shortlist' : 'Compare first, then move into advisor review',
+            title: locale === 'th' ? 'เทียบแล้วค่อยคุยกับทีมต่อเรื่องรายการคัดไว้' : 'Compare first, then move into advisor review',
             body: locale === 'th'
-              ? 'หลังจากเห็นตารางแล้ว คุณสามารถส่งต่อ context ไปยังที่ปรึกษาเพื่อปิด shortlist ได้เลย'
+              ? 'หลังจากเห็นตารางแล้ว คุณสามารถส่งต่อบริบทไปยังที่ปรึกษาเพื่อปิดรายการคัดไว้ได้เลย'
               : 'Once the table is clear, hand the context to the advisor team for the next shortlist cut.',
             icon: 'check',
           },
@@ -879,10 +879,10 @@ export default async function ComparePage(
         <Container>
           {investorContextPresent ? (
             <div className="authority-card reveal compare-flow-card compare-carried-brief-card mb-4">
-              <h2 className="card-title">{locale === 'th' ? 'Investment brief ที่ใช้ประกอบการเทียบ' : 'Investment brief used in this comparison'}</h2>
+              <h2 className="card-title">{locale === 'th' ? 'ชุดตัวเลขการลงทุนที่ใช้ประกอบการเทียบ' : 'Investment brief used in this comparison'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
-                  ? 'ชุดตัวเลขจาก calculator ถูกพกมาด้วย เพื่อให้คุยต่อกับ advisor ในบริบทเดียวกันหลังจากดูตารางนี้'
+                  ? 'ชุดตัวเลขจากเครื่องมือคำนวณถูกพกมาด้วย เพื่อให้คุยต่อกับที่ปรึกษาในบริบทเดียวกันหลังจากดูตารางนี้'
                   : 'The calculator brief travels with this comparison so the advisor sees the same context after you review the table.'}
               </p>
               <ul className="bullet-list mt-3">
@@ -905,7 +905,7 @@ export default async function ComparePage(
               <h2 className="card-title">{locale === 'th' ? 'ภาพรวมเปรียบเทียบระดับทำเล' : 'Area comparison read'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
-                  ? 'ก่อนตัดสินใจที่ระดับโครงการ ลองอ่านบริบทของแต่ละทำเลแบบ side-by-side จากราคา ค่าเช่า และ ROI snapshot ที่มีอยู่จริง'
+                  ? 'ก่อนตัดสินใจที่ระดับโครงการ ลองอ่านบริบทของแต่ละทำเลแบบวางเทียบกัน จากราคา ค่าเช่า และผลตอบแทนล่าสุดที่มีอยู่จริง'
                   : 'Before narrowing the decision at project level, read the location context side by side using live pricing, rent, and ROI snapshots where available.'}
               </p>
               <div className="signal-grid signal-grid--two-up compare-area-grid mt-4">
@@ -929,11 +929,11 @@ export default async function ComparePage(
                         <strong className="metric-card__value">{area.avgRent ?? '—'}</strong>
                       </div>
                       <div className="metric-card">
-                        <span className="metric-card__label">{locale === 'th' ? 'ROI snapshot' : 'ROI snapshot'}</span>
+                        <span className="metric-card__label">{locale === 'th' ? 'ผลตอบแทนล่าสุด' : 'ROI snapshot'}</span>
                         <strong className="metric-card__value">{area.roiPercent ?? '—'}</strong>
                       </div>
                       <div className="metric-card">
-                        <span className="metric-card__label">{locale === 'th' ? 'จำนวนโครงการใน snapshot' : 'Projects in snapshot'}</span>
+                        <span className="metric-card__label">{locale === 'th' ? 'จำนวนโครงการในชุดข้อมูล' : 'Projects in snapshot'}</span>
                         <strong className="metric-card__value">{area.totalProjects ?? '—'}</strong>
                       </div>
                     </div>
@@ -948,7 +948,7 @@ export default async function ComparePage(
                       <div className="insight-list__item">
                         <span className="insight-list__body">
                           {locale === 'th'
-                            ? 'ชั้นนี้ช่วยแยก “ทำเลที่เหมาะ” ออกจาก “โครงการที่เหมาะ” ก่อนเข้าสู่ shortlist รอบถัดไป'
+                            ? 'ชั้นนี้ช่วยแยก “ทำเลที่เหมาะ” ออกจาก “โครงการที่เหมาะ” ก่อนเข้าสู่การคัดรอบถัดไป'
                             : 'This layer helps separate the right area from the right project before the next shortlist cut.'}
                         </span>
                       </div>
@@ -962,7 +962,7 @@ export default async function ComparePage(
                           data-amp-event-payload={JSON.stringify({
                             source_route: 'compare',
                             cta_type: 'secondary',
-                            cta_label: locale === 'th' ? 'เปิด area brief' : 'Open area brief',
+                            cta_label: locale === 'th' ? 'เปิดสรุปทำเล' : 'Open area brief',
                             entity_type: 'area',
                             entity_id: area.areaSlug,
                             entity_name: area.areaName,
@@ -973,7 +973,7 @@ export default async function ComparePage(
                             },
                           })}
                         >
-                          {locale === 'th' ? 'เปิด area brief' : 'Open area brief'}
+                          {locale === 'th' ? 'เปิดสรุปทำเล' : 'Open area brief'}
                         </Link>
                       </div>
                     ) : null}

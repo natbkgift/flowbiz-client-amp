@@ -75,10 +75,10 @@ export default async function AboutPage(
     resolveCmsText(processInfo?.content, locale)
       || [
         locale === 'th'
-          ? 'เริ่มจากการรับ brief ที่ชัดเจนก่อน จากนั้นทีมจะคัด shortlist ตามงบ ทำเล และเป้าหมายที่ตกลงกัน'
+          ? 'เริ่มจากการรับรายละเอียดที่ชัดเจนก่อน จากนั้นทีมจะคัดรายการคัดไว้ตามงบ ทำเล และเป้าหมายที่ตกลงกัน'
           : 'We start with a clear brief, then turn it into a shortlist matched to your budget, area, and goal.',
         locale === 'th'
-          ? 'ทุกขั้นตอนเน้นข้อมูลที่ตรวจสอบได้ ความโปร่งใสของ trade-off และการพาไปยัง next step ที่ทำได้จริง'
+          ? 'ทุกขั้นตอนเน้นข้อมูลที่ตรวจสอบได้ อธิบายข้อแลกเปลี่ยนอย่างตรงไปตรงมา และพาไปยังขั้นถัดไปที่ทำได้จริง'
           : 'Each step is grounded in verifiable data, transparent trade-offs, and the next action that can actually move the deal forward.',
       ].join('\n\n'),
   );

@@ -23,7 +23,7 @@ function isAreaSlug(slug: string): slug is AreaSlug {
 function getFallbackBuyerTypes(locale: 'en' | 'th'): string[] {
   if (locale === 'th') {
     return [
-      'ผู้ซื้อที่ต้องการอ่านภาพรวมทำเลก่อน shortlist โครงการ',
+      'ผู้ซื้อที่ต้องการอ่านภาพรวมทำเลก่อนคัดโครงการ',
       'ผู้ลงทุนที่ต้องการเช็กสัญญาณราคาและค่าเช่าแบบตรงไปตรงมา',
       'ผู้ซื้อเพื่ออยู่อาศัยที่ต้องการเปรียบเทียบพื้นที่ก่อนคุยกับที่ปรึกษา',
     ];
@@ -68,10 +68,10 @@ function buildAreaMarketRead(locale: 'en' | 'th', areaName: string, hasStats: bo
   if (locale === 'th') {
     return [
       hasStats
-        ? `${areaName} มี snapshot ราคาและค่าเช่าจริงในระบบ จึงใช้เป็นจุดตั้งต้นสำหรับการ shortlist ได้`
-        : `${areaName} ยังมีข้อมูลเชิงตัวเลขบางส่วนไม่ครบ จึงควรใช้หน้านี้เพื่ออ่านบริบทและส่งต่อ brief ให้ทีมแทน`,
+        ? `${areaName} มีข้อมูลราคาและค่าเช่าจริงในระบบ จึงใช้เป็นจุดตั้งต้นสำหรับการคัดรายการได้`
+        : `${areaName} ยังมีข้อมูลเชิงตัวเลขบางส่วนไม่ครบ จึงควรใช้หน้านี้เพื่ออ่านบริบทและส่งรายละเอียดให้ทีมแทน`,
       roiPercent
-        ? `หากคุณมองเชิงลงทุน ค่า ROI snapshot ปัจจุบันอยู่ที่ ${roiPercent}`
+        ? `หากคุณมองเชิงลงทุน ผลตอบแทนล่าสุดอยู่ที่ ${roiPercent}`
         : 'หากโฟกัสผลตอบแทน ควรใช้พื้นที่นี้เป็นจุดเริ่มต้นก่อนไปดูโครงการระดับยูนิต',
       'พื้นที่ที่เหมาะควรชนะทั้งเรื่องการใช้ชีวิตและความชัดเจนของขั้นถัดไป ไม่ใช่แค่ตัวเลขบนกระดาษ',
     ];
@@ -95,13 +95,13 @@ function buildAreaConfidenceLines(locale: 'en' | 'th', areaName: string, hasStat
         ? `${areaName} มีทั้งบริบทราคาและค่าเช่าที่พอช่วยลดความลังเลรอบแรก ก่อนคุณจะขอรายการโครงการหรือยูนิตต่อ`
         : `${areaName} already carries enough pricing and rent context to reduce first-pass hesitation before you request projects or units.`)
       : (locale === 'th'
-        ? `${areaName} ยังทำหน้าที่เป็นสรุปทำเลตั้งต้นที่ดีได้ แม้ snapshot เชิงตัวเลขจะบาง เพราะมันช่วยกันไม่ให้คุณขอรายการในโซนที่ผิดตั้งแต่ต้น`
+        ? `${areaName} ยังทำหน้าที่เป็นสรุปทำเลตั้งต้นที่ดีได้ แม้ภาพรวมเชิงตัวเลขจะบาง เพราะมันช่วยกันไม่ให้คุณขอรายการในโซนที่ผิดตั้งแต่ต้น`
         : `${areaName} still works as a useful location brief even when the numeric snapshot is thin, because it stops the shortlist from starting in the wrong zone.`),
     locale === 'th'
-      ? `ความเหมาะกับผู้ซื้อใน ${areaName} จะชัดขึ้นเมื่ออ่าน logic ของย่านก่อนคำสัญญาระดับอาคารหรือยูนิต`
+      ? `ความเหมาะกับผู้ซื้อใน ${areaName} จะชัดขึ้นเมื่ออ่านบริบทของย่านก่อนคำสัญญาระดับอาคารหรือยูนิต`
       : `Buyer fit in ${areaName} gets clearer when you read the district logic before individual building promises.`,
     locale === 'th'
-      ? 'ใช้ทำเลนี้เป็นตัวกรอง shortlist ก่อน ไม่ใช่ข้อสรุปสุดท้ายของดีล'
+      ? 'ใช้ทำเลนี้เป็นตัวกรองของรายการคัดไว้ก่อน ไม่ใช่ข้อสรุปสุดท้ายของดีล'
       : 'Use this area as a shortlist filter first, not as a final deal conclusion.',
   ];
 }
@@ -109,10 +109,10 @@ function buildAreaConfidenceLines(locale: 'en' | 'th', areaName: string, hasStat
 function buildAreaProcessLines(locale: 'en' | 'th', areaName: string): string[] {
   return [
     locale === 'th'
-      ? 'เริ่มจาก area brief ก่อน แล้วค่อยเปิดโครงการที่เดินไปใน logic เดียวกันของไลฟ์สไตล์หรือการลงทุน'
+      ? 'เริ่มจากสรุปทำเลก่อน แล้วค่อยเปิดโครงการที่เดินไปในทิศทางเดียวกันของไลฟ์สไตล์หรือการลงทุน'
       : 'Start with the area brief, then open projects that follow the same lifestyle or investment logic.',
     locale === 'th'
-      ? `ถ้า ${areaName} ดูใช่แต่ project set ยังบาง ให้ส่ง advisor brief จากหน้านี้แทนการกระโดดไปยัง listing แบบสุ่ม`
+      ? `ถ้า ${areaName} ดูใช่แต่ชุดโครงการยังบาง ให้ส่งรายละเอียดให้ที่ปรึกษาจากหน้านี้แทนการกระโดดไปยังรายการแบบสุ่ม`
       : `If ${areaName} feels right but the project set is still thin, send the advisor brief from this page instead of jumping into random listings.`,
     locale === 'th'
       ? 'ถ้าเรื่องทำเลเริ่มนิ่งแล้วแต่ยังติดใจเรื่องแบรนด์ ให้ไปต่อที่หน้า developers ก่อนค่อยตัดสินใจส่ง inquiry'
@@ -260,9 +260,9 @@ export default async function AreaPage(
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ต่อไปยัง Smart Finder หรือคลังโครงการ' : 'Move next into Smart Finder or project inventory',
+            title: locale === 'th' ? 'ต่อไปยังเครื่องมือช่วยคัดหรือคลังโครงการ' : 'Move next into Smart Finder or project inventory',
             body: locale === 'th'
-              ? 'เมื่อทำเลเริ่มชัดแล้ว ให้ใช้ Smart Finder หรือเปิดดูโครงการที่เผยแพร่ในพื้นที่ใกล้เคียง'
+              ? 'เมื่อทำเลเริ่มชัดแล้ว ให้ใช้เครื่องมือช่วยคัด หรือเปิดดูโครงการที่เผยแพร่ในพื้นที่ใกล้เคียง'
               : 'Once the location is clearer, use Smart Finder or browse the published inventory that fits this area.',
             icon: 'check',
           },
@@ -414,7 +414,7 @@ export default async function AreaPage(
                   </div>
                   <div className="card-actions mt-3">
                     <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
-                      {locale === 'th' ? 'เปิดเครื่องคำนวณ' : 'Open calculator'}
+                      {locale === 'th' ? 'เปิดเครื่องมือคำนวณ' : 'Open calculator'}
                     </Link>
                   </div>
                 </div>
@@ -423,7 +423,7 @@ export default async function AreaPage(
 
             <aside className="detail-sidebar detail-stack">
               <div className="page-rail-card reveal" id="area-advisor-brief">
-                <h2 className="card-title">{locale === 'th' ? 'ส่ง brief ของทำเลนี้' : 'Send a brief around this area'}</h2>
+                <h2 className="card-title">{locale === 'th' ? 'ส่งรายละเอียดของทำเลนี้' : 'Send a brief around this area'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
                     ? 'กรอกงบ วัตถุประสงค์ และไทม์ไลน์ เพื่อให้ทีมแปลงข้อมูลของทำเลเป็นรายการคัดไว้ที่ใช้งานได้จริง'

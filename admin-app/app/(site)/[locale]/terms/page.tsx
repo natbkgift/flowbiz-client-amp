@@ -14,7 +14,15 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, '/terms', `Terms of Service | ${dict.brand.name}`, 'Terms of Service', dict.brand.name);
+  return makePageMetadata(
+    locale,
+    '/terms',
+    locale === 'th' ? 'ข้อกำหนดการใช้บริการ' : 'Terms of Service',
+    locale === 'th'
+      ? 'เงื่อนไขการใช้งานเว็บไซต์และบริการของ AMP Pattaya สำหรับการให้ข้อมูลและคำแนะนำด้านอสังหาริมทรัพย์'
+      : 'Terms for using AMP Pattaya website content and property advisory services.',
+    dict.brand.name,
+  );
 }
 
 export default async function TermsPage(

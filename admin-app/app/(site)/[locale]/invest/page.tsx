@@ -65,7 +65,7 @@ export default async function InvestPage(props: { params: Promise<{ locale: stri
             kicker: dict.advisory.trustSignal,
             title: locale === 'th' ? 'ใช้ข้อมูลจริงก่อนอารมณ์ตลาด' : 'Operator logic before market hype',
             body: locale === 'th'
-              ? 'เราใช้ inventory และ demand story ที่ตรวจสอบได้ ไม่ยึด headline marketing อย่างเดียว'
+              ? 'เราใช้ข้อมูลสต็อกและอุปสงค์ที่ตรวจสอบได้ ไม่ยึดเพียงคำโฆษณาในตลาด'
               : 'We anchor the decision in verifiable inventory and demand context, not marketing headlines alone.',
             icon: 'shield',
           },

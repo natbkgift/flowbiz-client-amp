@@ -34,6 +34,19 @@ export function HomeVideoEmbedCard({
   youtubePayload: Record<string, unknown>;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const copy = locale === 'th'
+    ? {
+        playVideo: `เล่นวิดีโอ ${title}`,
+        tapToPlay: 'แตะเพื่อเล่นวิดีโอ',
+        curatedMedia: 'วิดีโอแนะนำจากทีม',
+        openYoutube: 'เปิดบน YouTube',
+      }
+    : {
+        playVideo: `Play video ${title}`,
+        tapToPlay: 'Tap to play video',
+        curatedMedia: 'Curated advisory media',
+        openYoutube: 'Open on YouTube',
+      };
   const safeYtId = useMemo(() => normalizeYouTubeId(ytId), [ytId]);
   const embedSrc = safeYtId
     ? `https://www.youtube.com/embed/${safeYtId}?autoplay=1&rel=0`
@@ -57,7 +70,7 @@ export function HomeVideoEmbedCard({
             type="button"
             className="home-video-card__embed-trigger"
             onClick={() => setIsLoaded(true)}
-            aria-label={locale === 'th' ? `เล่นวิดีโอ ${title}` : `Play video ${title}`}
+            aria-label={copy.playVideo}
             disabled={!embedSrc}
           >
             <SafeCoverImage
@@ -70,16 +83,14 @@ export function HomeVideoEmbedCard({
             />
             <span className="home-video-card__embed-scrim" aria-hidden="true" />
             <span className="home-video-card__play-badge" aria-hidden="true">▶</span>
-            <span className="home-video-card__play-copy">
-              {locale === 'th' ? 'กดเพื่อเล่นวิดีโอ' : 'Tap to play video'}
-            </span>
+            <span className="home-video-card__play-copy">{copy.tapToPlay}</span>
           </button>
         )}
       </div>
       <figcaption className="home-video-card__body type-small px-5 py-4 text-gray-600 min-h-[72px]">
         <div className="home-video-card__meta">
           <span>{topic}</span>
-          <span>{locale === 'th' ? 'Curated advisory media' : 'Curated advisory media'}</span>
+          <span>{copy.curatedMedia}</span>
         </div>
         <h3 className="home-video-card__title type-h3">{title}</h3>
         <p>{caption}</p>
@@ -98,7 +109,7 @@ export function HomeVideoEmbedCard({
             eventType="home_advisory_content_click"
             eventPayload={youtubePayload}
           >
-            {locale === 'th' ? 'เปิดบน YouTube' : 'Open on YouTube'}
+            {copy.openYoutube}
           </TrackedLink>
         </div>
       </figcaption>

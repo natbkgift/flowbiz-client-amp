@@ -20,9 +20,9 @@ export async function generateMetadata(
   return makePageMetadata(
     locale,
     'shortlist',
-    locale === 'th' ? 'Shortlist ของคุณ' : 'Your Shortlist',
+    locale === 'th' ? 'รายการคัดไว้ของคุณ' : 'Your Shortlist',
     locale === 'th'
-      ? 'ทบทวน listing ที่บันทึกไว้ พร้อมข้อมูลสั้นที่ใช้ตัดสินใจต่อได้ทันที'
+      ? 'ทบทวนรายการที่บันทึกไว้ พร้อมข้อมูลสั้นที่ใช้ตัดสินใจต่อได้ทันที'
       : 'Review your saved listings with concise facts and clear next steps.',
     dict.brand.name,
   );
@@ -35,23 +35,23 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
   const advisoryLabels = getAdvisoryLabels(locale);
   const advisoryProofs = getAdvisoryProofs(dict);
   const shortlistProofs = [
-    locale === 'th' ? 'บันทึกรายการไว้ได้โดยไม่ต้องส่ง lead ทันที' : 'Save listings without forcing a lead handoff',
-    locale === 'th' ? 'แชร์, compare, หรือส่งต่อให้ทีมจาก shortlist เดียวกัน' : 'Share, compare, or hand off from the same shortlist',
+    locale === 'th' ? 'บันทึกรายการไว้ได้โดยยังไม่ต้องส่งข้อมูลติดต่อทันที' : 'Save listings without forcing a lead handoff',
+    locale === 'th' ? 'แชร์ เปรียบเทียบ หรือส่งต่อให้ทีมจากรายการคัดไว้ชุดเดียวกัน' : 'Share, compare, or hand off from the same shortlist',
     locale === 'th' ? 'ยังคงบริบทการคัดเลือกไว้ครบ' : 'Keeps the review context intact',
   ];
   const confidenceCards = locale === 'th'
     ? [
         {
           title: 'หน้านี้ยืนยันอะไรได้บ้าง',
-          body: 'Shortlist ช่วยรวบรวม listing ที่คุณตั้งใจกลับมาทบทวน โดยไม่ผูกการบันทึกเข้ากับการส่ง lead ทันที',
+          body: 'รายการคัดไว้ช่วยรวบรวมตัวเลือกที่คุณตั้งใจกลับมาทบทวน โดยไม่ผูกการบันทึกเข้ากับการส่งข้อมูลติดต่อทันที',
         },
         {
-          title: 'เมื่อไรควรไป compare',
-          body: 'เมื่อ shortlist นี้เริ่ม resolve ได้อย่างน้อย 2 โครงการ คุณควรยกระดับไป compare เพื่ออ่าน trade-off แบบ side-by-side',
+          title: 'เมื่อไรควรไปหน้าเปรียบเทียบ',
+          body: 'เมื่อรายการคัดไว้นี้มีอย่างน้อย 2 โครงการที่พร้อมเทียบ คุณควรยกระดับไปหน้าเปรียบเทียบเพื่ออ่านข้อแลกเปลี่ยนแบบวางเทียบกัน',
         },
         {
           title: 'เมื่อไรควรคุยกับทีม',
-          body: 'ถ้าตัวเลือกเริ่มแคบลงแล้ว หน้านี้เป็นจุดที่ดีที่สุดในการส่ง context เดิมต่อให้ที่ปรึกษาโดยไม่ต้องอธิบายใหม่ทั้งหมด',
+          body: 'ถ้าตัวเลือกเริ่มแคบลงแล้ว หน้านี้เป็นจุดที่ดีที่สุดในการส่งบริบทเดิมต่อให้ที่ปรึกษาโดยไม่ต้องอธิบายใหม่ทั้งหมด',
         },
       ]
     : [
@@ -74,15 +74,15 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
       <Breadcrumbs
         items={[
           { label: locale === 'th' ? 'หน้าแรก' : 'Home', href: `/${locale}` },
-          { label: locale === 'th' ? 'Shortlist' : 'Shortlist', href: `/${locale}/shortlist` },
+          { label: locale === 'th' ? 'รายการคัดไว้' : 'Shortlist', href: `/${locale}/shortlist` },
         ]}
       />
 
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
-        title={locale === 'th' ? 'Shortlist ของคุณ' : 'Your shortlist'}
+        title={locale === 'th' ? 'รายการคัดไว้ของคุณ' : 'Your shortlist'}
         subtitle={locale === 'th'
-          ? 'ทบทวนรายการที่บันทึกไว้, สร้างลิงก์แชร์แบบ read-only, และต่อยอดไป compare หรือ advisor handoff ได้จากหน้าเดียวโดยไม่เสียบริบทการคัดเลือก'
+          ? 'ทบทวนรายการที่บันทึกไว้ สร้างลิงก์สำหรับเปิดดูอย่างเดียว และต่อยอดไปหน้าเปรียบเทียบหรือส่งต่อให้ที่ปรึกษาได้จากหน้าเดียวโดยไม่เสียบริบทการคัดเลือก'
           : 'Review saved listings, create a read-only share link, and move into compare or advisor handoff from one shortlist review surface.'}
         proofs={shortlistProofs.length ? shortlistProofs : advisoryProofs}
         proofsLabel={advisoryLabels.proofsLabel}
@@ -92,15 +92,15 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
             kicker: dict.advisory.bestFor,
             title: locale === 'th' ? 'ผู้ใช้ที่เริ่มคัดตัวเลือกจริงจังก่อนคุยกับทีม' : 'Buyers who want to narrow real options before contact',
             body: locale === 'th'
-              ? 'shortlist ชุดนี้มีไว้ทบทวนตัวเลือกที่ตั้งใจเก็บไว้ ไม่ใช่ให้ระบบบังคับพาไปส่ง lead ทันที'
+              ? 'รายการคัดไว้นี้มีไว้ทบทวนตัวเลือกที่ตั้งใจเก็บไว้ ไม่ใช่ให้ระบบบังคับพาไปส่งข้อมูลติดต่อทันที'
               : 'This shortlist is for reviewing intentionally saved options, not for forcing an immediate lead handoff.',
             icon: 'shield',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'อ่าน shortlist ก่อน แล้วค่อยเลือก compare, share, หรือ advisor review' : 'Read the shortlist first, then choose compare, share, or advisor review',
+            title: locale === 'th' ? 'อ่านรายการคัดไว้ก่อน แล้วค่อยเลือกเปรียบเทียบ แชร์ หรือส่งให้ที่ปรึกษาช่วยดูต่อ' : 'Read the shortlist first, then choose compare, share, or advisor review',
             body: locale === 'th'
-              ? 'เมื่อ shortlist เริ่มแคบลง หน้านี้ควรเป็นจุดที่คุณตัดสินใจว่าจะเทียบ side by side หรือส่ง context เดิมต่อให้ทีม'
+              ? 'เมื่อรายการคัดไว้เริ่มแคบลง หน้านี้ควรเป็นจุดที่คุณตัดสินใจว่าจะเทียบแบบวางข้างกัน หรือส่งบริบทเดิมต่อให้ทีม'
               : 'As the shortlist narrows, this page should be where you decide whether to compare side by side or pass the same context to the team.',
             icon: 'check',
           },
@@ -108,7 +108,7 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
             kicker: dict.advisory.trustSignal,
             title: locale === 'th' ? 'ยังคงบริบทเดิมไว้ครบ แม้จะขยับไปหน้าถัดไป' : 'Keeps the original shortlist context intact across next steps',
             body: locale === 'th'
-              ? 'CTA หลักจะพาคุณกลับไปยัง shortlist review surface ทันที ส่วน CTA รองใช้เมื่อต้องเติมตัวเลือกเพิ่มก่อน'
+              ? 'ปุ่มหลักจะพาคุณกลับไปยังส่วนทบทวนรายการทันที ส่วนปุ่มรองใช้เมื่อต้องเติมตัวเลือกเพิ่มก่อน'
               : 'The primary CTA returns you straight to the shortlist review surface, while the secondary CTA is for adding one more option before comparing.',
             icon: 'users',
           },
@@ -128,11 +128,11 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
         }}
         secondaryAction={{
           href: withLocale(locale, '/buy'),
-          label: locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings',
+          label: locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกเพิ่ม' : 'Browse shortlist-ready listings',
           eventPayload: {
             source_route: 'shortlist',
             cta_type: 'secondary',
-            cta_label: locale === 'th' ? 'ดู listings ที่บันทึกเพิ่มได้' : 'Browse shortlist-ready listings',
+            cta_label: locale === 'th' ? 'ดูตัวเลือกที่พร้อมบันทึกเพิ่ม' : 'Browse shortlist-ready listings',
             entity_type: 'shortlist',
             entity_name: 'shortlist',
             user_intent: 'research',
@@ -140,11 +140,11 @@ export default async function ShortlistPage(props: { params: Promise<{ locale: s
           },
         }}
         supportNote={locale === 'th'
-          ? 'เริ่มจาก shortlist review ก่อน แล้วค่อยใช้ share link, compare, หรือ advisor handoff ตาม stage ของการตัดสินใจจริง'
+          ? 'เริ่มจากส่วนทบทวนรายการก่อน แล้วค่อยใช้ลิงก์แชร์ หน้าเปรียบเทียบ หรือการส่งต่อให้ที่ปรึกษาตามจังหวะการตัดสินใจจริง'
           : 'Start with the shortlist review first, then use share, compare, or advisor handoff according to the real decision stage.'}
       />
 
-      <section id="shortlist-review-surface" className="section section--alt" aria-label={locale === 'th' ? 'พื้นที่ทบทวน shortlist' : 'Shortlist review surface'}>
+      <section id="shortlist-review-surface" className="section section--alt" aria-label={locale === 'th' ? 'พื้นที่ทบทวนรายการคัดไว้' : 'Shortlist review surface'}>
         <Container>
           <ShortlistListSurface locale={locale} />
         </Container>

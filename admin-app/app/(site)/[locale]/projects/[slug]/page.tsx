@@ -160,24 +160,24 @@ function buildProjectWhyConsiderLines(
     leadLine,
     project.area?.name && startingPriceLabel
       ? (locale === 'th'
-        ? `${project.name} มีจุดเริ่มที่ ${startingPriceLabel} ใน ${project.area.name} ซึ่งเพียงพอให้ตัดสินใจว่าควรอยู่ต่อใน shortlist หรือควรขยับไปสู่การเทียบกับตัวเลือกใกล้เคียง`
+        ? `${project.name} มีจุดเริ่มที่ ${startingPriceLabel} ใน ${project.area.name} ซึ่งเพียงพอให้ตัดสินใจว่าควรอยู่ต่อในรายการคัดไว้ หรือควรขยับไปเทียบกับตัวเลือกใกล้เคียง`
         : `${project.name} gives you a ${startingPriceLabel} entry point in ${project.area.name}, strong enough to judge whether it deserves a shortlist slot or only a compare pass next.`)
       : project.area?.name
         ? (locale === 'th'
-          ? `${project.name} ควรถูกอ่านในบริบทของ ${project.area.name} ก่อน เพราะ logic ของย่านคือสิ่งที่จะตัดสินว่าควรไปต่อแบบลงทุน อยู่อาศัย หรือพักตากอากาศ`
+          ? `${project.name} ควรถูกอ่านในบริบทของ ${project.area.name} ก่อน เพราะตรรกะของย่านคือสิ่งที่จะตัดสินว่าควรไปต่อแบบลงทุน อยู่อาศัย หรือพักตากอากาศ`
           : `${project.name} should be read inside the ${project.area.name} district story first, because the neighborhood logic decides whether it belongs to an investment, end-use, or holiday-home brief.`)
         : null,
     project.developer?.name
       ? (locale === 'th'
-        ? `ผู้พัฒนา ${project.developer.name} ทำให้หน้านี้มีน้ำหนักพอสำหรับการเช็ก buyer fit และ shortlist pressure ก่อนขยับไปสู่ระดับยูนิต`
+        ? `ผู้พัฒนา ${project.developer.name} ทำให้หน้านี้มีน้ำหนักพอสำหรับการเช็กความเหมาะกับผู้ซื้อ และแรงกดดันในการคัดตัวเลือก ก่อนขยับไปสู่ระดับยูนิต`
         : `Published developer context from ${project.developer.name} gives this page enough credibility to test buyer fit and shortlist pressure before you move into unit-level review.`)
       : null,
     hasEvaluationSnapshot
       ? (locale === 'th'
-        ? `snapshot ปัจจุบัน${deliveryLabel ? ` และกำหนดส่งมอบ ${deliveryLabel}` : ''} ช่วยให้ตัดสินใจได้ว่าโครงการนี้ยังสมควรใช้เวลาคุยต่อหรือควรถูกผลักไปเป็นเพียงตัวเทียบ`
+        ? `ภาพรวมข้อมูลปัจจุบัน${deliveryLabel ? ` และกำหนดส่งมอบ ${deliveryLabel}` : ''} ช่วยให้ตัดสินใจได้ว่าโครงการนี้ยังสมควรใช้เวลาคุยต่อ หรือควรถูกผลักไปเป็นเพียงตัวเทียบ`
         : `The current snapshot${deliveryLabel ? ` and the ${deliveryLabel} delivery signal` : ''} are strong enough to judge whether this project still deserves advisor time or should fall back to benchmark status.`)
       : (locale === 'th'
-        ? 'แม้ข้อมูลเชิงลึกยังไม่ครบ หน้านี้ยังควรบอกได้ว่าโครงการนี้สมควรอยู่ต่อใน shortlist หรือถูกแทนด้วยตัวเลือกใกล้เคียง'
+        ? 'แม้ข้อมูลเชิงลึกยังไม่ครบ หน้านี้ยังควรบอกได้ว่าโครงการนี้สมควรอยู่ต่อในรายการคัดไว้ หรือถูกแทนด้วยตัวเลือกใกล้เคียง'
         : 'Even when the deeper data is still thin, this page should still tell you whether the project stays in the shortlist or gets replaced by nearby options.'),
   ]).slice(0, 3);
 }
@@ -194,21 +194,21 @@ function buildProjectAvailabilityLines(
         ? `ราคาเริ่มต้นที่เผยแพร่อยู่ตอนนี้คือ ${startingPriceLabel}`
         : `Published starting price currently reads ${startingPriceLabel}.`)
       : (locale === 'th'
-        ? 'ยังไม่มีราคาเริ่มต้นใน snapshot นี้ จึงควรใช้หน้านี้เพื่อเช็กว่าควรขอช่วงราคาหรือ unit mix ต่อหรือไม่'
+        ? 'ยังไม่มีราคาเริ่มต้นในภาพรวมข้อมูลชุดนี้ จึงควรใช้หน้านี้เพื่อเช็กว่าควรขอช่วงราคาหรือรูปแบบยูนิตต่อหรือไม่'
         : 'A starting price is not surfaced in this snapshot yet, so use this page to decide whether it is worth requesting live price bands or unit mix next.'),
     deliveryLabel
       ? (locale === 'th'
         ? `กำหนดส่งมอบที่เผยแพร่คือ ${deliveryLabel}`
         : `Published delivery timing is ${deliveryLabel}.`)
       : (locale === 'th'
-        ? 'กำหนดส่งมอบยังไม่ถูกยืนยันในเส้นทางนี้ จึงควรเช็ก handover timing ก่อนลด shortlist ให้แคบลง'
+        ? 'กำหนดส่งมอบยังไม่ถูกยืนยันในเส้นทางนี้ จึงควรเช็กจังหวะส่งมอบก่อนบีบรายการคัดไว้ให้แคบลง'
         : 'Delivery timing is not confirmed on this route yet, so handover timing should be checked before narrowing the shortlist.'),
     project.unit_count
       ? (locale === 'th'
         ? `มีข้อมูลจำนวนยูนิต ${project.unit_count.toLocaleString()} ยูนิตให้ใช้เป็นสัญญาณเรื่องสเกลของโครงการ`
         : `Published unit count of ${project.unit_count.toLocaleString()} helps frame the scale of the project.`)
       : (locale === 'th'
-        ? 'ข้อมูล unit mix ยังไม่ครบใน route นี้ จึงควรใช้บริบทของทำเลและผู้พัฒนาเป็นตัวกรองก่อนเช็ก inventory live'
+        ? 'ข้อมูลรูปแบบยูนิตยังไม่ครบในหน้านี้ จึงควรใช้บริบทของทำเลและผู้พัฒนาเป็นตัวกรองก่อนเช็กสต็อกจริง'
         : 'Unit-mix detail is still thin on this route, so use the location and developer context as the filter before checking live inventory.'),
   ]).slice(0, 3);
 }
@@ -228,9 +228,9 @@ function buildProjectDecisionCta(
       ? `สนใจ ${project.name} และต้องการเทียบราคา ค่าเช่า และมุมมองการลงทุนกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
       : `I am reviewing ${project.name} and want to compare its price, rent, and investment context against nearby alternatives.`;
     return {
-      title: locale === 'th' ? 'ต่อยอดจาก snapshot นี้เป็นการตัดสินใจที่คมขึ้น' : 'Turn this snapshot into a sharper decision',
+      title: locale === 'th' ? 'ต่อยอดจากภาพรวมชุดนี้เป็นการตัดสินใจที่คมขึ้น' : 'Turn this snapshot into a sharper decision',
       body: locale === 'th'
-        ? 'ใช้ราคา ค่าเช่า และ ROI ที่มีตอนนี้เพื่อตรวจว่าโครงการนี้ยังควรอยู่ในรายการคัดไว้ เมื่อเทียบกับตัวเลือกใกล้เคียงหรือไม่'
+        ? 'ใช้ราคา ค่าเช่า และอัตราผลตอบแทนที่มีตอนนี้เพื่อตรวจว่าโครงการนี้ยังควรอยู่ในรายการคัดไว้ เมื่อเทียบกับตัวเลือกใกล้เคียงหรือไม่'
         : 'Use the visible price, rent, and ROI context to test whether this project still belongs in your shortlist against nearby alternatives.',
       primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
         intent: 'project_consultation',
@@ -246,9 +246,9 @@ function buildProjectDecisionCta(
       secondaryLabel: locale === 'th' ? 'เทียบกับโครงการใกล้เคียง' : 'Compare nearby options',
       leadHeading: locale === 'th' ? 'ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง' : 'Compare this project with nearby options',
       leadMessage,
-      sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
+      sidebarTitle: locale === 'th' ? 'ส่งรายละเอียดโครงการให้ที่ปรึกษา' : 'Advisor project brief',
       sidebarBody: locale === 'th'
-        ? 'ส่งงบ ทำเล และเหตุผลที่สนใจโครงการนี้เพื่อให้ทีมช่วยเช็กว่าควรอยู่ต่อในรายการคัดไว้หรือควรเทียบกับตัวเลือกอื่น'
+        ? 'ส่งงบ ทำเล และเหตุผลที่สนใจโครงการนี้ เพื่อให้ทีมช่วยเช็กว่าควรอยู่ต่อในรายการคัดไว้หรือควรเทียบกับตัวเลือกอื่น'
         : 'Share your budget, area, and why this project is on your radar so the team can test whether it survives a tighter shortlist.',
       inquiryIntent: 'project_consultation',
       inquirySource: projectConsultationSource,
@@ -262,9 +262,9 @@ function buildProjectDecisionCta(
       ? `สนใจ ${project.name} และต้องการยืนยันยูนิต ช่วงราคา และตัวเลือกใกล้เคียงที่ยังเปิดอยู่จริงตอนนี้`
       : `I am interested in ${project.name} and want to confirm live unit availability, price bands, and nearby alternatives still open now.`;
     return {
-      title: locale === 'th' ? 'เช็กสิ่งที่ยัง active อยู่จริงก่อนขยับต่อ' : 'Check what is actually live before moving forward',
+      title: locale === 'th' ? 'เช็กสิ่งที่ยังเปิดอยู่จริงก่อนขยับต่อ' : 'Check what is actually live before moving forward',
       body: locale === 'th'
-        ? 'ใช้ราคาเริ่มต้นหรือกำหนดส่งมอบที่เผยแพร่ตอนนี้เป็นจุดเริ่มต้น แล้วให้ทีมช่วยยืนยัน inventory และทางเลือกที่ยังเปิดอยู่จริง'
+        ? 'ใช้ราคาเริ่มต้นหรือกำหนดส่งมอบที่เผยแพร่ตอนนี้เป็นจุดเริ่มต้น แล้วให้ทีมช่วยยืนยันสต็อกและทางเลือกที่ยังเปิดอยู่จริง'
         : 'Use the published entry price or delivery timing as the starting point, then verify which units and comparables are genuinely still active.',
       primaryHref: withLocaleQuery(locale, '/contact', buildLeadCaptureQuery({
         intent: 'project_consultation',
@@ -275,14 +275,14 @@ function buildProjectDecisionCta(
         signalLevel: 'medium',
         message: leadMessage,
       })),
-      primaryLabel: locale === 'th' ? 'เช็ก availability ของโครงการนี้' : 'Check live availability',
+      primaryLabel: locale === 'th' ? 'เช็กยูนิตที่ยังเปิดอยู่ของโครงการนี้' : 'Check live availability',
       secondaryHref: withLocale(locale, '/buy'),
       secondaryLabel: locale === 'th' ? 'ดูรายการที่พร้อมคัดต่อ' : 'Browse shortlist-ready listings',
-      leadHeading: locale === 'th' ? 'ขอเช็ก availability รอบโครงการนี้' : 'Check live availability around this project',
+      leadHeading: locale === 'th' ? 'ขอเช็กยูนิตที่ยังเปิดอยู่รอบโครงการนี้' : 'Check live availability around this project',
       leadMessage,
-      sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
+      sidebarTitle: locale === 'th' ? 'ส่งรายละเอียดโครงการให้ที่ปรึกษา' : 'Advisor project brief',
       sidebarBody: locale === 'th'
-        ? 'ส่งงบ ทำเล และช่วงเวลาที่ต้องการเพื่อให้ทีมช่วยเช็กยูนิตที่ยังเปิดขายและตัวเลือกสำรองที่ไม่หลุดโจทย์'
+        ? 'ส่งงบ ทำเล และช่วงเวลาที่ต้องการ เพื่อให้ทีมช่วยเช็กยูนิตที่ยังเปิดขายและตัวเลือกสำรองที่ไม่หลุดโจทย์'
         : 'Share your budget, area, and timing so the team can confirm live inventory and backup options without losing the current brief.',
       inquiryIntent: 'project_consultation',
       inquirySource: projectConsultationSource,
@@ -295,7 +295,7 @@ function buildProjectDecisionCta(
     ? `สนใจโครงการ ${project.name} และต้องการเทียบกับตัวเลือกใกล้เคียงในพื้นที่เดียวกัน`
     : `I am interested in ${project.name} and want to compare it with similar options in the same area.`;
   return {
-    title: locale === 'th' ? 'ใช้โครงการนี้เป็นจุดตั้งต้นของ shortlist ที่แคบขึ้น' : 'Use this project as the starting point for a tighter shortlist',
+    title: locale === 'th' ? 'ใช้โครงการนี้เป็นจุดตั้งต้นของรายการคัดไว้ที่แคบขึ้น' : 'Use this project as the starting point for a tighter shortlist',
     body: locale === 'th'
       ? 'หากโครงการนี้เริ่มใกล้โจทย์ ให้ทีมช่วยคัดตัวเลือกในทำเลเดียวกันหรือระดับราคาใกล้เคียงเพื่อเร่งการตัดสินใจ'
       : 'If this project is directionally right, turn it into a narrower shortlist of similar options in the same area or price band.',
@@ -308,12 +308,12 @@ function buildProjectDecisionCta(
       signalLevel: 'low',
       message: leadMessage,
     })),
-    primaryLabel: locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project',
+    primaryLabel: locale === 'th' ? 'ขอรายการคัดไว้รอบโครงการนี้' : 'Request a shortlist around this project',
     secondaryHref: withLocale(locale, '/compare'),
     secondaryLabel: locale === 'th' ? 'ไปหน้าเปรียบเทียบ' : 'Go to Compare',
-    leadHeading: locale === 'th' ? 'ขอ shortlist รอบโครงการนี้' : 'Request a shortlist around this project',
+    leadHeading: locale === 'th' ? 'ขอรายการคัดไว้รอบโครงการนี้' : 'Request a shortlist around this project',
     leadMessage,
-    sidebarTitle: locale === 'th' ? 'ส่งบรีฟโครงการให้ที่ปรึกษา' : 'Advisor project brief',
+    sidebarTitle: locale === 'th' ? 'ส่งรายละเอียดโครงการให้ที่ปรึกษา' : 'Advisor project brief',
     sidebarBody: locale === 'th'
       ? 'ส่งงบ ทำเล และกรอบเวลาของคุณเพื่อให้ทีมช่วยบอกเร็วขึ้นว่าโครงการนี้ควรอยู่ต่อหรือควรถูกแทนด้วยตัวเลือกอื่น'
       : 'Share your budget, area, and timing so the team can judge quickly whether this project should stay or be replaced by better-fit options.',
@@ -340,7 +340,7 @@ function buildProjectBuyerFit(
       : `Project-first buyers who want ${areaLabel} context before going into unit-level review.`,
     hasInvestmentView
       ? (locale === 'th'
-        ? 'นักลงทุนที่ต้องการเทียบราคา ค่าเช่า และ ROI กับตัวเลือกใกล้เคียงก่อนตัดสินใจคุยต่อ'
+        ? 'นักลงทุนที่ต้องการเทียบราคา ค่าเช่า และอัตราผลตอบแทนกับตัวเลือกใกล้เคียงก่อนตัดสินใจคุยต่อ'
         : 'Investors comparing visible price, rent, and ROI signals before moving deeper.')
       : null,
     hasEntrySignal || hasDeliverySignal
@@ -350,7 +350,7 @@ function buildProjectBuyerFit(
       : null,
     !hasEvaluationSnapshot
       ? (locale === 'th'
-        ? 'เคสที่ยังต้องให้ทีมช่วยสร้างรายการคัดไว้รอบโครงการนี้ แทนการสรุปจาก snapshot ที่ยังบางเกินไป'
+        ? 'เคสที่ยังต้องให้ทีมช่วยสร้างรายการคัดไว้รอบโครงการนี้ แทนการสรุปจากภาพรวมข้อมูลที่ยังบางเกินไป'
         : 'Cases where the team should build a tighter shortlist around this project because the current snapshot is still thin.')
       : null,
   ]).slice(0, 3);
@@ -373,19 +373,19 @@ function buildProjectHeroSubtitle(
 
   if (startingPriceLabel && areaName) {
     return locale === 'th'
-      ? `${projectName} เริ่มต้นที่ ${startingPriceLabel} ใน ${areaName} ให้คุณอ่าน entry signal ของโครงการก่อนเช็กยูนิตที่ยัง active`
+      ? `${projectName} เริ่มต้นที่ ${startingPriceLabel} ใน ${areaName} ให้คุณอ่านจุดเริ่มต้นของโครงการก่อนเช็กยูนิตที่ยังเปิดอยู่`
       : `${projectName} starts from ${startingPriceLabel} in ${areaName}, giving you a clear project entry point before checking live units.`;
   }
 
   if (areaName && deliveryLabel) {
     return locale === 'th'
-      ? `${projectName} ใน ${areaName} มาพร้อมสัญญาณส่งมอบ ${deliveryLabel} สำหรับเริ่มคัด shortlist ให้แคบขึ้น`
+      ? `${projectName} ใน ${areaName} มาพร้อมสัญญาณส่งมอบ ${deliveryLabel} สำหรับเริ่มบีบรายการคัดไว้ให้แคบขึ้น`
       : `${projectName} in ${areaName} carries a published ${deliveryLabel} delivery signal, enough to start a tighter shortlist read.`;
   }
 
   if (areaName) {
     return locale === 'th'
-      ? `${projectName} ใช้เพื่ออ่านบริบทของ ${areaName} ก่อนขยับไปยังราคา live และทางเลือกใกล้เคียง`
+      ? `${projectName} ใช้เพื่ออ่านบริบทของ ${areaName} ก่อนขยับไปยังราคาล่าสุดและทางเลือกใกล้เคียง`
       : `${projectName} gives you a project-first read on ${areaName} before you move into live pricing and nearby alternatives.`;
   }
 
@@ -394,7 +394,7 @@ function buildProjectHeroSubtitle(
       ? 'หน้านี้สรุปสัญญาณโครงการที่ยืนยันได้แล้ว เพื่อให้ตัดสินใจต่อได้ก่อนลงลึกถึงระดับยูนิต'
       : 'This page compresses the verified project signals you need before moving deeper into unit-level decisions.')
     : (locale === 'th'
-      ? 'หน้านี้ทำหน้าที่เป็นบรีฟโครงการตั้งต้น ก่อนส่งต่อไปยังการคัดรายการ การเปรียบเทียบ หรือคุยกับทีม'
+      ? 'หน้านี้ทำหน้าที่เป็นสรุปโครงการตั้งต้น ก่อนส่งต่อไปยังการคัดรายการ การเปรียบเทียบ หรือคุยกับทีม'
       : 'This page acts as the starting project brief before you hand off into shortlist, compare, or advisor review.');
 }
 
@@ -420,10 +420,10 @@ function buildProjectUseCaseFrames(
           : `Starts from ${startingPriceLabel} in ${areaLabel} with live market context, so it suits buyers who want to pressure-test price, rent, and upside next.`)
         : hasEvaluationSnapshot
           ? (locale === 'th'
-            ? `มี snapshot พอให้ใช้ ${projectName} เป็นจุดเริ่มของการเทียบฝั่งลงทุน แต่ยังควรยืนยัน rent และ liquidity ก่อนสรุป`
+            ? `มีข้อมูลพอให้ใช้ ${projectName} เป็นจุดเริ่มของการเทียบฝั่งลงทุน แต่ยังควรยืนยันค่าเช่าและสภาพคล่องก่อนสรุป`
             : `There is enough snapshot context to use ${projectName} as an investment starting point, but rent and liquidity still need confirmation before you conclude.`)
           : (locale === 'th'
-            ? `มอง ${projectName} เป็น shortlist candidate ก่อน และค่อยขอข้อมูล rent, resale, และ inventory live เพิ่มเติม`
+            ? `มอง ${projectName} เป็นตัวเลือกหลักในรายการคัดไว้ก่อน แล้วค่อยขอข้อมูลค่าเช่า รีเซล และสต็อกจริงเพิ่มเติม`
             : `Treat ${projectName} as a shortlist candidate first, then request rent, resale, and live inventory detail before making an investment call.`),
     },
     {
@@ -446,14 +446,14 @@ function buildProjectUseCaseFrames(
       title: locale === 'th' ? 'อยู่อาศัยจริง' : 'End use',
       body: deliveryLabel && amenityCount > 0
         ? (locale === 'th'
-          ? `กำหนดส่งมอบ ${deliveryLabel} และชุดสิ่งอำนวยความสะดวกที่เผยแพร่ ทำให้หน้านี้ใช้เช็ก move-in readiness ได้เร็วขึ้น`
+          ? `กำหนดส่งมอบ ${deliveryLabel} และชุดสิ่งอำนวยความสะดวกที่เผยแพร่ ทำให้หน้านี้ใช้เช็กความพร้อมเข้าอยู่ได้เร็วขึ้น`
           : `The published ${deliveryLabel} delivery timing plus the visible amenity mix make this page useful for a faster move-in readiness read.`)
         : deliveryLabel
           ? (locale === 'th'
-            ? `กำหนดส่งมอบ ${deliveryLabel} ช่วยตั้งเฟรม end-use ได้ แต่ยังควรยืนยันผังยูนิตและ readiness ของการอยู่อาศัยจริง`
+            ? `กำหนดส่งมอบ ${deliveryLabel} ช่วยตั้งกรอบการอยู่อาศัยจริงได้ แต่ยังควรยืนยันผังยูนิตและความพร้อมเข้าอยู่`
             : `The published ${deliveryLabel} delivery timing gives you an end-use frame, but layouts and real move-in readiness still need confirmation.`)
           : (locale === 'th'
-            ? 'ใช้หน้านี้เพื่อคัดกรองเบื้องต้นสำหรับการอยู่อาศัยจริง แล้วค่อยเช็กผัง ยูนิต และ handover timing ต่อกับทีม'
+            ? 'ใช้หน้านี้เพื่อคัดกรองเบื้องต้นสำหรับการอยู่อาศัยจริง แล้วค่อยเช็กผัง ยูนิต และกำหนดส่งมอบต่อกับทีม'
             : 'Use this page as the first pass for end-use planning, then confirm layouts, matching units, and handover timing with the team.'),
     },
   ];
@@ -484,7 +484,7 @@ function buildProjectInvestmentFramingLines(
     return uniqueItems([
       evaluationSignals[0] ?? null,
       locale === 'th'
-        ? `${projectName} มี market snapshot พอให้เริ่มเทียบในกรอบลงทุนของ ${areaLabel}`
+        ? `${projectName} มีภาพรวมตลาดพอให้เริ่มเทียบในกรอบลงทุนของ ${areaLabel}`
         : `${projectName} has enough market snapshot context to start an investment comparison inside ${areaLabel}.`,
       startingPriceLabel
         ? (locale === 'th'
@@ -492,7 +492,7 @@ function buildProjectInvestmentFramingLines(
           : `Use the ${startingPriceLabel} entry point as the start, then pressure-test rent, yield, and resale liquidity next.`)
         : null,
       locale === 'th'
-        ? 'หากจะคุยเชิงลงทุนต่อ ควรยืนยัน rent, vacancy, และ unit mix ที่ยังเปิดอยู่ก่อนทุกครั้ง'
+        ? 'หากจะคุยเชิงลงทุนต่อ ควรยืนยันค่าเช่า อัตราห้องว่าง และรูปแบบยูนิตที่ยังเปิดอยู่ก่อนทุกครั้ง'
         : 'If you are moving this into an investment conversation, confirm rent, vacancy, and live unit mix before every next step.',
     ]).slice(0, 4);
   }
@@ -505,7 +505,7 @@ function buildProjectInvestmentFramingLines(
       ? `ใช้บริบทของ ${areaLabel} เพื่อดูว่าควรขอข้อมูล rent, resale, และ demand ฝั่งลงทุนต่อหรือไม่`
       : `Use the ${areaLabel} context to judge whether it is worth requesting rent, resale, and demand evidence next.`,
     locale === 'th'
-      ? 'ถ้ายังไม่มี snapshot ตัวเลขครบ ให้ใช้โครงการนี้เป็น seed ของ compare brief มากกว่าการฟันธงผลตอบแทน'
+      ? 'ถ้ายังไม่มีภาพรวมตัวเลขครบ ให้ใช้โครงการนี้เป็นจุดตั้งต้นของกรอบเปรียบเทียบ มากกว่าการฟันธงผลตอบแทน'
       : 'When the number set is still thin, use the project as the seed of a compare brief instead of forcing a return conclusion.',
   ]).slice(0, 3);
 }
@@ -525,7 +525,7 @@ function buildProjectLocationContextLines(
     ...locationFacts.slice(0, 2).map((item) => `${item.label}: ${item.value}`),
     areaName
       ? (locale === 'th'
-        ? `อ่าน ${projectName} ในบริบทของย่าน ${areaName} ก่อน เพราะ logic ของทำเลจะเป็นตัวบอกว่าโครงการนี้เหมาะกับฝั่งลงทุน พักตากอากาศ หรืออยู่อาศัยจริงแบบไหน`
+        ? `อ่าน ${projectName} ในบริบทของย่าน ${areaName} ก่อน เพราะธรรมชาติของทำเลจะเป็นตัวบอกว่าโครงการนี้เหมาะกับฝั่งลงทุน พักตากอากาศ หรืออยู่อาศัยจริงแบบไหน`
         : `Read ${projectName} inside the ${areaName} district context first, because the neighborhood logic is what tells you whether it fits an investment, holiday-home, or end-use brief.`)
       : null,
     startingPriceLabel
@@ -540,11 +540,11 @@ function buildProjectLocationContextLines(
       : null,
     hasEvaluationSnapshot
       ? (locale === 'th'
-        ? 'เมื่อมี snapshot ของพื้นที่และตลาดแล้ว หน้านี้จึงอ่านทำเลได้ในฐานะบริบทการตัดสินใจจริง ไม่ใช่เพียง wrapper ของแบรนด์โครงการ'
+        ? 'เมื่อมีภาพรวมของพื้นที่และตลาดแล้ว หน้านี้จึงอ่านทำเลได้ในฐานะบริบทการตัดสินใจจริง ไม่ใช่เพียงเปลือกของแบรนด์โครงการ'
         : 'Because there is already area and market snapshot data, this location can be read as a real decision context instead of a branding wrapper.')
       : developerName
         ? (locale === 'th'
-          ? `บริบทของผู้พัฒนา ${developerName} ช่วยตั้งต้นความน่าเชื่อถือได้ แต่การตัดสินใจยังต้องอิง logic ของย่านและทางไปต่อระดับยูนิต`
+          ? `บริบทของผู้พัฒนา ${developerName} ช่วยตั้งต้นความน่าเชื่อถือได้ แต่การตัดสินใจยังต้องอิงธรรมชาติของย่านและทางไปต่อระดับยูนิต`
           : `Published developer context from ${developerName} helps anchor credibility, but the decision still depends on the district logic and the live-unit path.`)
         : null,
   ]).slice(0, 4);
@@ -570,7 +570,7 @@ function buildProjectUnitMixLines(
   return uniqueItems([
     visibleTotal > 0
       ? (locale === 'th'
-        ? `${visibleTotal} ยูนิตที่ผูกกับโครงการนี้ยังเปิดให้เช็กต่อได้ใน route นี้`
+        ? `${visibleTotal} ยูนิตที่ผูกกับโครงการนี้ยังเปิดให้เช็กต่อได้บนหน้านี้`
         : `${visibleTotal} project-linked units are currently visible on this route.`)
       : null,
     bedroomMix.length > 0
@@ -607,14 +607,14 @@ function buildProjectInventoryFlowLines(
     minPrice && maxPrice
       ? (locale === 'th'
         ? minPrice === maxPrice
-          ? `ราคา live ของยูนิตที่เห็นตอนนี้อยู่ที่ ${formatCurrency(locale, minPrice)}`
-          : `ราคา live ของยูนิตที่เห็นตอนนี้อยู่ระหว่าง ${formatCurrency(locale, minPrice)} ถึง ${formatCurrency(locale, maxPrice)}`
+          ? `ราคาล่าสุดของยูนิตที่เห็นตอนนี้อยู่ที่ ${formatCurrency(locale, minPrice)}`
+          : `ราคาล่าสุดของยูนิตที่เห็นตอนนี้อยู่ระหว่าง ${formatCurrency(locale, minPrice)} ถึง ${formatCurrency(locale, maxPrice)}`
         : minPrice === maxPrice
           ? `The live units shown here currently sit at ${formatCurrency(locale, minPrice)}.`
           : `The live units shown here currently range from ${formatCurrency(locale, minPrice)} to ${formatCurrency(locale, maxPrice)}.`)
       : startingPriceLabel
         ? (locale === 'th'
-          ? `ถ้ายังไม่มียูนิตผูกโครงการมากพอ ให้ใช้ราคาเริ่มต้น ${startingPriceLabel} เป็น anchor ก่อนส่งต่อไปเช็ก live stock`
+          ? `ถ้ายังไม่มียูนิตผูกโครงการมากพอ ให้ใช้ราคาเริ่มต้น ${startingPriceLabel} เป็นจุดอ้างอิงก่อนส่งต่อไปเช็กสต็อกจริง`
           : `If the linked unit set is still thin, use the ${startingPriceLabel} starting signal as the anchor before you request live stock.`)
         : null,
     properties.length > 0
@@ -622,10 +622,10 @@ function buildProjectInventoryFlowLines(
         ? `เปิดการ์ดยูนิตเพื่อขยับจากการอ่านโครงการไปสู่การตัดสินใจระดับยูนิต โดยไม่หลุดจากบริบทของ ${projectName}`
         : `Open a unit card to move from the project read into unit-level decisions without losing the ${projectName} context.`)
       : (locale === 'th'
-        ? `หาก route นี้ยังไม่แสดงยูนิตที่ผูกกับ ${projectName} ให้ใช้ advisor handoff เพื่อขอ unit mix และ stock ล่าสุด`
+        ? `หากหน้านี้ยังไม่แสดงยูนิตที่ผูกกับ ${projectName} ให้ส่งต่อให้ทีมเพื่อขอรูปแบบยูนิตและสต็อกล่าสุด`
         : `If this route is not yet surfacing linked units for ${projectName}, use the advisor handoff to request the latest unit mix and stock.`),
     locale === 'th'
-      ? 'เก็บ project brief เดิมไว้ แล้วค่อยเช็กผัง ขนาด และราคา live ในรอบถัดไป'
+      ? 'เก็บสรุปโครงการเดิมไว้ แล้วค่อยเช็กผัง ขนาด และราคาจริงที่เปิดขายในรอบถัดไป'
       : 'Keep the project brief intact, then verify layouts, size, and live pricing in the next step.',
   ]).slice(0, 3);
 }
@@ -648,10 +648,10 @@ function buildProjectGalleryStatusLines(
   return uniqueItems([
     mediaCount > 0
       ? (locale === 'th'
-        ? `route นี้ยืนยันภาพ local media ของโครงการได้ ${mediaCount} ภาพ`
+        ? `หน้านี้ยืนยันภาพ local media ของโครงการได้ ${mediaCount} ภาพ`
         : `${mediaCount} published local-media project visual${mediaCount === 1 ? '' : 's'} are confirmed on this route.`)
       : (locale === 'th'
-        ? 'route นี้กำลังใช้ภาพ overview สำรอง เพราะ photo pack แบบ local media ที่เผยแพร่ยังบางอยู่'
+        ? 'หน้านี้กำลังใช้ภาพภาพรวมสำรอง เพราะชุดภาพแบบ local media ที่เผยแพร่ยังบางอยู่'
         : 'This route is currently using the fallback overview image because the published local-media photo pack is still thin.'),
     locale === 'th'
       ? 'หน้านี้แสดงเฉพาะไฟล์ local media ที่เผยแพร่แล้วเท่านั้น เพื่อไม่ดึงภาพภายนอกหรือภาพที่ยังไม่พร้อมใช้งาน'
@@ -665,7 +665,7 @@ function buildProjectGalleryStatusLines(
           ? `แม้ภาพจะยังบาง คุณยังใช้บริบทของ ${areaName}${startingPriceLabel ? ` และราคาเริ่มต้น ${startingPriceLabel}` : ''}${deliveryLabel ? ` พร้อมกำหนดส่งมอบ ${deliveryLabel}` : ''} เพื่อคัดต่อได้ก่อนค่อยขอภาพล่าสุดจากทีม`
           : `Even with a thin photo pack, you can still use the ${areaName}${startingPriceLabel ? ` entry point of ${startingPriceLabel}` : ''}${deliveryLabel ? ` and the published ${deliveryLabel} delivery timing` : ''} before you request fresher visuals from the team.`)
         : (locale === 'th'
-          ? 'หากจะใช้โครงการนี้ต่อใน shortlist ให้ส่งต่อเพื่อขอภาพล่าสุดและสถานะหน้างานก่อนตัดสินใจ'
+          ? 'หากจะใช้โครงการนี้ต่อในรายการคัดไว้ ให้ส่งต่อเพื่อขอภาพล่าสุดและสถานะหน้างานก่อนตัดสินใจ'
           : 'If this project stays in the shortlist, request the latest visuals and site status before moving further.'),
   ]).slice(0, 3);
 }
@@ -753,23 +753,23 @@ export default async function ProjectDetailPage(
               kicker: dict.advisory.bestFor,
               title: formatSlugTitle(params.slug),
               body: locale === 'th'
-                ? 'ใช้ข้อมูลสรุปนี้เพื่อส่งบริบทให้ทีมช่วยคัดรายการ หรือไปต่อยังโครงการที่เผยแพร่แล้ว'
+                ? 'ใช้ข้อมูลสรุปนี้เพื่อส่งบริบทให้ทีมช่วยคัดตัวเลือก หรือไปต่อยังโครงการที่เผยแพร่แล้ว'
                 : 'Use this snapshot to hand context to the team or continue into the published inventory.',
               icon: 'building',
             },
             {
               kicker: dict.advisory.nextStep,
-              title: locale === 'th' ? 'ต่อไปยังการคัดรายการหรือ Smart Finder' : 'Move next into shortlist or Smart Finder',
+              title: locale === 'th' ? 'ต่อไปยังการคัดตัวเลือกหรือเครื่องมือช่วยคัด' : 'Move next into shortlist or Smart Finder',
               body: locale === 'th'
-                ? 'จากหน้านี้คุณยังคัดรายการต่อ หรือส่งบรีฟให้ทีมคัดทางเลือกได้ทันที'
+                ? 'จากหน้านี้คุณยังคัดตัวเลือกต่อ หรือส่งสรุปให้ทีมช่วยคัดทางเลือกได้ทันที'
                 : 'From here you can keep shortlisting or hand the project brief to the team without losing momentum.',
               icon: 'check',
             },
             {
               kicker: dict.advisory.trustSignal,
-              title: locale === 'th' ? 'แสดงเฉพาะสิ่งที่ยืนยันได้จากข้อมูลจริง' : 'Only verified snapshot signals are shown',
+              title: locale === 'th' ? 'แสดงเฉพาะข้อมูลที่ยืนยันได้จากข้อมูลจริง' : 'Only verified snapshot signals are shown',
               body: locale === 'th'
-                ? 'เมื่อข้อมูลเชิงลึกกลับมาครบ หน้านี้จะขยายเป็น project review เต็มรูปแบบ'
+                ? 'เมื่อข้อมูลเชิงลึกกลับมาครบ หน้านี้จะขยายเป็นรีวิวโครงการแบบเต็มรูปแบบ'
                 : 'When the deeper data becomes available, this route expands back into the full project review surface.',
               icon: 'shield',
             },
@@ -925,7 +925,7 @@ export default async function ProjectDetailPage(
   const projectQuickFacts = [
     {
       label: locale === 'th' ? 'ราคาเริ่มต้น' : 'Starting price',
-      value: startingPriceLabel ?? (locale === 'th' ? 'ขอเช็กราคา live' : 'Check live pricing'),
+      value: startingPriceLabel ?? (locale === 'th' ? 'ขอเช็กราคาล่าสุด' : 'Check live pricing'),
     },
     {
       label: locale === 'th' ? 'ทำเล' : 'Location',
@@ -937,7 +937,7 @@ export default async function ProjectDetailPage(
     },
     {
       label: locale === 'th' ? 'ส่งมอบ' : 'Delivery',
-      value: deliveryLabel ?? (locale === 'th' ? 'เช็ก handover ล่าสุด' : 'Check latest handover timing'),
+      value: deliveryLabel ?? (locale === 'th' ? 'เช็กกำหนดส่งมอบล่าสุด' : 'Check latest handover timing'),
     },
   ];
   const linkedProjectProperties = linkedInventoryResponse.data
@@ -949,24 +949,24 @@ export default async function ProjectDetailPage(
   const projectDecisionRead = uniqueItems([
     hasInvestmentView
       ? (locale === 'th'
-        ? `ให้โครงการนี้อยู่ต่อใน shortlist เมื่อราคาเริ่มต้น ${startingPriceLabel ?? 'ที่เห็น'} และ snapshot ของ ${project.area?.name ?? 'ทำเลนี้'} ยังมีน้ำหนักกว่าทางเลือกใกล้เคียง`
+        ? `ให้โครงการนี้อยู่ต่อในรายการคัดไว้ เมื่อราคาเริ่มต้น ${startingPriceLabel ?? 'ที่เห็น'} และภาพรวมของ ${project.area?.name ?? 'ทำเลนี้'} ยังมีน้ำหนักกว่าทางเลือกใกล้เคียง`
         : `Keep this project in the shortlist when the ${startingPriceLabel ?? 'visible'} entry point and the ${project.area?.name ?? 'local'} snapshot still carry more weight than nearby alternatives.`)
       : (locale === 'th'
-        ? `ให้โครงการนี้อยู่ต่อใน shortlist เมื่อบริบทของ ${project.area?.name ?? 'ทำเลหลัก'} ผู้พัฒนา และทางไปต่อระดับยูนิตยังดูแข็งกว่าตัวเลือกแทน`
+        ? `ให้โครงการนี้อยู่ต่อในรายการคัดไว้ เมื่อบริบทของ ${project.area?.name ?? 'ทำเลหลัก'} ผู้พัฒนา และทางไปต่อระดับยูนิตยังดูแข็งกว่าตัวเลือกแทน`
         : `Keep this project on the shortlist when the ${project.area?.name ?? 'area'} context, developer signal, and live-unit path still read stronger than nearby substitutes.`),
     linkedInventoryCount > 0
       ? (locale === 'th'
-        ? 'ยูนิตที่ผูกกับโครงการนี้เริ่มพอให้เช็กได้แล้วว่า bedroom mix และช่วงราคา live ยังสอดคล้องกับโจทย์หรือไม่'
+        ? 'ยูนิตที่ผูกกับโครงการนี้เริ่มพอให้เช็กได้แล้วว่ารูปแบบห้องนอนและช่วงราคาล่าสุดยังสอดคล้องกับโจทย์หรือไม่'
         : 'The linked unit set is already strong enough to test whether the visible bedroom mix and live price band still match the brief.')
       : (locale === 'th'
-        ? 'ถ้า live stock ยังบาง ให้ใช้หน้านี้เป็นตัวกรองโครงการก่อน แล้วค่อยขอ unit mix ล่าสุดจากทีม'
+        ? 'ถ้าสต็อกจริงยังบาง ให้ใช้หน้านี้เป็นตัวกรองโครงการก่อน แล้วค่อยขอรูปแบบยูนิตล่าสุดจากทีม'
         : 'If the live stock is still thin, use this page as the project filter first, then request the latest unit mix from the team.'),
     hasEvaluationSnapshot
       ? (locale === 'th'
-        ? 'ตอนนี้มีข้อมูลพอให้ตัดสินได้ว่าโครงการนี้สมควรไปต่อเป็น shortlist candidate หรือเหลือไว้เป็น benchmark เท่านั้น'
+        ? 'ตอนนี้มีข้อมูลพอให้ตัดสินได้ว่าโครงการนี้สมควรไปต่อในรายการคัดไว้ หรือควรเหลือไว้เป็นตัวเทียบเท่านั้น'
         : 'There is enough context here to judge whether the project deserves shortlist-candidate status or should stay as a benchmark only.')
       : (locale === 'th'
-        ? 'เมื่อ snapshot ยังบาง ให้ใช้กรอบนี้เพื่อกันไม่ให้โครงการที่ไม่ใช่หลุดเข้ามาใน shortlist โดยไม่จำเป็น'
+        ? 'เมื่อภาพรวมข้อมูลยังบาง ให้ใช้กรอบนี้เพื่อกันไม่ให้โครงการที่ไม่ใช่หลุดเข้ามาในรายการคัดไว้โดยไม่จำเป็น'
         : 'When the snapshot is still thin, use this layer to stop weak-fit projects from drifting into the shortlist by default.'),
   ]).slice(0, 3);
   const projectHeroProofs = uniqueItems([
@@ -982,7 +982,7 @@ export default async function ProjectDetailPage(
       : null,
     hasInvestmentView
       ? locale === 'th'
-        ? 'มี market snapshot แล้ว'
+        ? 'มีภาพรวมตลาดแล้ว'
         : 'Market snapshot available'
       : null,
     project.developer?.name
@@ -1064,16 +1064,16 @@ export default async function ProjectDetailPage(
     ? (locale === 'th' ? 'ภาพโครงการที่ยืนยันแล้ว' : 'Confirmed project visual')
     : (locale === 'th' ? 'ภาพ overview สำรอง' : 'Fallback overview');
   const projectGalleryLeadCaption = projectMedia.length > 1
-    ? (locale === 'th' ? `${projectMedia.length} ภาพที่ยืนยันได้ใน route นี้` : `${projectMedia.length} visuals confirmed on this route`)
+    ? (locale === 'th' ? `${projectMedia.length} ภาพที่ยืนยันได้บนหน้านี้` : `${projectMedia.length} visuals confirmed on this route`)
     : projectMedia.length === 1
-      ? (locale === 'th' ? 'มี 1 ภาพ local media ที่ยืนยันได้บน route นี้' : '1 confirmed local-media visual on this route')
-      : (locale === 'th' ? 'ใช้ภาพ overview สำรองจนกว่าจะมี photo pack ที่เผยแพร่ครบขึ้น' : 'Using the fallback overview until a fuller published photo pack is available.');
+      ? (locale === 'th' ? 'มี 1 ภาพ local media ที่ยืนยันได้บนหน้านี้' : '1 confirmed local-media visual on this route')
+      : (locale === 'th' ? 'ใช้ภาพภาพรวมสำรองจนกว่าจะมีชุดภาพที่เผยแพร่ครบขึ้น' : 'Using the fallback overview until a fuller published photo pack is available.');
   const projectGalleryStatusTitle = projectMedia.length > 0
     ? (locale === 'th' ? 'สถานะภาพโครงการที่ยืนยันได้' : 'Confirmed project visual status')
-    : (locale === 'th' ? 'photo pack ของโครงการยังบางใน route นี้' : 'The project photo pack is still thin on this route');
+    : (locale === 'th' ? 'ชุดภาพของโครงการยังบางบนหน้านี้' : 'The project photo pack is still thin on this route');
   const projectGalleryStatusBody = projectMedia.length > 0
     ? (locale === 'th'
-      ? 'ใช้แกลเลอรีนี้เป็น visual brief ระดับโครงการก่อน แล้วค่อยยืนยันภาพส่วนกลาง ความคืบหน้า และยูนิตล่าสุดในรอบถัดไป'
+      ? 'ใช้แกลเลอรีนี้เป็นภาพรวมระดับโครงการก่อน แล้วค่อยยืนยันภาพส่วนกลาง ความคืบหน้า และยูนิตล่าสุดในรอบถัดไป'
       : 'Use this gallery as the project-level visual brief first, then confirm the latest shared-area, progress, and unit-specific visuals in the next step.')
     : (locale === 'th'
       ? 'ถึงภาพจะยังไม่ครบ หน้านี้ยังคงใช้บริบทของโครงการและ fallback overview เพื่อไม่ให้การตัดสินใจหลุดจากเส้นทาง'
@@ -1199,22 +1199,22 @@ export default async function ProjectDetailPage(
     : 'This handoff keeps the project, area, and next-step intent in one inquiry.';
   const projectMobileDescription = projectSecondaryIsCompare
     ? (locale === 'th'
-      ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือเปิดหน้าเปรียบเทียบเมื่ออยากดูตัวเลือกใกล้เคียงแบบวางคู่กัน'
+      ? 'ส่งสรุปโครงการนี้ให้ทีมทันที หรือเปิดหน้าเปรียบเทียบเมื่ออยากดูตัวเลือกใกล้เคียงแบบวางคู่กัน'
       : 'Send this project brief to the team now, or open compare when you want nearby options side by side.')
     : (locale === 'th'
-      ? 'ส่งบรีฟโครงการนี้ให้ทีมทันที หรือไปต่อยังรายการที่พร้อมคัดต่อเมื่ออยากเช็ก stock ที่ขยับต่อได้เร็ว'
+      ? 'ส่งสรุปโครงการนี้ให้ทีมทันที หรือไปต่อยังรายการที่พร้อมคัดต่อเมื่ออยากเช็กสต็อกที่ขยับต่อได้เร็ว'
       : 'Send this project brief to the team now, or browse shortlist-ready listings when you want stock you can move on quickly.');
   const projectHeroSignals: HeroSignal[] = [
     {
       kicker: locale === 'th' ? 'จุดเริ่มต้น' : 'Entry signal',
       title: startingPriceLabel
         ? (locale === 'th' ? `เริ่มต้น ${startingPriceLabel}` : `From ${startingPriceLabel}`)
-        : (project.area?.name ?? (locale === 'th' ? 'เช็กราคาและทำเล live' : 'Confirm live pricing and area')),
+        : (project.area?.name ?? (locale === 'th' ? 'เช็กราคาและทำเลล่าสุด' : 'Confirm live pricing and area')),
       body: uniqueItems([
         project.area?.name ? (locale === 'th' ? `ทำเล ${project.area.name}` : `Area ${project.area.name}`) : null,
         project.developer?.name ? (locale === 'th' ? `ผู้พัฒนา ${project.developer.name}` : `Developer ${project.developer.name}`) : null,
         deliveryLabel ? (locale === 'th' ? `ส่งมอบ ${deliveryLabel}` : `Delivery ${deliveryLabel}`) : null,
-      ]).join(' • ') || (locale === 'th' ? 'เช็กช่วงราคาและ availability ล่าสุดก่อนลงลึกถึงยูนิต' : 'Confirm current pricing and availability before moving into unit detail.'),
+      ]).join(' • ') || (locale === 'th' ? 'เช็กช่วงราคาและยูนิตที่ยังเปิดอยู่ล่าสุดก่อนลงลึกถึงยูนิต' : 'Confirm current pricing and availability before moving into unit detail.'),
       icon: hasInvestmentView || Boolean(startingPriceLabel) ? 'trend' : 'building' as const,
     },
     {
@@ -1329,13 +1329,13 @@ export default async function ProjectDetailPage(
             </div>
           </div>
 
-          <div className="authority-card project-confidence-card project-confidence-card--availability">
-            <h2 className="card-title">{locale === 'th' ? 'ราคา เวลา และสิ่งที่ยังต้องเช็ก' : 'Price, timing, and what still needs checking'}</h2>
-            <p className="card-subtitle">
-              {locale === 'th'
-                ? 'ดูสัญญาณ availability ที่มีอยู่แล้ว พร้อมสิ่งที่ควรยืนยันก่อนคุยต่อในระดับยูนิต'
-                : 'See what the route already surfaces on availability, and what still needs confirmation before unit-level conversations.'}
-            </p>
+              <div className="authority-card project-confidence-card project-confidence-card--availability">
+                <h2 className="card-title">{locale === 'th' ? 'ราคา เวลา และสิ่งที่ยังต้องเช็ก' : 'Price, timing, and what still needs checking'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'ดูสัญญาณยูนิตที่ยังเปิดอยู่ พร้อมสิ่งที่ควรยืนยันก่อนคุยต่อในระดับยูนิต'
+                    : 'See what the route already surfaces on availability, and what still needs confirmation before unit-level conversations.'}
+                </p>
             <div className="insight-list mt-3">
               {availabilityLines.map((item) => (
                 <div key={item} className="insight-list__item">
@@ -1345,13 +1345,13 @@ export default async function ProjectDetailPage(
             </div>
           </div>
 
-          <div className="authority-card project-confidence-card project-confidence-card--consider">
-            <h2 className="card-title">{locale === 'th' ? 'ใครควรให้โครงการนี้ไปต่อ' : 'Who should keep this project moving'}</h2>
-            <p className="card-subtitle">
-              {locale === 'th'
-                ? 'บอกให้เร็วว่าโครงการนี้เหมาะกับผู้ซื้อแบบไหน และทำไมจึงยังควรอยู่ใน shortlist'
-                : 'Call out quickly who this project suits, and why it still deserves shortlist attention.'}
-            </p>
+              <div className="authority-card project-confidence-card project-confidence-card--consider">
+                <h2 className="card-title">{locale === 'th' ? 'ใครควรให้โครงการนี้ไปต่อ' : 'Who should keep this project moving'}</h2>
+                <p className="card-subtitle">
+                  {locale === 'th'
+                    ? 'บอกให้เร็วว่าโครงการนี้เหมาะกับผู้ซื้อแบบไหน และทำไมจึงยังควรอยู่ในรายการคัดไว้'
+                    : 'Call out quickly who this project suits, and why it still deserves shortlist attention.'}
+                </p>
             <div className="insight-list project-confidence-fit-list mt-3">
               {projectConfidenceFitLines.map((item) => (
                 <div key={item} className="insight-list__item">
@@ -1401,8 +1401,8 @@ export default async function ProjectDetailPage(
           </div>
 
           <div id="project-gallery-status" className="project-gallery__status">
-            <div className="project-gallery__status-copy">
-              <p className="project-gallery__status-kicker">{locale === 'th' ? 'Media status' : 'Media status'}</p>
+          <div className="project-gallery__status-copy">
+              <p className="project-gallery__status-kicker">{locale === 'th' ? 'สถานะรูปภาพ' : 'Media status'}</p>
               <h2 className="project-gallery__status-title">{projectGalleryStatusTitle}</h2>
               <p className="project-gallery__status-body">{projectGalleryStatusBody}</p>
             </div>
@@ -1450,11 +1450,11 @@ export default async function ProjectDetailPage(
             <section id="project-why-framework" className="reveal project-why-framework">
               <PublicSectionHeader
                 align="start"
-                kicker={locale === 'th' ? 'Why this project' : 'Why this project'}
+                kicker={locale === 'th' ? 'ทำไมต้องดูโครงการนี้ต่อ' : 'Why this project'}
                 kickerClassName="project-why-framework__kicker"
-                title={locale === 'th' ? 'เหตุผลที่โครงการนี้ควรอยู่ต่อใน shortlist' : 'Why this project deserves another shortlist round'}
+                title={locale === 'th' ? 'เหตุผลที่โครงการนี้ควรอยู่ต่อในรายการคัดไว้' : 'Why this project deserves another shortlist round'}
                 subtitle={locale === 'th'
-                  ? 'อ่านชั้นนี้เพื่อดูว่าโครงการนี้น่าสนใจเพราะอะไร เหมาะกับ use case แบบไหน และควรตีความฝั่งลงทุนอย่างไร'
+                  ? 'อ่านชั้นนี้เพื่อดูว่าโครงการนี้น่าสนใจเพราะอะไร เหมาะกับกรณีใช้งานแบบไหน และควรตีความฝั่งลงทุนอย่างไร'
                   : 'Use this layer to see why the project stays interesting, which use case it best fits, and how to read the investment angle without overreaching.'}
                 subtitleClassName="project-why-framework__subtitle"
               />
@@ -1497,7 +1497,7 @@ export default async function ProjectDetailPage(
                   <h2 className="card-title">{locale === 'th' ? 'กรอบการอ่านฝั่งลงทุน' : 'Investment framing'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
-                      ? 'ใช้ส่วนนี้เพื่ออ่านตัวเลขและสัญญาณตลาดในฐานะ comparison context ไม่ใช่ข้อสรุปผลตอบแทนล่วงหน้า'
+                      ? 'ใช้ส่วนนี้เพื่ออ่านตัวเลขและสัญญาณตลาดในฐานะบริบทเปรียบเทียบ ไม่ใช่ข้อสรุปผลตอบแทนล่วงหน้า'
                       : 'Use this block to read the numbers and market signals as comparison context, not as a promised return conclusion.'}
                   </p>
                   <div className="insight-list mt-3 project-investment-framing-list">
@@ -1514,18 +1514,18 @@ export default async function ProjectDetailPage(
             <section id="project-unit-inventory" className="reveal project-unit-inventory">
               <PublicSectionHeader
                 align="start"
-                kicker={locale === 'th' ? 'Unit path' : 'Unit path'}
+                kicker={locale === 'th' ? 'ทางไปต่อระดับยูนิต' : 'Unit path'}
                 kickerClassName="project-unit-inventory__kicker"
-                title={locale === 'th' ? 'ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยัง active' : 'Move from the project read into live units'}
+                title={locale === 'th' ? 'ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยังเปิดอยู่' : 'Move from the project read into live units'}
                 subtitle={locale === 'th'
-                  ? 'ส่วนนี้ช่วยบอกว่าเห็น unit mix แบบไหนแล้ว ราคา live อยู่ช่วงใด และควรไปต่อที่การ์ดยูนิตหรือ advisor handoff'
+                  ? 'ส่วนนี้ช่วยบอกว่าเห็นรูปแบบยูนิตแบบไหนแล้ว ราคาจริงที่เปิดขายอยู่ช่วงใด และควรไปต่อที่การ์ดยูนิตหรือส่งต่อให้ทีม'
                   : 'This layer shows which unit mix is already visible, where live pricing sits, and whether the next move should be a unit card or an advisor handoff.'}
                 subtitleClassName="project-unit-inventory__subtitle"
               />
 
               <div className="signal-grid signal-grid--two-up project-unit-summary-grid">
                 <div className="authority-card project-unit-summary-card project-unit-summary-card--mix">
-                  <h2 className="card-title">{locale === 'th' ? 'mix ของยูนิตที่เห็นตอนนี้' : 'Visible unit mix now'}</h2>
+                  <h2 className="card-title">{locale === 'th' ? 'รูปแบบยูนิตที่เห็นตอนนี้' : 'Visible unit mix now'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
                       ? 'ใช้บล็อกนี้เพื่อดูว่าจากโครงการนี้คุณขยับไปเช็กยูนิตแบบไหนได้ทันที'
@@ -1541,7 +1541,7 @@ export default async function ProjectDetailPage(
                 </div>
 
                 <div className="authority-card project-unit-summary-card project-unit-summary-card--flow">
-                  <h2 className="card-title">{locale === 'th' ? 'ไปต่อยัง live stock อย่างไร' : 'How to move into live stock'}</h2>
+                  <h2 className="card-title">{locale === 'th' ? 'ไปต่อยังสต็อกจริงอย่างไร' : 'How to move into live stock'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
                       ? 'อ่านทางเดินต่อจากโครงการนี้ไปสู่การตัดสินใจระดับยูนิต โดยไม่ต้องกระโดดข้ามบริบทของหน้า'
@@ -1587,7 +1587,7 @@ export default async function ProjectDetailPage(
                 <div className="cta-strip project-unit-inventory-empty">
                   <div className="cta-strip__text">
                     {locale === 'th'
-                      ? 'ถ้ายังไม่มียูนิตผูกกับโครงการนี้บน route สาธารณะ ให้ใช้ project brief ด้านบนแล้วส่งต่อเพื่อขอ unit mix และ availability ล่าสุดจากทีม'
+                      ? 'ถ้ายังไม่มียูนิตผูกกับโครงการนี้บนหน้าสาธารณะ ให้ใช้สรุปโครงการด้านบนแล้วส่งต่อเพื่อขอรูปแบบยูนิตและสถานะล่าสุดจากทีม'
                       : 'If this public route is not yet surfacing linked units, keep the project brief above and hand it off to request the latest unit mix and availability from the team.'}
                   </div>
                   <div className="card-actions project-cta-row project-unit-summary-actions">
@@ -1619,7 +1619,7 @@ export default async function ProjectDetailPage(
                 <h2 className="card-title">{locale === 'th' ? 'มุมมองสำหรับตัดสินใจคัดรายการ' : 'Shortlist decision lens'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'อ่านชุดสัญญาณนี้เพื่อดูว่าโครงการควรไปต่อใน shortlist หรือเก็บไว้เป็นเพียงตัวเทียบอ้างอิง'
+                    ? 'อ่านชุดสัญญาณนี้เพื่อดูว่าโครงการควรไปต่อในรายการคัดไว้ หรือเก็บไว้เป็นเพียงตัวเทียบอ้างอิง'
                     : 'Read these signals to decide whether the project earns a shortlist slot or stays as a reference only.'}
                 </p>
                 <div className="insight-list project-decision-lens-list mt-3">
@@ -1661,7 +1661,7 @@ export default async function ProjectDetailPage(
                 <h2 className="card-title">{locale === 'th' ? 'บทความและบริบทที่เกี่ยวข้อง' : 'Related advisory reads'}</h2>
                 <p className="card-subtitle">
                   {locale === 'th'
-                    ? 'ใช้บทความและคู่มือที่เกี่ยวข้องเพื่อขยายบริบท ก่อนเทียบต่อหรือส่งบรีฟให้ทีมช่วยคัดรายการ'
+                    ? 'ใช้บทความและคู่มือที่เกี่ยวข้องเพื่อขยายบริบท ก่อนเทียบต่อหรือส่งสรุปให้ทีมช่วยคัดรายการ'
                     : 'Use these reads to widen the context before you compare options or hand a brief to the team.'}
                 </p>
                 <div className="insight-list project-related-reads-list mt-3">
@@ -1678,7 +1678,7 @@ export default async function ProjectDetailPage(
                 </div>
                 <div className="card-actions project-related-reads-actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
-                    {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
+                    {locale === 'th' ? 'เปิดเครื่องมือคำนวณ' : 'Open calculator'}
                   </Link>
                 </div>
               </div>
@@ -1726,7 +1726,7 @@ export default async function ProjectDetailPage(
                     <h2 className="card-title">{locale === 'th' ? 'บริบทของทำเล' : 'Location context'}</h2>
                     <p className="card-subtitle">
                       {locale === 'th'
-                        ? 'อ่านบริบทนี้เพื่อวางโครงการในเฟรมของย่านจริง และดูว่าทำเลนี้หนุน shortlist logic ของคุณมากพอหรือไม่'
+                        ? 'อ่านบริบทนี้เพื่อวางโครงการในเฟรมของย่านจริง และดูว่าทำเลนี้หนุนแนวคิดการคัดตัวเลือกของคุณมากพอหรือไม่'
                         : 'Read this context to place the project inside the real district frame and judge whether the location still supports your shortlist logic.'}
                     </p>
                     <div className="insight-list project-supporting-fact-list mt-3">
@@ -1743,7 +1743,7 @@ export default async function ProjectDetailPage(
                   <h2 className="card-title">{locale === 'th' ? 'ขั้นตอนถัดไปกับทีมที่ปรึกษา' : 'Advisory next steps'}</h2>
                   <p className="card-subtitle">
                     {locale === 'th'
-                      ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่งบรีฟเพื่อให้ทีมคัดรายการที่แคบลง'
+                      ? 'ถ้าโครงการนี้ใกล้เคียงโจทย์ ให้เทียบต่อหรือส่งรายละเอียดเพื่อให้ทีมคัดตัวเลือกที่แคบลง'
                       : 'If this project is directionally right, compare it next or send the brief so the team can tighten the shortlist.'}
                   </p>
                   <div className="card-actions project-cta-row project-next-steps-actions mt-3">

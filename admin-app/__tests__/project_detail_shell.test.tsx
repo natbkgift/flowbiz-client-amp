@@ -163,13 +163,13 @@ describe('project detail shell', () => {
     const markup = container.textContent ?? '';
 
     expect(markup).toContain('สรุปโครงการเพื่อใช้คัดรายการ');
-    expect(markup).toContain('เหตุผลที่โครงการนี้ควรอยู่ต่อใน shortlist');
-    expect(markup).toContain('ให้โครงการนี้อยู่ต่อใน shortlist');
+    expect(markup).toContain('เหตุผลที่โครงการนี้ควรอยู่ต่อในรายการคัดไว้');
+    expect(markup).toContain('ให้โครงการนี้อยู่ต่อในรายการคัดไว้');
     expect(markup).toContain('อ่าน Alpha Residence ในบริบทของย่าน Jomtien ก่อน');
-    expect(markup).toContain('ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยัง active');
+    expect(markup).toContain('ขยับจากการอ่านโครงการไปสู่การดูยูนิตที่ยังเปิดอยู่');
     expect(markup).toContain('ขั้นตอนถัดไปกับทีมที่ปรึกษา');
     expect(markup).toContain('สถานะภาพโครงการที่ยืนยันได้');
-    expect(markup).toContain('ส่งบรีฟโครงการให้ที่ปรึกษา');
+    expect(markup).toContain('ส่งรายละเอียดโครงการให้ที่ปรึกษา');
     expect(markup).toContain('ขอเทียบโครงการนี้กับตัวเลือกใกล้เคียง');
     expect(markup).toContain('จังหวะถัดไปจากหน้าโครงการนี้');
     expect(markup).toContain('ดูรายการที่พร้อมคัดต่อ');

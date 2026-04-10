@@ -15,10 +15,14 @@ export function makePageMetadata(
   description: string,
   brandName: string,
 ): Metadata {
-  const canonical = slug ? `/${locale}/${slug}` : `/${locale}`;
-  const fullTitle = `${title} | ${brandName}`;
-  const enAlt = slug ? `/en/${slug}` : '/en';
-  const thAlt = slug ? `/th/${slug}` : '/th';
+  const normalizedSlug = String(slug || '').trim().replace(/^\/+|\/+$/g, '');
+  const canonical = normalizedSlug ? `/${locale}/${normalizedSlug}` : `/${locale}`;
+  const normalizedTitle = title.trim();
+  const fullTitle = normalizedTitle.includes(brandName)
+    ? normalizedTitle
+    : `${normalizedTitle} | ${brandName}`;
+  const enAlt = normalizedSlug ? `/en/${normalizedSlug}` : '/en';
+  const thAlt = normalizedSlug ? `/th/${normalizedSlug}` : '/th';
   return {
     title: fullTitle,
     description,

@@ -211,10 +211,10 @@ export function Header({
   const pathname = usePathname();
   const currentPathname = pathname ?? `/${locale}`;
 
-  const investLabel = locale === 'th' ? 'คู่มือลงทุน' : 'Investment Guides';
-  const smartFinderLabel = locale === 'th' ? 'ค้นหาอัจฉริยะ' : 'Smart Finder';
-  const compareLabel = locale === 'th' ? 'เปรียบเทียบ' : 'Compare';
-  const marketplaceLabel = locale === 'th' ? 'ทุกประกาศ' : 'Marketplace';
+  const investLabel = locale === 'th' ? 'วางแผนลงทุน' : 'Investment Guides';
+  const smartFinderLabel = locale === 'th' ? 'ตัวช่วยคัดตัวเลือก' : 'Smart Finder';
+  const compareLabel = locale === 'th' ? 'เทียบตัวเลือก' : 'Compare';
+  const marketplaceLabel = locale === 'th' ? 'ประกาศทั้งหมด' : 'Marketplace';
   const rentLabel = locale === 'th' ? 'เช่า / ย้ายมาอยู่' : 'Rent / Relocate';
   const sellLabel = locale === 'th' ? 'ขายกับ AMP' : 'Sell with AMP';
   const homeAreaLabel = locale === 'th' ? 'พื้นที่' : 'Areas';

@@ -44,15 +44,15 @@ export default async function LuxuryPage(props: { params: Promise<{ locale: stri
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการ private tour และการคัดแบบ bespoke' : 'Buyers who want bespoke private tours',
+            title: locale === 'th' ? 'ผู้ซื้อที่ต้องการนัดชมแบบส่วนตัวและการคัดแบบเฉพาะโจทย์' : 'Buyers who want bespoke private tours',
             body: locale === 'th'
-              ? 'เหมาะกับผู้ซื้อ luxury ที่ต้องการคัดยูนิตจากคุณภาพโครงการ วิว และความเป็นส่วนตัว'
+              ? 'เหมาะกับผู้ซื้อระดับบนที่ต้องการคัดยูนิตจากคุณภาพโครงการ วิว และความเป็นส่วนตัว'
               : 'Best for buyers prioritising building quality, view, privacy, and viewing efficiency.',
             icon: 'building',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'นัด private tour ตาม shortlist' : 'Book a private tour from a curated shortlist',
+            title: locale === 'th' ? 'นัดชมแบบส่วนตัวจากรายการที่คัดไว้' : 'Book a private tour from a curated shortlist',
             body: locale === 'th'
               ? 'บอกทำเล งบ และรูปแบบการใช้งาน ทีมจะคัดห้องที่คุ้มเวลาชมจริงให้ก่อน'
               : 'Share area, budget, and use case, and we will narrow the viewing plan before you tour.',
@@ -60,9 +60,9 @@ export default async function LuxuryPage(props: { params: Promise<{ locale: stri
           },
           {
             kicker: dict.advisory.trustSignal,
-            title: locale === 'th' ? 'คัด luxury inventory แบบไม่ส่งเกินจำเป็น' : 'Luxury inventory without unnecessary noise',
+            title: locale === 'th' ? 'คัดตัวเลือกระดับลักชัวรีแบบไม่ส่งเกินจำเป็น' : 'Luxury inventory without unnecessary noise',
             body: locale === 'th'
-              ? 'เราเน้นคุณภาพ shortlist มากกว่าจำนวนประกาศ เพื่อให้แต่ละ viewing มีเหตุผลรองรับ'
+              ? 'เราเน้นคุณภาพของรายการคัดไว้ มากกว่าจำนวนประกาศ เพื่อให้ทุกการนัดชมมีเหตุผลรองรับ'
               : 'We keep the shortlist tight so each tour slot has a clear strategic reason.',
             icon: 'shield',
           },

@@ -88,6 +88,21 @@ describe('makePageMetadata', () => {
     expect(langs.en).toBe('/en');
     expect(langs.th).toBe('/th');
   });
+
+  it('normalizes leading slashes in slugs', () => {
+    const meta = makePageMetadata('th', '/privacy', 'นโยบายความเป็นส่วนตัว', 'รายละเอียด', 'AMP Pattaya');
+    expect(meta.alternates?.canonical).toBe('/th/privacy');
+    const langs = meta.alternates?.languages as Record<string, string>;
+    expect(langs.en).toBe('/en/privacy');
+    expect(langs.th).toBe('/th/privacy');
+  });
+
+  it('does not duplicate the brand when the title already includes it', () => {
+    const meta = makePageMetadata('th', '', 'AMP Pattaya | หน้าแรก', 'รายละเอียด', 'AMP Pattaya');
+    expect(meta.title).toBe('AMP Pattaya | หน้าแรก');
+    const og = meta.openGraph as Record<string, unknown>;
+    expect(og.title).toBe('AMP Pattaya | หน้าแรก');
+  });
 });
 
 describe('routing utilities', () => {

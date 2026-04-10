@@ -31,13 +31,13 @@ export async function generateMetadata(
 function buildHowWeWorkClarifyLines(locale: 'en' | 'th'): string[] {
   return [
     locale === 'th'
-      ? 'งบ เป้าหมาย ทำเล และ timeframe ควรถูกล็อกก่อนทุกครั้ง ก่อนที่ shortlist จะถูกขยายหรือพาไปดูยูนิต'
+      ? 'งบ เป้าหมาย ทำเล และช่วงเวลาควรถูกล็อกก่อนทุกครั้ง ก่อนที่รายการคัดไว้จะถูกขยายหรือพาไปดูยูนิต'
       : 'Budget, goal, area, and timeframe should be locked before the shortlist widens or the conversation moves into units.',
     locale === 'th'
-      ? 'trade-offs ต้องถูกอธิบายตรงไปตรงมา เพื่อให้คุณรู้ว่ากำลังยอมอะไร ไม่ใช่เห็นแต่สิ่งที่ดูน่าสนใจ'
+      ? 'ข้อแลกเปลี่ยนต้องถูกอธิบายตรงไปตรงมา เพื่อให้คุณรู้ว่ากำลังยอมอะไร ไม่ใช่เห็นแต่สิ่งที่ดูน่าสนใจ'
       : 'Trade-offs should be named plainly so you know what you are accepting, not just what looks attractive.',
     locale === 'th'
-      ? 'ขั้นถัดไปควรแคบลงเป็น compare, viewing, หรือ advisor review ที่ชัดขึ้น ไม่ใช่การ browse กว้าง ๆ อีกครั้ง'
+      ? 'ขั้นถัดไปควรแคบลงเป็นหน้าเปรียบเทียบ การนัดดู หรือการคุยกับที่ปรึกษาที่ชัดขึ้น ไม่ใช่การเปิดดูแบบกว้าง ๆ อีกครั้ง'
       : 'The next step should tighten into compare, viewing, or a sharper advisor review, not another broad browse.',
   ];
 }
@@ -45,17 +45,17 @@ function buildHowWeWorkClarifyLines(locale: 'en' | 'th'): string[] {
 function buildHowWeWorkReplyLines(locale: 'en' | 'th', liveTeamCount: number): string[] {
   return [
     locale === 'th'
-      ? 'brief เดียวควรพาบริบทเดิมไปต่อได้ในทุกช่องทาง โดยไม่ต้องเล่าโจทย์ใหม่ทุกครั้ง'
+      ? 'รายละเอียดชุดเดียวควรพาบริบทเดิมไปต่อได้ในทุกช่องทาง โดยไม่ต้องเล่าโจทย์ใหม่ทุกครั้ง'
       : 'One brief should carry the same context forward across channels so you do not have to rebuild the story each time.',
     liveTeamCount > 0
       ? (locale === 'th'
-        ? `ตอนนี้มี ${liveTeamCount} โปรไฟล์ทีมที่เผยแพร่แล้วรองรับ route นี้ ดังนั้นการตอบกลับควรเป็น owned handoff ที่ชัด ไม่ใช่ข้อความกลาง ๆ`
+        ? `ตอนนี้มี ${liveTeamCount} โปรไฟล์ทีมที่เผยแพร่แล้วรองรับหน้านี้ ดังนั้นการตอบกลับควรเป็นการรับช่วงที่ชัด ไม่ใช่ข้อความกลาง ๆ`
         : `${liveTeamCount} live team profile${liveTeamCount === 1 ? '' : 's'} currently back this route, so the reply should feel like a clearly owned handoff rather than generic copy.`)
       : (locale === 'th'
-        ? 'แม้โปรไฟล์ทีมบน public จะยังบาง การตอบกลับก็ควรยังเป็น owned handoff ที่ชัด ไม่ใช่ข้อความกลาง ๆ'
+        ? 'แม้โปรไฟล์ทีมบนหน้าเว็บจะยังบาง การตอบกลับก็ควรยังเป็นการรับช่วงที่ชัด ไม่ใช่ข้อความกลาง ๆ'
         : 'Even when public team coverage is still thin, the reply should still feel like a clearly owned handoff rather than generic copy.'),
     locale === 'th'
-      ? 'ถ้า brief ยังไม่พร้อม ทีมควรบอกให้ชัดว่าต้องยืนยันอะไรต่อก่อนเสียเวลาไปกับ viewing หรือ negotiation'
+      ? 'ถ้ารายละเอียดยังไม่พร้อม ทีมควรบอกให้ชัดว่าต้องยืนยันอะไรต่อก่อนเสียเวลาไปกับการนัดดูหรือการต่อรอง'
       : 'If the brief is not ready yet, the team should say exactly what needs verification before you spend time on viewings or negotiations.',
   ];
 }
@@ -80,7 +80,7 @@ export default async function HowWeWorkPage(
     resolveCmsText(processInfo?.content, locale)
       || [
         locale === 'th'
-          ? 'ทุก engagement เริ่มจาก brief ที่ชัดเจนเพื่อคุมทิศทางของ shortlist, budget และ next step ให้ตรงกันก่อน'
+          ? 'ทุกการทำงานเริ่มจากรายละเอียดที่ชัดเจน เพื่อคุมทิศทางของรายการคัดไว้ งบ และขั้นถัดไปให้ตรงกันก่อน'
           : 'Every engagement starts with a clear brief so the shortlist, budget lens, and next step stay aligned from the start.',
         locale === 'th'
           ? 'จากนั้นทีมจะคัดตัวเลือก ตรวจ context ที่ต้องใช้ และพาไปยังขั้นตอนถัดไปที่ทำได้จริงโดยไม่ยืด loop เกินจำเป็น'
@@ -90,21 +90,21 @@ export default async function HowWeWorkPage(
 
   const processCards = [
     {
-      title: locale === 'th' ? '1. รับ brief ให้ชัด' : '1. Clarify the brief',
+      title: locale === 'th' ? '1. รับรายละเอียดให้ชัด' : '1. Clarify the brief',
       body: locale === 'th'
-        ? 'เริ่มจากงบ เป้าหมาย ทำเล และ timeframe ก่อน เพื่อไม่ให้ shortlist หลุดโจทย์'
+        ? 'เริ่มจากงบ เป้าหมาย ทำเล และช่วงเวลาก่อน เพื่อไม่ให้รายการคัดไว้หลุดโจทย์'
         : 'Budget, goal, area, and timeframe are locked first so the shortlist stays on brief.',
     },
     {
-      title: locale === 'th' ? '2. คัด shortlist พร้อม trade-offs' : '2. Curate with trade-offs',
+      title: locale === 'th' ? '2. คัดรายการพร้อมข้อแลกเปลี่ยน' : '2. Curate with trade-offs',
       body: locale === 'th'
         ? 'ทีมจะคัดตัวเลือกที่เหมาะจริง พร้อมบอกสิ่งที่ควรยอมรับและสิ่งที่ควรเลี่ยง'
         : 'The team narrows the field and explains the trade-offs worth accepting or avoiding.',
     },
     {
-      title: locale === 'th' ? '3. พาไปยัง next step ที่ทำได้จริง' : '3. Move into the real next step',
+      title: locale === 'th' ? '3. พาไปยังขั้นถัดไปที่ทำได้จริง' : '3. Move into the real next step',
       body: locale === 'th'
-        ? 'เมื่อ shortlist เริ่มนิ่งแล้ว ค่อยไปต่อที่ compare, viewing, หรือ consultation ที่ชัดขึ้น'
+        ? 'เมื่อรายการคัดไว้เริ่มนิ่งแล้ว ค่อยไปต่อที่หน้าเปรียบเทียบ การนัดดู หรือการคุยที่ชัดขึ้น'
         : 'Once the shortlist is shaped, the flow moves into compare, viewing, or a tighter consultation step.',
     },
   ];
@@ -123,17 +123,17 @@ export default async function HowWeWorkPage(
         signals={[
           {
             kicker: dict.advisory.bestFor,
-            title: locale === 'th' ? 'คนที่ต้องการเข้าใจ flow ก่อนคุยเรื่องยูนิต' : 'People who want the workflow before unit-level talk',
+            title: locale === 'th' ? 'คนที่ต้องการเข้าใจลำดับงานก่อนคุยเรื่องยูนิต' : 'People who want the workflow before unit-level talk',
             body: locale === 'th'
-              ? 'หน้านี้อธิบายลำดับการทำงานของทีมเมื่อรับ brief จริง'
+              ? 'หน้านี้อธิบายลำดับการทำงานของทีมเมื่อรับรายละเอียดจริง'
               : 'This page explains the operating sequence the team follows on live briefs.',
             icon: 'users',
           },
           {
             kicker: dict.advisory.nextStep,
-            title: locale === 'th' ? 'ดู flow แล้วค่อยไปต่อที่ about หรือ contact' : 'Review the flow, then move to about or contact',
+            title: locale === 'th' ? 'ดูลำดับงานแล้วค่อยไปต่อที่หน้าทีมหรือหน้าติดต่อ' : 'Review the flow, then move to about or contact',
             body: locale === 'th'
-              ? 'เมื่อเข้าใจวิธีทำงานแล้ว จะตัดสินใจได้ง่ายขึ้นว่าควรส่ง brief ตอนนี้หรือกลับไปดูทีมก่อน'
+              ? 'เมื่อเข้าใจวิธีทำงานแล้ว จะตัดสินใจได้ง่ายขึ้นว่าควรส่งรายละเอียดตอนนี้หรือกลับไปดูทีมก่อน'
               : 'Once the operating model is clear, it becomes easier to decide whether to brief the team now or review the about page first.',
             icon: 'check',
           },
@@ -200,7 +200,7 @@ export default async function HowWeWorkPage(
               <h2 className="card-title">{locale === 'th' ? 'อะไรควรถูกเคลียร์ก่อน shortlist จะขยับต่อ' : 'What gets clarified before the shortlist moves'}</h2>
               <p className="card-subtitle">
                 {locale === 'th'
-                  ? 'ใช้ชั้นนี้เพื่อดูว่าทีมควรทำให้โจทย์นิ่งลงตรงไหน ก่อนจะพาไปยัง compare, viewing, หรือ inquiry ที่จริงจังขึ้น'
+                  ? 'ใช้ชั้นนี้เพื่อดูว่าทีมควรทำให้โจทย์นิ่งลงตรงไหน ก่อนจะพาไปยังหน้าเปรียบเทียบ การนัดชม หรือการคุยต่อที่จริงจังขึ้น'
                   : 'Use this layer to see which parts of the brief should become clearer before the flow moves into compare, viewing, or a more serious inquiry.'}
               </p>
               <div className="insight-list mt-3">
@@ -242,7 +242,7 @@ export default async function HowWeWorkPage(
               </h2>
               <p className="cta-body">
                 {locale === 'th'
-                  ? 'เมื่อพร้อมส่ง brief ให้ทีม ให้ข้ามไปที่ contact หรือตรวจรายชื่อทีมที่เผยแพร่แล้วในหน้า about'
+                  ? 'เมื่อพร้อมส่งรายละเอียดให้ทีม ให้ข้ามไปที่หน้าติดต่อ หรือตรวจรายชื่อทีมที่เผยแพร่แล้วในหน้าแนะนำทีม'
                   : 'When you are ready to brief the team, move into contact or review the published team roster on the about page.'}
               </p>
             </div>

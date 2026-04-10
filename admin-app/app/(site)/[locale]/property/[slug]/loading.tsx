@@ -7,7 +7,7 @@ function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
       title: 'มุมมองรายการคัดสรร',
-      subtitle: 'ข้อเท็จจริงหลักของรายการและเส้นทางถัดไปสำหรับการคัด shortlist กับทีมที่ปรึกษา',
+      subtitle: 'ข้อเท็จจริงหลักของรายการและเส้นทางถัดไปสำหรับการคัดรายการกับทีมที่ปรึกษา',
       contact: 'คุยกับที่ปรึกษา',
       inventory: 'ดูคลังรายการ',
       loading: 'AMP Listing View',

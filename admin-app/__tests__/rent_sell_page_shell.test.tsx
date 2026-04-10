@@ -26,8 +26,8 @@ describe('rent and sell page shell', () => {
     );
 
     expect(screen.getByRole('heading', { name: /ส่งอสังหาฯ เข้าตรวจพร้อมบริบทด้านราคาและความพร้อมก่อนลงประกาศ/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /เริ่มส่ง brief ผู้ขาย/i }).getAttribute('href')).toBe('#seller-form');
+    expect(screen.getByRole('link', { name: /เริ่มส่งรายละเอียดผู้ขาย/i }).getAttribute('href')).toBe('#seller-form');
     expect(screen.getByRole('link', { name: /ดูขั้นตอนหลังส่งข้อมูล/i }).getAttribute('href')).toBe('#seller-process');
-    expect(screen.getByRole('heading', { name: /หลังส่ง brief ผู้ขายแล้วจะเกิดอะไรขึ้น/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /หลังส่งรายละเอียดผู้ขายแล้วจะเกิดอะไรขึ้น/i })).toBeTruthy();
   });
 });

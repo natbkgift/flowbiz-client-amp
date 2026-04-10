@@ -78,10 +78,10 @@ async function buildAreaGuideCards(locale: 'en' | 'th', dict: ReturnType<typeof 
         title: area.name,
         city: area.city,
         lifestyle: locale === 'th'
-          ? `${area.name} เหมาะกับผู้ซื้อที่ต้องการอ่านบริบทของทำเลก่อนคัดโครงการแบบจริงจัง`
+          ? `${area.name} เหมาะกับผู้ซื้อที่ต้องการอ่านบริบทของทำเลก่อนเริ่มคัดโครงการอย่างจริงจัง`
           : `${area.name} works best for buyers who want the location context before making a real project shortlist.`,
         investment: locale === 'th'
-          ? 'ใช้หน้า area brief เพื่อแยกความต่างของทำเลก่อนส่งต่อไป Smart Finder, compare, หรือ advisor review'
+          ? 'ใช้หน้าสรุปทำเลเพื่อแยกความต่างของแต่ละโซน ก่อนต่อไปยังตัวช่วยคัดตัวเลือก หน้าเปรียบเทียบ หรือให้ทีมช่วยดูต่อ'
           : 'Use the area brief to separate location trade-offs before moving into Smart Finder, compare, or an advisor review.',
       }));
   } catch {
@@ -95,10 +95,10 @@ function buildAreaGuideConfidenceLines(locale: 'en' | 'th', areaCount: number): 
       ? `ตอนนี้มี ${areaCount} ทำเลที่เผยแพร่อยู่บนหน้านี้ ซึ่งเพียงพอให้ตัดสินใจเรื่องโซนก่อนขยับไปที่โครงการ`
       : `There are ${areaCount} published areas on this page right now, enough to decide the zone before you move into projects.`,
     locale === 'th'
-      ? 'การเลือกทำเลควรช่วยลดความไม่แน่ใจเรื่องไลฟ์สไตล์ แรงกดดันด้านงบ และประเภท shortlist ที่คุณควรขอต่อ'
+      ? 'การเลือกทำเลควรช่วยลดความไม่แน่ใจเรื่องไลฟ์สไตล์ แรงกดดันด้านงบ และประเภทของรายการคัดไว้ที่คุณควรขอต่อ'
       : 'Area choice should reduce uncertainty around lifestyle fit, budget pressure, and the kind of shortlist you should ask for next.',
     locale === 'th'
-      ? 'ถ้ายังลังเลระหว่างสองโซน ให้พกทั้งคู่ไปต่อใน Smart Finder แทนการฝืนเลือกโครงการเร็วเกินไป'
+      ? 'ถ้ายังลังเลระหว่างสองโซน ให้พกทั้งคู่ไปต่อในตัวช่วยคัดตัวเลือก แทนการฝืนเลือกโครงการเร็วเกินไป'
       : 'If two zones still feel close, carry both into Smart Finder instead of forcing a project decision too early.',
   ];
 }
@@ -106,7 +106,7 @@ function buildAreaGuideConfidenceLines(locale: 'en' | 'th', areaCount: number): 
 function buildAreaGuideProcessLines(locale: 'en' | 'th'): string[] {
   return [
     locale === 'th'
-      ? 'เปิด area brief ก่อน แล้วค่อยไปต่อที่ projects, compare, หรือ advisor handoff โดยไม่ต้องรีเซ็ตบริบทใหม่'
+      ? 'เปิดหน้าสรุปทำเลก่อน แล้วค่อยไปต่อที่หน้าโครงการ หน้าเปรียบเทียบ หรือส่งต่อให้ทีมช่วยดูต่อ โดยไม่ต้องเริ่มอธิบายใหม่'
       : 'Open the area brief first, then move into projects, compare, or an advisor handoff without rebuilding the context.',
     locale === 'th'
       ? 'ใช้หน้านี้เมื่อสิ่งที่ยังบล็อกการตัดสินใจคือโซน ไม่ใช่อาคารหรือยูนิตเฉพาะ'
@@ -144,7 +144,7 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
                 entityName: 'area-guide',
                 userIntent: 'research',
                 message: locale === 'th'
-                  ? 'ต้องการคุยต่อจากหน้า area guide เพื่อเลือกทำเลที่เหมาะก่อนคัดโครงการ'
+                  ? 'ต้องการคุยต่อจากหน้าคู่มือทำเล เพื่อเลือกโซนที่เหมาะก่อนคัดโครงการ'
                   : 'I want to continue from the area guide to choose the right location before narrowing projects.',
               }))}
               eventType="cta_click"
@@ -226,7 +226,7 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
                     data-amp-event-payload={JSON.stringify({
                       source_route: 'area-guide',
                       cta_type: 'secondary',
-                      cta_label: locale === 'th' ? 'เปิด area brief' : 'Open area brief',
+                      cta_label: locale === 'th' ? 'เปิดสรุปทำเล' : 'Open area brief',
                       entity_type: 'area',
                       entity_id: a.slug,
                       entity_name: a.title,
@@ -236,7 +236,7 @@ export default async function AreaGuidePage(props: { params: Promise<{ locale: s
                       },
                     })}
                   >
-                    {locale === 'th' ? 'เปิด area brief' : 'Open area brief'}
+                    {locale === 'th' ? 'เปิดสรุปทำเล' : 'Open area brief'}
                   </a>
                 </div>
               </div>

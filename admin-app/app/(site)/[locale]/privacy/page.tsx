@@ -14,7 +14,15 @@ export async function generateMetadata(
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
-  return makePageMetadata(locale, '/privacy', `Privacy Policy | ${dict.brand.name}`, 'Privacy Policy & Data Protection', dict.brand.name);
+  return makePageMetadata(
+    locale,
+    '/privacy',
+    locale === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy',
+    locale === 'th'
+      ? 'วิธีที่ AMP Pattaya เก็บ ใช้ และคุ้มครองข้อมูลส่วนบุคคลตาม PDPA และ GDPR'
+      : 'How AMP Pattaya collects, uses, and protects personal data under PDPA and GDPR.',
+    dict.brand.name,
+  );
 }
 
 export default async function PrivacyPage(

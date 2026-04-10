@@ -331,7 +331,7 @@ export function LeadForm({
       locale === 'th'
         ? normalizedPurpose === 'rent'
           ? 'ดูรายการเช่าสำหรับขั้นตอนถัดไป'
-          : 'ดู listings ที่เหมาะต่อ'
+          : 'ดูตัวเลือกที่เหมาะต่อ'
         : normalizedPurpose === 'rent'
           ? 'Browse rental options'
           : 'Browse matching listings';
@@ -340,7 +340,7 @@ export function LeadForm({
       { href: browseHref, label: browseLabel, primary: true },
       {
         href: withLocale(locale, '/shortlist'),
-        label: locale === 'th' ? 'เปิด shortlist ของคุณ' : 'Open your shortlist',
+        label: locale === 'th' ? 'เปิดรายการคัดไว้ของคุณ' : 'Open your shortlist',
       },
       {
         href: CTA.whatsAppUrl,
