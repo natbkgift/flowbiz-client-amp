@@ -29,17 +29,6 @@ function toFiniteNumber(value: number | string | null | undefined): number | nul
   return null;
 }
 
-function formatEditorialDate(locale: 'en' | 'th', value: string | null | undefined): string | null {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat(locale === 'th' ? 'th-TH' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
-
 function formatCompactPrice(value: number | string | null | undefined, locale: 'en' | 'th' = 'en'): string | null {
   const numericValue = toFiniteNumber(value);
   if (numericValue == null || numericValue <= 0) return null;
@@ -55,20 +44,6 @@ function formatCompactPrice(value: number | string | null | undefined, locale: '
     return `${Math.round(numericValue).toLocaleString('th-TH')} บาท`;
   }
   return `฿${Math.round(numericValue).toLocaleString()}`;
-}
-
-function resolveComposerText(value: unknown, locale: 'en' | 'th'): string | null {
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    return trimmed || null;
-  }
-  if (!value || typeof value !== 'object') return null;
-  const row = value as Record<string, unknown>;
-  for (const key of [locale, 'en', 'th']) {
-    const candidate = typeof row[key] === 'string' ? row[key].trim() : '';
-    if (candidate) return candidate;
-  }
-  return null;
 }
 
 const DEFAULT_FEATURED_PROJECT_SLUGS = [
@@ -202,8 +177,6 @@ export default async function HomePage({
   const composerFeaturedProjects = (composerConfig.featured_projects ?? {}) as Record<string, unknown>;
   const composerProofTrust = (composerConfig.proof_trust ?? {}) as Record<string, unknown>;
   const composerWhyPattaya = (composerConfig.why_pattaya ?? {}) as Record<string, unknown>;
-  const composerMarketInsights = (composerConfig.market_insights ?? {}) as Record<string, unknown>;
-  const composerReviews = (composerConfig.reviews ?? {}) as Record<string, unknown>;
   const composerBottomCta = (composerConfig.bottom_cta ?? {}) as Record<string, unknown>;
 
   const composerEnabled = Array.isArray(composerConfig.enabled_sections)
@@ -211,11 +184,10 @@ export default async function HomePage({
     : [];
   const defaultSectionOrder = [
     'hero',
-    'trust_micro_strip',
+    'pathways',
     'featured_projects',
     'why_pattaya',
-    'pathways',
-    'proof_trust',
+    'trust_micro_strip',
     'bottom_cta',
   ];
   const composerOrder = Array.isArray(composerConfig.section_order)
@@ -229,7 +201,7 @@ export default async function HomePage({
   const sectionConfigs: Record<string, Record<string, unknown>> = {
     hero: composerHero,
     pathways: {},
-    trust_micro_strip: {},
+    trust_micro_strip: composerProofTrust,
     featured_projects: composerFeaturedProjects,
     why_pattaya: composerWhyPattaya,
     proof_trust: composerProofTrust,
@@ -243,35 +215,19 @@ export default async function HomePage({
   };
   const forcedFunnelOrder = new Map<string, number>([
     ['hero', 1],
-    ['trust_micro_strip', 2],
+    ['pathways', 2],
     ['featured_projects', 3],
     ['why_pattaya', 4],
-    ['pathways', 5],
-    ['proof_trust', 6],
-    ['bottom_cta', 7],
+    ['trust_micro_strip', 5],
+    ['bottom_cta', 6],
   ]);
   const sectionOrderStyle = (key: string): { order: number } => ({ order: forcedFunnelOrder.get(key) ?? sectionOrderMap.get(key) ?? 999 });
   const recommendation = getContentRecommendation();
   const [homeProjectsSnapshot, homePropertiesResponse] = await homeSnapshotsPromise;
   const homePropertiesSnapshot: PropertyListItem[] = homePropertiesResponse.data || [];
-  const authorityPosts: Array<{
-    slug: string;
-    category?: unknown;
-    title?: unknown;
-    excerpt?: unknown;
-    read_time?: unknown;
-    published_at?: string | null;
-    updated_at?: string | null;
-  }> = [];
-  const publishedTestimonials: Array<{
-    quote: string;
-    attribution_name?: string | null;
-    context?: string | null;
-  }> = [];
 
   const liveProjectCount = homeProjectsSnapshot.length;
   const saleProperties = homePropertiesSnapshot.filter((property) => property.type !== 'rent');
-  const rentProperties = homePropertiesSnapshot.filter((property) => property.type === 'rent');
   const propertyPrices = homePropertiesSnapshot
     .map((property) => property.price)
     .filter((price): price is number => typeof price === 'number' && Number.isFinite(price) && price > 0);
@@ -437,7 +393,7 @@ export default async function HomePage({
             <PublicSectionHeader
               align="start"
               className="home-pathways-shell__header"
-              kicker={locale === 'th' ? 'ขั้นตอนถัดไป' : 'Next step'}
+              kicker={locale === 'th' ? 'เลือกเส้นทาง' : 'Choose your route'}
               kickerClassName="home-section-kicker"
               title={dict.home.pathSectionTitle}
               titleId="home-pathways-title"
@@ -573,11 +529,12 @@ export default async function HomePage({
           <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
             <PublicSectionHeader
               align="start"
-              kicker={locale === 'th' ? 'เหตุผลที่เริ่มกับ AMP' : 'Why start with AMP'}
+              kicker={locale === 'th' ? 'เหตุผลที่ลูกค้าเริ่มกับ AMP' : 'Why clients start with AMP'}
               kickerClassName="home-section-kicker"
               title={dict.home.trustTitle}
               titleId="home-trust-strip-title"
               subtitle={dict.home.trustSubtitle}
+              subtitleProps={{ 'data-home-perf': 'trust-strip' }}
             />
             <div className="home-trust-snapshot-grid mt-8">
               {trustStripItems.map((item) => (
@@ -601,20 +558,12 @@ export default async function HomePage({
             <PublicSectionHeader
               align="start"
               className="home-market-shell__header"
-              kicker={locale === 'th' ? 'เราช่วยให้คุณตัดสินใจอย่างไร' : 'How we help you decide'}
+              kicker={locale === 'th' ? 'กรอบช่วยตัดสินใจ' : 'Decision clarity'}
               kickerClassName="home-section-kicker"
               title={whyPattayaHeading}
               titleId="home-market-title"
               subtitle={whyPattayaSubcopy}
             />
-            <div
-              className="home-market-shell__signal-row"
-              aria-label={locale === 'th' ? 'สัญญาณบรรณาธิการของส่วนตลาด' : 'Market editorial signals'}
-            >
-              {marketSignalItems.map((item) => (
-                <PublicChip key={item} as="span" size="sm" className="home-market-shell__signal">{item}</PublicChip>
-              ))}
-            </div>
 
             <div className="home-market-grid">
               <div className="home-market-story">
@@ -628,44 +577,23 @@ export default async function HomePage({
                 </div>
               </div>
 
-              <PublicSurfaceCard as="aside" tone="deep" className="home-market-proof" aria-label={locale === 'th' ? 'กรอบการตัดสินใจของทีม' : 'How the team frames the decision'}>
+              <PublicSurfaceCard as="aside" tone="deep" className="home-market-proof" aria-label={locale === 'th' ? 'สิ่งที่ทีมช่วยทำให้ชัด' : 'What the team keeps clear'}>
                 <div className="home-market-proof__intro">
-                  <p className="home-market-proof__eyebrow">{locale === 'th' ? 'ทำไมต้อง AMP' : 'Why AMP'}</p>
+                  <p className="home-market-proof__eyebrow">{locale === 'th' ? 'สิ่งที่ AMP ช่วยทำให้ชัด' : 'What AMP keeps clear'}</p>
                   <h3 className="home-market-proof__title">
                     {locale === 'th'
-                      ? 'ทีมท้องถิ่นที่ช่วยคัดให้แคบลงก่อนคุณใช้เวลาลึกกว่านี้'
-                      : 'A local team that narrows the right options before you go deeper.'}
+                      ? 'คัดตัวเลือกให้แคบลงก่อนคุณใช้เวลาไปกับสิ่งที่ยังไม่ใช่'
+                      : 'We narrow the shortlist before you spend time on options that are not the right fit.'}
                   </h3>
                 </div>
 
                 <div className="home-market-proof__list">
-                  {trustProofItems.slice(0, 3).map((item) => (
+                  {trustProofItems.filter((item) => item.value).slice(0, 3).map((item) => (
                     <div key={item.key} className="home-market-proof__item">
                       <span className="home-market-proof__label">{item.label}</span>
                       <p className="home-market-proof__value">{item.value}</p>
                     </div>
                   ))}
-                </div>
-
-                <div className="home-market-proof__footer">
-                  <TrackedLink
-                    className="home-market-proof__link"
-                    href={proofTrustPrimaryUrl}
-                    prefetch={false}
-                    eventType="cta_click"
-                    eventPayload={{ cta: 'home_market_primary', from: 'home_market', target: proofTrustPrimaryUrl }}
-                  >
-                    {proofTrustPrimaryLabel}
-                  </TrackedLink>
-                  <TrackedLink
-                    className="home-market-proof__link home-market-proof__link--secondary"
-                    href={withLocale(locale, '/projects')}
-                    prefetch={false}
-                    eventType="cta_click"
-                    eventPayload={{ cta: 'home_market_secondary', from: 'home_market', target: withLocale(locale, '/projects') }}
-                  >
-                    {dict.home.heroSecondaryCta}
-                  </TrackedLink>
                 </div>
               </PublicSurfaceCard>
             </div>
@@ -708,57 +636,17 @@ export default async function HomePage({
   const composerTrustProofItems = Array.isArray(composerProofTrust.trust_proofs)
     ? composerProofTrust.trust_proofs as Array<{ key?: string; label?: string; value?: string | null }>
     : [];
-  const proofTrustHeading =
-    typeof composerProofTrust.heading === 'string' && composerProofTrust.heading.trim()
-      ? composerProofTrust.heading.trim()
-      : (locale === 'th' ? 'หลังจากคุณส่งโจทย์ให้ AMP แล้วจะเกิดอะไรต่อ' : 'What happens after you send AMP your brief');
-  const proofTrustSubcopy =
-    typeof composerProofTrust.subcopy === 'string' && composerProofTrust.subcopy.trim()
-      ? composerProofTrust.subcopy.trim()
-      : (locale === 'th'
-        ? 'ทีมจะคัดชุดแรก วางลำดับสิ่งที่ควรดู และอธิบายขั้นตอนสำหรับผู้ซื้อต่างชาติให้ชัดก่อนนัดชม'
-        : 'The team narrows the first set, prioritises what deserves attention, and explains the foreign-buyer path clearly before viewings.');
-  const proofTrustPrimaryLabel =
-    typeof composerProofTrust.primary_cta_label === 'string' && composerProofTrust.primary_cta_label.trim()
-      ? composerProofTrust.primary_cta_label.trim()
-      : (locale === 'th' ? 'รู้จักทีมที่ปรึกษาพัทยา' : 'Meet the local advisory team');
-  const proofTrustPrimaryUrl =
-    typeof composerProofTrust.primary_cta_url === 'string' && composerProofTrust.primary_cta_url.trim()
-      ? withLocale(locale, composerProofTrust.primary_cta_url.trim())
-      : withLocale(locale, '/about');
-  const proofTrustSecondaryLabel =
-    typeof composerProofTrust.secondary_cta_label === 'string' && composerProofTrust.secondary_cta_label.trim()
-      ? composerProofTrust.secondary_cta_label.trim()
-      : (locale === 'th' ? 'ดูลำดับการทำงาน' : 'Review our process');
-  const proofTrustSecondaryUrl =
-    typeof composerProofTrust.secondary_cta_url === 'string' && composerProofTrust.secondary_cta_url.trim()
-      ? withLocale(locale, composerProofTrust.secondary_cta_url.trim())
-      : withLocale(locale, '/about#how-we-work');
   const trustProofItems: Array<{ key: string; label: string; value: string | null }> = composerTrustProofItems.length
     ? composerTrustProofItems.slice(0, 6).map((item, index) => ({
       key: String(item.key ?? `proof-${index}`),
       label: String(item.label ?? (locale === 'th' ? 'หลักฐาน' : 'Proof')),
-      value: item.value != null ? String(item.value) : null,
+      value: item.value != null ? String(item.value).trim() : null,
     }))
     : dict.home.trustProofFallbackItems;
-
-  const composerMarketInsightCards = Array.isArray(composerMarketInsights.cards)
-    ? composerMarketInsights.cards as Array<{ key?: string; eyebrow?: string; title?: string; body?: string; href?: string; updatedAt?: string | null; actionLabel?: string; signal?: string | null }>
-    : [];
-
-  const reviewsHeading =
-    typeof composerReviews.heading === 'string' && composerReviews.heading.trim()
-      ? composerReviews.heading.trim()
-      : (locale === 'th' ? 'รีวิวจากลูกค้า' : 'Verified Client Reviews');
-  const reviewsSubcopy =
-    typeof composerReviews.subcopy === 'string' && composerReviews.subcopy.trim()
-      ? composerReviews.subcopy.trim()
-      : (locale === 'th'
-        ? 'ใช้เฉพาะ feedback ที่มีบริบทชัดเจน และไม่อ้างคะแนนรวมที่ยังไม่มีหลักฐานรองรับ'
-        : 'We only surface feedback with clear context and avoid unsupported aggregate rating claims.');
-  const composerReviewItems = Array.isArray(composerReviews.items)
-    ? composerReviews.items as Array<{ quote?: string; name?: string; context?: string }>
-    : [];
+  const advisoryProofValues = trustProofItems
+    .map((item) => item.value)
+    .filter((value): value is string => Boolean(value))
+    .slice(0, 3);
 
   const bottomCtaHeading =
     typeof composerBottomCta.heading === 'string' && composerBottomCta.heading.trim()
@@ -769,17 +657,15 @@ export default async function HomePage({
       ? composerBottomCta.subheading.trim()
       : dict.home.premiumCtaBody;
   const bottomCtaBenefits = Array.isArray(composerBottomCta.benefit_bullets)
-    ? composerBottomCta.benefit_bullets.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+    ? composerBottomCta.benefit_bullets.map((item) => String(item).trim()).filter(Boolean).slice(0, 2)
     : (locale === 'th'
       ? [
-          'ใช้ได้ทั้งสำหรับซื้อ ลงทุน อยู่จริง หรือคุยทางเลือกของเจ้าของทรัพย์',
-          'เริ่มจากรายละเอียดของคุณ ก่อนที่รายการคัดไว้จะกระจายเกินจำเป็น',
-          'ทีมตอบกลับด้วยชุดแรกที่คัดแล้วและขั้นตอนถัดไปที่ชัดเจน',
+          'คุยได้ทั้งซื้อ ลงทุน อยู่เอง หรือวางแผนต่อยอดพอร์ตในพัทยา',
+          'ทีมตอบกลับด้วยตัวเลือกชุดแรกที่คัดแล้ว พร้อมสิ่งที่ควรรู้ก่อนก้าวต่อไป',
         ]
       : [
-          'For buying, investing, living, or owner decisions',
-          'Start with your brief before the shortlist sprawls out',
-          'The team replies with a tighter first set and a clearer next step',
+          'Useful for buying, investing, living in Pattaya, or reviewing the next move in your portfolio',
+          'The team replies with a tighter first set and the practical checks worth knowing early',
         ]);
   const bottomCtaPrimaryLabel =
     typeof composerBottomCta.primary_cta_label === 'string' && composerBottomCta.primary_cta_label.trim()
@@ -790,14 +676,6 @@ export default async function HomePage({
     bottomCtaFormId,
     typeof composerBottomCta.primary_cta_url === 'string' ? composerBottomCta.primary_cta_url : undefined,
   );
-  const bottomCtaSecondaryLabel =
-    typeof composerBottomCta.secondary_cta_label === 'string' && composerBottomCta.secondary_cta_label.trim()
-      ? composerBottomCta.secondary_cta_label.trim()
-      : dict.home.premiumCtaSecondary;
-  const bottomCtaSecondaryUrl =
-    typeof composerBottomCta.secondary_cta_url === 'string' && composerBottomCta.secondary_cta_url.trim()
-      ? withLocale(locale, composerBottomCta.secondary_cta_url.trim())
-      : withLocaleQuery(locale, '/projects', { source: 'home_bottom_secondary' });
   const bottomCtaTrustNote =
     typeof composerBottomCta.trust_note === 'string' && composerBottomCta.trust_note.trim()
       ? composerBottomCta.trust_note.trim()
@@ -814,217 +692,42 @@ export default async function HomePage({
     typeof composerBottomCta.form_body === 'string' && composerBottomCta.form_body.trim()
       ? composerBottomCta.form_body.trim()
       : dict.home.premiumCtaFormBody;
-  const hasDedicatedBottomConversionGate = isSectionEnabled('bottom_cta');
-
-  const editorialInsightCards = authorityPosts.map((post, index) => ({
-    key: `editorial-${post.slug}`,
-    eyebrow: resolveComposerText(post.category, locale) || (locale === 'th' ? 'บทความล่าสุด' : 'Latest article'),
-    title: resolveComposerText(post.title, locale) || post.slug,
-    body: resolveComposerText(post.excerpt, locale)
-      || resolveComposerText(post.read_time, locale)
-      || (locale === 'th' ? 'อ่านบทความฉบับเต็มเพื่อดูกรอบคิดจากทีมที่ปรึกษาเพิ่มเติม' : 'Open the full article for the complete advisory context.'),
-    href: withLocale(locale, `/blog/${encodeURIComponent(post.slug)}`),
-    updatedAt: formatEditorialDate(locale, post.published_at ?? post.updated_at),
-    actionLabel: locale === 'th' ? 'อ่านบทความ' : 'Read article',
-    signal: index === 0
-      ? (locale === 'th' ? 'บทความแนะนำ' : 'Featured authority read')
-      : (locale === 'th' ? 'บทความเผยแพร่แล้ว' : 'Published editorial'),
-  }));
-
-  const fallbackInsightCards = [
-    {
-      key: 'area_intelligence',
-      eyebrow: locale === 'th' ? 'อินไซต์ทำเล' : 'Area authority',
-      title: locale === 'th' ? 'ภาพรวมทำเล' : 'Area intelligence',
-      body: locale === 'th'
-        ? 'โฟกัส micro-location ที่ดีมานด์จริง พร้อมสัญญาณราคาและสภาพคล่อง'
-        : 'Micro-location signals, price direction, and liquidity cues for each Pattaya zone.',
-      href: withLocale(locale, '/area-guide'),
-      updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_AREA_UPDATED_AT ?? null,
-      actionLabel: locale === 'th' ? 'ดูคู่มือทำเล' : 'Open area guide',
-      signal: locale === 'th' ? 'ระบบทำเล' : 'Location system',
-    },
-    {
-      key: 'yield_rent_demand',
-      eyebrow: locale === 'th' ? 'อ่านมุมมองการลงทุน' : 'Investment read',
-      title: locale === 'th' ? 'ผลตอบแทนและดีมานด์เช่า' : 'Yield & rent demand',
-      body: locale === 'th'
-        ? 'สรุปดีมานด์เช่าและช่วงผลตอบแทนแบบไม่กล่าวเกินจริง'
-        : 'Rental demand snapshots and yield ranges without overclaiming certainty.',
-      href: withLocale(locale, '/investment'),
-      updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_YIELD_UPDATED_AT ?? null,
-      actionLabel: locale === 'th' ? 'ดูคู่มือการลงทุน' : 'Open investment guide',
-      signal: locale === 'th' ? 'สัญญาณผลตอบแทน' : 'Yield signal',
-    },
-    {
-      key: 'new_launches',
-      eyebrow: locale === 'th' ? 'จับตาโครงการ' : 'Project watch',
-      title: locale === 'th' ? 'โครงการเปิดใหม่' : 'New launches',
-      body: locale === 'th'
-        ? 'โครงการเปิดใหม่ที่ทีมคัดกรองแล้ว พร้อมมุมมองความเสี่ยง/โอกาส'
-        : 'Curated launch pipeline with practical risk/opportunity notes from the team.',
-      href: withLocale(locale, '/projects'),
-      updatedAt: process.env.NEXT_PUBLIC_INSIGHTS_LAUNCH_UPDATED_AT ?? null,
-      actionLabel: locale === 'th' ? 'ดูโครงการ' : 'Browse projects',
-      signal: locale === 'th' ? 'ชุดโครงการเปิดใหม่' : 'Launch pipeline',
-    },
-  ];
-  const insightCards = composerMarketInsightCards.length
-    ? composerMarketInsightCards.slice(0, 3).map((card, index) => ({
-        key: String(card.key ?? `insight-${index + 1}`),
-        eyebrow: typeof card.eyebrow === 'string' && card.eyebrow.trim() ? card.eyebrow.trim() : (locale === 'th' ? 'สัญญาณบรรณาธิการ' : 'Editorial signal'),
-        title: String(card.title ?? (locale === 'th' ? `อินไซต์ ${index + 1}` : `Insight ${index + 1}`)),
-        body: String(card.body ?? advisoryDict.noPublishedDataBody),
-        href: typeof card.href === 'string' && card.href.trim() ? withLocale(locale, card.href.trim()) : withLocale(locale, '/area-guide'),
-        updatedAt: card.updatedAt ? String(card.updatedAt) : null,
-        actionLabel: typeof card.actionLabel === 'string' && card.actionLabel.trim() ? card.actionLabel.trim() : (locale === 'th' ? 'อ่านต่อ' : 'Continue'),
-        signal: typeof card.signal === 'string' && card.signal.trim() ? card.signal.trim() : null,
-      }))
-    : [...editorialInsightCards, ...fallbackInsightCards].slice(0, 3);
-
-  const composerProcessTimeline = Array.isArray(composerProofTrust.process_timeline)
-    ? composerProofTrust.process_timeline as Array<{ step?: string; title?: string; body?: string }>
-    : [];
-  const processTimeline = composerProcessTimeline.length
-    ? composerProcessTimeline
-        .slice(0, 6)
-        .map((item, index) => ({
-          step: String(item.step ?? index + 1),
-          title: String(item.title ?? (locale === 'th' ? `ขั้นตอน ${index + 1}` : `Step ${index + 1}`)),
-          body: String(item.body ?? (locale === 'th' ? 'รายละเอียดขั้นตอนจะปรับตามแผนการของคุณระหว่างการปรึกษา' : 'Process details are tailored to your goals during consultation.')),
-        }))
-    : [
-      {
-        step: '1',
-        title: locale === 'th' ? 'สรุปโจทย์' : 'Brief',
-        body: locale === 'th' ? 'ทำความเข้าใจเป้าหมาย งบประมาณ และช่วงเวลาที่ต้องการ' : 'Align on goals, budget, and timeline.',
-      },
-      {
-        step: '2',
-        title: locale === 'th' ? 'คัดตัวเลือก' : 'Options',
-        body: locale === 'th' ? 'คัดตัวเลือกที่ตรงเกณฑ์ พร้อมข้อดีข้อควรพิจารณาอย่างโปร่งใส' : 'Curate options with transparent trade-offs.',
-      },
-      {
-        step: '3',
-        title: locale === 'th' ? 'เข้าชมและเดินดีล' : 'Tour / Deal',
-        body: locale === 'th' ? 'จัดนัดชมทรัพย์แบบส่วนตัว และพาเดินกระบวนการดีลตามความพร้อมของคุณ' : 'Arrange private tours and guide deal execution.',
-      },
-    ];
-  const reviewItems = composerReviewItems.length
-    ? composerReviewItems
-        .filter((item) => String(item.quote ?? '').trim() && String(item.name ?? '').trim() && String(item.context ?? '').trim())
-        .slice(0, 3)
-        .map((item) => ({
-          quote: String(item.quote).trim(),
-          name: String(item.name).trim(),
-          context: String(item.context).trim(),
-        }))
-    : publishedTestimonials.length
-      ? publishedTestimonials
-          .filter((item) => item.quote.trim() && String(item.attribution_name ?? '').trim() && String(item.context ?? '').trim())
-          .slice(0, 3)
-          .map((item) => ({
-            quote: item.quote.trim(),
-            name: String(item.attribution_name).trim(),
-            context: String(item.context).trim(),
-          }))
-      : [];
-
-  const latestInsightUpdate = insightCards
-    .map((card) => card.updatedAt)
-    .find((value): value is string => Boolean(value));
-  const latestInsightUpdateLabel = formatEditorialDate(locale, latestInsightUpdate);
-  const showHomeProofProcessSection = isSectionEnabled('proof_trust');
+  const showTrustStripSection = isSectionEnabled('trust_micro_strip') || isSectionEnabled('proof_trust');
   const trustStripItems = [
     {
       label: locale === 'th' ? 'ทีมท้องถิ่นพัทยา' : 'Local Pattaya team',
-      value: locale === 'th'
-        ? 'ทีมเดียวกันช่วยตั้งโจทย์ คัดโครงการ และพาไปยังขั้นตอนถัดไป'
-        : 'One local team helps shape the brief, narrow projects, and guide the next step.',
+      value: advisoryProofValues[0] ?? (locale === 'th'
+        ? 'ทีมเดียวกันช่วยคัดทำเล โครงการ และจังหวะการตัดสินใจให้แคบลงตั้งแต่ต้น'
+        : 'The same local team narrows the area, projects, and decision path before you go deeper.'),
     },
     {
       label: locale === 'th' ? 'คัดก่อนส่งต่อ' : 'Curated before you review',
-      value: liveProjectCount > 0
+      value: advisoryProofValues[1] ?? (liveProjectCount > 0
         ? (locale === 'th'
-          ? `${liveProjectCount} โครงการที่ยังคัดต่อได้ ไม่ใช่กองประกาศที่เปิดไว้เฉย ๆ`
+          ? `${liveProjectCount} โครงการที่ยังควรเริ่มดู ไม่ใช่กองประกาศที่ต้องไล่เปิดเอง`
           : `${liveProjectCount} projects are still worth reviewing, not listing noise.`)
         : (locale === 'th'
           ? 'ทีมจะคัดจากตัวเลือกที่ยังไปต่อได้จริง'
-          : 'The team narrows from options that still deserve attention.'),
+          : 'The team narrows from options that still deserve attention.')),
     },
     {
       label: locale === 'th' ? 'ความชัดเจนสำหรับผู้ซื้อต่างชาติ' : 'Foreign-buyer clarity',
-      value: locale === 'th'
-        ? 'โควตา การโอน และเอกสารถูกอธิบายตั้งแต่ต้นก่อนคุณไปดูต่อ'
-        : 'Quota, transfer, and paperwork are explained early before you go deeper.',
-    },
-  ];
-  const trustSnapshotIntro = locale === 'th'
-    ? 'หลังจากคุณส่งรายละเอียด ทีมจะช่วยจัดลำดับสิ่งที่ควรดูต่อให้ชัดขึ้น'
-    : 'Once you share the brief, the team will narrow what deserves attention first.';
-  const trustSnapshotItems = [
-    {
-      label: locale === 'th' ? 'คัดชุดแรกจากโจทย์ของคุณ' : 'A shortlist shaped by your brief',
-      value: locale === 'th'
-        ? 'โครงการชุดแรกถูกคัดจากงบ ทำเล และเป้าหมายของคุณ ไม่ใช่เปิดทุกอย่างให้เลือกเอง'
-        : 'The first set is narrowed by budget, area, and goal instead of opening everything at once.',
-    },
-    {
-      label: locale === 'th' ? 'ข้อแลกเปลี่ยนที่ต้องรู้' : 'Trade-offs made clear',
-      value: locale === 'th'
-        ? 'เรื่องราคา ทำเล และรูปแบบถือครองจะถูกอธิบายตรงไปตรงมาก่อนคุณตัดสินใจ'
-        : 'Price, area, and ownership trade-offs are explained plainly before you commit.',
-    },
-    {
-      label: locale === 'th' ? 'นัดชมและก้าวถัดไป' : 'Viewings and next steps',
-      value: locale === 'th'
-        ? 'เมื่อมีตัวเลือกที่ใช่ ทีมจะพาไปต่อสู่นัดชมและขั้นตอนดีลอย่างเป็นลำดับ'
-        : 'When the fit is right, the same team can guide viewings and the next deal steps.',
+      value: advisoryProofValues[2] ?? (locale === 'th'
+        ? 'โควตา การโอน และเอกสารถูกอธิบายตั้งแต่ต้นก่อนคุณนัดชม'
+        : 'Quota, transfer, and paperwork are explained early before you schedule viewings.'),
     },
   ];
   const heroTrustItems = locale === 'th'
     ? [
-        liveProjectCount > 0 ? `${liveProjectCount} โครงการที่คัดแล้วให้เริ่มดู` : 'คัดเฉพาะโครงการที่ยังควรดูต่อ',
-        'ทีมท้องถิ่นพัทยาที่ช่วยคัดก่อนดูต่อ',
-        'อธิบายขั้นตอนสำหรับผู้ซื้อต่างชาติตั้งแต่ต้น',
+        liveProjectCount > 0 ? `${liveProjectCount} โครงการคัดแล้วให้เริ่มดู` : 'คัดเฉพาะตัวเลือกที่ยังควรดูต่อ',
+        'ทีมท้องถิ่นพัทยาช่วยคัดให้แคบลงก่อน',
+        'เรื่องโควตาและเอกสารถูกอธิบายตั้งแต่ต้น',
       ]
     : [
-        liveProjectCount > 0 ? `${liveProjectCount} curated projects in view` : 'Projects are screened before they are shared',
-        'Local Pattaya team guiding the shortlist',
-        'Foreign-buyer steps explained early',
+        liveProjectCount > 0 ? `${liveProjectCount} curated projects to start with` : 'Projects are screened before they are shared',
+        'Local Pattaya advisors narrow the first set',
+        'Foreign-buyer clarity early on',
       ];
-  const marketSignalItems = [
-    latestInsightUpdateLabel
-      ? (locale === 'th'
-        ? `มุมมองล่าสุดอัปเดต ${latestInsightUpdateLabel}`
-        : `Latest perspective updated ${latestInsightUpdateLabel}`)
-      : (locale === 'th'
-        ? 'เริ่มจากทำเล งบ และรูปแบบถือครองก่อนขยายตัวเลือก'
-        : 'Start with area, budget, and ownership route before opening more options.'),
-    locale === 'th'
-      ? `${whyPattayaNarrativeCards.length} ประเด็นช่วยอ่านตลาดให้ชัดขึ้น`
-      : `${whyPattayaNarrativeCards.length} ways to read the market better`,
-    locale === 'th'
-      ? `${Math.min(trustProofItems.length, 3)} เหตุผลที่ AMP ช่วยให้ตัดสินใจง่ายขึ้น`
-      : `${Math.min(trustProofItems.length, 3)} AMP strengths that reduce guesswork`,
-  ];
-  const trustSignalItems = [
-    locale === 'th'
-      ? 'เริ่มจากโจทย์ก่อนดูยาว'
-      : 'Brief-led from the start',
-    locale === 'th'
-      ? `${Math.min(processTimeline.length, 3)} ขั้นตอนอธิบายได้ตั้งแต่ต้น`
-      : `${Math.min(processTimeline.length, 3)} steps explained early`,
-    locale === 'th'
-      ? 'ทีมเดียวกันพาไปถึงนัดชม'
-      : 'One team through viewings and next steps',
-  ];
-
-  function getReviewHighlight(quote: string): string {
-    const normalized = quote.replace(/\s+/g, ' ').trim();
-    const chunks = normalized.split(/(?<=[.!?])\s+/);
-    return chunks[0] || normalized;
-  }
 
   return (
     <main id="main-content" data-emphasis={recommendation.emphasis} data-locale={locale} className="home-page flex flex-col">
@@ -1073,12 +776,6 @@ export default async function HomePage({
         </div>
       ) : null}
 
-      {isSectionEnabled('trust_micro_strip') ? (
-        <div style={sectionOrderStyle('trust_micro_strip')}>
-          <HomeTrustStripSection />
-        </div>
-      ) : null}
-
       {/* Guided Finder Overlay — client component.
           Reads URL params client-side so this server component stays
           searchParams-free → Next.js ISR cache is shared across ALL URL
@@ -1101,6 +798,11 @@ export default async function HomePage({
           closeAriaLabel={dict.common.close}
         />
       </Suspense>
+
+      <div style={sectionOrderStyle('pathways')}>
+        <HomePathwaysSection />
+      </div>
+
       {showCuratedOpportunities ? (
         <Suspense fallback={<SectionCardSkeleton />}>
           <HomeCuratedOpportunitiesSection />
@@ -1113,119 +815,10 @@ export default async function HomePage({
         </div>
       ) : null}
 
-      <div style={sectionOrderStyle('pathways')}>
-        <HomePathwaysSection />
-      </div>
-
-      {showHomeProofProcessSection ? (
-        <section className="home-trust-layer-section py-12 md:py-16 xl:py-16 2xl:py-20 bg-surface" style={sectionOrderStyle('proof_trust')} id="home-proof-process" data-home-perf="trust-layer">
-          <Container variant="wide">
-            <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
-              <PublicSectionHeader
-                align="start"
-                kicker={locale === 'th' ? 'หลักฐานและขั้นตอน' : 'Proof and process'}
-                kickerClassName="home-section-kicker"
-                title={proofTrustHeading}
-                subtitle={proofTrustSubcopy}
-                subtitleClassName="max-w-3xl mt-3"
-                subtitleProps={{
-                  role: 'note',
-                  'aria-label': locale === 'th' ? 'ข้อมูลความน่าเชื่อถือ' : 'Trust highlights',
-                  'data-home-perf': 'trust-strip',
-                }}
-              />
-              <div className="home-trust-module mt-8">
-                <div className="home-trust-module__summary">
-                  <p className="home-trust-module__intro">{trustSnapshotIntro}</p>
-                  <div
-                    className="home-trust-module__signal-row"
-                    aria-label={locale === 'th' ? 'สัญญาณภาพรวมของความน่าเชื่อถือ' : 'Trust overview signals'}
-                  >
-                    {trustSignalItems.map((item, index) => (
-                      <PublicChip
-                        key={item}
-                        as="span"
-                        size="sm"
-                        tone={index === 2 ? 'deep' : 'neutral'}
-                        className="home-trust-module__signal"
-                      >
-                        {item}
-                      </PublicChip>
-                    ))}
-                  </div>
-                  <div className="home-trust-snapshot-grid">
-                    {trustSnapshotItems.map((item) => (
-                      <div key={item.label} className="home-trust-snapshot__item">
-                        <p className="home-trust-snapshot__label">{item.label}</p>
-                        <p className="home-trust-snapshot__value">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="home-trust-module__actions">
-                    <TrackedLink
-                      className="home-section-utility__link"
-                      href={proofTrustSecondaryUrl}
-                      prefetch={false}
-                      eventType="cta_click"
-                      eventPayload={{ cta: 'home_trust_secondary', from: 'home_trust', target: proofTrustSecondaryUrl }}
-                    >
-                      {proofTrustSecondaryLabel}
-                    </TrackedLink>
-                  </div>
-                </div>
-
-                <div className="home-trust-module__columns">
-                  <div className="home-trust-module__proofs">
-                    <p className="home-trust-module__eyebrow">{locale === 'th' ? 'สิ่งที่ทีมช่วยทำให้ชัดขึ้น' : 'What the team makes clearer'}</p>
-                    <div className="home-trust-proof-list">
-                      {trustProofItems.slice(0, 4).map((item) => (
-                        <article key={item.key} className="home-trust-proof-item public-surface-card public-surface-card--warm">
-                          <p className="home-trust-snapshot__label">{item.label}</p>
-                          {item.value ? <p className="home-trust-snapshot__value">{item.value}</p> : null}
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-
-                  <PublicSurfaceCard as="div" tone="deep" className="home-trust-process-card">
-                    <p className="home-trust-module__eyebrow home-trust-module__eyebrow--light">
-                      {locale === 'th' ? 'AMP พาไปต่ออย่างไร' : 'How AMP carries the next step'}
-                    </p>
-                    <div className="home-trust-process-list">
-                      {processTimeline.slice(0, 3).map((item) => (
-                        <div key={`${item.step}-${item.title}`} className="home-trust-process-item">
-                          <span className="home-trust-process-item__step">{item.step}</span>
-                          <div>
-                            <strong className="home-trust-process-item__title">{item.title}</strong>
-                            <p className="home-trust-process-item__body">{item.body}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </PublicSurfaceCard>
-                </div>
-
-                {reviewItems.length > 0 ? (
-                  <div className="home-trust-review-shell">
-                    <div className="home-trust-review-copy">
-                      <p className="home-trust-module__eyebrow">{reviewsHeading}</p>
-                      <p className="home-trust-module__subcopy">{reviewsSubcopy}</p>
-                    </div>
-                    <div className="home-trust-review-stack">
-                      {reviewItems.slice(0, 3).map((item, index) => (
-                        <article key={`${item.name}-${index}`} className="home-trust-review-card public-surface-card public-surface-card--warm">
-                          <p className="home-trust-review-quote">&ldquo;{getReviewHighlight(item.quote)}&rdquo;</p>
-                          <p className="home-trust-review-meta">{item.name}</p>
-                          <p className="home-trust-review-context">{item.context}</p>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </PublicSurfaceCard>
-          </Container>
-        </section>
+      {showTrustStripSection ? (
+        <div style={sectionOrderStyle('trust_micro_strip')}>
+          <HomeTrustStripSection />
+        </div>
       ) : null}
 
       {/* Premium CTA / Conversion Gate */}
@@ -1236,12 +829,9 @@ export default async function HomePage({
         benefits={bottomCtaBenefits}
         primaryLabel={bottomCtaPrimaryLabel}
         primaryUrl={bottomCtaPrimaryUrl}
-        secondaryLabel={bottomCtaSecondaryLabel}
-        secondaryUrl={bottomCtaSecondaryUrl}
         trustNote={bottomCtaTrustNote}
         conversionNote={bottomCtaConversionNote}
         primaryEventPayload={{ cta: 'request_shortlist', from: 'home_bottom' }}
-        secondaryEventPayload={{ cta: 'browse_verified_projects', from: 'home_bottom' }}
         order={sectionOrderStyle('bottom_cta').order}
         sectionId="home-consultation-section"
         formSlot={(

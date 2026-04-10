@@ -28,8 +28,8 @@ export function HomeBottomCta({
   benefits?: string[];
   primaryLabel: string;
   primaryUrl: string;
-  secondaryLabel: string;
-  secondaryUrl: string;
+  secondaryLabel?: string;
+  secondaryUrl?: string;
   trustNote: string;
   conversionNote?: string;
   formSlot: ReactNode;
@@ -40,7 +40,7 @@ export function HomeBottomCta({
 }) {
   const resolvedSectionId = sectionId ?? 'home-bottom-cta';
   const headingId = `${resolvedSectionId}-title`;
-  const isThai = /[\u0E00-\u0E7F]/.test(`${heading} ${subheading} ${primaryLabel} ${secondaryLabel} ${trustNote}`);
+  const isThai = /[\u0E00-\u0E7F]/.test(`${heading} ${subheading} ${primaryLabel} ${secondaryLabel ?? ''} ${trustNote}`);
   const eyebrow = isThai ? 'ทีมพัทยา' : 'Pattaya team';
 
   return (
@@ -90,18 +90,20 @@ export function HomeBottomCta({
               >
                 {primaryLabel}
               </TrackedLink>
-              <TrackedLink
-                className={getPublicButtonClassName({
-                  variant: 'secondary',
-                  className: 'home-bottom-cta__secondary',
-                })}
-                href={secondaryUrl}
-                prefetch={false}
-                eventType="home_final_cta_click"
-                eventPayload={secondaryEventPayload ?? { cta: 'view_investment_path', from: 'home_bottom' }}
-              >
-                {secondaryLabel}
-              </TrackedLink>
+              {secondaryLabel && secondaryUrl ? (
+                <TrackedLink
+                  className={getPublicButtonClassName({
+                    variant: 'secondary',
+                    className: 'home-bottom-cta__secondary',
+                  })}
+                  href={secondaryUrl}
+                  prefetch={false}
+                  eventType="home_final_cta_click"
+                  eventPayload={secondaryEventPayload ?? { cta: 'view_investment_path', from: 'home_bottom' }}
+                >
+                  {secondaryLabel}
+                </TrackedLink>
+              ) : null}
             </PublicActionRow>
             {conversionNote ? (
               <p className="home-bottom-conversion-note type-caption mt-4 text-white/72 max-w-xl">{conversionNote}</p>

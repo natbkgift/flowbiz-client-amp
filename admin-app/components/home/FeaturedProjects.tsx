@@ -58,9 +58,14 @@ function formatPrice(price: number, locale: 'en' | 'th'): string {
 function isLowValueSummary(input: string): boolean {
   const normalized = input.toLowerCase();
   return [
+    'published',
     'published project',
     'published data',
     'project information',
+    'official',
+    'launch price',
+    'launch from',
+    'entry point',
     'next step',
     'clearer context',
     'shortlist',
@@ -244,13 +249,11 @@ export function FeaturedProjects({
       developer?: { name?: string | null } | null;
     };
 
-    const propertyType = localizePropertyType(dynamicProject.property_type ? humanizeToken(dynamicProject.property_type) : null);
     const deliveryRaw = String(dynamicProject.delivery_date ?? dynamicProject.handover_date ?? '').trim();
     const developerName = String(dynamicProject.developer?.name ?? '').trim();
     const normalizedStatus = project.status ? localizeStatus(humanizeToken(project.status).toLowerCase()) : null;
     const facts: string[] = [];
 
-    if (propertyType) facts.push(`${labels.type}: ${propertyType}`);
     if (deliveryRaw) facts.push(`${labels.delivery}: ${deliveryRaw}`);
     if (developerName) facts.push(`${labels.developer}: ${developerName}`);
     if (normalizedStatus && normalizedStatus !== localizeStatus('published')) {

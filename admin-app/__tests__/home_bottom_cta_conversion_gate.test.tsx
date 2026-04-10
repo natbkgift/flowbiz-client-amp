@@ -19,12 +19,10 @@ describe('HomeBottomCta conversion gate', () => {
     const { container } = render(
       <HomeBottomCta
         heading="Tell us what you are looking for"
-        subheading="Share your budget, goal, preferred area, and timing. We’ll reply with a tighter shortlist and clearer next steps."
+        subheading="Share your budget, goal, preferred area, and timing. We’ll reply with a more focused first set."
         benefits={[]}
         primaryLabel="Request My Shortlist"
         primaryUrl="#home-consultation-form"
-        secondaryLabel="Browse Verified Projects"
-        secondaryUrl="/en/projects?source=home_bottom_secondary"
         trustNote="The Pattaya team replies with a focused first set."
         sectionId="home-consultation-section"
         formSlot={(
@@ -40,6 +38,7 @@ describe('HomeBottomCta conversion gate', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Request My Shortlist' })).toHaveAttribute('href', '#home-consultation-form');
+    expect(container.querySelectorAll('.home-bottom-cta__actions .btn')).toHaveLength(1);
     expect(container.querySelector('section#home-consultation-section')).not.toBeNull();
     expect(container.querySelector('section#home-consultation-section')?.getAttribute('aria-labelledby')).toBe('home-consultation-section-title');
     expect(screen.getByRole('heading', { name: 'Tell us what you need' })).toBeInTheDocument();

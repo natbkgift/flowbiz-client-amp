@@ -17,8 +17,8 @@ describe('home surface handoff contract', () => {
     expect(perfProbe).toContain("trackEvent('web_vitals_probe'");
     expect(page).toContain('home_hero_primary');
     expect(page).toContain('home_hero_secondary');
-    expect(page).toContain('home_bottom_secondary');
     expect(page).toContain('home-trust-snapshot-grid');
+    expect(page).toContain('showTrustStripSection');
     expect(page).not.toContain('home_featured_projects_advisor');
     expect(perfProbe).toContain('amp_home_perf_probe_latest_v1');
     expect(perfProbe).toContain('follow_up_target');
@@ -27,10 +27,11 @@ describe('home surface handoff contract', () => {
   it('keeps the trust snapshot and final cta framed as decision cues instead of a route selector', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
-    expect(page).toContain('A shortlist shaped by your brief');
-    expect(page).toContain('Trade-offs made clear');
+    expect(page).not.toContain('A shortlist shaped by your brief');
+    expect(page).not.toContain('Trade-offs made clear');
     expect(page).toContain('dict.home.premiumCtaFormHeading');
-    expect(page).toContain('dict.home.premiumCtaSecondary');
+    expect(page).not.toContain('dict.home.premiumCtaSecondary');
+    expect(page).not.toContain('home-proof-process');
     expect(page).not.toContain('home-pathways-highlight-row');
     expect(page).not.toContain('home-curated-shell__signal-row');
     expect(page).not.toContain('home-confidence-row');
@@ -72,8 +73,8 @@ describe('home surface handoff contract', () => {
     expect(safeCoverImage).toContain('shouldBypassOptimization');
     expect(safeCoverImage).toContain('loader={shouldUsePassthroughLoader ? passthroughLoader : undefined}');
     expect(personalization).toContain("intent === 'sell'");
-    expect(page).toContain('data-home-perf="trust-layer"');
     expect(page).toContain("'data-home-perf': 'trust-strip'");
+    expect(page).not.toContain('data-home-perf="trust-layer"');
     expect(page).not.toContain('fetchBlogPosts');
     expect(page).not.toContain('fetchPublishedTestimonials');
     expect(page).not.toContain("dynamic = 'force-dynamic'");

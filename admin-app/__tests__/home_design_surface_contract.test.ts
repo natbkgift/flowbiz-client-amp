@@ -17,9 +17,7 @@ describe('home design surface contract', () => {
     expect(page).toContain('home-section-kicker');
     expect(page).toContain('home-pathways-grid');
     expect(page).toContain('home-pathway-card');
-    expect(page).toContain('home-market-shell__signal-row');
     expect(page).toContain('home-trust-snapshot-grid');
-    expect(page).toContain('home-trust-module__signal-row');
     expect(page).toContain('dict.home.heroTitle');
     expect(page).toContain('dict.home.heroPrimaryCta');
     expect(page).toContain('dict.home.heroSecondaryCta');
@@ -28,14 +26,15 @@ describe('home design surface contract', () => {
     expect(page).toContain('whyPattayaHeading');
     expect(page).toContain('dict.home.premiumCtaFormHeading');
     expect(page).toContain('dict.home.premiumCtaPrimary');
-    expect(page).toContain('dict.home.premiumCtaSecondary');
+    expect(page).not.toContain('dict.home.premiumCtaSecondary');
     expect(page).not.toContain('One brief is enough.');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('home-pathways-highlight-row');
     expect(page).toContain('function HomeTrustStripSection()');
     expect(page).not.toContain('home-confidence-row');
     expect(page).toContain('home-pathways-support__link');
-    expect(page).toContain('home-market-proof__footer');
+    expect(page).not.toContain('home-market-proof__footer');
+    expect(page).not.toContain('home-proof-process');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');
     expect(page).not.toContain('home-curated-shell__signal-row');
