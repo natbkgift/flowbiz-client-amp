@@ -198,7 +198,7 @@ if project_detail_path:
             "project_detail_contract",
             all(marker in project_html for marker in [
                 'id="project_consultation_primary"',
-                'id="project_compare_secondary"',
+                'id="project_self_serve_secondary"',
                 'id="project-brief-section"',
                 'id="project-decision-lens"',
                 'id="project-related-reads"',
