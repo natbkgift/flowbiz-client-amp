@@ -88,28 +88,28 @@ export default async function AboutPage(
       title:
         teamMembers.length > 0
           ? locale === 'th'
-            ? `${teamMembers.length} โปรไฟล์ทีมที่เผยแพร่แล้ว`
-            : `${teamMembers.length} published team profiles`
+            ? `${teamMembers.length} โปรไฟล์ทีมพร้อมให้คำแนะนำ`
+            : `${teamMembers.length} team profiles ready to guide you`
           : dict.about.missionCards[0]?.title || (locale === 'th' ? 'ข้อมูลทีม' : 'Team data'),
       body:
         teamMembers.length > 0
           ? locale === 'th'
-            ? 'ทีมที่แสดงในหน้านี้ดึงจาก backadmin โดยตรงและอัปเดตตามสถานะ publish จริง'
-            : 'The team section is driven directly from backadmin and reflects only live published profiles.'
+            ? 'ทีมที่แสดงในหน้านี้อัปเดตจากข้อมูลจริงของบริษัท และพร้อมพาคุณไปยังขั้นถัดไปที่ชัดเจน'
+            : 'The team section is sourced from live company data and highlights the advisors available for the next step.'
           : dict.about.missionCards[0]?.body || '',
     },
     {
       title:
         testimonials.length > 0
           ? locale === 'th'
-            ? `${testimonials.length} รีวิวลูกค้าที่เผยแพร่แล้ว`
-            : `${testimonials.length} published client reviews`
+            ? `${testimonials.length} เสียงจากลูกค้า`
+            : `${testimonials.length} client reviews`
           : dict.about.missionCards[1]?.title || (locale === 'th' ? 'รีวิวลูกค้า' : 'Client reviews'),
       body:
         testimonials.length > 0
           ? locale === 'th'
-            ? 'รีวิวในหน้านี้ใช้เฉพาะรายการที่ publish แล้วจากระบบหลังบ้านเท่านั้น'
-            : 'The review section only uses testimonial records that are already published from the admin system.'
+            ? 'รีวิวในหน้านี้ใช้เพื่อสะท้อนประสบการณ์จริงของลูกค้า และช่วยให้คุณเห็นภาพการทำงานของทีมชัดขึ้น'
+            : 'These reviews are shown to reflect real client experience and make the team\'s working style easier to assess.'
           : dict.about.missionCards[1]?.body || '',
     },
     {

@@ -252,13 +252,13 @@ export default async function HowWeWorkPage(
             <div>
               <h2 className="cta-title">
                 {locale === 'th'
-                  ? `ทีมที่เผยแพร่แล้วตอนนี้ ${teamMembers.length} คน`
+                  ? `ตอนนี้มีทีมที่พร้อมช่วยคุณ ${teamMembers.length} คน`
                   : `${teamMembers.length} live team profile${teamMembers.length === 1 ? '' : 's'} available now`}
               </h2>
               <p className="cta-body">
                 {locale === 'th'
-                  ? 'เมื่อพร้อมส่งรายละเอียดให้ทีม ให้ข้ามไปที่หน้าติดต่อ หรือตรวจรายชื่อทีมที่เผยแพร่แล้วในหน้าแนะนำทีม'
-                  : 'When you are ready to brief the team, move into contact or review the published team roster on the about page.'}
+                  ? 'เมื่อพร้อมส่งรายละเอียด ให้ข้ามไปที่หน้าติดต่อ หรือดูรายชื่อทีมในหน้าแนะนำทีมก่อนตัดสินใจขั้นถัดไป'
+                  : 'When you are ready to brief the team, move into contact or review the team roster on the about page.'}
               </p>
             </div>
             <div className="cta-row">
