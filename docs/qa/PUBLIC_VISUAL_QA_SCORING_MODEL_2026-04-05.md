@@ -1,5 +1,9 @@
 # Public Visual QA Scoring Model
 
+> Note
+> For future public UI review and release decisions, the human-facing authoritative gate is now `docs/AMP_PUBLIC_UI_QA_GATE.md`.
+> This file remains the detailed scoring model for the automated / evidence-weighted QA workflow.
+
 อัปเดต: `2026-04-05`  
 model version: `public-visual-qa-v3`
 

@@ -7,6 +7,13 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { Button } from '@/components/public-system/components/Button';
+import { Card } from '@/components/public-system/components/Card';
+import { SectionHeader } from '@/components/public-system/components/SectionHeader';
+import { CardBase } from '@/components/public-system/primitives/CardBase';
+import { Grid } from '@/components/public-system/primitives/Grid';
+import { Section } from '@/components/public-system/primitives/Section';
+import { Stack } from '@/components/public-system/primitives/Stack';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 const ListingGrid = dynamic(() => import('@/components/listing/ListingGrid').then(m => m.ListingGrid), {
@@ -137,9 +144,9 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
         supportNote={copy.supportNote}
       />
 
-      <section className="section">
-        <Container variant="wide">
-          <div className="buy-scan-note buy-scan-note--hero buy-scan-note--process mb-6" aria-label={copy.scanMode.ariaLabel}>
+      <Section container="wide">
+        <Stack gap="relaxed">
+          <div className="buy-scan-note buy-scan-note--hero buy-scan-note--process" aria-label={copy.scanMode.ariaLabel}>
             <p className="buy-scan-note__eyebrow">
               {copy.scanMode.eyebrow}
             </p>
@@ -147,19 +154,23 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
               {copy.scanMode.body}
             </p>
           </div>
-          <div className="section-header">
-            <h2 className="section-title">{dict.buy.processTitle}</h2>
-            <p className="section-subtitle">{dict.buy.processSubtitle}</p>
-          </div>
+          <SectionHeader
+            align="start"
+            title={dict.buy.processTitle}
+            subtitle={dict.buy.processSubtitle}
+          />
 
-          <div className="grid grid-3">
-            {dict.buy.processCards.map((c) => (
-              <div key={c.title} className="card">
-                <h3 className="card-title">{c.title}</h3>
-                <p className="card-subtitle">{c.body}</p>
-              </div>
+          <Grid columns={3} className="grid grid-3">
+            {dict.buy.processCards.map((card) => (
+              <Card
+                key={card.title}
+                className="card"
+                description={card.body}
+                padding="default"
+                title={card.title}
+              />
             ))}
-          </div>
+          </Grid>
 
           <div className="buy-flow-utility buy-flow-utility--process" aria-label={copy.processUtility.ariaLabel}>
             <div className="buy-flow-utility__text">
@@ -171,44 +182,46 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
               </a>
             </div>
           </div>
-        </Container>
-      </section>
+        </Stack>
+      </Section>
 
-      <section className="section section--alt">
-        <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">{dict.buy.quotaTitle}</h2>
-            <p className="section-subtitle">{dict.buy.quotaSubtitle}</p>
-          </div>
+      <Section container="wide" tone="alt">
+        <Stack gap="relaxed">
+          <SectionHeader
+            align="start"
+            title={dict.buy.quotaTitle}
+            subtitle={dict.buy.quotaSubtitle}
+          />
 
-          <div className="grid grid-2">
-            {dict.buy.quotaCards.map((c) => (
-              <div key={c.title} className="card">
-                <h3 className="card-title">{c.title}</h3>
-                <p className="card-subtitle">{c.body}</p>
-              </div>
+          <Grid columns={2} className="grid grid-2">
+            {dict.buy.quotaCards.map((card) => (
+              <Card
+                key={card.title}
+                className="card"
+                description={card.body}
+                padding="default"
+                title={card.title}
+              />
             ))}
-          </div>
-        </Container>
-      </section>
+          </Grid>
+        </Stack>
+      </Section>
 
       {/* Installment & Transfer Cost Guide (TH-prioritized, but visible to all) */}
-      <section className="section">
-        <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">
-              {copy.reference.title}
-            </h2>
-            <p className="section-subtitle">
-              {copy.reference.subtitle}
-            </p>
-          </div>
+      <Section container="wide">
+        <Stack gap="relaxed">
+          <SectionHeader
+            align="start"
+            title={copy.reference.title}
+            subtitle={copy.reference.subtitle}
+          />
 
-          <div className="grid grid-2 buy-reference-grid">
-            <div className="card buy-reference-card buy-reference-card--installment">
-              <h3 className="card-title">
-                {copy.reference.installmentTitle}
-              </h3>
+          <Grid columns={2} className="grid grid-2 buy-reference-grid">
+            <CardBase className="card buy-reference-card buy-reference-card--installment" padding="default">
+              <Stack gap="compact">
+                <h3 className="card-title">
+                  {copy.reference.installmentTitle}
+                </h3>
                 <table className="info-table buy-reference-card__table">
                   <thead>
                     <tr>
@@ -243,12 +256,14 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                 <p className="text-caption buy-reference-card__caption">
                   {copy.reference.installmentCaption}
                 </p>
-            </div>
+              </Stack>
+            </CardBase>
 
-            <div className="card buy-reference-card buy-reference-card--closing">
-              <h3 className="card-title">
-                {copy.reference.transferTitle}
-              </h3>
+            <CardBase className="card buy-reference-card buy-reference-card--closing" padding="default">
+              <Stack gap="compact">
+                <h3 className="card-title">
+                  {copy.reference.transferTitle}
+                </h3>
                 <table className="info-table buy-reference-card__table">
                   <thead>
                     <tr>
@@ -278,46 +293,49 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
                 <p className="text-caption buy-reference-card__caption">
                   {copy.reference.transferCaption}
                 </p>
-            </div>
-          </div>
-        </Container>
-      </section>
+              </Stack>
+            </CardBase>
+          </Grid>
+        </Stack>
+      </Section>
 
-      <section className="section">
-        <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">{dict.buy.legalTitle}</h2>
-            <p className="section-subtitle">{dict.buy.legalSubtitle}</p>
-          </div>
+      <Section container="wide">
+        <Stack gap="relaxed">
+          <SectionHeader
+            align="start"
+            title={dict.buy.legalTitle}
+            subtitle={dict.buy.legalSubtitle}
+          />
 
           <ul className="bullet-list buy-legal-list">
-            {dict.buy.legalBullets.map((b) => (
-              <li key={b}>{b}</li>
+            {dict.buy.legalBullets.map((bullet) => (
+              <li key={bullet}>{bullet}</li>
             ))}
           </ul>
 
-          <div className="buy-flow-utility buy-flow-utility--legal mt-6" aria-label={copy.legalUtility.ariaLabel}>
+          <div className="buy-flow-utility buy-flow-utility--legal" aria-label={copy.legalUtility.ariaLabel}>
             <div className="buy-flow-utility__text">
               {copy.legalUtility.body}
             </div>
             <div className="buy-flow-utility__links">
-              <a className="buy-flow-utility__link" href={withLocale(locale, '/contact')}>
+              <Button href={withLocale(locale, '/contact')} variant="tertiary">
                 {dict.cta.speakToAdvisor}
-              </a>
-              <a className="buy-flow-utility__link" href={withLocale(locale, '/invest')}>
+              </Button>
+              <Button href={withLocale(locale, '/invest')} variant="tertiary">
                 {dict.cta.exploreInvestment}
-              </a>
+              </Button>
             </div>
           </div>
-        </Container>
-      </section>
+        </Stack>
+      </Section>
 
-      <section className="section section--alt">
-        <Container variant="wide">
-          <div className="section-header">
-            <h2 className="section-title">{dict.buy.featuredTitle}</h2>
-            <p className="section-subtitle">{dict.buy.featuredSubtitle}</p>
-          </div>
+      <Section container="wide" tone="alt">
+        <Stack gap="relaxed">
+          <SectionHeader
+            align="start"
+            title={dict.buy.featuredTitle}
+            subtitle={dict.buy.featuredSubtitle}
+          />
 
           {featuredItems.length ? (
             <>
@@ -348,14 +366,14 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
               title={dict.advisory.noPublishedDataTitle}
               body={dict.advisory.noPublishedDataBody}
               action={
-                <a className="btn btn-secondary" href={withLocale(locale, '/contact')}>
+                <Button href={withLocale(locale, '/contact')} variant="secondary">
                   {dict.cta.speakToAdvisor}
-                </a>
+                </Button>
               }
             />
           )}
-        </Container>
-      </section>
+        </Stack>
+      </Section>
 
       <section className="section section--cta buy-closing-cta-section">
         <Container variant="wide">
@@ -382,4 +400,3 @@ export default async function BuyPage(props: { params: Promise<{ locale: string 
     </main>
   );
 }
-

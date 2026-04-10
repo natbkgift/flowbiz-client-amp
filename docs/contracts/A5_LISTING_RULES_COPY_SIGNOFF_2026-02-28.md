@@ -1,5 +1,13 @@
 # A5 Property Listing Rules + Copy Sign-off (v1)
 
+> Note
+> For future public listing governance, use these authoritative docs first:
+> - `docs/AMP_COPY_SYSTEM_TH_EN_V1.md`
+> - `docs/AMP_PUBLISH_GATE_RULES_V1.md`
+> - `docs/AMP_PUBLIC_UI_QA_GATE.md`
+>
+> This file remains a historical sign-off record for the earlier A5 listing slice.
+
 Date: 2026-02-28  
 Scope: `/en|th/buy`, `/en|th/rent`, `/en|th/investment`, `/en|th/marketplace`  
 Runtime copy pack id: `a5-listing-v1-2026-02-28`

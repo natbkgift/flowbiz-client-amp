@@ -7,6 +7,7 @@ import { withLocale } from '../../app/_lib/i18n/routing';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicChip } from '@/components/public/PublicChip';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { Button } from '@/components/public-system/components/Button';
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
 
@@ -215,9 +216,9 @@ export function PropertyCard({
 
       <div className="property-card__actions">
         <PublicActionRow className="card-actions property-card__decision-ladder" stackOnMobile>
-          <Link className="btn btn-primary property-card__primary-action" href={href}>
+          <Button className="property-card__primary-action" href={href} variant="primary">
             {decisionSignal.primaryCtaLabel}
-          </Link>
+          </Button>
           <ShortlistSaveButton
             className="property-card__secondary-action"
             locale={locale}

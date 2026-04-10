@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
-import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m.LeadForm), {
   loading: () => <div className="animate-pulse h-48 rounded bg-slate-100" />,
@@ -9,7 +8,6 @@ const LeadForm = dynamic(() => import('@/components/forms/LeadForm').then(m => m
 import { CTA } from '@/app/_lib/public-cta';
 import { getContactTopicPreset } from '@/app/_lib/contact-topic';
 import {
-  buildAdvisorWhatsApp,
   getAdvisoryLabels,
   getAdvisoryProofs,
   parseLeadCaptureContext,
@@ -21,6 +19,14 @@ import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { Button } from '@/components/public-system/components/Button';
+import { CTAGroup } from '@/components/public-system/components/CTAGroup';
+import { CardBase } from '@/components/public-system/primitives/CardBase';
+import { Heading } from '@/components/public-system/primitives/Heading';
+import { Section } from '@/components/public-system/primitives/Section';
+import { Stack } from '@/components/public-system/primitives/Stack';
+import { Text } from '@/components/public-system/primitives/Text';
+import { SectionIntroBlock } from '@/components/public-system/patterns/SectionIntroBlock';
 import type { LeadHandoff } from '@/lib/conversion';
 
 export const revalidate = 300;
@@ -588,28 +594,37 @@ export default async function ContactPage(
       />
 
       {!hasSpecializedContactContext ? (
-        <section className="section section--alt contact-route-section">
-          <Container>
-            <div className="section-header">
-              <h2 className="section-title">{contactCopy.routeChooser.title}</h2>
-              <p className="section-subtitle">{contactCopy.routeChooser.subtitle}</p>
-            </div>
-            <div className="grid grid-3 contact-route-grid">
+        <SectionIntroBlock
+          container="default"
+          sectionClassName="contact-route-section"
+          title={contactCopy.routeChooser.title}
+          subtitle={contactCopy.routeChooser.subtitle}
+          tone="alt"
+        >
+          <div className="grid grid-3 contact-route-grid">
               {contactRouteCards.map((card) => (
-                <Link key={card.key} className="card contact-route-card" href={card.href} aria-label={card.action}>
-                  <span className="contact-route-card__eyebrow">{card.eyebrow}</span>
-                  <h3 className="card-title">{card.title}</h3>
-                  <p className="card-subtitle">{card.body}</p>
-                  <span className="contact-route-card__action">{card.action}</span>
+                <Link key={card.key} href={card.href} aria-label={card.action}>
+                  <CardBase className="card contact-route-card" interactive padding="default">
+                    <Stack gap="compact">
+                      <Text as="span" className="contact-route-card__eyebrow" variant="label">
+                        {card.eyebrow}
+                      </Text>
+                      <Heading as="h3" className="card-title" level="h3">
+                        {card.title}
+                      </Heading>
+                      <Text as="p" className="card-subtitle" tone="muted" variant="small">
+                        {card.body}
+                      </Text>
+                      <span className="contact-route-card__action">{card.action}</span>
+                    </Stack>
+                  </CardBase>
                 </Link>
               ))}
-            </div>
-          </Container>
-        </section>
+          </div>
+        </SectionIntroBlock>
       ) : null}
 
-      <section className="section">
-        <Container>
+      <Section>
           <div className="split split--form-priority">
             <aside className="split__aside contact-concierge-rail">
               <h2 className="section-title">{contactAdvisoryTitle}</h2>
@@ -658,18 +673,18 @@ export default async function ContactPage(
               </div>
 
               <div className="contact-support-actions">
-                <div className="cta-row">
-                  <a className="btn btn-cta" href={CTA.whatsAppUrl} target="_blank" rel="noreferrer">
+                <CTAGroup className="cta-row" stackOnMobile>
+                  <Button external href={CTA.whatsAppUrl} rel="noreferrer" target="_blank" variant="cta">
                     {dict.cta.whatsapp}
-                  </a>
-                  <a className="btn btn-secondary" href={CTA.lineUrl} target="_blank" rel="noreferrer">
+                  </Button>
+                  <Button external href={CTA.lineUrl} rel="noreferrer" target="_blank" variant="secondary">
                     {dict.cta.line}
-                  </a>
-                </div>
+                  </Button>
+                </CTAGroup>
 
-                <a className="btn btn-tertiary contact-support-actions__phone" href={CTA.phoneTel}>
+                <Button className="contact-support-actions__phone" external href={CTA.phoneTel} variant="tertiary">
                   {CTA.phoneTel}
-                </a>
+                </Button>
               </div>
 
               <div className="trust-box contact-concierge-box contact-concierge-box--trust">
@@ -697,8 +712,7 @@ export default async function ContactPage(
               />
             </div>
           </div>
-        </Container>
-      </section>
+      </Section>
     </main>
   );
 }

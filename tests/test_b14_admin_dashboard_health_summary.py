@@ -132,6 +132,10 @@ def test_b14_dashboard_trend_series_counts_more_than_visible_recent_rows(client)
 
 def test_b14_dashboard_conversion_funnel_widget_reports_recent_event_health(client) -> None:
     headers = _make_admin_headers()
+    baseline_response = client.get("/admin/dashboard/health-summary", headers=headers)
+    assert baseline_response.status_code == 200, baseline_response.text
+    baseline_metrics = baseline_response.json()["raw_metrics"]["conversion_funnel"]
+    baseline_counts = baseline_metrics["counts_7d"]
 
     for event_name in ("form_start", "form_submit", "lead_submit", "form_success"):
         response = client.post(
@@ -172,10 +176,10 @@ def test_b14_dashboard_conversion_funnel_widget_reports_recent_event_health(clie
     assert widget["status"] == "ok"
 
     metrics = body["raw_metrics"]["conversion_funnel"]
-    assert metrics["counts_7d"]["form_start"] == 1
-    assert metrics["counts_7d"]["form_submit"] == 1
-    assert metrics["counts_7d"]["lead_submit"] == 1
-    assert metrics["counts_7d"]["form_success"] == 1
+    assert metrics["counts_7d"]["form_start"] == baseline_counts["form_start"] + 1
+    assert metrics["counts_7d"]["form_submit"] == baseline_counts["form_submit"] + 1
+    assert metrics["counts_7d"]["lead_submit"] == baseline_counts["lead_submit"] + 1
+    assert metrics["counts_7d"]["form_success"] == baseline_counts["form_success"] + 1
     assert metrics["success_rate_7d"] == 100.0
     assert metrics["top_source_route_7d"] == "buy"
     assert metrics["top_lead_source_7d"] == "buy_form"

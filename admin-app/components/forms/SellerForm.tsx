@@ -6,6 +6,10 @@ import { useMemo, useState } from 'react';
 import { en } from '@/app/_lib/i18n/en';
 import { th } from '@/app/_lib/i18n/th';
 import { localeFromPathname } from '@/app/_lib/i18n/routing';
+import { Button } from '@/components/public-system/components/Button';
+import { InputBase } from '@/components/public-system/components/InputBase';
+import { TextAreaBase } from '@/components/public-system/components/TextAreaBase';
+import { FieldShell } from '@/components/public-system/primitives/FieldShell';
 import { trackEvent } from '@/lib/analytics';
 import { isValidEmail, isValidPhone } from '@/lib/contact-validation';
 
@@ -40,6 +44,10 @@ export function SellerForm({ heading }: SellerFormProps) {
     locale === 'th'
       ? 'กรุณากรอกเบอร์โทรให้มีตัวเลข 7 ถึง 15 หลัก'
       : 'Enter a phone number with 7 to 15 digits.';
+  const propertyTypeLabel = locale === 'th' ? 'ประเภททรัพย์' : 'Property type';
+  const locationLabel = locale === 'th' ? 'ทำเล' : 'Location';
+  const askingPriceLabel = locale === 'th' ? 'ราคาที่ต้องการ' : 'Asking price';
+  const notesLabel = locale === 'th' ? 'รายละเอียดเพิ่มเติม' : 'Additional details';
 
   const [didStart, setDidStart] = useState(false);
 
@@ -191,18 +199,20 @@ export function SellerForm({ heading }: SellerFormProps) {
           className="form-honeypot"
         />
 
-        <label htmlFor="seller-name" className="form-label">
-          {dict.common.leadForm.namePlaceholder} <span className="text-gray-500">{requiredText}</span>
-        </label>
-        <input
-          className="form-input"
-          id="seller-name"
-          name="name"
-          placeholder={dict.common.leadForm.namePlaceholder}
-          aria-required="true"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <FieldShell
+          label={dict.common.leadForm.namePlaceholder}
+          labelFor="seller-name"
+          requiredMark={requiredText}
+        >
+          <InputBase
+            id="seller-name"
+            name="name"
+            placeholder={dict.common.leadForm.namePlaceholder}
+            aria-required="true"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </FieldShell>
         <div>
           <p className="form-helper form-helper--muted">{contactMethodHelper}</p>
           {contactMethodError ? (
@@ -212,10 +222,13 @@ export function SellerForm({ heading }: SellerFormProps) {
           ) : null}
         </div>
         <div className="form-grid-2">
-          <div>
-            <label htmlFor="seller-email" className="form-label">{dict.common.leadForm.emailPlaceholder}</label>
-            <input
-              className="form-input"
+          <FieldShell
+            error={emailError}
+            errorId="seller-email-error"
+            label={dict.common.leadForm.emailPlaceholder}
+            labelFor="seller-email"
+          >
+            <InputBase
               id="seller-email"
               name="email"
               type="email"
@@ -226,16 +239,14 @@ export function SellerForm({ heading }: SellerFormProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {emailError ? (
-              <p id="seller-email-error" className="form-error mt-2" role="alert">
-                {emailError}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="seller-phone" className="form-label">{dict.common.leadForm.phonePlaceholder}</label>
-            <input
-              className="form-input"
+          </FieldShell>
+          <FieldShell
+            error={phoneError}
+            errorId="seller-phone-error"
+            label={dict.common.leadForm.phonePlaceholder}
+            labelFor="seller-phone"
+          >
+            <InputBase
               id="seller-phone"
               name="phone"
               type="tel"
@@ -246,70 +257,62 @@ export function SellerForm({ heading }: SellerFormProps) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
-            {phoneError ? (
-              <p id="seller-phone-error" className="form-error mt-2" role="alert">
-                {phoneError}
-              </p>
-            ) : null}
-          </div>
+          </FieldShell>
         </div>
 
         <div className="form-grid-2">
-          <div>
-            <label htmlFor="seller-property-type" className="sr-only">{dict.common.sellerForm.propertyTypePlaceholder}</label>
-            <input
-              className="form-input"
+          <FieldShell label={propertyTypeLabel} labelFor="seller-property-type">
+            <InputBase
               id="seller-property-type"
               name="property_type"
               placeholder={dict.common.sellerForm.propertyTypePlaceholder}
               value={propertyType}
               onChange={(e) => setPropertyType(e.target.value)}
             />
-          </div>
-          <div>
-            <label htmlFor="seller-location" className="sr-only">{dict.common.sellerForm.locationPlaceholder}</label>
-            <input
-              className="form-input"
+          </FieldShell>
+          <FieldShell label={locationLabel} labelFor="seller-location">
+            <InputBase
               id="seller-location"
               name="location"
               placeholder={dict.common.sellerForm.locationPlaceholder}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
-          </div>
+          </FieldShell>
         </div>
 
-        <label htmlFor="seller-price" className="sr-only">{dict.common.sellerForm.askingPricePlaceholder}</label>
-        <input
-          className="form-input"
-          id="seller-price"
-          name="asking_price"
-          inputMode="numeric"
-          placeholder={dict.common.sellerForm.askingPricePlaceholder}
-          value={askingPrice}
-          onChange={(e) => setAskingPrice(e.target.value)}
-        />
+        <FieldShell label={askingPriceLabel} labelFor="seller-price">
+          <InputBase
+            id="seller-price"
+            name="asking_price"
+            inputMode="numeric"
+            placeholder={dict.common.sellerForm.askingPricePlaceholder}
+            value={askingPrice}
+            onChange={(e) => setAskingPrice(e.target.value)}
+          />
+        </FieldShell>
 
-        <label htmlFor="seller-notes" className="sr-only">{dict.common.sellerForm.notesPlaceholder}</label>
-        <textarea
-          className="form-textarea"
-          id="seller-notes"
-          name="notes"
-          placeholder={dict.common.sellerForm.notesPlaceholder}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={4}
-        />
+        <FieldShell label={notesLabel} labelFor="seller-notes">
+          <TextAreaBase
+            id="seller-notes"
+            name="notes"
+            placeholder={dict.common.sellerForm.notesPlaceholder}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+          />
+        </FieldShell>
 
-        <button
+        <Button
           type="button"
-          className="btn btn-primary btn-block"
+          variant="primary"
+          fullWidth
           onClick={onSubmit}
           disabled={!canSubmit}
           aria-describedby="seller-form-status"
         >
           {status.state === 'submitting' ? dict.common.leadForm.submitting : dict.common.sellerForm.submit}
-        </button>
+        </Button>
 
         <div id="seller-form-status" aria-live="assertive" aria-atomic="true">
           {status.state === 'success' ? (
