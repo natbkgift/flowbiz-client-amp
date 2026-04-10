@@ -553,6 +553,9 @@ export default async function HomePage({
         aria-labelledby="home-curated-title"
       >
         <Container variant="wide">
+          <h2 id="home-curated-title" className="sr-only">
+            {locale === 'th' ? 'โครงการคัดสรรสำหรับคุณ' : 'Curated opportunities for you'}
+          </h2>
           <div className="home-curated-shell reveal">
             <div className="home-curated-stack">
               {showFeaturedProjectsSection ? <FeaturedProjectsSection embedded /> : null}
@@ -627,7 +630,7 @@ export default async function HomePage({
 
               <PublicSurfaceCard as="aside" tone="deep" className="home-market-proof" aria-label={locale === 'th' ? 'กรอบการตัดสินใจของทีม' : 'How the team frames the decision'}>
                 <div className="home-market-proof__intro">
-                  <p className="home-market-proof__eyebrow">Why AMP</p>
+                  <p className="home-market-proof__eyebrow">{locale === 'th' ? 'ทำไมต้อง AMP' : 'Why AMP'}</p>
                   <h3 className="home-market-proof__title">
                     {locale === 'th'
                       ? 'ทีมท้องถิ่นที่ช่วยคัดให้แคบลงก่อนคุณใช้เวลาลึกกว่านี้'
