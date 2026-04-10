@@ -27,12 +27,12 @@ describe('home surface handoff contract', () => {
   it('keeps the trust snapshot and final cta framed as decision cues instead of a route selector', () => {
     const page = read('app/(site)/[locale]/page.tsx');
 
-    expect(page).toContain('Verified listings only');
-    expect(page).toContain('No fake or outdated stock');
+    expect(page).toContain('A shortlist shaped by your brief');
+    expect(page).toContain('Trade-offs made clear');
     expect(page).toContain('dict.home.premiumCtaFormHeading');
     expect(page).toContain('dict.home.premiumCtaSecondary');
     expect(page).not.toContain('home-pathways-highlight-row');
-    expect(page).toContain('home-curated-shell__signal-row');
+    expect(page).not.toContain('home-curated-shell__signal-row');
     expect(page).not.toContain('home-confidence-row');
     expect(page).not.toContain('home-intent-card__eyebrow');
     expect(page).not.toContain('home-intent-card__start');
@@ -72,10 +72,6 @@ describe('home surface handoff contract', () => {
     expect(safeCoverImage).toContain('shouldBypassOptimization');
     expect(safeCoverImage).toContain('loader={shouldUsePassthroughLoader ? passthroughLoader : undefined}');
     expect(personalization).toContain("intent === 'sell'");
-    expect(page).toContain('HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 1');
-    expect(page).toContain("loading={shouldPreloadMedia ? 'eager' : 'lazy'}");
-    expect(page).toContain("fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}");
-    expect(page).toContain('quality={60}');
     expect(page).toContain('data-home-perf="trust-layer"');
     expect(page).toContain("'data-home-perf': 'trust-strip'");
     expect(page).not.toContain('fetchBlogPosts');

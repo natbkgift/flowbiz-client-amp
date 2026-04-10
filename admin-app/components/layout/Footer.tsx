@@ -7,6 +7,7 @@ import { withLocale } from '../../app/_lib/i18n/routing';
 import { CTA } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
+import { getPublicButtonClassName } from '../public-system/tokens/publicUiTokens';
 
 type FooterCms = ResolvedLayoutCms['footer'];
 
@@ -51,11 +52,11 @@ export function Footer({
     : facebookLabelRaw;
   const showFacebookLink = facebookUrl && !/flowbiz/i.test(facebookUrl);
   const brandTitle = locale === 'th'
-    ? 'ที่ปรึกษาอสังหาริมทรัพย์พัทยา'
-    : 'Pattaya property advisory';
+    ? 'ทีมที่ปรึกษาอสังหาริมทรัพย์พัทยาสำหรับผู้ซื้อและนักลงทุนต่างชาติ'
+    : 'Pattaya property advisory for foreign buyers and investors';
   const brandBody = locale === 'th'
-    ? 'คัดโครงการ ยูนิต และขั้นตอนถัดไปให้ชัดขึ้น สำหรับการซื้อ ลงทุน เช่า หรือขายในพัทยา'
-    : 'Curated projects, units, and next-step guidance for buying, investing, renting, or selling in Pattaya.';
+    ? 'คัดโครงการ คำแนะนำเรื่องทำเล และขั้นตอนถัดไปที่ชัดขึ้น สำหรับการซื้อ ลงทุน เช่า หรือขายในพัทยา'
+    : 'Curated projects, area guidance, and clearer next steps for buying, investing, renting, or selling in Pattaya.';
   const routeLinks = quickLinks.filter((item) => ['/invest', '/buy', '/rent', '/sell', '/projects', '/area-guide'].includes(item.href));
   const footerRouteLinks = routeLinks.filter((item) => ['/buy', '/invest', '/rent', '/sell', '/projects'].includes(item.href));
   const planningLinks = [
@@ -88,11 +89,25 @@ export function Footer({
               ))}
             </div>
             <div className="footer-brand__actions">
-              <Link href={withLocale(locale, '/contact')} prefetch={false} className="footer-action footer-action--primary">
-                {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
+              <Link
+                href={withLocale(locale, '/contact')}
+                prefetch={false}
+                className={getPublicButtonClassName({
+                  variant: 'primary',
+                  className: 'footer-action footer-action--primary',
+                })}
+              >
+                {dict.home.heroPrimaryCta}
               </Link>
-              <Link href={withLocale(locale, '/projects')} prefetch={false} className="footer-action footer-action--secondary">
-                {locale === 'th' ? 'ดูโครงการที่เปิดอยู่' : 'View live projects'}
+              <Link
+                href={withLocale(locale, '/projects')}
+                prefetch={false}
+                className={getPublicButtonClassName({
+                  variant: 'secondary',
+                  className: 'footer-action footer-action--secondary',
+                })}
+              >
+                {dict.home.heroSecondaryCta}
               </Link>
             </div>
           </div>

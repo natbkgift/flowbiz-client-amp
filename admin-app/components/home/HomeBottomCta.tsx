@@ -5,6 +5,7 @@ import { Container } from '@/components/layout/Container';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicChip } from '@/components/public/PublicChip';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { getPublicButtonClassName } from '@/components/public-system/tokens/publicUiTokens';
 
 export function HomeBottomCta({
   heading,
@@ -78,7 +79,10 @@ export function HomeBottomCta({
             ) : null}
             <PublicActionRow className="home-bottom-cta__actions" stackOnMobile>
               <TrackedLink
-                className="px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors home-bottom-cta__primary"
+                className={getPublicButtonClassName({
+                  variant: 'cta',
+                  className: 'home-bottom-cta__primary',
+                })}
                 href={primaryUrl}
                 prefetch={false}
                 eventType="home_final_cta_click"
@@ -87,7 +91,10 @@ export function HomeBottomCta({
                 {primaryLabel}
               </TrackedLink>
               <TrackedLink
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium transition-colors border border-white/20 home-bottom-cta__secondary"
+                className={getPublicButtonClassName({
+                  variant: 'secondary',
+                  className: 'home-bottom-cta__secondary',
+                })}
                 href={secondaryUrl}
                 prefetch={false}
                 eventType="home_final_cta_click"
