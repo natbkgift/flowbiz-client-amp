@@ -10,6 +10,15 @@ import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 
 export const revalidate = 300;
 
+const THAI_CHAR_RE = /[\u0E00-\u0E7F]/;
+
+function preferLocalizedValue(locale: 'en' | 'th', value: string | null | undefined, fallback: string): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return fallback;
+  if (locale === 'th' && !THAI_CHAR_RE.test(trimmed)) return fallback;
+  return trimmed;
+}
+
 export async function generateMetadata(
   props: {
     params: Promise<{ locale: string }>;
@@ -19,11 +28,15 @@ export async function generateMetadata(
   const locale = normalizeLocale(params.locale);
   const dict = getDictionary(locale);
   const processInfo = await fetchCompanyInfoBySlug('how-we-work').catch(() => null);
+  const fallbackTitle = locale === 'th' ? 'วิธีที่เราทำงาน' : 'How we work';
+  const fallbackDescription = locale === 'th'
+    ? 'ดูขั้นตอนการทำงานของ AMP Pattaya ตั้งแต่รับรายละเอียด คัดตัวเลือก ไปจนถึงขั้นถัดไปที่ทำได้จริง'
+    : 'See how AMP Pattaya moves from a clear brief to the next practical step.';
   return makePageMetadata(
     locale,
     'how-we-work',
-    processInfo?.meta_title || (locale === 'th' ? 'How we work' : 'How we work'),
-    processInfo?.meta_description || dict.about.heroSubtitle,
+    preferLocalizedValue(locale, processInfo?.meta_title, fallbackTitle),
+    preferLocalizedValue(locale, processInfo?.meta_description, fallbackDescription || dict.about.heroSubtitle),
     dict.brand.name,
   );
 }
@@ -76,17 +89,19 @@ export default async function HowWeWorkPage(
     fetchPublishedTeamMembers().catch(() => []),
   ]);
 
+  const fallbackNarrative = [
+    locale === 'th'
+      ? 'ทุกการทำงานเริ่มจากรายละเอียดที่ชัดเจน เพื่อคุมทิศทางของรายการคัดไว้ งบ และขั้นถัดไปให้ตรงกันก่อน'
+      : 'Every engagement starts with a clear brief so the shortlist, budget lens, and next step stay aligned from the start.',
+    locale === 'th'
+      ? 'จากนั้นทีมจะคัดตัวเลือก ตรวจบริบทที่ต้องใช้ และพาไปยังขั้นตอนถัดไปที่ทำได้จริงโดยไม่ยืดวงรอบเกินจำเป็น'
+      : 'The team then curates options, verifies the context that matters, and moves the conversation to the next practical step without stretching the loop.',
+  ].join('\n\n');
+
   const paragraphs = splitIntoParagraphs(
-    resolveCmsText(processInfo?.content, locale)
-      || [
-        locale === 'th'
-          ? 'ทุกการทำงานเริ่มจากรายละเอียดที่ชัดเจน เพื่อคุมทิศทางของรายการคัดไว้ งบ และขั้นถัดไปให้ตรงกันก่อน'
-          : 'Every engagement starts with a clear brief so the shortlist, budget lens, and next step stay aligned from the start.',
-        locale === 'th'
-          ? 'จากนั้นทีมจะคัดตัวเลือก ตรวจ context ที่ต้องใช้ และพาไปยังขั้นตอนถัดไปที่ทำได้จริงโดยไม่ยืด loop เกินจำเป็น'
-          : 'The team then curates options, verifies the context that matters, and moves the conversation to the next practical step without stretching the loop.',
-      ].join('\n\n'),
+    preferLocalizedValue(locale, resolveCmsText(processInfo?.content, locale), fallbackNarrative),
   );
+  const heroTitle = preferLocalizedValue(locale, processInfo?.title, locale === 'th' ? 'วิธีที่เราทำงาน' : 'How we work');
 
   const processCards = [
     {
@@ -115,7 +130,7 @@ export default async function HowWeWorkPage(
     <main id="main-content" className="page-template--narrative">
       <PublicAdvisoryHero
         eyebrow={dict.advisory.heroEyebrow}
-        title={processInfo?.title || (locale === 'th' ? 'How we work' : 'How we work')}
+        title={heroTitle}
         subtitle={paragraphs[0] || dict.about.heroSubtitle}
         proofs={advisoryProofs}
         proofsLabel={advisoryLabels.proofsLabel}

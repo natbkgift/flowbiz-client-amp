@@ -57,6 +57,7 @@ describe('how we work page', () => {
       }),
     );
 
+    expect(screen.getByRole('heading', { level: 1, name: /วิธีที่เราทำงาน/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /อะไรควรถูกเคลียร์ก่อน shortlist จะขยับต่อ/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /คำตอบกลับที่ดีควรให้ความรู้สึกแบบไหน/i })).toBeTruthy();
   });
