@@ -8,6 +8,7 @@ import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { getPublicButtonClassName } from '@/components/public-system/tokens/publicUiTokens';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { resolveRenderableLocalMediaPath } from '@/app/_lib/local-media';
 
@@ -255,7 +256,10 @@ export function HomeHero({
 
             <PublicActionRow className="hero-cta-row home-hero-slider__actions" stackOnMobile>
               <TrackedLink
-                className="btn btn-primary hero-cta hero-cta--primary"
+                className={getPublicButtonClassName({
+                  variant: 'primary',
+                  className: 'hero-cta hero-cta--primary',
+                })}
                 href={primaryCtaUrl}
                 prefetch
                 eventType="cta_click"
@@ -264,7 +268,10 @@ export function HomeHero({
                 {primaryCtaLabel}
               </TrackedLink>
               <TrackedLink
-                className="btn btn-secondary hero-cta hero-cta--secondary"
+                className={getPublicButtonClassName({
+                  variant: 'secondary',
+                  className: 'hero-cta hero-cta--secondary',
+                })}
                 href={secondaryCtaUrl}
                 prefetch
                 eventType="cta_click"

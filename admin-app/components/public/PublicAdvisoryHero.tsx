@@ -6,6 +6,7 @@ import { Container } from '@/components/layout/Container';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicChip } from '@/components/public/PublicChip';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { getPublicButtonClassName } from '@/components/public-system/tokens/publicUiTokens';
 import {
   IconArrowRight,
   IconBuilding,
@@ -93,7 +94,10 @@ export function PublicAdvisoryHero({
             <PublicActionRow className="public-hero__actions cta-row" stackOnMobile>
               <TrackedLink
                 id={primaryAction.id}
-                className="btn btn-primary public-hero__action public-hero__action--primary"
+                className={getPublicButtonClassName({
+                  variant: 'primary',
+                  className: 'public-hero__action public-hero__action--primary',
+                })}
                 href={primaryAction.href}
                 prefetch={primaryAction.prefetch ?? false}
                 eventType={primaryAction.eventType ?? 'cta_click'}
@@ -105,7 +109,10 @@ export function PublicAdvisoryHero({
               {secondaryAction ? (
                 <TrackedLink
                   id={secondaryAction.id}
-                  className="btn btn-secondary public-hero__action public-hero__action--secondary"
+                  className={getPublicButtonClassName({
+                    variant: 'secondary',
+                    className: 'public-hero__action public-hero__action--secondary',
+                  })}
                   href={secondaryAction.href}
                   prefetch={secondaryAction.prefetch ?? false}
                   eventType={secondaryAction.eventType ?? 'cta_click'}
@@ -118,7 +125,10 @@ export function PublicAdvisoryHero({
               {tertiaryAction ? (
                 <a
                   id={tertiaryAction.id}
-                  className="btn btn-tertiary public-hero__action public-hero__action--tertiary"
+                  className={getPublicButtonClassName({
+                    variant: 'tertiary',
+                    className: 'public-hero__action public-hero__action--tertiary',
+                  })}
                   href={tertiaryAction.href}
                   target="_blank"
                   rel="noreferrer"

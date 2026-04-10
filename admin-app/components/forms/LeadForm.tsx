@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
@@ -21,6 +20,12 @@ import {
 } from '../../lib/conversion';
 import { trackExperimentOutcomes } from '../../lib/experiments';
 import { calculateLeadScore } from '../../lib/lead-scoring';
+import { Button } from '@/components/public-system/components/Button';
+import { CTAGroup } from '@/components/public-system/components/CTAGroup';
+import { InputBase } from '@/components/public-system/components/InputBase';
+import { SelectBase } from '@/components/public-system/components/SelectBase';
+import { TextAreaBase } from '@/components/public-system/components/TextAreaBase';
+import { FieldShell } from '@/components/public-system/primitives/FieldShell';
 
 type LeadFormProps = {
   locale?: 'en' | 'th';
@@ -576,18 +581,20 @@ export function LeadForm({
           className="form-honeypot"
         />
 
-        <label htmlFor="lead-name" className="form-label">
-          {dict.common.leadForm.namePlaceholder} <span className="text-gray-500">{requiredText}</span>
-        </label>
-        <input
-          id="lead-name"
-          className="form-input"
-          name="name"
-          placeholder={dict.common.leadForm.namePlaceholder}
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <FieldShell
+          label={dict.common.leadForm.namePlaceholder}
+          labelFor="lead-name"
+          requiredMark={requiredText}
+        >
+          <InputBase
+            id="lead-name"
+            name="name"
+            placeholder={dict.common.leadForm.namePlaceholder}
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </FieldShell>
         <div>
           <p id={contactHelperId} className="form-helper form-helper--muted">{contactMethodHelper}</p>
           {contactMethodError ? (
@@ -597,13 +604,14 @@ export function LeadForm({
           ) : null}
         </div>
         <div className="form-grid-2">
-          <div>
-            <label htmlFor="lead-email" className="form-label">
-              {dict.common.leadForm.emailPlaceholder}
-            </label>
-            <input
+          <FieldShell
+            error={emailError}
+            errorId={emailErrorId}
+            label={dict.common.leadForm.emailPlaceholder}
+            labelFor="lead-email"
+          >
+            <InputBase
               id="lead-email"
-              className="form-input"
               name="email"
               type="email"
               placeholder={dict.common.leadForm.emailPlaceholder}
@@ -612,19 +620,15 @@ export function LeadForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {emailError ? (
-              <p id={emailErrorId} className="form-error mt-2" role="alert">
-                {emailError}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="lead-phone" className="form-label">
-              {dict.common.leadForm.phonePlaceholder}
-            </label>
-            <input
+          </FieldShell>
+          <FieldShell
+            error={phoneError}
+            errorId={phoneErrorId}
+            label={dict.common.leadForm.phonePlaceholder}
+            labelFor="lead-phone"
+          >
+            <InputBase
               id="lead-phone"
-              className="form-input"
               name="phone"
               type="tel"
               placeholder={dict.common.leadForm.phonePlaceholder}
@@ -633,34 +637,21 @@ export function LeadForm({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
-            {phoneError ? (
-              <p id={phoneErrorId} className="form-error mt-2" role="alert">
-                {phoneError}
-              </p>
-            ) : null}
-          </div>
+          </FieldShell>
         </div>
-        <div>
-          <label htmlFor="lead-nationality" className="form-label">
-            {nationalityLabel}
-          </label>
-          <input
+        <FieldShell label={nationalityLabel} labelFor="lead-nationality">
+          <InputBase
             id="lead-nationality"
-            className="form-input"
             name="nationality"
             placeholder={nationalityPlaceholder}
             value={nationality}
             onChange={(e) => setNationality(e.target.value)}
           />
-        </div>
+        </FieldShell>
         {isCompact ? (
-          <div>
-            <label htmlFor="lead-purpose" className="form-label">
-              {dict.common.leadForm.purposeLabel}
-            </label>
-            <select
+          <FieldShell label={dict.common.leadForm.purposeLabel} labelFor="lead-purpose">
+            <SelectBase
               id="lead-purpose"
-              className="form-select"
               name="purpose"
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
@@ -671,18 +662,14 @@ export function LeadForm({
                   {option.label}
                 </option>
               ))}
-            </select>
-          </div>
+            </SelectBase>
+          </FieldShell>
         ) : (
           <>
             <div className="form-grid-2">
-              <div>
-                <label htmlFor="lead-budget" className="form-label">
-                  {dict.common.leadForm.budgetLabel}
-                </label>
-                <select
+              <FieldShell label={dict.common.leadForm.budgetLabel} labelFor="lead-budget">
+                <SelectBase
                   id="lead-budget"
-                  className="form-select"
                   name="budget"
                   value={budgetBand}
                   onChange={(e) => setBudgetBand(e.target.value)}
@@ -693,15 +680,11 @@ export function LeadForm({
                       {option.label}
                     </option>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="lead-purpose" className="form-label">
-                  {dict.common.leadForm.purposeLabel}
-                </label>
-                <select
+                </SelectBase>
+              </FieldShell>
+              <FieldShell label={dict.common.leadForm.purposeLabel} labelFor="lead-purpose">
+                <SelectBase
                   id="lead-purpose"
-                  className="form-select"
                   name="purpose"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
@@ -712,30 +695,22 @@ export function LeadForm({
                       {option.label}
                     </option>
                   ))}
-                </select>
-              </div>
+                </SelectBase>
+              </FieldShell>
             </div>
             <div className="form-grid-2">
-              <div>
-                <label htmlFor="lead-preferred-area" className="form-label">
-                  {dict.common.leadForm.preferredAreaLabel}
-                </label>
-                <input
+              <FieldShell label={dict.common.leadForm.preferredAreaLabel} labelFor="lead-preferred-area">
+                <InputBase
                   id="lead-preferred-area"
-                  className="form-input"
                   name="preferred_area"
                   placeholder={dict.common.leadForm.preferredAreaPlaceholder}
                   value={preferredArea}
                   onChange={(e) => setPreferredArea(e.target.value)}
                 />
-              </div>
-              <div>
-                <label htmlFor="lead-timeframe" className="form-label">
-                  {dict.common.leadForm.timeframeLabel}
-                </label>
-                <select
+              </FieldShell>
+              <FieldShell label={dict.common.leadForm.timeframeLabel} labelFor="lead-timeframe">
+                <SelectBase
                   id="lead-timeframe"
-                  className="form-select"
                   name="timeframe"
                   value={timeframe}
                   onChange={(e) => setTimeframe(e.target.value)}
@@ -746,24 +721,26 @@ export function LeadForm({
                       {option.label}
                     </option>
                   ))}
-                </select>
-              </div>
+                </SelectBase>
+              </FieldShell>
             </div>
           </>
         )}
-        <label htmlFor="lead-message" className="form-label">
-          {dict.common.leadForm.messagePlaceholder} <span className="text-gray-500">{requiredText}</span>
-        </label>
-        <textarea
-          id="lead-message"
-          className="form-textarea"
-          name="message"
-          placeholder={dict.common.leadForm.messagePlaceholder}
-          required
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={4}
-        />
+        <FieldShell
+          label={dict.common.leadForm.messagePlaceholder}
+          labelFor="lead-message"
+          requiredMark={requiredText}
+        >
+          <TextAreaBase
+            id="lead-message"
+            name="message"
+            placeholder={dict.common.leadForm.messagePlaceholder}
+            required
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+          />
+        </FieldShell>
 
         <label className="form-consent">
           <input
@@ -778,14 +755,15 @@ export function LeadForm({
           </span>
         </label>
 
-        <button
+        <Button
           type="submit"
-          className="btn btn-primary btn-block"
+          variant="primary"
+          fullWidth
           disabled={!canSubmit}
           aria-describedby="lead-form-status"
         >
           {status.state === 'submitting' ? dict.common.leadForm.submitting : (submitLabel ?? dict.common.leadForm.submit)}
-        </button>
+        </Button>
 
         <div className="mt-4 border-t border-gray-200 pt-4" aria-label="lead-form-support-links">
           <p className="lead-form__support-copy mb-2">
@@ -827,29 +805,30 @@ export function LeadForm({
                 </p>
               ) : null}
               {describeResponseChannel(status.responseChannel) ? <p>{describeResponseChannel(status.responseChannel)}</p> : null}
-              <div className="mt-4 flex flex-wrap gap-3" aria-label="lead-success-actions">
+              <CTAGroup className="mt-4" aria-label="lead-success-actions">
                 {successActions.map((action) => {
                   if (action.external) {
                     return (
-                      <a
+                      <Button
                         key={action.label}
-                        className={action.primary ? 'btn btn-primary' : 'btn btn-secondary'}
+                        external
                         href={action.href}
-                        target="_blank"
                         rel="noreferrer"
+                        target="_blank"
+                        variant={action.primary ? 'primary' : 'secondary'}
                       >
                         {action.label}
-                      </a>
+                      </Button>
                     );
                   }
 
                   return (
-                    <Link key={action.label} className={action.primary ? 'btn btn-primary' : 'btn btn-secondary'} href={action.href}>
+                    <Button key={action.label} href={action.href} variant={action.primary ? 'primary' : 'secondary'}>
                       {action.label}
-                    </Link>
+                    </Button>
                   );
                 })}
-              </div>
+              </CTAGroup>
             </div>
           ) : null}
 

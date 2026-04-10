@@ -15,6 +15,11 @@ describe('public design system contract', () => {
     const tailwindConfig = read('tailwind.config.ts');
     const globals = read('app/globals.css');
     const foundationSpec = read('../docs/contracts/AMP_UI_FOUNDATION_SPEC_2026-04-08.md');
+    const sharedTokens = read('components/public-system/tokens/publicUiTokens.ts');
+    const sectionPrimitive = read('components/public-system/primitives/Section.tsx');
+    const cardBasePrimitive = read('components/public-system/primitives/CardBase.tsx');
+    const buttonComponent = read('components/public-system/components/Button.tsx');
+    const sectionHeaderComponent = read('components/public-system/components/SectionHeader.tsx');
 
     expect(rootStyles).toContain("../styles/public-tokens.css");
     expect(rootStyles).toContain("../styles/public-primitives.css");
@@ -95,6 +100,20 @@ describe('public design system contract', () => {
     expect(primitives).toContain('.authority-card');
     expect(primitives).toContain('.decision-page--confidence .public-hero__actions .public-hero__action');
 
+    expect(sharedTokens).toContain('publicSectionToneClassNames');
+    expect(sharedTokens).toContain('publicGridColumnClassNames');
+    expect(sharedTokens).toContain('publicButtonVariantClassNames');
+    expect(sharedTokens).toContain('getPublicButtonClassName');
+    expect(sectionPrimitive).toContain("container = 'default'");
+    expect(sectionPrimitive).toContain('publicSectionToneClassNames[tone]');
+    expect(cardBasePrimitive).toContain("'public-surface-card'");
+    expect(cardBasePrimitive).toContain('publicCardPaddingClassNames[padding]');
+    expect(buttonComponent).toContain('getPublicButtonClassName');
+    expect(buttonComponent).toContain("<Link className={resolvedClassName}");
+    expect(sectionHeaderComponent).toContain("'public-section-header'");
+    expect(sectionHeaderComponent).toContain('section-title');
+    expect(sectionHeaderComponent).toContain('section-subtitle');
+
     expect(foundationSpec).toContain('## Typography');
     expect(foundationSpec).toContain('## Content Rhythm');
     expect(foundationSpec).toContain('## Surface And Elevation');
@@ -114,6 +133,9 @@ describe('public design system contract', () => {
     const featuredProjects = read('components/home/FeaturedProjects.tsx');
     const propertyCard = read('components/cards/PropertyCard.tsx');
     const publicSectionHeader = read('components/public/PublicSectionHeader.tsx');
+    const publicActionRow = read('components/public/PublicActionRow.tsx');
+    const publicSurfaceCard = read('components/public/PublicSurfaceCard.tsx');
+    const canonicalSectionHeader = read('components/public-system/components/SectionHeader.tsx');
     const leadForm = read('components/forms/LeadForm.tsx');
     const sellerForm = read('components/forms/SellerForm.tsx');
     const sidebarFilter = read('components/listing/SidebarFilter.tsx');
@@ -136,15 +158,17 @@ describe('public design system contract', () => {
     expect(advisoryHero).toContain('PublicChip');
     expect(advisoryHero).toContain('type-h1');
     expect(advisoryHero).toContain('type-h4');
-    expect(advisoryHero).toContain('btn btn-primary');
-    expect(advisoryHero).toContain('btn btn-secondary');
-    expect(advisoryHero).toContain('btn btn-tertiary');
+    expect(advisoryHero).toContain('getPublicButtonClassName');
+    expect(advisoryHero).toContain("variant: 'primary'");
+    expect(advisoryHero).toContain("variant: 'secondary'");
+    expect(advisoryHero).toContain("variant: 'tertiary'");
 
     expect(homeHero).toContain('PublicSurfaceCard');
     expect(homeHero).toContain('PublicActionRow');
     expect(homeHero).toContain('hero-cta-row');
     expect(homeHero).toContain('home-hero-slider__panel');
     expect(homeHero).toContain('home-hero-slider__meta-bar');
+    expect(homeHero).toContain('getPublicButtonClassName');
 
     expect(homeBottomCta).toContain('type-h1');
     expect(homeBottomCta).toContain('type-body');
@@ -167,13 +191,16 @@ describe('public design system contract', () => {
     expect(propertyCard).toContain('PublicActionRow');
     expect(propertyCard).toContain('PublicChip');
     expect(propertyCard).toContain('SafeCoverImage');
-    expect(propertyCard).toContain('btn btn-primary');
+    expect(propertyCard).toContain('<Button');
+    expect(propertyCard).toContain('variant="primary"');
     expect(propertyCard).toContain('property-card__signals');
     expect(propertyCard).toContain('property-card__media-chip--signal');
 
-    expect(publicSectionHeader).toContain('typeClassesByHeading');
-    expect(publicSectionHeader).toContain('type-label');
-    expect(publicSectionHeader).toContain('type-body');
+    expect(publicSectionHeader).toContain('SectionHeader as PublicSectionHeader');
+    expect(publicActionRow).toContain('CTAGroup as PublicActionRow');
+    expect(publicSurfaceCard).toContain('CardBase as PublicSurfaceCard');
+    expect(canonicalSectionHeader).toContain('variant="label"');
+    expect(canonicalSectionHeader).toContain('variant="body"');
 
     expect(leadForm).toContain('form-helper form-helper--muted');
     expect(sellerForm).toContain('form-note-box');
@@ -189,6 +216,31 @@ describe('public design system contract', () => {
     expect(sidebarFilter).toContain('listing-filter-backdrop');
     expect(stickyMobileCta).toContain('pattern-mobile-bar');
     expect(pageOwnedMobileCta).toContain('pattern-mobile-bar');
+  });
+
+  it('aligns buy, projects, and contact routes to the shared public system', () => {
+    const buyPage = read('app/(site)/[locale]/buy/page.tsx');
+    const projectsPage = read('app/(site)/[locale]/projects/page.tsx');
+    const contactPage = read('app/(site)/[locale]/contact/page.tsx');
+
+    expect(buyPage).toContain("from '@/components/public-system/components/Button'");
+    expect(buyPage).toContain("from '@/components/public-system/components/Card'");
+    expect(buyPage).toContain("from '@/components/public-system/components/SectionHeader'");
+    expect(buyPage).toContain("from '@/components/public-system/primitives/Section'");
+    expect(buyPage).toContain("from '@/components/public-system/primitives/Grid'");
+    expect(buyPage).toContain("from '@/components/public-system/primitives/CardBase'");
+
+    expect(projectsPage).toContain("from '@/components/public-system/components/Button'");
+    expect(projectsPage).toContain("from '@/components/public-system/components/CTAGroup'");
+    expect(projectsPage).toContain("from '@/components/public-system/primitives/CardBase'");
+    expect(projectsPage).toContain("from '@/components/public-system/primitives/Section'");
+    expect(projectsPage).toContain("from '@/components/public-system/patterns/SectionIntroBlock'");
+
+    expect(contactPage).toContain("from '@/components/public-system/components/Button'");
+    expect(contactPage).toContain("from '@/components/public-system/components/CTAGroup'");
+    expect(contactPage).toContain("from '@/components/public-system/primitives/CardBase'");
+    expect(contactPage).toContain("from '@/components/public-system/primitives/Section'");
+    expect(contactPage).toContain("from '@/components/public-system/patterns/SectionIntroBlock'");
   });
 
   it('keeps undecided listing prompts on shared surface and action primitives with Smart Finder handoff', () => {
@@ -337,7 +389,7 @@ describe('public design system contract', () => {
     expect(privacyPage.match(/variant="readable"/g)?.length).toBe(2);
     expect(privacyPage).toContain('page-template--narrative');
 
-    expect(buyPage.match(/variant="wide"/g)?.length).toBe(6);
+    expect((buyPage.match(/(container|variant)="wide"/g) ?? []).length).toBe(6);
     expect(buyPage).toContain('page-template--catalogue');
     expect(rentPage.match(/variant="wide"/g)?.length).toBe(6);
     expect(rentPage).toContain('page-template--catalogue');
@@ -346,7 +398,7 @@ describe('public design system contract', () => {
     expect(sellPage).toContain('page-template--narrative');
     expect(sellPage).toContain('PublicAdvisoryHero');
     expect(sellPage).toContain('decision-page--confidence');
-    expect(projectsPage.match(/variant="wide"/g)?.length).toBe(2);
+    expect((projectsPage.match(/(container|variant)="wide"/g) ?? []).length).toBe(2);
     expect(projectsPage).toContain('page-template--catalogue');
   });
 

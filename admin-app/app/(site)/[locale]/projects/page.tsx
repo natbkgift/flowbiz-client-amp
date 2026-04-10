@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { Container } from '@/components/layout/Container';
 import { fetchProjects } from '@/app/_lib/public-api-server';
 
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
+import { Button } from '@/components/public-system/components/Button';
+import { CTAGroup } from '@/components/public-system/components/CTAGroup';
+import { CardBase } from '@/components/public-system/primitives/CardBase';
+import { Grid } from '@/components/public-system/primitives/Grid';
+import { Section } from '@/components/public-system/primitives/Section';
+import { SectionIntroBlock } from '@/components/public-system/patterns/SectionIntroBlock';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
@@ -286,14 +290,13 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
             prefetch: false,
           }}
         />
-        <section className="section projects-catalogue-section">
-        <Container variant="wide">
-          <div className="card-actions mb-4">
-            <Link className="btn btn-tertiary" href={withLocale(locale, '/buy')} prefetch={false}>
+        <Section className="projects-catalogue-section" container="wide">
+          <CTAGroup className="card-actions mb-4">
+            <Button href={withLocale(locale, '/buy')} prefetch={false} variant="tertiary">
               {copy.browseListingsLabel}
-            </Link>
-          </div>
-          <div className="grid grid-3 projects-catalogue-grid">
+            </Button>
+          </CTAGroup>
+          <Grid columns={3} className="grid grid-3 projects-catalogue-grid">
             {sorted.map((p, index) => {
               const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || copy.card.areaFallback;
               const hasEntryPrice = Boolean(p.starting_price && Number.isFinite(p.starting_price));
@@ -301,9 +304,11 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
               const summary = summarizeProject(locale, p as unknown as Record<string, unknown>);
               const facts = extractProjectFacts(locale, p as unknown as Record<string, unknown>);
               return (
-                <article
+                <CardBase
+                  as="article"
                   key={p.id}
                   className="card catalogue-card project-catalogue-card"
+                  padding="none"
                 >
                   <div className="card-image project-catalogue-card__visual">
                     <LocalMediaImage
@@ -343,17 +348,16 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
                       </div>
                     ) : null}
                     <div className="card-actions project-catalogue-card__actions">
-                      <Link className="btn btn-secondary" href={`/${locale}/projects/${p.slug}`} prefetch={false}>
+                      <Button href={`/${locale}/projects/${p.slug}`} prefetch={false} variant="secondary">
                         {copy.card.reviewAction}
-                      </Link>
+                      </Button>
                     </div>
                   </div>
-                </article>
+                </CardBase>
               );
             })}
-          </div>
-        </Container>
-        </section>
+          </Grid>
+        </Section>
       </main>
     );
   }
@@ -401,25 +405,24 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           prefetch: false,
         }}
       />
-        <section className="section">
-      <Container variant="wide">
-        <div className="section-header mb-6">
-          <h2 className="section-title">{copy.empty.sectionTitle}</h2>
-          <p className="section-subtitle">{copy.empty.sectionSubtitle}</p>
-        </div>
+      <SectionIntroBlock
+        container="wide"
+        headerClassName="mb-6"
+        title={copy.empty.sectionTitle}
+        subtitle={copy.empty.sectionSubtitle}
+      >
         <EmptyStateCard
           title={projectsFetchOk ? dict.advisory.noPublishedDataTitle : copy.empty.cardTitle}
           body={projectsFetchOk
             ? dict.advisory.noPublishedDataBody
             : copy.empty.cardBody}
           action={
-            <Link className="btn btn-secondary" href={withLocale(locale, '/contact')} prefetch={false}>
+            <Button href={withLocale(locale, '/contact')} prefetch={false} variant="secondary">
               {dict.cta.speakToAdvisor}
-            </Link>
+            </Button>
           }
         />
-      </Container>
-      </section>
+      </SectionIntroBlock>
     </main>
   );
 }

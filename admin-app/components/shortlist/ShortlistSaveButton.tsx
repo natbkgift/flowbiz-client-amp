@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { getPublicButtonClassName } from '@/components/public-system/tokens/publicUiTokens';
 import { trackEvent } from '@/lib/analytics';
 import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, publishShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, savePropertyToShortlist, type ShortlistDetail } from '@/lib/shortlist';
 
@@ -20,7 +21,7 @@ export function ShortlistSaveButton({
   locale,
   propertyId,
   sourceSurface,
-  className = 'btn btn-secondary',
+  className = getPublicButtonClassName({ variant: 'secondary' }),
   readOnMount = false,
 }: ShortlistSaveButtonProps) {
   const pathname = usePathname() ?? '/';
