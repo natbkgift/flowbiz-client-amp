@@ -207,13 +207,13 @@ export default async function AboutPage(
         </Container>
       </section>
 
+      {teamMembers.length > 0 ? (
       <section className="section" id="team-section">
         <Container>
           <div className="section-header">
             <h2 className="section-title">{dict.about.teamSection.title}</h2>
             <p className="section-subtitle">{dict.about.teamSection.subtitle}</p>
           </div>
-          {teamMembers.length > 0 ? (
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
               {teamMembers.map((member) => {
                 const bio = resolveLocalizedText(member.bio, locale);
@@ -251,14 +251,9 @@ export default async function AboutPage(
                 );
               })}
             </div>
-          ) : (
-            <div className="premium-empty-state" role="status">
-              <h3>{dict.about.teamSection.emptyTitle}</h3>
-              <p>{dict.about.teamSection.emptyBody}</p>
-            </div>
-          )}
         </Container>
       </section>
+      ) : null}
 
       <section className="section section--alt" id="proof-assets">
         <Container>
@@ -277,6 +272,7 @@ export default async function AboutPage(
         </Container>
       </section>
 
+      {testimonials.length > 0 ? (
       <section className="section" id="client-reviews">
         <span id="reviews" className="sr-only" />
         <Container>
@@ -284,7 +280,6 @@ export default async function AboutPage(
             <h2 className="section-title">{dict.about.reviewsSection.title}</h2>
             <p className="section-subtitle">{dict.about.reviewsSection.subtitle}</p>
           </div>
-          {testimonials.length > 0 ? (
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
               {testimonials.map((item) => (
                 <figure key={item.id} className="card reveal">
@@ -297,14 +292,9 @@ export default async function AboutPage(
                 </figure>
               ))}
             </div>
-          ) : (
-            <div className="premium-empty-state" role="status">
-              <h3>{dict.about.reviewsSection.emptyTitle}</h3>
-              <p>{dict.about.reviewsSection.emptyBody}</p>
-            </div>
-          )}
         </Container>
       </section>
+      ) : null}
 
       <section className="section section--cta">
         <Container variant="readable">

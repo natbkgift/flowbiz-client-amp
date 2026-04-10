@@ -87,10 +87,29 @@ export function resolveLocalizedText(value: unknown, locale: PublicLocale): stri
   return collectTextFragments(value).join('\n\n').trim();
 }
 
+/** Strip HTML tags from a string so CMS content renders as plain text. */
+function stripHtmlTags(text: string): string {
+  return text.replace(/<[^>]*>/g, '').trim();
+}
+
+/** Return true when the text looks like placeholder / seed content that should not display publicly. */
+function isSeedContent(text: string): boolean {
+  const lower = text.toLowerCase();
+  return (
+    lower.includes('production seed content') ||
+    lower.includes('seed content') ||
+    lower.includes('placeholder') ||
+    lower.includes('lorem ipsum')
+  );
+}
+
 export function resolveCmsText(rawContent: string | null | undefined, locale: PublicLocale): string {
   const parsed = parseJsonDocument(rawContent);
-  if (typeof parsed === 'string') return parsed.trim();
-  return resolveLocalizedText(parsed, locale);
+  const raw = typeof parsed === 'string' ? parsed.trim() : resolveLocalizedText(parsed, locale);
+  const cleaned = stripHtmlTags(raw);
+  // Treat seed/placeholder strings as empty so callers fall back to dictionary text.
+  if (isSeedContent(cleaned)) return '';
+  return cleaned;
 }
 
 export function splitIntoParagraphs(rawText: string | null | undefined): string[] {

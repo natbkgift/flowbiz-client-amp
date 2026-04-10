@@ -23,8 +23,8 @@ export function Footer({
   const defaultQuickLinks = [
     { href: '/buy', label: dict.nav.buy },
     { href: '/invest', label: dict.nav.invest },
-    { href: '/rent', label: locale === 'th' ? 'เช่า' : 'Rent' },
-    { href: '/sell', label: locale === 'th' ? 'ขาย' : 'Sell' },
+    { href: '/rent', label: dict.nav.rent },
+    { href: '/sell', label: dict.nav.sell },
     { href: '/projects', label: dict.nav.projects },
     { href: '/area-guide', label: dict.nav.areaGuide ?? 'Area Guide' },
     { href: '/contact', label: dict.nav.contact },
