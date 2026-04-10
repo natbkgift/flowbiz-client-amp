@@ -7,7 +7,7 @@ function resolveCopy(locale: string) {
   if (locale === 'th') {
     return {
       title: 'โครงการ',
-      subtitle: 'คลังโครงการที่เผยแพร่แล้วสำหรับรายการคัดไว้และการเปรียบเทียบ',
+      subtitle: 'คลังโครงการสำหรับเริ่มคัดตัวเลือกและเปรียบเทียบต่อ',
       contact: 'คุยกับที่ปรึกษา',
       finder: 'ใช้ตัวช่วยคัดตัวเลือก',
       loading: 'AMP Project Collection',
@@ -21,13 +21,13 @@ function resolveCopy(locale: string) {
 
   return {
     title: 'Projects',
-    subtitle: 'Published project inventory for shortlist and comparison flows.',
+    subtitle: 'Project inventory for shortlist and comparison flows.',
     contact: 'Speak to an Advisor',
     finder: 'Use Smart Finder',
     loading: 'AMP Project Collection',
     sampleTitle: 'Projects curated for comparison',
     sampleBody: 'Use this section to review project context and continue into the shortlist that matches your goals.',
-    signalOne: 'Published projects ready for review',
+    signalOne: 'Projects ready for review',
     signalTwo: 'Details that can move into compare or consultation',
     signalThree: 'The team can still prepare a shortlist directly from your brief',
   };
