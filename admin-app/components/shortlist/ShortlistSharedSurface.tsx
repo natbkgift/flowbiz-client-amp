@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -8,6 +7,7 @@ import { getDictionary } from '@/app/_lib/i18n/get-dictionary';
 import { resolveImageUrl, formatPriceTHB } from '@/app/_lib/public-api-shared';
 import { buildLeadCaptureQuery, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { EmptyStateCard, InlineStatusMessage, LoadingCardGrid } from '@/components/ui/StateBlocks';
 import { fetchSharedShortlist, type SharedShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
 
@@ -31,22 +31,22 @@ function buildPropertyHref(locale: 'en' | 'th', item: ShortlistPropertyItem): st
 
 function getPrimaryListingActionLabel(locale: 'en' | 'th', item: ShortlistPropertyItem): string {
   if (item.slug) {
-    return locale === 'th' ? 'ดูรายละเอียด listing' : 'View listing details';
+    return locale === 'th' ? 'ดูรายละเอียดยูนิตนี้' : 'View listing details';
   }
 
-  return locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings';
+  return locale === 'th' ? 'ดูตัวเลือกฝั่งซื้อเพิ่ม' : 'Browse buy listings';
 }
 
 function getSharedShortlistSummary(locale: 'en' | 'th', itemCount: number) {
   return {
     title: locale === 'th'
-      ? 'เริ่มจากรีวิว shortlist ที่แชร์นี้ก่อน'
+      ? 'เริ่มจากดูรายการคัดไว้ที่แชร์มานี้ก่อน'
       : 'Review the shared shortlist first',
     body: locale === 'th'
-      ? `ลิงก์นี้เปิดให้ดู ${itemCount} รายการแบบ read-only โดยซ่อนข้อมูลเจ้าของไว้ ใช้หน้านี้เพื่ออ่านว่ามี listing ไหนควรเปิดเช็กต่อ แล้วค่อยเริ่ม shortlist ของคุณเองถ้าต้องการคัดตัวเลือกเพิ่ม`
+      ? `ลิงก์นี้เปิดให้ดู ${itemCount} รายการในโหมดอ่านอย่างเดียว โดยซ่อนข้อมูลเจ้าของไว้ ใช้หน้านี้ดูว่ามียูนิตไหนควรเปิดเช็กต่อ แล้วค่อยเริ่มรายการคัดไว้ของคุณเองหากต้องการเทียบตัวเลือกเพิ่ม`
       : `This owner-safe link opens ${itemCount} saved listing${itemCount === 1 ? '' : 's'} in read-only mode. Use it to decide which listings deserve a deeper check, then start your own shortlist if you want to compare alternatives on your side.`,
-    advisorLabel: locale === 'th' ? 'ให้ AMP Pattaya ช่วยรีวิว shortlist นี้' : 'Ask AMP Pattaya to review this shortlist',
-    actionLabel: locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist',
+    advisorLabel: locale === 'th' ? 'ให้ AMP Pattaya ช่วยรีวิวรายการคัดไว้ชุดนี้' : 'Ask AMP Pattaya to review this shortlist',
+    actionLabel: locale === 'th' ? 'เริ่มรายการคัดไว้ของคุณ' : 'Start your own shortlist',
   };
 }
 
@@ -117,9 +117,9 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
         if (parsedError?.title === 'expired') {
           setError({
             tone: 'error',
-            title: locale === 'th' ? 'ลิงก์ shortlist นี้หมดอายุแล้ว' : 'This shared shortlist link has expired',
+            title: locale === 'th' ? 'ลิงก์รายการคัดไว้ชุดนี้หมดอายุแล้ว' : 'This shared shortlist link has expired',
             body: locale === 'th'
-              ? 'ขอให้ผู้ส่งสร้างลิงก์แชร์ใหม่เพื่อเปิด shortlist ชุดนี้อีกครั้ง'
+              ? 'ขอให้ผู้ส่งสร้างลิงก์แชร์ใหม่เพื่อเปิดรายการคัดไว้ชุดนี้อีกครั้ง'
               : 'Ask the sender to create a new shared link so you can reopen this shortlist.',
           });
           return;
@@ -128,7 +128,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
         if (parsedError?.title === 'restricted') {
           setError({
             tone: 'error',
-            title: locale === 'th' ? 'ลิงก์ shortlist นี้ไม่มีสิทธิ์เข้าถึง' : 'This shared shortlist link is restricted',
+            title: locale === 'th' ? 'ลิงก์รายการคัดไว้ชุดนี้ไม่มีสิทธิ์เข้าถึง' : 'This shared shortlist link is restricted',
             body: locale === 'th'
               ? 'ลิงก์นี้อาจถูกจำกัดสิทธิ์หรือถูกปิดการเข้าถึงแล้ว'
               : 'This link may now be restricted or no longer shared with this audience.',
@@ -164,7 +164,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
         body={error.body}
         action={
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist'}
+            {locale === 'th' ? 'เริ่มรายการคัดไว้ของคุณเอง' : 'Start your own shortlist'}
           </Link>
         }
       />
@@ -174,15 +174,15 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
   if (!shortlist || !shortlist.items.length) {
     return (
       <EmptyStateCard
-        title={locale === 'th' ? 'Shortlist ที่แชร์นี้ยังไม่มีรายการ' : 'This shared shortlist has no listings'}
+        title={locale === 'th' ? 'รายการคัดไว้ที่แชร์มายังไม่มีรายการ' : 'This shared shortlist has no listings'}
         body={
           locale === 'th'
-            ? 'ลิงก์นี้เป็นมุมมองแบบ read-only เท่านั้น หากต้องการเริ่ม shortlist ของคุณเอง ให้กลับไปที่หน้ารวม listings'
+            ? 'ลิงก์นี้เปิดได้แบบอ่านอย่างเดียวเท่านั้น หากต้องการเริ่มรายการคัดไว้ของคุณเอง ให้กลับไปที่หน้ารวมอสังหาริมทรัพย์'
             : 'This is a read-only shared view. To start your own shortlist, return to the listings overview.'
         }
         action={
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'เริ่ม shortlist ของคุณ' : 'Start your own shortlist'}
+            {locale === 'th' ? 'เริ่มรายการคัดไว้ของคุณเอง' : 'Start your own shortlist'}
           </Link>
         }
       />
@@ -222,11 +222,11 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
       <div className="shortlist-compare-panel" aria-live="polite">
         <div className="shortlist-compare-panel__header">
           <h2 className="card-title mb-0">
-            {locale === 'th' ? 'วิธีใช้ shortlist ที่แชร์นี้' : 'How to use this shared shortlist'}
+            {locale === 'th' ? 'วิธีใช้รายการคัดไว้ที่แชร์มานี้' : 'How to use this shared shortlist'}
           </h2>
           <p className="card-subtitle mb-0">
             {locale === 'th'
-              ? 'รีวิวรายการที่ถูกคัดไว้แล้วก่อน เปิด listing ที่ต้องการตรวจเพิ่ม แล้วเลือกว่าจะให้ทีมช่วยรีวิว shortlist นี้ต่อ หรือเริ่ม shortlist ของคุณเองเมื่ออยากคัดตัวเลือกเพิ่มในบริบทของคุณ'
+              ? 'ดูชุดที่คัดไว้ก่อน เปิดยูนิตที่อยากเช็กเพิ่ม แล้วค่อยเลือกว่าจะให้ทีมช่วยรีวิวต่อ หรือเริ่มรายการคัดไว้ของคุณเองเมื่ออยากเทียบตัวเลือกเพิ่มในบริบทของคุณ'
               : 'Read the curated set first, open the listings that need a deeper check, then either ask the team to review this shortlist or start your own shortlist when you want to save alternatives on your side.'}
           </p>
         </div>
@@ -235,7 +235,7 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
             {locale === 'th' ? `จำนวน ${shortlist.item_count} รายการ` : `${shortlist.item_count} listings`}
           </span>
           <span className="shortlist-compare-panel__chip">
-            {locale === 'th' ? 'read-only และซ่อนข้อมูลเจ้าของ' : 'Read-only and owner-safe'}
+            {locale === 'th' ? 'อ่านอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Read-only and owner-safe'}
           </span>
           {updatedAtLabel ? (
             <span className="shortlist-compare-panel__chip">
@@ -252,23 +252,24 @@ export function ShortlistSharedSurface({ locale, shareToken }: { locale: 'en' | 
           return (
             <article key={`${item.property_id}-${item.position}`} className="shortlist-item-card">
               <div className="shortlist-item-card__media">
-                <Image
+                <SafeCoverImage
                   src={image}
                   alt={item.title}
-                  fill
-                  unoptimized
+                  fallbackSrc={SHORTLIST_FALLBACK_IMAGE}
                   sizes="(min-width: 1024px) 280px, 100vw"
                   className="object-cover"
+                  unoptimized={false}
+                  ssrStartWithPrimary={image !== SHORTLIST_FALLBACK_IMAGE}
                 />
               </div>
 
               <div className="shortlist-item-card__content">
                 <div className="shortlist-item-card__eyebrow">
                   <span className="shortlist-item-card__badge">
-                    {locale === 'th' ? `แชร์ลำดับ ${index + 1}` : `Shared #${index + 1}`}
+                    {locale === 'th' ? `รายการที่แชร์ ${index + 1}` : `Shared #${index + 1}`}
                   </span>
                   <span className="shortlist-item-card__badge shortlist-item-card__badge--accent">
-                    {locale === 'th' ? 'read-only' : 'Read-only'}
+                    {locale === 'th' ? 'อ่านอย่างเดียว' : 'Read-only'}
                   </span>
                 </div>
 

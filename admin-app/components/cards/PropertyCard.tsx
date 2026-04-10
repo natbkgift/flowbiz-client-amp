@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import type { PropertyListItem } from '../../app/public/_shared/types';
@@ -8,6 +7,7 @@ import { withLocale } from '../../app/_lib/i18n/routing';
 import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicChip } from '@/components/public/PublicChip';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { ShortlistSaveButton } from '@/components/shortlist/ShortlistSaveButton';
 
 const PROPERTY_CARD_FALLBACK = '/images/property-placeholder.svg';
@@ -70,8 +70,8 @@ function buildPropertyDecisionSignal(
 
   if (item.type === 'rent') {
     return {
-      transactionLabel: locale === 'th' ? 'เช่า live' : 'Rental live',
-      priceLabel: locale === 'th' ? 'ค่าเช่า live / เดือน' : 'Live monthly rent',
+      transactionLabel: locale === 'th' ? 'เช่าล่าสุด' : 'Rental live',
+      priceLabel: locale === 'th' ? 'ค่าเช่าล่าสุด / เดือน' : 'Live monthly rent',
       fitLabel: locale === 'th' ? 'เหมาะกับ' : 'Best fit',
       fitBody: locale === 'th'
         ? `เหมาะกับคนเช่าที่ต้องคัดยูนิตใน ${cityLabel}${specsSummary ? ` จาก ${specsSummary}` : ''} ก่อนนัดดูจริง`
@@ -102,10 +102,10 @@ function buildPropertyDecisionSignal(
 
   return {
     transactionLabel: locale === 'th' ? 'สัญญาณซื้อ' : 'Buy signal',
-    priceLabel: locale === 'th' ? 'ราคาเสนอขาย live' : 'Live asking price',
+    priceLabel: locale === 'th' ? 'ราคาเสนอขายล่าสุด' : 'Live asking price',
     fitLabel: locale === 'th' ? 'เหมาะกับ' : 'Best fit',
     fitBody: locale === 'th'
-      ? `เหมาะกับผู้ซื้อที่ใช้ราคาเสนอขาย live${specsSummary ? `พร้อม ${specsSummary}` : ''} เพื่อตัดสินใจก่อนลงลึกเรื่องโครงการ เอกสาร หรือการต่อรอง`
+      ? `เหมาะกับผู้ซื้อที่ใช้ราคาเสนอขายล่าสุด${specsSummary ? `พร้อม ${specsSummary}` : ''} เพื่อตัดสินใจก่อนลงลึกเรื่องโครงการ เอกสาร หรือการต่อรอง`
       : `Best for buyers using the live asking price${specsSummary ? ` plus ${specsSummary}` : ''} to decide if this unit deserves deeper project or legal review.`,
     nextCheckLabel: locale === 'th' ? 'เช็กต่อ' : 'Next check',
     nextCheckBody: locale === 'th'
@@ -138,13 +138,14 @@ export function PropertyCard({
     <PublicSurfaceCard as="article" tone="warm" interactive className="property-card">
       <Link href={href} className="property-card__link">
         <div className="card-image property-card__media">
-          <Image
+          <SafeCoverImage
             src={img}
             alt={item.title}
-            fill
-            unoptimized
+            fallbackSrc={PROPERTY_CARD_FALLBACK}
             sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover property-card__image"
+            unoptimized={false}
+            ssrStartWithPrimary={img !== PROPERTY_CARD_FALLBACK}
           />
           <div className="property-card__media-scrim" aria-hidden="true" />
           <div className="property-card__media-topline" aria-hidden="true">

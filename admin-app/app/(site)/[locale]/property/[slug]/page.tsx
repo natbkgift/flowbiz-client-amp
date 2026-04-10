@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 
 import { buildLeadCaptureQuery, getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { EntityViewTracker } from '@/components/analytics/EntityViewTracker';
@@ -10,6 +9,7 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 import { LeadForm } from '@/components/forms/LeadForm';
 import { IconBed, IconBath, IconArea } from '@/components/icons/SvgIcons';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { fetchPropertyBySlug, fetchProperties } from '@/app/_lib/public-api-server';
 import { CTA } from '@/app/_lib/public-cta';
 import { resolveImageUrl } from '@/app/_lib/public-api-shared';
@@ -162,17 +162,17 @@ function buildPropertyFallbackDescription(
       : `${property.title} is a ${bedroomDescriptor ? `${bedroomDescriptor} ` : ''}${typeDescriptor}${sizeLabel ? ` with ${sizeLabel}` : ''} in ${locationLabel}, so it should be read as a unit-level decision point instead of a placeholder listing.`,
     priceLabel
       ? (locale === 'th'
-        ? `ใช้ราคา ${priceLabel} เป็น anchor ก่อน แล้วค่อยตัดสินว่ายูนิตนี้ควรอยู่ต่อใน shortlist หรือควรถูกเทียบกับทางเลือกใกล้เคียง`
+        ? `ใช้ราคา ${priceLabel} เป็นจุดอ้างอิงก่อน แล้วค่อยตัดสินว่ายูนิตนี้ควรอยู่ต่อในรายการคัดไว้ หรือควรถูกเทียบกับทางเลือกใกล้เคียง`
         : `Use the ${priceLabel} price point as the anchor, then decide whether this unit keeps a shortlist slot or should be tested against nearby alternatives.`)
       : (locale === 'th'
-        ? 'เริ่มจากข้อเท็จจริงของยูนิตและบริบททำเลก่อน แล้วค่อยขอราคา live หรือเงื่อนไขล่าสุดจากทีม'
+        ? 'เริ่มจากข้อเท็จจริงของยูนิตและบริบททำเลก่อน แล้วค่อยขอราคาปัจจุบันหรือเงื่อนไขล่าสุดจากทีม'
         : 'Start from the unit facts and location context here before you request live pricing or the latest terms from the team.'),
     property.type === 'rent'
       ? (locale === 'th'
         ? 'ถ้าอ่านเป็นเคสเช่า ให้เช็กช่วงย้ายเข้า สัญญา และความพร้อมเข้าอยู่ก่อนทุกครั้ง'
         : 'If you are reading this as a rental case, confirm move-in timing, lease terms, and readiness before every next step.')
       : (locale === 'th'
-        ? 'ถ้าอ่านเป็นเคสซื้อ ให้เช็กค่าโอน ownership fit และตัวเลือกงบใกล้เคียงควบคู่กันไป'
+        ? 'ถ้าอ่านเป็นเคสซื้อ ให้เช็กค่าโอน ความเหมาะของการถือครอง และตัวเลือกงบใกล้เคียงควบคู่กันไป'
         : 'If you are reading this as a purchase case, confirm transfer costs, ownership fit, and the nearby options in the same budget at the same time.'),
   ]).slice(0, 3);
 }
@@ -219,14 +219,14 @@ function buildPropertyConfirmNextLines(
         ? 'ใช้ภาพชุดนี้ร่วมกับข้อเท็จจริงด้านราคาและทำเลก่อนคุยเรื่องเงื่อนไขต่อรอง.'
         : 'Use the current image set together with the price and location facts before discussing terms.'),
     locale === 'th'
-      ? `เช็ก availability, เฟอร์นิเจอร์, และเงื่อนไขล่าสุดของ ${property.title} ก่อนตัดสินใจคุยเชิงลึก.`
+      ? `เช็กความพร้อม เฟอร์นิเจอร์ และเงื่อนไขล่าสุดของ ${property.title} ก่อนตัดสินใจคุยเชิงลึก`
       : `Confirm live availability, furnishing, and the latest deal terms for ${property.title} before going deeper.`,
     property.type === 'rent'
       ? (locale === 'th'
-        ? 'ถ้าใช้เพื่อเช่า ควรเช็กเงื่อนไขสัญญา ระยะเวลา การวางมัดจำ และความพร้อมเข้าอยู่ก่อนให้ยูนิตนี้อยู่ต่อใน shortlist.'
+        ? 'ถ้าใช้เพื่อเช่า ควรเช็กเงื่อนไขสัญญา ระยะเวลา การวางมัดจำ และความพร้อมเข้าอยู่ก่อนให้ยูนิตนี้อยู่ต่อในรายการคัดไว้'
         : 'If this is a rental case, confirm contract terms, duration, deposit structure, and move-in readiness before this unit keeps its shortlist slot.')
       : (locale === 'th'
-        ? 'ถ้าใช้เพื่อซื้อ ควรเช็กค่าโอน ownership fit และตัวเลือกที่ใกล้เคียงในงบเดียวกัน ก่อนพาเรื่องไปสู่การคุยเงื่อนไขต่อ.'
+        ? 'ถ้าใช้เพื่อซื้อ ควรเช็กค่าโอน ความเหมาะของการถือครอง และตัวเลือกที่ใกล้เคียงในงบเดียวกัน ก่อนพาเรื่องไปสู่การคุยเงื่อนไขต่อ'
         : 'If this is a purchase case, confirm transfer costs, ownership fit, and nearby alternatives in the same budget range before you move into deal terms.'),
   ];
 }
@@ -247,17 +247,17 @@ function buildPropertyHighlightLines(
       : `${property.title} is a ${bedroomDescriptor ? `${bedroomDescriptor} ` : ''}${typeDescriptor}${priceLabel ? ` at ${priceLabel}` : ''}${sizeLabel ? ` with ${sizeLabel}` : ''}, which is enough for a serious first-pass decision.`,
     property.type === 'rent'
       ? (locale === 'th'
-        ? 'จุดแข็งของหน้านี้คือการคัด rental shortlist ที่พร้อมย้ายเข้าได้เร็ว ไม่ใช่การไล่ดูรายการเช่ากว้าง ๆ'
+        ? 'จุดแข็งของหน้านี้คือการคัดรายการเช่าที่พร้อมย้ายเข้าได้เร็ว ไม่ใช่การไล่ดูรายการเช่ากว้าง ๆ'
         : 'This read is strongest when you want a move-in-ready rental shortlist instead of another broad rental scan.')
       : (locale === 'th'
-        ? 'จุดแข็งของหน้านี้คือการเทียบยูนิตจริงกับตัวเลือกใกล้เคียง โดยไม่ย้อนกลับไปดู marketing ระดับโครงการ'
+        ? 'จุดแข็งของหน้านี้คือการเทียบยูนิตจริงกับตัวเลือกใกล้เคียง โดยไม่ย้อนกลับไปดูคำขายระดับโครงการ'
         : 'This read is strongest when you want to compare a concrete unit against nearby stock, not go back to project-level marketing.'),
     galleryCount <= 1
       ? (locale === 'th'
         ? 'แม้ภาพจะยังบาง แต่ราคา ขนาด และข้อเท็จจริงระดับยูนิตยังชัดพอให้ใช้คัดกรองต่อได้'
         : 'Even with a thin media pack, the price, size, and unit facts are already strong enough to filter this listing forward.')
       : (locale === 'th'
-        ? 'ภาพที่มีอยู่ช่วยเช็กบรรยากาศและสภาพห้องได้ แต่การคัดสินใจยังควรอิง price-fit และ local context ร่วมกัน'
+        ? 'ภาพที่มีอยู่ช่วยเช็กบรรยากาศและสภาพห้องได้ แต่การตัดสินใจยังควรอิงความเหมาะของราคาและบริบททำเลร่วมกัน'
         : 'The current visuals help confirm layout feel, but the shortlist call should still come from price fit and local context together.'),
   ]).slice(0, 3);
 }
@@ -285,14 +285,14 @@ function buildPropertyLocalContextLines(
         ? 'สำหรับเคสเช่า ความเหมาะของทำเลถูกตัดสินจากการเดินทาง ช่วงย้ายเข้า และความเร็วที่ยูนิตแบบเดียวกันหายไปจากตลาด'
         : 'For rental decisions, location fit is really about commute, move-in timing, and how quickly comparable units disappear from the market.')
       : (locale === 'th'
-        ? 'สำหรับเคสซื้อ ความเหมาะของทำเลคือการดูว่าราคา ขนาด และ bedroom mix นี้ยังแข่งขันกับยูนิตใกล้เคียงได้หรือไม่'
+        ? 'สำหรับเคสซื้อ ความเหมาะของทำเลคือการดูว่าราคา ขนาด และสัดส่วนห้องนอนนี้ยังแข่งขันกับยูนิตใกล้เคียงได้หรือไม่'
         : 'For purchase decisions, location fit means asking whether this price, size, and bedroom mix still competes well against nearby units.'),
     relatedCount > 0
       ? (locale === 'th'
-        ? `route นี้มีตัวเทียบใกล้เคียง ${relatedCount} รายการ จึงใช้ตัดสินได้ว่ายูนิตนี้เป็นตัวนำหรือเป็นเพียง benchmark`
+        ? `หน้านี้มีตัวเทียบใกล้เคียง ${relatedCount} รายการ จึงใช้ตัดสินได้ว่ายูนิตนี้เป็นตัวนำหรือเป็นเพียงตัวอ้างอิง`
         : `There are ${relatedCount} nearby comparables on this route, so use them to judge whether this unit is the lead candidate or just the benchmark.`)
       : (locale === 'th'
-        ? 'ถ้าตัวเทียบใกล้เคียงยังบาง ให้ใช้ยูนิตนี้เป็น anchor ของ brief แล้วขอทีมคัดตัวเลือกที่ใกล้กันต่อ'
+        ? 'ถ้าตัวเทียบใกล้เคียงยังบาง ให้ใช้ยูนิตนี้เป็นจุดอ้างอิงของโจทย์ แล้วขอทีมคัดตัวเลือกที่ใกล้กันต่อ'
         : 'If the nearby compare set is still thin, use this unit as the anchor of the brief and ask the team for tighter alternatives.'),
   ]).slice(0, 4);
 }
@@ -305,20 +305,20 @@ function buildPropertyShortlistFitLines(
   return uniqueItems([
     property.type === 'rent'
       ? (locale === 'th'
-        ? 'ให้ยูนิตนี้อยู่ต่อใน shortlist เมื่อช่วงย้ายเข้า เงื่อนไขเช่า และความพร้อมของห้องดูสะอาดกว่าตัวเลือกเช่าอื่น'
+        ? 'ให้ยูนิตนี้อยู่ต่อในรายการคัดไว้ เมื่อช่วงย้ายเข้า เงื่อนไขเช่า และความพร้อมของห้องดูชัดกว่าตัวเลือกเช่าอื่น'
         : 'Keep this unit in the shortlist when the move-in timing, lease terms, and room readiness read cleaner than the other rental options.')
       : (locale === 'th'
-        ? 'ให้ยูนิตนี้อยู่ต่อใน shortlist เมื่อราคา ขนาด และห้องนอนยังมีน้ำหนักกว่าตัวเลือกซื้อใกล้เคียงในงบเดียวกัน'
+        ? 'ให้ยูนิตนี้อยู่ต่อในรายการคัดไว้ เมื่อราคา ขนาด และห้องนอนยังมีน้ำหนักกว่าตัวเลือกซื้อใกล้เคียงในงบเดียวกัน'
         : 'Keep this unit in the shortlist when its price, size, and bedroom mix still hold more weight than nearby purchase options in the same budget.'),
     relatedCount > 0
       ? (locale === 'th'
         ? `ถ้าเทียบกับตัวเลือกใกล้เคียง ${relatedCount} รายการแล้วยูนิตนี้ยังอธิบายโจทย์ของคุณได้ชัดที่สุด ก็สมควรเป็นตัวที่พาไปคุยกับทีมต่อ`
         : `If this unit still explains your brief better than the ${relatedCount} nearby comparables, it deserves the next advisor conversation.`)
       : (locale === 'th'
-        ? 'ถ้าตัวเทียบยังไม่พอ ให้ใช้ยูนิตนี้เป็น benchmark แล้วขอทีมคัด shortlist ที่แคบกว่าเดิม'
+        ? 'ถ้าตัวเทียบยังไม่พอ ให้ใช้ยูนิตนี้เป็นตัวอ้างอิง แล้วขอทีมคัดรายการที่แคบกว่าเดิม'
         : 'If the compare set is still thin, use this unit as the benchmark and ask the team for a tighter shortlist.'),
     locale === 'th'
-      ? 'ถ้ายังลังเล ให้ใช้ section นี้ร่วมกับ verified facts และ local context ก่อนคุยเรื่องเงื่อนไขหรือการนัดดู'
+      ? 'ถ้ายังลังเล ให้ใช้ส่วนนี้ร่วมกับข้อเท็จจริงที่ยืนยันแล้วและบริบททำเล ก่อนคุยเรื่องเงื่อนไขหรือการนัดดู'
       : 'If the decision is still close, read this together with the verified facts and local context before discussing terms or scheduling.',
   ]).slice(0, 3);
 }
@@ -530,10 +530,10 @@ export default async function PropertyPage(props: PageProps) {
     },
   };
   const propertyActionNote = locale === 'th'
-    ? 'การส่งบรีฟจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิตไปกับ inquiry เดียวกัน หรือจะบันทึกลง shortlist ก่อนแล้วค่อยส่งต่อก็ได้.'
+    ? 'การส่งรายละเอียดจากหน้านี้จะพกชื่อรายการ ราคา และบริบทของยูนิตไปกับคำขอเดียวกัน หรือจะบันทึกลงรายการคัดไว้ก่อนแล้วค่อยส่งต่อก็ได้'
     : 'This handoff carries the listing title, price, and unit context into the same inquiry, or you can save it to the shortlist first and continue later.';
   const propertyRailNote = locale === 'th'
-    ? 'เริ่มจากการคุยตรงกับทีมได้ทันที หรือส่งบรีฟด้านล่างเมื่ออยากให้ทีมถือบริบทของยูนิตนี้ไปต่อแบบครบกว่าเดิม.'
+    ? 'เริ่มจากการคุยตรงกับทีมได้ทันที หรือส่งรายละเอียดด้านล่างเมื่ออยากให้ทีมถือบริบทของยูนิตนี้ไปต่อแบบครบกว่าเดิม'
     : 'Start with a direct message now, or use the brief below when you want the team to carry this unit context forward in one handoff.';
 
   const jsonLd = JSON.stringify(
@@ -622,14 +622,17 @@ export default async function PropertyPage(props: PageProps) {
           <div className="detail-main">
             <div id="gallery-section" className="property-gallery">
               <div className="gallery-main property-gallery__main">
-                <Image
+                <SafeCoverImage
                   src={main}
                   alt={property.title}
-                  fill
-                  unoptimized
+                  fallbackSrc={PROPERTY_DETAIL_FALLBACK}
                   sizes="(min-width: 1024px) 70vw, 100vw"
                   className="property-gallery__main-image object-cover"
                   priority
+                  loading="eager"
+                  fetchPriority="high"
+                  unoptimized={false}
+                  ssrStartWithPrimary={main !== PROPERTY_DETAIL_FALLBACK}
                 />
                 <div className="gallery-counter property-gallery__counter">1 / {Math.max(gallery.length, 1)}</div>
               </div>
@@ -637,15 +640,16 @@ export default async function PropertyPage(props: PageProps) {
               {gallery.length > 1 ? (
                 <div className="gallery-thumbnails property-gallery__thumbnails">
                   {gallery.slice(0, 12).map((src, idx) => (
-                    <div key={src} className={idx === 0 ? 'gallery-thumbnail property-gallery__thumb active' : 'gallery-thumbnail property-gallery__thumb'}>
-                      <Image
+                    <div key={src} className={idx === 0 ? 'gallery-thumbnail property-gallery__thumb active relative' : 'gallery-thumbnail property-gallery__thumb relative'}>
+                      <SafeCoverImage
                         src={src}
                         alt={`${dict.property.galleryPhoto} ${idx + 1}`}
-                        width={80}
-                        height={60}
-                        unoptimized
+                        fallbackSrc={PROPERTY_DETAIL_FALLBACK}
+                        sizes="80px"
                         className="property-gallery__thumb-image object-cover"
                         loading="lazy"
+                        unoptimized={false}
+                        ssrStartWithPrimary={src !== PROPERTY_DETAIL_FALLBACK}
                       />
                     </div>
                   ))}
@@ -667,7 +671,7 @@ export default async function PropertyPage(props: PageProps) {
                 <div className="property-price">{formatPriceTHB(Number(property.price))}</div>
                 <p className="property-price-note">
                   {locale === 'th'
-                    ? 'ใช้ราคาในหน้านี้เป็นฐานก่อนเช็ก availability และยูนิตที่ยังเปิดอยู่จริง'
+                    ? 'ใช้ราคาในหน้านี้เป็นฐานก่อนเช็กความพร้อมล่าสุดและยูนิตที่ยังเปิดอยู่จริง'
                     : 'Use this price as the starting point before confirming live availability and active units.'}
                 </p>
               </div>
@@ -865,7 +869,7 @@ export default async function PropertyPage(props: PageProps) {
                 </p>
                 <div className="card-actions property-decision-card__actions mt-3">
                   <Link className="btn btn-secondary" href={withLocale(locale, '/calculator')}>
-                    {locale === 'th' ? 'เปิด calculator' : 'Open calculator'}
+                    {locale === 'th' ? 'เปิดเครื่องมือคำนวณ' : 'Open calculator'}
                   </Link>
                   <Link className="btn btn-tertiary" href={withLocale(locale, '/compare')}>
                     {locale === 'th' ? 'ไปหน้าเปรียบเทียบ' : 'Go to compare'}
@@ -882,7 +886,16 @@ export default async function PropertyPage(props: PageProps) {
                   return (
                     <Link key={item.id} href={relatedHref} className="authority-card card-interactive property-related-listing-card">
                       <div className="card-image property-related-listing-card__image relative" style={{ aspectRatio: '4 / 3' }}>
-                        <Image src={relatedImage} alt={item.title} fill unoptimized sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover rounded-[18px] property-related-listing-card__img" />
+                        <SafeCoverImage
+                          src={relatedImage}
+                          alt={item.title}
+                          fallbackSrc={PROPERTY_DETAIL_FALLBACK}
+                          sizes="(min-width: 1024px) 33vw, 100vw"
+                          className="object-cover rounded-[18px] property-related-listing-card__img"
+                          loading="lazy"
+                          unoptimized={false}
+                          ssrStartWithPrimary={relatedImage !== PROPERTY_DETAIL_FALLBACK}
+                        />
                       </div>
                       <div className="mt-4 property-related-listing-card__body">
                         <div className="editorial-card__meta property-related-listing-card__meta">
@@ -971,7 +984,7 @@ export default async function PropertyPage(props: PageProps) {
       </Container>
       <PageOwnedMobileCTA
         id="property-mobile-cta"
-        eyebrow={locale === 'th' ? 'ส่งต่อไปยัง advisor' : 'Advisor handoff'}
+        eyebrow={locale === 'th' ? 'ส่งต่อให้ที่ปรึกษา' : 'Advisor handoff'}
         variant="property"
         title={locale === 'th' ? 'พร้อมคุยต่อเกี่ยวกับยูนิตนี้' : 'Ready to move forward on this unit'}
         description={locale === 'th'

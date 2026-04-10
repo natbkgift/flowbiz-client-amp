@@ -198,7 +198,7 @@ const DEFAULT_FEATURED_PROPERTY_SOURCE_IDS = [
 
 const MAX_HOME_FEATURED_PROJECTS = 4;
 const MAX_HOME_FEATURED_PROPERTIES = 4;
-const HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 2;
+const HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 1;
 
 export async function generateMetadata({
   params,
@@ -219,7 +219,7 @@ export async function generateMetadata({
     import('@/app/_lib/public-api-server'),
   ]);
   const dict = getDictionary(locale);
-  const base = makePageMetadata(locale, '', `${dict.brand.name} | ${dict.home.heroTitle}`, dict.home.heroSubtitle, dict.brand.name);
+  const base = makePageMetadata(locale, '', dict.home.heroTitle, dict.home.heroSubtitle, dict.brand.name);
   const resolvedPath = `/${locale}`;
   const override = await fetchSeoResolvedOverride(resolvedPath, locale);
   if (!override?.found) return base;
@@ -1091,6 +1091,25 @@ export default async function HomePage({
     const curatedEmptyPreviewBody = locale === 'th'
       ? 'เริ่มจากสิ่งที่เกี่ยวข้องก่อน แล้วค่อยขยายต่อ'
       : 'Start with the right launches and units first, then go deeper only where it matters.';
+    const curatedSignalItems = [
+      liveProjectCount > 0
+        ? (locale === 'th'
+          ? `${liveProjectCount} โครงการที่ยังเช็กต่อได้`
+          : `${liveProjectCount} live projects still worth reviewing`)
+        : (locale === 'th'
+          ? 'คัดโครงการที่ยังเช็กต่อได้ก่อนเปิดต่อ'
+          : 'Projects are screened before they reach this set.'),
+      liveInventoryCount > 0
+        ? (locale === 'th'
+          ? `${liveInventoryCount} ยูนิตที่ยังอยู่ในกรอบการคัดของทีม`
+          : `${liveInventoryCount} listings currently in the live review set`)
+        : (locale === 'th'
+          ? 'ยูนิตในชุดนี้ถูกคัดจากรายการที่ยังตรวจต่อได้'
+          : 'Units here come from listings that still clear review.'),
+      locale === 'th'
+        ? 'เริ่มจากโครงการก่อน แล้วค่อยเปิดยูนิตที่ผ่านโจทย์จริง'
+        : 'Start with launches first, then open the units that survive the brief.',
+    ];
 
     return (
       <section
@@ -1106,13 +1125,21 @@ export default async function HomePage({
               kicker={locale === 'th' ? 'โครงการและยูนิตที่คัดแล้ว' : 'Curated opportunities'}
               kickerClassName="home-section-kicker"
               title={locale === 'th'
-                ? 'เริ่มจากโครงการและยูนิตที่ควร shortlist ก่อน'
+                ? 'เริ่มจากโครงการและยูนิตที่ควรคัดต่อก่อน'
                 : 'Open the projects and units worth shortlisting first.'}
               titleId="home-curated-title"
               subtitle={locale === 'th'
-                ? 'ดูโครงการเพื่อเช็ก thesis และทำเลก่อน แล้วค่อยเปิดยูนิตที่ช่วยให้ตัดสินใจต่อได้จริง'
+                ? 'ดูโครงการเพื่อเช็กทิศทางและทำเลก่อน แล้วค่อยเปิดยูนิตที่ช่วยให้ตัดสินใจต่อได้จริง'
                 : 'Start with launches for thesis and fit, then move into ready units only when they support the next decision.'}
             />
+            <div
+              className="home-curated-shell__signal-row"
+              aria-label={locale === 'th' ? 'สัญญาณของชุดโครงการและยูนิตที่คัดแล้ว' : 'Curated project and unit signals'}
+            >
+              {curatedSignalItems.map((item) => (
+                <span key={item} className="home-curated-shell__signal">{item}</span>
+              ))}
+            </div>
 
             {showCombinedCuratedEmpty ? (
               <div className="home-project-empty home-curated-empty">
@@ -1192,6 +1219,14 @@ export default async function HomePage({
               titleId="home-market-title"
               subtitle={whyPattayaSubcopy}
             />
+            <div
+              className="home-market-shell__signal-row"
+              aria-label={locale === 'th' ? 'สัญญาณบรรณาธิการของส่วนตลาด' : 'Market editorial signals'}
+            >
+              {marketSignalItems.map((item) => (
+                <PublicChip key={item} as="span" size="sm" className="home-market-shell__signal">{item}</PublicChip>
+              ))}
+            </div>
 
             <div className="home-market-grid">
               <div className="home-market-story">
@@ -1223,6 +1258,27 @@ export default async function HomePage({
                     </div>
                   ))}
                 </div>
+
+                <div className="home-market-proof__footer">
+                  <TrackedLink
+                    className="home-market-proof__link"
+                    href={withLocale(locale, '/area-guide')}
+                    prefetch={false}
+                    eventType="cta_click"
+                    eventPayload={{ cta: 'home_market_area_guide', from: 'home_market', target: withLocale(locale, '/area-guide') }}
+                  >
+                    {locale === 'th' ? 'อ่านระบบทำเลพัทยา' : 'Read the Pattaya area guide'}
+                  </TrackedLink>
+                  <TrackedLink
+                    className="home-market-proof__link home-market-proof__link--secondary"
+                    href={withLocale(locale, '/calculator')}
+                    prefetch={false}
+                    eventType="cta_click"
+                    eventPayload={{ cta: 'home_market_calculator', from: 'home_market', target: withLocale(locale, '/calculator') }}
+                  >
+                    {locale === 'th' ? 'เช็กสมมติฐานผลตอบแทน' : 'Stress-test yield assumptions'}
+                  </TrackedLink>
+                </div>
               </PublicSurfaceCard>
             </div>
           </div>
@@ -1249,7 +1305,7 @@ export default async function HomePage({
             <div className="home-owner-grid home-owner-grid--team-cta">
               <PublicSurfaceCard as="div" tone="warm" className="home-owner-card home-owner-card--team-cta">
                 <h3 className="home-owner-card__title">
-                  {locale === 'th' ? 'เริ่มจาก brief ของคุณ แล้วให้ทีมช่วยคัด shortlist แรก' : 'Start with your brief, then let the team narrow the first shortlist.'}
+                  {locale === 'th' ? 'เริ่มจากรายละเอียดของคุณ แล้วให้ทีมช่วยคัดรายการชุดแรก' : 'Start with your brief, then let the team narrow the first shortlist.'}
                 </h3>
                 <p className="home-owner-card__body">{teamCtaTrustNote}</p>
                 <div className="home-pathways-support" aria-label={locale === 'th' ? 'เส้นทางคุยกับทีม' : 'Advisory next steps'}>
@@ -1433,7 +1489,7 @@ export default async function HomePage({
     : (locale === 'th'
       ? [
           'ใช้ได้ทั้งสำหรับซื้อ ลงทุน อยู่จริง หรือคุยทางเลือกของเจ้าของทรัพย์',
-          'เริ่มจาก brief ของคุณ ก่อนที่ shortlist จะกระจายเกินจำเป็น',
+          'เริ่มจากรายละเอียดของคุณ ก่อนที่รายการคัดไว้จะกระจายเกินจำเป็น',
           'ทีมตอบกลับด้วยชุดแรกที่คัดแล้วและขั้นตอนถัดไปที่ชัดเจน',
         ]
       : [
@@ -1628,6 +1684,7 @@ export default async function HomePage({
   const latestInsightUpdate = insightCards
     .map((card) => card.updatedAt)
     .find((value): value is string => Boolean(value));
+  const latestInsightUpdateLabel = formatEditorialDate(locale, latestInsightUpdate);
   const showHomeTrustLayer = ['trust_micro_strip', 'proof_trust', 'reviews'].some((key) => isSectionEnabled(key));
   const trustSnapshotIntro = locale === 'th'
     ? 'รายการที่ยังตรวจต่อได้ และขั้นตอนที่อธิบายได้ตั้งแต่ต้น'
@@ -1663,6 +1720,40 @@ export default async function HomePage({
         liveInventoryCount > 0 ? `${liveInventoryCount} listings checked` : 'Curated projects and ready units',
         'Curated next steps, not listing noise',
       ];
+  const marketSignalItems = [
+    latestInsightUpdateLabel
+      ? (locale === 'th'
+        ? `อัปเดตอินไซต์ล่าสุด ${latestInsightUpdateLabel}`
+        : `Insights updated ${latestInsightUpdateLabel}`)
+      : (locale === 'th'
+        ? 'อินไซต์ชุดนี้อิงข้อมูลที่ทีมใช้คัดจริง'
+        : 'These cues reflect the same live review frame the team uses.'),
+    locale === 'th'
+      ? `${whyPattayaNarrativeCards.length} มุมมองช่วยอ่านทำเล`
+      : `${whyPattayaNarrativeCards.length} location lenses`,
+    locale === 'th'
+      ? `${videoItems.length} วิดีโออธิบายวิธีคิดของทีม`
+      : `${videoItems.length} advisory videos in support`,
+  ];
+  const trustSignalItems = [
+    liveInventoryCount > 0
+      ? (locale === 'th'
+        ? `${liveInventoryCount} รายการที่ทีมเช็กก่อนส่ง`
+        : `${liveInventoryCount} listings checked before sharing`)
+      : (locale === 'th'
+        ? 'รายการที่ส่งต่อถูกคัดก่อนทุกครั้ง'
+        : 'Listings are screened before they are shared.'),
+    locale === 'th'
+      ? `${Math.min(processTimeline.length, 3)} ขั้นตอนที่อธิบายได้ล่วงหน้า`
+      : `${Math.min(processTimeline.length, 3)} clear next steps upfront`,
+    reviewItems.length > 0
+      ? (locale === 'th'
+        ? `${reviewItems.length} รีวิวที่มีบริบทชัด`
+        : `${reviewItems.length} context-backed client reviews`)
+      : (locale === 'th'
+        ? 'ไม่ใช้คะแนนรวมที่ไม่มีหลักฐานรองรับ'
+        : 'No unsupported rating claims'),
+  ];
 
   function getReviewHighlight(quote: string): string {
     const normalized = quote.replace(/\s+/g, ' ').trim();
@@ -1775,6 +1866,22 @@ export default async function HomePage({
               <div className="home-trust-module mt-8">
                 <div className="home-trust-module__summary">
                   <p className="home-trust-module__intro">{trustSnapshotIntro}</p>
+                  <div
+                    className="home-trust-module__signal-row"
+                    aria-label={locale === 'th' ? 'สัญญาณภาพรวมของความน่าเชื่อถือ' : 'Trust overview signals'}
+                  >
+                    {trustSignalItems.map((item, index) => (
+                      <PublicChip
+                        key={item}
+                        as="span"
+                        size="sm"
+                        tone={index === 2 ? 'deep' : 'neutral'}
+                        className="home-trust-module__signal"
+                      >
+                        {item}
+                      </PublicChip>
+                    ))}
+                  </div>
                   <div className="home-trust-snapshot-grid">
                     {trustSnapshotItems.map((item) => (
                       <div key={item.label} className="home-trust-snapshot__item">

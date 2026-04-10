@@ -32,7 +32,7 @@ describe('home surface handoff contract', () => {
     expect(page).toContain('dict.home.premiumCtaFormHeading');
     expect(page).toContain('dict.home.premiumCtaSecondary');
     expect(page).not.toContain('home-pathways-highlight-row');
-    expect(page).not.toContain('home-curated-shell__signal-row');
+    expect(page).toContain('home-curated-shell__signal-row');
     expect(page).not.toContain('home-confidence-row');
     expect(page).not.toContain('home-intent-card__eyebrow');
     expect(page).not.toContain('home-intent-card__start');
@@ -58,7 +58,7 @@ describe('home surface handoff contract', () => {
     expect(hero).toContain('SafeCoverImage');
     expect(hero).toContain('data-home-perf="hero-media"');
     expect(hero).toContain('prefetch');
-    expect(featuredProjects).toContain('HOME_PROJECT_MEDIA_PRELOAD_COUNT = 2');
+    expect(featuredProjects).toContain('HOME_PROJECT_MEDIA_PRELOAD_COUNT = 1');
     expect(featuredProjects).toContain("loading={shouldPreloadMedia ? 'eager' : 'lazy'}");
     expect(featuredProjects).toContain("fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}");
     expect(featuredProjects).toContain('quality={60}');
@@ -72,7 +72,7 @@ describe('home surface handoff contract', () => {
     expect(safeCoverImage).toContain('shouldBypassOptimization');
     expect(safeCoverImage).toContain('loader={shouldUsePassthroughLoader ? passthroughLoader : undefined}');
     expect(personalization).toContain("intent === 'sell'");
-    expect(page).toContain('HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 2');
+    expect(page).toContain('HOME_PROPERTY_MEDIA_PRELOAD_COUNT = 1');
     expect(page).toContain("loading={shouldPreloadMedia ? 'eager' : 'lazy'}");
     expect(page).toContain("fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}");
     expect(page).toContain('quality={60}');

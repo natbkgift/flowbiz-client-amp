@@ -79,7 +79,7 @@ const PROJECT_FALLBACK_IMAGES = [
   '/images/property-pool.png',
   '/images/villa-garden.png',
 ];
-const HOME_PROJECT_MEDIA_PRELOAD_COUNT = 2;
+const HOME_PROJECT_MEDIA_PRELOAD_COUNT = 1;
 
 export function FeaturedProjects({
   projects,

@@ -17,7 +17,9 @@ describe('home design surface contract', () => {
     expect(page).toContain('home-section-kicker');
     expect(page).toContain('home-pathways-grid');
     expect(page).toContain('home-pathway-card');
+    expect(page).toContain('home-market-shell__signal-row');
     expect(page).toContain('home-trust-snapshot-grid');
+    expect(page).toContain('home-trust-module__signal-row');
     expect(page).toContain('dict.home.heroTitle');
     expect(page).toContain('dict.home.heroPrimaryCta');
     expect(page).toContain('dict.home.heroSecondaryCta');
@@ -31,9 +33,10 @@ describe('home design surface contract', () => {
     expect(page).not.toContain('One brief is enough.');
     expect(page).toContain('home-trust-snapshot__item');
     expect(page).not.toContain('home-pathways-highlight-row');
-    expect(page).not.toContain('home-curated-shell__signal-row');
+    expect(page).toContain('home-curated-shell__signal-row');
     expect(page).not.toContain('home-confidence-row');
     expect(page).toContain('home-pathways-support__link');
+    expect(page).toContain('home-market-proof__footer');
     expect(page).not.toContain('Choose the next route by buyer intent');
     expect(page).not.toContain('home-intent-card reveal');
     expect(page).toContain('home-segmentation-note');

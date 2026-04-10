@@ -127,6 +127,9 @@ describe('public design system contract', () => {
     expect(homePage).toContain('public-surface-card--interactive');
     expect(homePage).toContain('home-segmentation-note public-surface-card public-surface-card--deep');
     expect(homePage).toContain('home-unit-group public-surface-card public-surface-card--warm');
+    expect(homePage).toContain('home-market-shell__signal-row');
+    expect(homePage).toContain('home-market-proof__footer');
+    expect(homePage).toContain('home-trust-module__signal-row');
 
     expect(advisoryHero).toContain('PublicSurfaceCard');
     expect(advisoryHero).toContain('PublicActionRow');
@@ -163,6 +166,7 @@ describe('public design system contract', () => {
     expect(propertyCard).toContain('PublicSurfaceCard');
     expect(propertyCard).toContain('PublicActionRow');
     expect(propertyCard).toContain('PublicChip');
+    expect(propertyCard).toContain('SafeCoverImage');
     expect(propertyCard).toContain('btn btn-primary');
     expect(propertyCard).toContain('property-card__signals');
     expect(propertyCard).toContain('property-card__media-chip--signal');
@@ -210,6 +214,7 @@ describe('public design system contract', () => {
     expect(shortlistListSurface).toContain('PublicActionRow');
     expect(shortlistListSurface).toContain('PublicSectionHeader');
     expect(shortlistListSurface).toContain('PublicChip');
+    expect(shortlistListSurface).toContain('SafeCoverImage');
     expect(shortlistListSurface).toContain('shortlist-conversion-pack');
     expect(shortlistListSurface).toContain('compareIds: compareReady ? compareProjectIds : undefined');
 
@@ -228,6 +233,7 @@ describe('public design system contract', () => {
     expect(projectDetail).toContain('decision-page--confidence');
 
     expect(propertyDetail).toContain('PublicAdvisoryHero');
+    expect(propertyDetail).toContain('SafeCoverImage');
     expect(propertyDetail).toContain('decision-page--property');
   });
 

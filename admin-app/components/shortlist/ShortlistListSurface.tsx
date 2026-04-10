@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +11,7 @@ import { PublicActionRow } from '@/components/public/PublicActionRow';
 import { PublicChip } from '@/components/public/PublicChip';
 import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
 import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { EmptyStateCard, InlineStatusMessage } from '@/components/ui/StateBlocks';
 import { trackEvent } from '@/lib/analytics';
 import { SHORTLIST_UPDATED_EVENT, fetchCurrentShortlist, publishShortlist, readCachedShortlistForCurrentOwner, removePropertyFromShortlist, resolveShortlistCompareProjects, shareCurrentShortlist, type ShortlistCompareProject, type ShortlistDetail, type ShortlistPropertyItem } from '@/lib/shortlist';
@@ -36,18 +36,18 @@ function buildPropertyHref(locale: 'en' | 'th', item: ShortlistPropertyItem): st
 
 function getPrimaryListingActionLabel(locale: 'en' | 'th', item: ShortlistPropertyItem): string {
   if (item.slug) {
-    return locale === 'th' ? 'ดูรายละเอียด listing' : 'View listing details';
+    return locale === 'th' ? 'ดูรายละเอียดยูนิตนี้' : 'View listing details';
   }
 
-  return locale === 'th' ? 'ดู buy listings เพิ่ม' : 'Browse buy listings';
+  return locale === 'th' ? 'ดูตัวเลือกฝั่งซื้อเพิ่ม' : 'Browse buy listings';
 }
 
 function getShortlistAdvisorLabel(locale: 'en' | 'th', compareReady: boolean): string {
   if (compareReady) {
-    return locale === 'th' ? 'ส่ง shortlist นี้ให้ที่ปรึกษาช่วยรีวิว' : 'Send this shortlist for advisor review';
+    return locale === 'th' ? 'ส่งรายการคัดไว้นี้ให้ที่ปรึกษาช่วยรีวิว' : 'Send this shortlist for advisor review';
   }
 
-  return locale === 'th' ? 'รีวิว shortlist นี้กับที่ปรึกษา' : 'Review this shortlist with an advisor';
+  return locale === 'th' ? 'รีวิวรายการคัดไว้นี้กับที่ปรึกษา' : 'Review this shortlist with an advisor';
 }
 
 function buildShortlistItemContext(item: ShortlistPropertyItem, locationPending: string): string {
@@ -65,15 +65,15 @@ function getShortlistSummaryContent(input: {
   if (compareReady) {
     return {
       title: locale === 'th'
-        ? `ขั้นถัดไปที่คุ้มสุด: เทียบ ${compareProjectCount} โครงการจาก shortlist นี้`
+        ? `ขั้นถัดไปที่คุ้มสุด: เทียบ ${compareProjectCount} โครงการจากรายการคัดไว้นี้`
         : `Best next move: compare ${compareProjectCount} saved projects`,
       body: locale === 'th'
-        ? `ตอนนี้ shortlist นี้มี ${itemCount} รายการและ resolve ได้ ${compareProjectCount} โครงการแล้ว จึงควรอ่าน trade-off แบบ side-by-side ก่อน แล้วค่อยส่ง context เดิมต่อให้ที่ปรึกษาถ้ายังต้อง pressure-test ผู้ชนะ`
+        ? `ตอนนี้รายการคัดไว้นี้มี ${itemCount} รายการและจับคู่ได้ ${compareProjectCount} โครงการแล้ว จึงควรอ่านข้อแลกเปลี่ยนแบบเทียบกันก่อน แล้วค่อยส่งบริบทเดิมต่อให้ที่ปรึกษาหากยังต้องตัดสินผู้ชนะ`
         : `This shortlist now holds ${itemCount} saved listings and already resolves to ${compareProjectCount} projects, so the highest-value next step is a side-by-side compare before handing the same context to an advisor if a winner still needs pressure-testing.`,
       primaryLabel: locale === 'th'
-        ? `เทียบ ${compareProjectCount} โครงการจาก shortlist`
+        ? `เทียบ ${compareProjectCount} โครงการจากรายการคัดไว้`
         : `Compare ${compareProjectCount} saved projects`,
-      browseUtilityLabel: locale === 'th' ? 'ดู listings เพิ่มต่อ' : 'Keep adding listings',
+      browseUtilityLabel: locale === 'th' ? 'ดูตัวเลือกเพิ่มต่อ' : 'Keep adding listings',
     };
   }
 
@@ -82,7 +82,7 @@ function getShortlistSummaryContent(input: {
       ? 'ขั้นถัดไปที่คุ้มสุด: เพิ่มอีก 1 ตัวเลือกที่ผูกกับโครงการ'
       : 'Best next move: add one more project-backed listing',
     body: locale === 'th'
-      ? `ตอนนี้ shortlist นี้มี ${itemCount} รายการ แต่ compare จะเริ่มคุ้มเมื่อ resolve ได้อย่างน้อย 2 โครงการในเฟรมเดียวกัน เพิ่มอีก 1 ตัวเลือกก่อน หรือส่ง shortlist นี้ให้ทีมช่วยรีวิวถ้าการค้นหาเริ่มแคบแล้ว`
+      ? `ตอนนี้รายการคัดไว้นี้มี ${itemCount} รายการ แต่การเทียบจะเริ่มคุ้มเมื่อจับคู่ได้อย่างน้อย 2 โครงการในกรอบเดียวกัน เพิ่มอีก 1 ตัวเลือกก่อน หรือส่งรายการคัดไว้นี้ให้ทีมช่วยรีวิวถ้าการค้นหาเริ่มแคบแล้ว`
       : `This shortlist currently has ${itemCount} saved listing${itemCount === 1 ? '' : 's'}, but compare only becomes decision-useful once at least 2 projects resolve in the same frame. Add one more strong option first, or send this shortlist to the team if the search is already narrowing.`,
     primaryLabel: locale === 'th' ? 'เพิ่มอีก 1 ตัวเลือกก่อน' : 'Add one more listing first',
     browseUtilityLabel: null,
@@ -93,7 +93,7 @@ function summarizeProjectNames(names: string[], locale: 'en' | 'th'): string {
   const uniqueNames = Array.from(new Set(names.filter(Boolean)));
 
   if (!uniqueNames.length) {
-    return locale === 'th' ? 'shortlist ชุดนี้' : 'this shortlist';
+    return locale === 'th' ? 'รายการคัดไว้นี้' : 'this shortlist';
   }
 
   if (uniqueNames.length <= 2) {
@@ -129,46 +129,46 @@ function buildShortlistConversionPack(input: {
 
   if (compareReady) {
     return {
-      kicker: locale === 'th' ? 'Shortlist พร้อมเข้าสู่ decision round' : 'Compare-ready shortlist',
-      title: locale === 'th' ? 'เปลี่ยน shortlist นี้ให้เป็น decision round ถัดไป' : 'Turn this shortlist into the next decision round',
+      kicker: locale === 'th' ? 'รายการคัดไว้พร้อมเข้าสู่รอบตัดสินใจ' : 'Compare-ready shortlist',
+      title: locale === 'th' ? 'เปลี่ยนรายการคัดไว้นี้ให้เป็นรอบตัดสินใจถัดไป' : 'Turn this shortlist into the next decision round',
       subtitle: locale === 'th'
-        ? 'ตอนนี้ shortlist ชุดนี้พร้อมสำหรับการอ่าน trade-off แบบ side-by-side แล้ว จากนั้นค่อยส่ง context เดิมต่อให้ทีมถ้าผู้ชนะยังต้อง pressure-test เพิ่ม'
+        ? 'ตอนนี้รายการคัดไว้นี้พร้อมสำหรับการอ่านข้อแลกเปลี่ยนแบบเทียบกันแล้ว จากนั้นค่อยส่งบริบทเดิมต่อให้ทีมถ้าผู้ชนะยังต้องตรวจเพิ่ม'
         : 'This shortlist is already strong enough for a side-by-side compare. Use that round to cut weaker options, then hand the same frame to the team if the winner still needs pressure-testing.',
       cards: [
         {
           key: 'status',
-          title: locale === 'th' ? 'shortlist นี้ยืนยันอะไรได้แล้ว' : 'What this shortlist already confirms',
+          title: locale === 'th' ? 'รายการคัดไว้นี้ยืนยันอะไรได้แล้ว' : 'What this shortlist already confirms',
           body: locale === 'th'
-            ? 'ตอนนี้คุณไม่ได้อยู่ในโหมด browse กว้าง ๆ แล้ว แต่กำลังอยู่ใน shortlist ที่พอจะตัดสินใจรอบจริงได้'
+            ? 'ตอนนี้คุณไม่ได้อยู่ในช่วงไล่ดูแบบกว้าง ๆ แล้ว แต่กำลังอยู่ในรายการคัดไว้ที่พอจะตัดสินใจรอบจริงได้'
             : 'This is no longer a raw browsing state. The shortlist is already narrow enough to support a real decision round.',
           lines: [
             locale === 'th'
-              ? `${itemCount} listing ที่บันทึกไว้กำลังถูกอ่านใน shortlist นี้`
+              ? `${itemCount} รายการที่บันทึกไว้กำลังถูกอ่านในรายการคัดไว้นี้`
               : `${itemCount} saved listings are active in this shortlist review.`,
             locale === 'th'
-              ? `${compareProjectCount} โครงการ resolve เข้าสู่ compare frame เดียวกันได้แล้ว`
+              ? `${compareProjectCount} โครงการถูกจับคู่เข้าสู่กรอบการเทียบเดียวกันได้แล้ว`
               : `${compareProjectCount} projects already resolve into the same compare frame.`,
             locale === 'th'
-              ? 'ขั้นนี้เหมาะกับการ pressure-test ผู้ชนะ ไม่ใช่การกลับไปเริ่มค้นหาใหม่'
+              ? 'ขั้นนี้เหมาะกับการทดสอบเหตุผลของตัวเลือกที่นำอยู่ ไม่ใช่การกลับไปเริ่มค้นหาใหม่'
               : 'This stage is for pressure-testing likely winners, not restarting discovery.',
           ],
           tone: 'light',
         },
         {
           key: 'next',
-          title: locale === 'th' ? 'ใช้ compare เพื่อตัดตัวเลือกที่อ่อนกว่า' : 'Use compare to remove weaker options',
+          title: locale === 'th' ? 'ใช้ตารางเทียบเพื่อตัดตัวเลือกที่อ่อนกว่า' : 'Use compare to remove weaker options',
           body: locale === 'th'
-            ? 'Compare คือ step ที่คุ้มที่สุดตอนนี้ เพราะช่วยอ่าน trade-off ก่อนส่งต่อให้ทีม'
+            ? 'การเทียบคือขั้นที่คุ้มที่สุดตอนนี้ เพราะช่วยอ่านข้อแลกเปลี่ยนก่อนส่งต่อให้ทีม'
             : 'Compare is the highest-value next move because it forces the trade-offs into one frame before advisor review.',
           lines: [
             locale === 'th'
-              ? `เปิด compare ด้วย ${compareNameSummary}`
+              ? `เปิดตารางเทียบด้วย ${compareNameSummary}`
               : `Open compare with ${compareNameSummary}.`,
             locale === 'th'
-              ? 'กลับมาที่ shortlist นี้หลังดูตาราง เพื่อเก็บผู้ชนะและตัดรายการที่อ่อนลง'
+              ? 'กลับมาที่รายการคัดไว้นี้หลังดูตาราง เพื่อเก็บผู้ชนะและตัดรายการที่อ่อนลง'
               : 'Return to this shortlist after the table to keep the winner and remove weaker options.',
             locale === 'th'
-              ? 'ถ้าผลยังไม่ขาด ค่อยส่ง shortlist frame เดิมนี้ต่อให้ทีมโดยไม่ต้องอธิบายใหม่'
+              ? 'ถ้าผลยังไม่ขาด ค่อยส่งกรอบรายการเดิมนี้ต่อให้ทีมโดยไม่ต้องอธิบายใหม่'
               : 'If the result is still not decisive, send the same shortlist frame to the team without rebuilding the brief.',
           ],
           tone: 'warm',
@@ -177,17 +177,17 @@ function buildShortlistConversionPack(input: {
           key: 'handoff',
           title: locale === 'th' ? 'สิ่งที่ถูกพกต่อไปยังทีม' : 'What carries into advisor handoff',
           body: locale === 'th'
-            ? 'Contact route ควรเห็น shortlist และ compare-ready frame เดียวกับที่คุณกำลังใช้อยู่ตอนนี้'
+            ? 'หน้าติดต่อควรเห็นรายการคัดไว้และกรอบการเทียบเดียวกับที่คุณกำลังใช้อยู่ตอนนี้'
             : 'The contact route should receive the same shortlist and compare-ready frame you are using now.',
           lines: [
             locale === 'th'
               ? `โครงการในบริบทนี้: ${shortlistNameSummary}`
               : `Projects in scope: ${shortlistNameSummary}.`,
             locale === 'th'
-              ? 'compare-ready project IDs จะถูกพกไปกับ advisor link ด้วย'
+              ? 'รหัสโครงการที่พร้อมเทียบจะถูกพกไปพร้อมลิงก์คุยกับที่ปรึกษาด้วย'
               : 'Compare-ready project IDs travel with the advisor link.',
             locale === 'th'
-              ? 'หลัง compare แล้วคุณไม่ต้องสรุป shortlist ซ้ำอีกครั้ง'
+              ? 'หลังเทียบแล้วคุณไม่ต้องสรุปรายการคัดไว้ซ้ำอีกครั้ง'
               : 'You do not need to restate the shortlist after compare.',
           ],
           tone: 'light',
@@ -197,46 +197,46 @@ function buildShortlistConversionPack(input: {
   }
 
   return {
-    kicker: locale === 'th' ? 'Shortlist ยังอยู่ในขั้น narrowing' : 'Shortlist still narrowing',
-    title: locale === 'th' ? 'เสริม shortlist นี้ให้พร้อมก่อนเข้า compare' : 'Strengthen this shortlist before compare',
+    kicker: locale === 'th' ? 'รายการคัดไว้ยังอยู่ในช่วงคัดให้แคบลง' : 'Shortlist still narrowing',
+    title: locale === 'th' ? 'เสริมรายการคัดไว้นี้ให้พร้อมก่อนเข้าเทียบ' : 'Strengthen this shortlist before compare',
     subtitle: locale === 'th'
-      ? 'ตอนนี้ shortlist ชุดนี้ยังขาดอีกอย่างน้อย 1 โครงการที่ผูกกับ compare frame เดียวกัน ดังนั้น step ที่คุ้มกว่าคือเพิ่ม save อีก 1 ตัวเลือกหรือส่ง shortlist ปัจจุบันให้ทีมช่วยคัดต่อ'
+      ? 'ตอนนี้รายการคัดไว้นี้ยังขาดอีกอย่างน้อย 1 โครงการที่ผูกกับกรอบการเทียบเดียวกัน ดังนั้นขั้นที่คุ้มกว่าคือเพิ่มอีก 1 ตัวเลือกหรือส่งรายการคัดไว้ปัจจุบันให้ทีมช่วยคัดต่อ'
       : 'This shortlist is still at least one project short of a meaningful compare, so the higher-value move is either one more save or an advisor review on the current shortlist.',
     cards: [
       {
         key: 'status',
-        title: locale === 'th' ? 'shortlist นี้ยืนยันอะไรได้แล้ว' : 'What this shortlist already confirms',
+        title: locale === 'th' ? 'รายการคัดไว้นี้ยืนยันอะไรได้แล้ว' : 'What this shortlist already confirms',
         body: locale === 'th'
-          ? 'การค้นหาเริ่มแคบลงแล้ว แต่ compare ยังไม่พร้อมพอสำหรับตารางที่มีน้ำหนัก'
+          ? 'การค้นหาเริ่มแคบลงแล้ว แต่การเทียบยังไม่พร้อมพอสำหรับตารางที่มีน้ำหนัก'
           : 'The search is clearly narrowing, but compare is not ready for a meaningful table yet.',
         lines: [
           locale === 'th'
-            ? `${itemCount} listing ที่บันทึกไว้กำลังถูกอ่านใน shortlist นี้`
+            ? `${itemCount} รายการที่บันทึกไว้กำลังถูกอ่านในรายการคัดไว้นี้`
             : `${itemCount} saved listing${itemCount === 1 ? '' : 's'} are active in this shortlist review.`,
           locale === 'th'
-            ? `${compareProjectCount} โครงการที่ผูกกับ compare frame ถูก resolve ได้ตอนนี้`
+            ? `${compareProjectCount} โครงการที่ผูกกับกรอบการเทียบถูกจับคู่ได้ตอนนี้`
             : `${compareProjectCount} project-backed option${compareProjectCount === 1 ? '' : 's'} currently resolve for compare.`,
           locale === 'th'
-            ? 'หน้านี้ยังเป็นพื้นที่ owner-safe สำหรับเก็บ ตัด หรือแชร์ตัวเลือกเดิมต่อได้'
+            ? 'หน้านี้ยังเป็นพื้นที่ปลอดภัยสำหรับเก็บ ตัด หรือแชร์ตัวเลือกเดิมต่อได้'
             : 'This page remains the owner-safe place to keep, cut, or share the current options.',
         ],
         tone: 'light',
       },
       {
         key: 'next',
-        title: locale === 'th' ? 'อีก 1 save จะทำให้ compare คุ้มขึ้น' : 'One more save makes compare useful',
+        title: locale === 'th' ? 'อีก 1 การบันทึกจะทำให้การเทียบคุ้มขึ้น' : 'One more save makes compare useful',
         body: locale === 'th'
-          ? 'Compare จะเริ่มมีน้ำหนักเมื่ออย่างน้อย 2 โครงการ resolve อยู่ในเฟรมเดียวกัน'
+          ? 'การเทียบจะเริ่มมีน้ำหนักเมื่ออย่างน้อย 2 โครงการถูกจับคู่อยู่ในกรอบเดียวกัน'
           : 'Compare only becomes decision-useful once at least 2 projects resolve in the same frame.',
         lines: [
           locale === 'th'
-            ? 'เพิ่มอีก 1 project-backed listing จากหน้า buy หรือ property detail'
+            ? 'เพิ่มอีก 1 ตัวเลือกที่ผูกกับโครงการจากหน้าซื้อหรือหน้ารายละเอียดทรัพย์'
             : 'Add one more project-backed listing from buy or property detail.',
           locale === 'th'
-            ? 'ถ้าการค้นหาแคบพอแล้ว คุณข้ามไป advisor review ด้วย shortlist ชุดนี้ได้ทันที'
+            ? 'ถ้าการค้นหาแคบพอแล้ว คุณข้ามไปรีวิวกับที่ปรึกษาด้วยรายการคัดไว้นี้ได้ทันที'
             : 'If the search is already tight, skip straight to advisor review with this shortlist.',
           locale === 'th'
-            ? 'เมื่อมีตัวเลือกสดอีก 1 ตัวในเฟรมนี้ ค่อยกลับมาเปิด compare'
+            ? 'เมื่อมีตัวเลือกสดอีก 1 ตัวในกรอบนี้ ค่อยกลับมาเปิดตารางเทียบ'
             : 'Come back once one more live project belongs in this frame.',
         ],
         tone: 'warm',
@@ -245,17 +245,17 @@ function buildShortlistConversionPack(input: {
         key: 'handoff',
         title: locale === 'th' ? 'สิ่งที่ยังพกต่อไปยังทีมได้' : 'What still carries into advisor handoff',
         body: locale === 'th'
-          ? 'แม้ compare จะยังไม่พร้อม แต่ shortlist ปัจจุบันก็ส่งต่อให้ทีมช่วยคัดต่อได้แล้ว'
+          ? 'แม้การเทียบจะยังไม่พร้อม แต่รายการคัดไว้ปัจจุบันก็ส่งต่อให้ทีมช่วยคัดต่อได้แล้ว'
           : 'Even before compare is ready, the current shortlist can still move forward into advisor review.',
         lines: [
           locale === 'th'
-            ? `โครงการในบริบทนี้: ${shortlistNameSummary}`
-            : `Projects in scope: ${shortlistNameSummary}.`,
+              ? `โครงการในบริบทนี้: ${shortlistNameSummary}`
+              : `Projects in scope: ${shortlistNameSummary}.`,
           locale === 'th'
-            ? 'advisor link จะพกชื่อ shortlist และ stage ของการตัดสินใจนี้ต่อไปด้วย'
+            ? 'ลิงก์คุยกับที่ปรึกษาจะพกชื่อรายการคัดไว้และช่วงตัดสินใจนี้ต่อไปด้วย'
             : 'The advisor link keeps the shortlist names and this decision stage together.',
           locale === 'th'
-            ? 'ทีมช่วยชี้ได้ว่าควรเก็บ ตัด หรือแทนตัวเลือกไหนก่อน compare จะพร้อม'
+            ? 'ทีมช่วยชี้ได้ว่าควรเก็บ ตัด หรือแทนตัวเลือกไหนก่อนการเทียบจะพร้อม'
             : 'The team can suggest what to keep, cut, or replace before compare is ready.',
         ],
         tone: 'light',
@@ -279,6 +279,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
   function syncFromShortlist(shortlist: ShortlistDetail | null) {
     const shortlistItems = [...(shortlist?.items ?? [])].sort((left, right) => left.position - right.position);
+    setIsResolvingCompare(shortlistItems.length > 0);
     setItems(shortlistItems);
   }
 
@@ -378,7 +379,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     trackEvent('shortlist_action', window.location.pathname || `/${locale}/shortlist`, {
       source_route: 'shortlist',
       cta_type: 'secondary',
-      cta_label: locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist',
+      cta_label: locale === 'th' ? 'นำออกจากรายการคัดไว้' : 'Remove from shortlist',
       entity_type: 'property',
       entity_id: propertyId,
       user_intent: 'research',
@@ -427,9 +428,9 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
       try {
         await window.navigator.clipboard?.writeText(nextShareUrl);
-        setShareNotice(locale === 'th' ? 'คัดลอกลิงก์แชร์แล้ว ลิงก์นี้เปิดแบบดูอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link copied. This link stays read-only and hides owner identity.');
+        setShareNotice(locale === 'th' ? 'คัดลอกลิงก์แชร์แล้ว ลิงก์นี้เปิดแบบอ่านอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link copied. This link stays read-only and hides owner identity.');
       } catch {
-        setShareNotice(locale === 'th' ? 'สร้างลิงก์แชร์แล้ว คัดลอกต่อได้ด้านล่าง ลิงก์นี้เปิดแบบดูอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link created. Copy it below. This link stays read-only and hides owner identity.');
+        setShareNotice(locale === 'th' ? 'สร้างลิงก์แชร์แล้ว คัดลอกต่อได้ด้านล่าง ลิงก์นี้เปิดแบบอ่านอย่างเดียวและซ่อนข้อมูลเจ้าของ' : 'Share link created. Copy it below. This link stays read-only and hides owner identity.');
       }
     } catch {
       setError(shortlistCopy.shareError);
@@ -440,16 +441,16 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
   if (isLoading) {
     return (
-      <EmptyStateCard
-        title={locale === 'th' ? 'กำลังเช็ก shortlist ล่าสุด' : 'Checking your latest shortlist'}
+        <EmptyStateCard
+        title={locale === 'th' ? 'กำลังเช็กรายการคัดไว้ล่าสุด' : 'Checking your latest shortlist'}
         body={
           locale === 'th'
-            ? 'ถ้ามีรายการที่เคยบันทึกไว้ ระบบจะดึงกลับมาในหน้านี้อัตโนมัติ คุณยังเปิด inventory ต่อได้ทันทีระหว่างรอ.'
+            ? 'ถ้ามีรายการที่เคยบันทึกไว้ ระบบจะดึงกลับมาในหน้านี้อัตโนมัติ คุณยังเปิดดูตัวเลือกต่อได้ทันทีระหว่างรอ'
             : 'If you already saved listings, they will reappear here automatically. You can keep browsing inventory while this page checks the latest shortlist state.'
         }
         action={(
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'ดู listings ที่บันทึกได้' : 'Browse shortlist-ready listings'}
+            {locale === 'th' ? 'ดูตัวเลือกที่บันทึกได้' : 'Browse shortlist-ready listings'}
           </Link>
         )}
       />
@@ -462,16 +463,16 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
 
   if (!items.length) {
     return (
-      <EmptyStateCard
-        title={locale === 'th' ? 'Shortlist ของคุณยังว่างอยู่' : 'Your shortlist is still empty'}
+        <EmptyStateCard
+        title={locale === 'th' ? 'รายการคัดไว้ของคุณยังว่างอยู่' : 'Your shortlist is still empty'}
         body={
           locale === 'th'
-            ? 'เริ่มจากการบันทึก listing ที่สนใจจากหน้า buy, rent, หรือ property detail แล้วกลับมาทบทวนที่นี่'
+            ? 'เริ่มจากการบันทึกยูนิตที่สนใจจากหน้าซื้อ หน้าเช่า หรือหน้ารายละเอียดทรัพย์ แล้วกลับมาทบทวนที่นี่'
             : 'Save listings from buy, rent, or property detail surfaces first, then return here to review them.'
         }
         action={
           <Link className="btn btn-secondary" href={withLocale(locale, '/buy')}>
-            {locale === 'th' ? 'ดู listings ที่บันทึกได้' : 'Browse shortlist-ready listings'}
+            {locale === 'th' ? 'ดูตัวเลือกที่บันทึกได้' : 'Browse shortlist-ready listings'}
           </Link>
         }
       />
@@ -503,15 +504,15 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
     },
     {
       label: isResolvingCompare
-        ? (locale === 'th' ? 'กำลังเตรียม compare-ready projects' : 'Preparing compare-ready projects')
+        ? (locale === 'th' ? 'กำลังเตรียมโครงการที่พร้อมเทียบ' : 'Preparing compare-ready projects')
         : compareReady
-          ? (locale === 'th' ? `${compareProjects.length} โครงการพร้อม compare` : `${compareProjects.length} compare-ready projects`)
-          : (locale === 'th' ? `${compareProjects.length} โครงการที่ resolve ได้` : `${compareProjects.length} project-backed option${compareProjects.length === 1 ? '' : 's'}`),
+          ? (locale === 'th' ? `${compareProjects.length} โครงการพร้อมเทียบ` : `${compareProjects.length} compare-ready projects`)
+          : (locale === 'th' ? `${compareProjects.length} โครงการที่จับคู่ได้` : `${compareProjects.length} project-backed option${compareProjects.length === 1 ? '' : 's'}`),
       tone: isResolvingCompare ? 'neutral' as const : compareReady ? 'accent' as const : 'neutral' as const,
     },
     {
       label: compareReady
-        ? (locale === 'th' ? 'พร้อมส่งต่อ shortlist frame เดิม' : 'Shortlist frame ready to hand off')
+        ? (locale === 'th' ? 'พร้อมส่งต่อกรอบรายการเดิม' : 'Shortlist frame ready to hand off')
         : (locale === 'th' ? 'ยังคุยกับทีมต่อได้ทันที' : 'Advisor review still available'),
       tone: 'deep' as const,
     },
@@ -545,7 +546,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
           <p className="shortlist-surface__summary-body">{shortlistSummary.body}</p>
         </div>
 
-        <div className="shortlist-surface__summary-signals" aria-label={locale === 'th' ? 'สัญญาณของ shortlist ตอนนี้' : 'Current shortlist signals'}>
+        <div className="shortlist-surface__summary-signals" aria-label={locale === 'th' ? 'สัญญาณของรายการคัดไว้ตอนนี้' : 'Current shortlist signals'}>
           {summarySignals.map((signal) => (
             <PublicChip key={signal.label} tone={signal.tone}>{signal.label}</PublicChip>
           ))}
@@ -554,7 +555,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
         <PublicActionRow className="shortlist-surface__summary-actions" stackOnMobile>
           {isResolvingCompare ? (
             <button type="button" className="btn btn-cta" disabled>
-              {locale === 'th' ? 'กำลังเตรียม compare-ready projects…' : 'Preparing compare-ready projects…'}
+              {locale === 'th' ? 'กำลังเตรียมโครงการที่พร้อมเทียบ…' : 'Preparing compare-ready projects…'}
             </button>
           ) : compareReady ? (
             <Link
@@ -603,7 +604,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
         </PublicActionRow>
       </PublicSurfaceCard>
 
-      <section id="shortlist-conversion-pack" className="shortlist-conversion-pack" aria-label={locale === 'th' ? 'ขั้นถัดไปจาก shortlist นี้' : 'Next-step decision layer for this shortlist'}>
+      <section id="shortlist-conversion-pack" className="shortlist-conversion-pack" aria-label={locale === 'th' ? 'ขั้นถัดไปจากรายการคัดไว้นี้' : 'Next-step decision layer for this shortlist'}>
         <PublicSectionHeader
           align="start"
           kicker={shortlistConversionPack.kicker}
@@ -635,29 +636,29 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
         <div className="shortlist-compare-panel__header">
           <h2 className="card-title mb-0">
             {compareReady
-              ? (locale === 'th' ? 'โครงการชุดนี้พร้อมเข้า compare แล้ว' : 'These saved projects are ready for compare')
-              : (locale === 'th' ? 'ยังขาดอีก 1 โครงการก่อนเข้า compare' : 'You still need one more project before compare')}
+              ? (locale === 'th' ? 'โครงการชุดนี้พร้อมเข้าเทียบแล้ว' : 'These saved projects are ready for compare')
+              : (locale === 'th' ? 'ยังขาดอีก 1 โครงการก่อนเข้าเทียบ' : 'You still need one more project before compare')}
           </h2>
           <p className="card-subtitle mb-0">
             {compareReady
               ? (locale === 'th'
-                  ? 'ระบบ resolve เฉพาะโครงการที่ผูกกับ listing ที่คุณบันทึกไว้ และพาไปอ่าน trade-off แบบ side-by-side โดยยังไม่แตะ contact flow'
+                  ? 'ระบบจะจับคู่เฉพาะโครงการที่ผูกกับรายการที่คุณบันทึกไว้ และพาไปอ่านข้อแลกเปลี่ยนแบบเทียบกัน โดยยังไม่ต้องเข้าเส้นทางติดต่อ'
                   : 'Only project-backed saves are carried into compare, so you can read trade-offs side by side before touching the contact flow.')
               : (locale === 'th'
-                  ? 'ตอนนี้ shortlist นี้ยัง resolve ได้ไม่พอสำหรับ compare แบบมีน้ำหนัก จึงควรเพิ่มอีก 1 ตัวเลือกหรือส่ง shortlist นี้ให้ทีมช่วยรีวิว'
+                  ? 'ตอนนี้รายการคัดไว้นี้ยังจับคู่ได้ไม่พอสำหรับการเทียบแบบมีน้ำหนัก จึงควรเพิ่มอีก 1 ตัวเลือกหรือส่งรายการนี้ให้ทีมช่วยรีวิว'
                   : 'This shortlist does not yet resolve enough project-backed options for a useful compare read, so the next move is either one more save or an advisor review.')}
           </p>
         </div>
 
         {isResolvingCompare ? (
           <p className="guided-dialog__step mb-0">
-            {locale === 'th' ? 'กำลังเตรียมโครงการที่ compare ได้จาก shortlist…' : 'Preparing compare-ready projects from this shortlist…'}
+            {locale === 'th' ? 'กำลังเตรียมโครงการที่เทียบได้จากรายการคัดไว้นี้…' : 'Preparing compare-ready projects from this shortlist…'}
           </p>
         ) : compareProjects.length >= 2 ? (
           <>
             <p className="guided-dialog__step mb-0">
               {locale === 'th'
-                ? `พร้อมเทียบ ${compareProjects.length} โครงการจาก shortlist นี้แบบ side-by-side โดยไม่แตะ contact flow หรือ CRM`
+                ? `พร้อมเทียบ ${compareProjects.length} โครงการจากรายการคัดไว้นี้แบบวางคู่กัน โดยไม่แตะเส้นทางติดต่อหรือระบบภายใน`
                 : `${compareProjects.length} shortlist projects are ready for a side-by-side comparison without touching contact flow or CRM.`}
             </p>
             <div className="shortlist-compare-panel__chips">
@@ -669,7 +670,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
         ) : (
           <p className="guided-dialog__step mb-0">
             {locale === 'th'
-              ? 'ตอนนี้ shortlist นี้ยัง resolve ได้ไม่ถึง 2 โครงการสำหรับ compare บันทึกเพิ่มอีกอย่างน้อย 1 โครงการเพื่อเปิดตารางเทียบ'
+              ? 'ตอนนี้รายการคัดไว้นี้ยังจับคู่ได้ไม่ถึง 2 โครงการสำหรับการเทียบ บันทึกเพิ่มอีกอย่างน้อย 1 โครงการเพื่อเปิดตารางเทียบ'
               : 'This shortlist does not yet resolve to 2 projects for compare. Save at least one more project-backed listing to open the comparison table.'}
           </p>
         )}
@@ -693,7 +694,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
       {shareUrl ? (
         <div className="shortlist-share-panel" aria-live="polite">
           <label className="shortlist-share-panel__label" htmlFor="shortlist-share-link">
-            {locale === 'th' ? 'ลิงก์แชร์แบบ read-only' : 'Read-only share link'}
+            {locale === 'th' ? 'ลิงก์แชร์แบบอ่านอย่างเดียว' : 'Read-only share link'}
           </label>
           <input
             id="shortlist-share-link"
@@ -704,7 +705,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
             onFocus={(event) => event.currentTarget.select()}
           />
           <p className="guided-dialog__step mt-2">
-            {shareNotice ?? (locale === 'th' ? 'ลิงก์นี้เปิด shortlist แบบดูอย่างเดียว ซ่อนข้อมูลเจ้าของ และไม่เชื่อมเข้า CRM' : 'This link opens a read-only shortlist view, hides owner identity, and does not connect to CRM.')}
+            {shareNotice ?? (locale === 'th' ? 'ลิงก์นี้เปิดรายการคัดไว้แบบอ่านอย่างเดียว ซ่อนข้อมูลเจ้าของ และไม่เชื่อมเข้าระบบภายใน' : 'This link opens a read-only shortlist view, hides owner identity, and does not connect to CRM.')}
           </p>
         </div>
       ) : null}
@@ -716,13 +717,14 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
           return (
             <article key={`${item.property_id}-${item.position}`} className="shortlist-item-card">
               <div className="shortlist-item-card__media">
-                <Image
+                <SafeCoverImage
                   src={image}
                   alt={item.title}
-                  fill
-                  unoptimized
+                  fallbackSrc={SHORTLIST_FALLBACK_IMAGE}
                   sizes="(min-width: 1024px) 280px, 100vw"
                   className="object-cover"
+                  unoptimized={false}
+                  ssrStartWithPrimary={image !== SHORTLIST_FALLBACK_IMAGE}
                 />
               </div>
 
@@ -733,7 +735,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                   </span>
                   {item.foreign_quota ? (
                     <span className="shortlist-item-card__badge shortlist-item-card__badge--accent">
-                      {locale === 'th' ? 'มีสัญญาณ foreign quota' : 'Foreign quota signal'}
+                      {locale === 'th' ? 'มีสัญญาณโควตาต่างชาติ' : 'Foreign quota signal'}
                     </span>
                   ) : null}
                 </div>
@@ -786,7 +788,7 @@ export function ShortlistListSurface({ locale }: { locale: 'en' | 'th' }) {
                   >
                     {pendingPropertyId === item.property_id
                       ? (locale === 'th' ? 'กำลังนำออก…' : 'Removing…')
-                      : (locale === 'th' ? 'นำออกจาก shortlist' : 'Remove from shortlist')}
+                      : (locale === 'th' ? 'นำออกจากรายการคัดไว้' : 'Remove from shortlist')}
                   </button>
                 </div>
               </div>
