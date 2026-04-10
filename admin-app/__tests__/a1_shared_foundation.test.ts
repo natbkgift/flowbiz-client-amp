@@ -50,7 +50,7 @@ describe('A1 shared foundation guards', () => {
     expect(footer).toContain('footer-brand__promise');
     expect(footer).toContain('footer-signal-list');
     expect(footer).toContain('footer-action footer-action--primary');
-    expect(enDict).toContain("facebookUrl: 'https://facebook.com/flowbiz'");
+    expect(enDict).toContain("facebookUrl: 'https://facebook.com/amppattaya'");
     expect(enDict).toContain("contactEmail: ''");
   });
 
