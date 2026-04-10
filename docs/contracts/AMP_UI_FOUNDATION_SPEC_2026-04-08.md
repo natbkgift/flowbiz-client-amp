@@ -1,5 +1,13 @@
 # AMP UI Foundation Spec
 
+> Note
+> For future public UI governance and agent execution, the authoritative docs are now:
+> - `AGENT_RULES.md`
+> - `docs/AMP_VISUAL_SYSTEM_SPEC_V1.md`
+> - `docs/AMP_PUBLIC_UI_IMPLEMENTATION_RULES_V1.md`
+>
+> This file remains useful as legacy implementation context and historical contract evidence.
+
 Date: 2026-04-08
 Status: Active foundation contract for Phase A and PR 0.1
 

@@ -1,5 +1,14 @@
 # A2 Home Spec v1 Closeout (Locked)
 
+> Note
+> For future home-page governance and agent execution, the authoritative docs are now:
+> - `AGENT_RULES.md`
+> - `docs/AMP_HOME_BLUEPRINT_V1.md`
+> - `docs/AMP_PUBLISH_GATE_RULES_V1.md`
+> - `docs/AMP_PUBLIC_UI_QA_GATE.md`
+>
+> This file remains a closeout / evidence record for the original A2 implementation.
+
 Date: 2026-02-27  
 Branch: main  
 Scope: Finalize A2 Home on real runtime surface + tracking verification + data-safe fallback policy

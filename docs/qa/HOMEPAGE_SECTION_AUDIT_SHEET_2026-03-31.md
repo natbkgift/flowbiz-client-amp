@@ -1,5 +1,13 @@
 # Homepage Section Audit Sheet
 
+> Note
+> For future home-page governance and acceptance rules, use:
+> - `docs/AMP_HOME_BLUEPRINT_V1.md`
+> - `docs/AMP_PUBLIC_UI_QA_GATE.md`
+> - `docs/AMP_PUBLISH_GATE_RULES_V1.md`
+>
+> This file remains the live evidence sheet for the historical homepage audit round.
+
 อัปเดต: `2026-04-02`
 บทบาทเอกสาร: `Live evidence + section-level PASS/FAIL`
 

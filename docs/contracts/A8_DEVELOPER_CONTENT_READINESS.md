@@ -1,5 +1,9 @@
 # A8 Developer Content Readiness
 
+> Note
+> For future public content governance, use `docs/AMP_PUBLISH_GATE_RULES_V1.md` as the cross-site publish authority.
+> This file remains the detailed developer-specific readiness contract and should be read together with the new publish-gate rules when developer pages are affected.
+
 Purpose: prevent TODO fallback on `/developers/[slug]` by enforcing publish requirements.
 
 ## Backend Gate (enforced)
