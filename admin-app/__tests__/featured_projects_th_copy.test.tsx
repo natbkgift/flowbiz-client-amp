@@ -4,12 +4,29 @@ import { describe, expect, it, vi } from 'vitest';
 import { FeaturedProjects } from '@/components/home/FeaturedProjects';
 
 vi.mock('next/image', () => ({
-  default: ({ fill, unoptimized, priority, fetchPriority, loader, ...props }: any) => <img {...props} alt={props.alt ?? ''} />,
+  default: ({
+    alt,
+    className,
+    fill,
+    loader,
+    priority,
+    src,
+    style,
+    unoptimized,
+    fetchPriority,
+  }: any) => (
+    <div
+      aria-label={alt ?? ''}
+      className={className}
+      data-next-image={typeof src === 'string' ? src : ''}
+      style={style}
+    />
+  ),
 }));
 
 describe('FeaturedProjects Thai copy', () => {
-  it('keeps the empty-state handoff localized without shortlist jargon', () => {
-    render(
+  it('omits the section entirely when no publish-ready projects are available', () => {
+    const { container } = render(
       <FeaturedProjects
         projects={[]}
         locale="th"
@@ -18,7 +35,7 @@ describe('FeaturedProjects Thai copy', () => {
       />,
     );
 
-    expect(screen.getByText('ดูโครงการที่เผยแพร่แล้วก่อน')).toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
     expect(screen.queryByText(/shortlist/i)).toBeNull();
   });
 

@@ -6,7 +6,6 @@ import type { ProjectItem } from '@/app/_lib/public-api-server';
 import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 import { PublicChip } from '@/components/public/PublicChip';
 import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
-import { EmptyStateCard } from '@/components/ui/StateBlocks';
 
 type BadgeLabel = 'New' | 'Hot' | 'Beachfront';
 
@@ -112,74 +111,8 @@ export function FeaturedProjects({
     projectDetail: locale === 'th' ? 'ดูสรุปโครงการ' : 'Review project',
     publishedProject: locale === 'th' ? 'โครงการที่เผยแพร่แล้ว' : 'Published project',
   };
-  const emptyStatePrimaryHref = withLocale(locale, '/projects');
-  const emptyStateSecondaryHref = withLocale(locale, '/contact');
-  const emptyStateSignals = locale === 'th'
-    ? [
-        'เปิดรายการที่เผยแพร่ล่าสุดได้ทันที',
-        'ส่งโจทย์งบและทำเลให้ทีมได้เลย',
-        'รับตัวเลือกที่พร้อมเช็กราคาและเอกสารต่อ',
-      ]
-    : [
-        'Open the latest published inventory instantly',
-        'Send the team your budget and location brief',
-        'Get matched options ready for price checks',
-      ];
-  const emptyStatePreviewTitle = locale === 'th'
-    ? 'เริ่มจากโครงการที่เกี่ยวข้อง'
-    : 'Tell the team what to review';
-  const emptyStatePreviewBody = locale === 'th'
-    ? 'ถ้าโครงการที่เหมาะยังไม่ขึ้นบนหน้า ทีมจะช่วยคัดชุดแรกให้ดู'
-    : 'If the right launch is not already surfaced, the team can narrow the first set around pricing, fit, and location.';
-
   if (projects.length === 0) {
-    return (
-      <div>
-        <PublicSectionHeader
-          kicker={kicker}
-          kickerClassName="home-section-kicker"
-          title={title}
-          titleAs={HeadingTag}
-          subtitle={subtitle}
-        />
-        <div className="home-project-empty reveal">
-          <div className="home-project-empty__copy">
-            <p className="home-project-empty__eyebrow">
-              {locale === 'th' ? 'โต๊ะคัดโครงการของ AMP' : 'AMP advisory desk'}
-            </p>
-            <EmptyStateCard
-              className="premium-empty-state home-project-empty__card"
-              title={locale === 'th' ? 'ดูโครงการที่เผยแพร่แล้วก่อน' : 'Review the published projects first'}
-              body={locale === 'th' ? 'ถ้ายังไม่เจอสิ่งที่ใช่ บอกงบและทำเลให้ทีมช่วยคัดต่อได้' : 'Review the current list first, then share your budget and area if you need a tighter match.'}
-              action={(
-                <div className="home-project-empty__actions">
-                  <Link href={emptyStatePrimaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--primary">
-                    {locale === 'th' ? 'ดูโครงการทั้งหมด' : 'View all projects'}
-                  </Link>
-                  <Link href={emptyStateSecondaryHref} prefetch={false} className="home-project-empty__action home-project-empty__action--secondary">
-                    {locale === 'th' ? 'คุยกับทีม' : 'Speak with the team'}
-                  </Link>
-                </div>
-              )}
-            />
-          </div>
-          <div className="home-project-empty__preview" aria-hidden="true">
-            <div className="home-project-empty__preview-card">
-              <span className="home-project-empty__preview-kicker">
-                {locale === 'th' ? 'ทางเลือกถัดไป' : 'Verified live route'}
-              </span>
-              <strong className="home-project-empty__preview-title">{emptyStatePreviewTitle}</strong>
-              <p className="home-project-empty__preview-body">{emptyStatePreviewBody}</p>
-              <div className="home-project-empty__signal-list">
-                {emptyStateSignals.map((item) => (
-                  <PublicChip key={item} as="span" size="sm" className="home-project-empty__signal">{item}</PublicChip>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   function normalizeToken(input: string | null | undefined): string {

@@ -147,8 +147,8 @@ describe('public design system contract', () => {
     expect(homePage).toContain('PublicSurfaceCard');
     expect(homePage).toContain('PublicChip');
     expect(homePage).toContain('public-surface-card--interactive');
-    expect(homePage).toContain('home-segmentation-note public-surface-card public-surface-card--deep');
-    expect(homePage).toContain('home-unit-group public-surface-card public-surface-card--warm');
+    expect(homePage).toContain('function HomeTrustStripSection()');
+    expect(homePage).toContain('home-pathways-support__link');
     expect(homePage).toContain('home-market-shell__signal-row');
     expect(homePage).toContain('home-market-proof__footer');
     expect(homePage).toContain('home-trust-module__signal-row');
@@ -175,6 +175,7 @@ describe('public design system contract', () => {
     expect(homeBottomCta).toContain('type-caption');
     expect(homeBottomCta).toContain('className="home-bottom-cta__panel"');
     expect(homeBottomCta).toContain('pattern-split-grid');
+    expect(homeBottomCta).toContain('getPublicButtonClassName');
     expect(homeBottomCta).not.toContain('rounded-2xl');
     expect(homeBottomCta).not.toContain('shadow-2xl');
     expect(homeBottomCta).not.toContain('p-5 md:p-8');
@@ -408,19 +409,20 @@ describe('public design system contract', () => {
     const renderStart = homePage.indexOf('return (\n    <main');
     const renderBody = renderStart >= 0 ? homePage.slice(renderStart) : homePage;
 
-    expect(homePage).toMatch(/const defaultSectionOrder = \[\s*'hero',\s*'pathways',\s*'featured_projects',\s*'featured_properties',\s*'why_pattaya',\s*'trust_micro_strip',\s*'team_cta',\s*'bottom_cta',\s*\]/);
+    expect(homePage).toMatch(/const defaultSectionOrder = \[\s*'hero',\s*'trust_micro_strip',\s*'featured_projects',\s*'why_pattaya',\s*'pathways',\s*'proof_trust',\s*'bottom_cta',\s*\]/);
     expect(homePage).toContain("['featured_projects', 3]");
-    expect(homePage).toContain("['featured_properties', 3]");
+    expect(homePage).toContain("['trust_micro_strip', 2]");
     expect(homePage).toContain("['why_pattaya', 4]");
-    expect(homePage).toContain("['trust_micro_strip', 5]");
-    expect(homePage).toContain('function HomeTeamCtaSection()');
+    expect(homePage).toContain("['pathways', 5]");
+    expect(homePage).toContain("['proof_trust', 6]");
     expect(homePage).not.toContain('function HomeOwnerAdvisorySection()');
+    expect(homePage).not.toContain('function HomeTeamCtaSection()');
 
-    expect(renderBody.indexOf('HomePathwaysSection')).toBeLessThan(renderBody.indexOf('HomeCuratedOpportunitiesSection'));
+    expect(renderBody.indexOf('HomeTrustStripSection')).toBeLessThan(renderBody.indexOf('HomeCuratedOpportunitiesSection'));
     expect(renderBody.indexOf('HomeCuratedOpportunitiesSection')).toBeLessThan(renderBody.indexOf('HomeMarketClaritySection'));
-    expect(renderBody.indexOf('HomeMarketClaritySection')).toBeLessThan(renderBody.indexOf('id="home-trust-layer"'));
-    expect(renderBody.indexOf('id="home-trust-layer"')).toBeLessThan(renderBody.indexOf('HomeTeamCtaSection'));
-    expect(renderBody.indexOf('HomeTeamCtaSection')).toBeLessThan(renderBody.indexOf('HomeBottomCta'));
+    expect(renderBody.indexOf('HomeMarketClaritySection')).toBeLessThan(renderBody.indexOf('HomePathwaysSection'));
+    expect(renderBody.indexOf('HomePathwaysSection')).toBeLessThan(renderBody.indexOf('id="home-proof-process"'));
+    expect(renderBody.indexOf('id="home-proof-process"')).toBeLessThan(renderBody.indexOf('HomeBottomCta'));
   });
 
   it('keeps the home trust layer anchored on proof, process, and review blocks', () => {
@@ -432,8 +434,9 @@ describe('public design system contract', () => {
     expect(homePage).toContain('className="home-trust-proof-list"');
     expect(homePage).toContain('className="home-trust-process-list"');
     expect(homePage).toContain('className="home-trust-review-stack"');
-    expect(homePage).toContain("cta: 'home_trust_primary'");
     expect(homePage).toContain("cta: 'home_trust_secondary'");
+    expect(homePage).toContain("cta: 'home_market_primary'");
+    expect(homePage).toContain("cta: 'home_market_secondary'");
 
     expect(primitives).toContain('.home-trust-module__columns');
     expect(primitives).toContain('.home-trust-process-card');
