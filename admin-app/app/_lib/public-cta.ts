@@ -43,6 +43,7 @@ export type PublicCtaSurface =
   | 'home'
   | 'projects'
   | 'buy'
+  | 'rent'
   | 'contact'
   | 'sell'
   | 'project_detail'
@@ -70,6 +71,7 @@ export function getPublicCtaSurface(pathname: string): PublicCtaSurface {
   if (path === '/') return 'home';
   if (path === '/projects' || path.startsWith('/projects?')) return 'projects';
   if (path === '/buy' || path.startsWith('/buy?')) return 'buy';
+  if (path === '/rent' || path.startsWith('/rent?')) return 'rent';
   if (path === '/contact' || path.startsWith('/contact?')) return 'contact';
   if (path === '/sell' || path.startsWith('/sell?')) return 'sell';
   if (path === '/compare' || path.startsWith('/compare?')) return 'compare';
@@ -98,7 +100,10 @@ export function shouldRenderFloatingWhatsApp(pathname: string): boolean {
 
 export function shouldRenderStickyMobileCta(pathname: string): boolean {
   const path = stripLocaleFromPathname(pathname);
-  if (path === '/' || path === '/projects' || path.startsWith('/projects?')) {
+  if (path === '/') {
+    return true;
+  }
+  if (path === '/projects' || path.startsWith('/projects?')) {
     return false;
   }
   const surface = getPublicCtaSurface(pathname);

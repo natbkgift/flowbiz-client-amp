@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import { localeFromPathname } from '@/app/_lib/i18n/routing';
-import { shouldRenderFloatingWhatsApp, shouldRenderStickyMobileCta } from '@/app/_lib/public-cta';
+import { shouldRenderFloatingWhatsApp } from '@/app/_lib/public-cta';
 
 type IdleCapableWindow = Window & typeof globalThis & {
   requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
@@ -52,7 +52,6 @@ export function PublicClientEnhancements() {
   const [showConsent, setShowConsent] = useState(false);
   const [showAiWidget, setShowAiWidget] = useState(false);
   const showFloatingWhatsApp = shouldRenderFloatingWhatsApp(pathname);
-  const showStickyMobileCta = shouldRenderStickyMobileCta(pathname);
   const pathWithoutLocale = pathname.replace(/^\/(en|th)(?=\/|$)/, '') || '/';
   const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects';
 
@@ -175,9 +174,9 @@ export function PublicClientEnhancements() {
         <>
           <ScrollReveal />
           {showFloatingWhatsApp && !showAiWidget ? <FloatingWhatsAppCTA /> : null}
-          {showStickyMobileCta ? <StickyMobileCTA /> : null}
         </>
       ) : null}
+      <StickyMobileCTA />
       {showAiWidget ? <AIChatWidget /> : null}
       {showConsent ? <CookieConsent /> : null}
     </>

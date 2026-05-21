@@ -81,13 +81,15 @@ export default async function SiteLayout(
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <Header locale={locale} cms={layoutCms.header} />
-      {children}
-      <Footer locale={locale} cms={layoutCms.footer} />
-      <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
-      <Suspense fallback={null}>
-        <PublicClientEnhancements />
-      </Suspense>
+      <div className="public-site-shell" data-locale={locale}>
+        <Header locale={locale} cms={layoutCms.header} />
+        {children}
+        <Footer locale={locale} cms={layoutCms.footer} />
+        <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
+        <Suspense fallback={null}>
+          <PublicClientEnhancements />
+        </Suspense>
+      </div>
     </>
   );
 }

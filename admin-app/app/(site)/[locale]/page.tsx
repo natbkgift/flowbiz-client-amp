@@ -115,6 +115,7 @@ export default async function HomePage({
     { TrackedLink },
     { HomeHero },
     { FeaturedProjects },
+    { PropertyCard },
     { HomeBottomCta },
     { HomePerfProbe },
     { LeadForm },
@@ -134,6 +135,7 @@ export default async function HomePage({
     import('@/components/analytics/TrackedLink'),
     import('@/components/home/HomeHero'),
     import('@/components/home/FeaturedProjects'),
+    import('@/components/cards/PropertyCard'),
     import('@/components/home/HomeBottomCta'),
     (enableHomePerfProbe
       ? import('@/components/home/HomePerfProbe')
@@ -185,9 +187,10 @@ export default async function HomePage({
   const defaultSectionOrder = [
     'hero',
     'pathways',
+    'trust_micro_strip',
     'featured_projects',
     'why_pattaya',
-    'trust_micro_strip',
+    'owner_bridge',
     'bottom_cta',
   ];
   const composerOrder = Array.isArray(composerConfig.section_order)
@@ -216,10 +219,11 @@ export default async function HomePage({
   const forcedFunnelOrder = new Map<string, number>([
     ['hero', 1],
     ['pathways', 2],
-    ['featured_projects', 3],
-    ['why_pattaya', 4],
-    ['trust_micro_strip', 5],
-    ['bottom_cta', 6],
+    ['trust_micro_strip', 3],
+    ['featured_projects', 4],
+    ['why_pattaya', 5],
+    ['owner_bridge', 6],
+    ['bottom_cta', 7],
   ]);
   const sectionOrderStyle = (key: string): { order: number } => ({ order: forcedFunnelOrder.get(key) ?? sectionOrderMap.get(key) ?? 999 });
   const recommendation = getContentRecommendation();
@@ -384,6 +388,44 @@ export default async function HomePage({
   const showFeaturedProjectsSection = isSectionEnabled('featured_projects');
   const showCuratedOpportunities = showFeaturedProjectsSection && homeRenderableProjects.length > 0;
   const curatedOpportunitiesOrder = sectionOrderStyle('featured_projects').order;
+  const homeSaleUnits = homePropertiesSnapshot
+    .filter((property) => property.slug && property.type !== 'rent')
+    .slice(0, 2);
+  const homeRentUnits = homePropertiesSnapshot
+    .filter((property) => property.slug && property.type === 'rent')
+    .slice(0, 2);
+  const homeUnitGroups = [
+    homeSaleUnits.length > 0
+      ? {
+          key: 'sale-units',
+          eyebrow: locale === 'th' ? 'ยูนิตซื้อที่ยังเปิดอยู่' : 'Live buy units',
+          title: locale === 'th' ? 'ต่อจากภาพรวมโครงการ มาดูยูนิตที่ใช้ตัดสินใจได้จริง' : 'After the project read, scan units that can drive the next decision',
+          count: locale === 'th' ? `${homeSaleUnits.length} รายการซื้อ` : `${homeSaleUnits.length} buy options`,
+          href: withLocaleQuery(locale, '/buy', { source: 'home_curated_units_buy' }),
+          cta: locale === 'th' ? 'ดูรายการซื้อทั้งหมด' : 'View all buy listings',
+          items: homeSaleUnits,
+        }
+      : null,
+    homeRentUnits.length > 0
+      ? {
+          key: 'rent-units',
+          eyebrow: locale === 'th' ? 'ยูนิตเช่าพร้อมย้าย' : 'Move-in rental units',
+          title: locale === 'th' ? 'ถ้าโจทย์เป็นการย้ายมาอยู่ ให้เทียบยูนิตเช่าคู่กับภาพรวมทำเล' : 'If the brief is relocation, compare rental units alongside area context',
+          count: locale === 'th' ? `${homeRentUnits.length} รายการเช่า` : `${homeRentUnits.length} rental options`,
+          href: withLocaleQuery(locale, '/rent', { source: 'home_curated_units_rent' }),
+          cta: locale === 'th' ? 'ดูรายการเช่าทั้งหมด' : 'View all rentals',
+          items: homeRentUnits,
+        }
+      : null,
+  ].filter((group): group is {
+    key: string;
+    eyebrow: string;
+    title: string;
+    count: string;
+    href: string;
+    cta: string;
+    items: PropertyListItem[];
+  } => Boolean(group));
 
   function HomePathwaysSection() {
     return (
@@ -515,6 +557,60 @@ export default async function HomePage({
           <div className="home-curated-shell reveal">
             <div className="home-curated-stack">
               {showFeaturedProjectsSection ? <FeaturedProjectsSection embedded /> : null}
+              {homeUnitGroups.length > 0 ? (
+                <PublicSurfaceCard as="aside" tone="deep" className="home-segmentation-note" aria-label={locale === 'th' ? 'วิธีอ่านโครงการและยูนิต' : 'How to read projects and units'}>
+                  <p className="home-segmentation-note__title">
+                    {locale === 'th'
+                      ? 'เริ่มจากภาพรวมโครงการเพื่ออ่านทำเล ราคาเข้า และความเสี่ยงหลัก จากนั้นดูยูนิตที่ยังเปิดอยู่เพื่อเลือกทางไปต่อ'
+                      : 'Start with project context for area, entry price, and risk signals, then move into live units that can shape the next step.'}
+                  </p>
+                  <div className="home-segmentation-note__signals" aria-label={locale === 'th' ? 'ชั้นข้อมูลบนหน้าแรก' : 'Homepage data layers'}>
+                    <PublicChip as="span" size="sm" className="home-segmentation-note__signal">
+                      {locale === 'th' ? 'โครงการคัดแล้ว' : 'Curated projects'}
+                    </PublicChip>
+                    <PublicChip as="span" size="sm" className="home-segmentation-note__signal">
+                      {locale === 'th' ? 'ยูนิตซื้อ / เช่าที่เปิดอยู่' : 'Live buy / rent units'}
+                    </PublicChip>
+                    <PublicChip as="span" size="sm" className="home-segmentation-note__signal">
+                      {locale === 'th' ? 'ส่งต่อเข้าฟอร์มปรึกษา' : 'Advisor handoff ready'}
+                    </PublicChip>
+                  </div>
+                </PublicSurfaceCard>
+              ) : null}
+              {homeUnitGroups.length > 0 ? (
+                <div className="home-curated-block home-curated-block--units">
+                  <div className="home-unit-groups" role="list" aria-label={locale === 'th' ? 'ยูนิตซื้อและเช่าที่คัดมา' : 'Curated buy and rental units'}>
+                    {homeUnitGroups.map((group) => {
+                      const headingId = `home-unit-group-${group.key}`;
+                      return (
+                        <section key={group.key} className="home-unit-group" aria-labelledby={headingId}>
+                          <div className="home-unit-group__header">
+                            <div>
+                              <p className="home-unit-group__eyebrow">{group.eyebrow}</p>
+                              <h3 id={headingId} className="home-unit-group__title">{group.title}</h3>
+                            </div>
+                            <PublicChip as="span" size="sm" className="home-unit-group__count">{group.count}</PublicChip>
+                          </div>
+                          <div className="home-unit-group__grid">
+                            {group.items.map((property) => (
+                              <PropertyCard key={property.id} item={property} dict={dict} locale={locale} />
+                            ))}
+                          </div>
+                          <TrackedLink
+                            className="home-unit-group__route-link home-pathways-support__link"
+                            href={group.href}
+                            prefetch={false}
+                            eventType="cta_click"
+                            eventPayload={{ cta: 'home_curated_unit_group', from: 'home_curated_opportunities', target: group.key }}
+                          >
+                            {group.cta}
+                          </TrackedLink>
+                        </section>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </Container>
@@ -524,7 +620,7 @@ export default async function HomePage({
 
   function HomeTrustStripSection() {
     return (
-      <section className="home-trust-strip-section py-12 md:py-16 xl:py-16 2xl:py-20 bg-surface" aria-labelledby="home-trust-strip-title">
+      <section className="home-trust-strip-section home-trust-layer-section py-12 md:py-16 xl:py-16 2xl:py-20 bg-surface" aria-labelledby="home-trust-strip-title">
         <Container variant="wide">
           <PublicSurfaceCard as="div" tone="warm" className="home-trust-snapshot reveal">
             <PublicSectionHeader
@@ -545,6 +641,65 @@ export default async function HomePage({
               ))}
             </div>
           </PublicSurfaceCard>
+        </Container>
+      </section>
+    );
+  }
+
+  function HomeOwnerBridgeSection() {
+    const ownerCards = [
+      {
+        key: 'sell',
+        eyebrow: locale === 'th' ? 'สำหรับเจ้าของทรัพย์' : 'For owners',
+        title: dict.home.pathSell.title,
+        body: dict.home.pathSell.desc,
+        href: withLocaleQuery(locale, '/sell', { source: 'home_owner_bridge_sell' }),
+        label: dict.home.pathSell.cta,
+      },
+      {
+        key: 'rent',
+        eyebrow: locale === 'th' ? 'สำหรับปล่อยเช่าหรือย้ายมาอยู่' : 'For rent or relocation',
+        title: dict.rent.heroTitle,
+        body: dict.rent.heroSub,
+        href: withLocaleQuery(locale, '/rent', { source: 'home_owner_bridge_rent' }),
+        label: dict.rent.secondaryAction,
+      },
+    ];
+
+    return (
+      <section className="home-owner-section" aria-labelledby="home-owner-title">
+        <Container variant="wide">
+          <div className="home-owner-shell reveal">
+            <PublicSectionHeader
+              align="start"
+              className="home-owner-shell__header"
+              kicker={locale === 'th' ? 'ทางไปต่อที่ไม่ใช่การซื้อทันที' : 'Routes beyond an immediate purchase'}
+              kickerClassName="home-section-kicker"
+              title={locale === 'th' ? 'เก็บเส้นทางเจ้าของทรัพย์และผู้เช่าไว้ในเฟรมเดียวกัน' : 'Keep owner and rental routes in the same advisory frame'}
+              titleId="home-owner-title"
+              subtitle={locale === 'th'
+                ? 'ถ้าโจทย์ยังไม่ใช่การซื้อวันนี้ หน้านี้ยังพาไปยังการขาย การปล่อยเช่า หรือการย้ายมาอยู่ได้โดยไม่หลุดจากบริบทพัทยาเดิม'
+                : 'If the brief is not a purchase today, this bridge keeps selling, renting, and relocation paths connected to the same Pattaya context.'}
+            />
+            <div className="home-owner-grid" role="list" aria-label={locale === 'th' ? 'เส้นทางเจ้าของทรัพย์และผู้เช่า' : 'Owner and rental routes'}>
+              {ownerCards.map((card) => (
+                <TrackedLink
+                  key={card.key}
+                  className="home-owner-card card-interactive"
+                  href={card.href}
+                  prefetch={false}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'home_owner_bridge', from: 'home_owner_bridge', target: card.key }}
+                  role="listitem"
+                >
+                  <p className="home-pathway-card__eyebrow">{card.eyebrow}</p>
+                  <h3 className="home-owner-card__title">{card.title}</h3>
+                  <p className="home-owner-card__body">{card.body}</p>
+                  <span className="home-pathway-card__cta">{card.label}</span>
+                </TrackedLink>
+              ))}
+            </div>
+          </div>
         </Container>
       </section>
     );
@@ -676,6 +831,14 @@ export default async function HomePage({
     bottomCtaFormId,
     typeof composerBottomCta.primary_cta_url === 'string' ? composerBottomCta.primary_cta_url : undefined,
   );
+  const bottomCtaSecondaryLabel =
+    typeof composerBottomCta.secondary_cta_label === 'string' && composerBottomCta.secondary_cta_label.trim()
+      ? composerBottomCta.secondary_cta_label.trim()
+      : locale === 'th' ? 'ดูโครงการที่กำลังเปิดขาย' : 'Review Current Projects';
+  const bottomCtaSecondaryUrl =
+    typeof composerBottomCta.secondary_cta_url === 'string' && composerBottomCta.secondary_cta_url.trim()
+      ? composerBottomCta.secondary_cta_url.trim()
+      : withLocaleQuery(locale, '/projects', { source: 'home_bottom_secondary' });
   const bottomCtaTrustNote =
     typeof composerBottomCta.trust_note === 'string' && composerBottomCta.trust_note.trim()
       ? composerBottomCta.trust_note.trim()
@@ -803,6 +966,12 @@ export default async function HomePage({
         <HomePathwaysSection />
       </div>
 
+      {showTrustStripSection ? (
+        <div style={sectionOrderStyle('trust_micro_strip')}>
+          <HomeTrustStripSection />
+        </div>
+      ) : null}
+
       {showCuratedOpportunities ? (
         <Suspense fallback={<SectionCardSkeleton />}>
           <HomeCuratedOpportunitiesSection />
@@ -815,11 +984,9 @@ export default async function HomePage({
         </div>
       ) : null}
 
-      {showTrustStripSection ? (
-        <div style={sectionOrderStyle('trust_micro_strip')}>
-          <HomeTrustStripSection />
-        </div>
-      ) : null}
+      <div style={sectionOrderStyle('owner_bridge')}>
+        <HomeOwnerBridgeSection />
+      </div>
 
       {/* Premium CTA / Conversion Gate */}
       {isSectionEnabled('bottom_cta') ? (
@@ -829,9 +996,12 @@ export default async function HomePage({
         benefits={bottomCtaBenefits}
         primaryLabel={bottomCtaPrimaryLabel}
         primaryUrl={bottomCtaPrimaryUrl}
+        secondaryLabel={bottomCtaSecondaryLabel}
+        secondaryUrl={bottomCtaSecondaryUrl}
         trustNote={bottomCtaTrustNote}
         conversionNote={bottomCtaConversionNote}
         primaryEventPayload={{ cta: 'request_shortlist', from: 'home_bottom' }}
+        secondaryEventPayload={{ cta: 'browse_verified_projects', from: 'home_bottom' }}
         order={sectionOrderStyle('bottom_cta').order}
         sectionId="home-consultation-section"
         formSlot={(

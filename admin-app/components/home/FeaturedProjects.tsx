@@ -1,10 +1,7 @@
-import Link from 'next/link';
-
 import { pickRenderableLocalMedia } from '@/app/_lib/local-media';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import type { ProjectItem } from '@/app/_lib/public-api-server';
-import { LocalMediaImage } from '@/components/media/LocalMediaImage';
-import { PublicChip } from '@/components/public/PublicChip';
+import { ProjectCard } from '@/components/project/ProjectCard';
 import { PublicSectionHeader } from '@/components/public/PublicSectionHeader';
 
 type BadgeLabel = 'New' | 'Hot' | 'Beachfront';
@@ -302,94 +299,44 @@ export function FeaturedProjects({
           };
           const hasLocalMedia = Boolean(pickRenderableLocalMedia(media));
           const price = p.starting_price ? formatPrice(Number(p.starting_price), locale) : null;
-          const badges = extractBadgeSet(p);
+          const badges = extractBadgeSet(p).map((badge) => {
+            const key = badge.toLowerCase() as 'new' | 'hot' | 'beachfront';
+            return {
+              key: badge,
+              label: badgeLabels[key],
+            };
+          });
           const area = extractAreaLabel(p);
           const projectSummary = extractProjectSummary(p, area);
           const facts = extractProjectFacts(p);
           const signals = extractProjectSignals(p);
           const fallbackImage = PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length];
           const shouldPreloadMedia = index < HOME_PROJECT_MEDIA_PRELOAD_COUNT;
+
           return (
-            <Link
+            <ProjectCard
               key={p.id}
               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
+              name={p.name}
+              locale={locale}
+              media={media}
+              fallbackImage={fallbackImage}
+              area={area}
+              price={price}
+              summary={projectSummary}
+              badges={badges}
+              facts={facts}
+              signals={signals}
+              ctaLabel={labels.projectDetail}
+              ctaClassName="premium-project-card__cta"
+              hasLocalMedia={hasLocalMedia}
+              loading={shouldPreloadMedia ? 'eager' : 'lazy'}
+              fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}
+              quality={60}
+              unoptimized={false}
               prefetch={false}
-              className="premium-project-card reveal card-interactive public-surface-card public-surface-card--interactive public-surface-card--warm"
-            >
-              <div className="card-image premium-project-card__media">
-                <LocalMediaImage
-                  media={media}
-                  alt={p.name}
-                  altFallback={locale === 'th' ? `ภาพประกอบโครงการ ${p.name}` : `Project image for ${p.name}`}
-                  className="media-shell"
-                  imageClassName={`absolute inset-0 h-full w-full object-cover ${hasLocalMedia ? '' : 'premium-project-card__fallback-image'}`}
-                  fallbackSrc={fallbackImage}
-                  sizes="(max-width: 767px) 92vw, (max-width: 1279px) 48vw, 31vw"
-                  loading={shouldPreloadMedia ? 'eager' : 'lazy'}
-                  fetchPriority={shouldPreloadMedia ? 'low' : 'auto'}
-                  quality={60}
-                  unoptimized={false}
-                  ssrStartWithPrimary={shouldPreloadMedia}
-                />
-                <div className="premium-project-card__media-scrim" aria-hidden="true" />
-                {badges.length > 0 ? (
-                  <div className="premium-project-card__badges" aria-label={locale === 'th' ? 'ป้ายกำกับโครงการ' : 'Project badges'}>
-                    {badges.map((badge) => {
-                      const key = badge.toLowerCase() as 'new' | 'hot' | 'beachfront';
-                      return (
-                        <PublicChip key={badge} as="span" tone="accent" size="sm" className="premium-badge">
-                          {badgeLabels[key]}
-                        </PublicChip>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
-              <div className="card-content premium-project-card__body">
-                <div className="premium-project-card__header">
-                  <h3 className="card-title premium-project-card__title">{p.name}</h3>
-                  {area ? <p className="premium-project-card__area">{area}</p> : null}
-                </div>
-
-                {price ? (
-                  <div className="premium-project-card__price-row">
-                    <span className="premium-project-card__price-label">{labels.from}</span>
-                    <span className="premium-project-card__price-value">{price}</span>
-                  </div>
-                ) : null}
-
-                {signals.length > 0 ? (
-                  <div className="premium-project-card__signals" aria-label={locale === 'th' ? 'สัญญาณการตัดสินใจของโครงการ' : 'Project decision cues'}>
-                    {signals.map((signal) => (
-                      <PublicChip key={signal} as="span" size="sm" className="premium-project-card__signal">
-                        {signal}
-                      </PublicChip>
-                    ))}
-                  </div>
-                ) : null}
-
-                {projectSummary ? (
-                  <p className="premium-project-card__summary line-clamp-2">
-                    {projectSummary}
-                  </p>
-                ) : null}
-
-                {facts.length > 0 ? (
-                  <ul className="premium-project-card__facts" aria-label={locale === 'th' ? 'ข้อเท็จจริงของโครงการ' : 'Project facts'}>
-                    {facts.map((fact) => (
-                      <li key={fact} className="premium-project-card__fact-item">
-                        <span className="premium-project-card__fact-value text-left">{fact}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                <div className="premium-project-card__footer">
-                  <span className="premium-project-card__cta">
-                    {labels.projectDetail}
-                  </span>
-                </div>
-              </div>
-            </Link>
+              ssrStartWithPrimary={shouldPreloadMedia}
+            />
           );
         })}
         </div>

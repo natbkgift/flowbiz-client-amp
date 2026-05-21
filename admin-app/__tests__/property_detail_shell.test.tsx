@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import PropertyPage from '@/app/(site)/[locale]/property/[slug]/page';
 
 const propertyState = vi.hoisted(() => ({
-  mode: 'strong' as 'strong' | 'thin',
+  mode: 'strong' as 'strong' | 'thin' | 'missing' | 'noMedia' | 'manyImages' | 'rent',
 }));
 
 vi.mock('next/image', () => ({
@@ -26,6 +26,90 @@ vi.mock('@/app/_lib/public-api-server', async () => {
   return {
     ...actual,
     fetchPropertyBySlug: vi.fn(async () => {
+      if (propertyState.mode === 'rent') {
+        return {
+          id: 'property-rent',
+          slug: 'central-rent-ready',
+          title: 'Central Rent Ready 1BR',
+          address: 'Central Pattaya',
+          city: 'Pattaya',
+          price: 45000,
+          bedrooms: 1,
+          bathrooms: 1,
+          size: 42,
+          type: 'rent',
+          description: 'Complete rent condo fixture for property detail QA.',
+          cover_image: '/images/property-interior.png',
+          local_images: ['/images/property-interior.png'],
+          images: ['/images/condo-view.png'],
+        };
+      }
+
+      if (propertyState.mode === 'manyImages') {
+        return {
+          id: 'property-many-images',
+          slug: 'gallery-condo',
+          title: 'Gallery Condo With Many Images',
+          address: 'Wongamat',
+          city: 'Pattaya',
+          price: 24500000,
+          bedrooms: 3,
+          bathrooms: 3,
+          size: 142,
+          type: 'resale',
+          description: 'Sale condo fixture with a larger media set.',
+          cover_image: '/images/condo-view.png',
+          local_images: [
+            '/images/property-interior.png',
+            '/images/property-exterior.png',
+            '/images/property-pool.png',
+            '/images/project-overview.png',
+            '/images/area-guide-pattaya.png',
+            '/images/hero-banner.png',
+            '/images/villa-garden.png',
+          ],
+          images: [],
+        };
+      }
+
+      if (propertyState.mode === 'missing') {
+        return {
+          id: 'property-missing',
+          slug: 'missing-optional-condo',
+          title: 'Missing Optional Condo',
+          address: 'Pratumnak Hill',
+          city: 'Pattaya',
+          price: 7200000,
+          bedrooms: null,
+          bathrooms: null,
+          size: null,
+          type: 'resale',
+          description: null,
+          cover_image: null,
+          local_images: [],
+          images: ['/images/area-guide-pattaya.png'],
+        };
+      }
+
+      if (propertyState.mode === 'noMedia') {
+        return {
+          id: 'property-no-media',
+          slug: 'no-media-condo',
+          title: 'No Media Condo',
+          address: 'Naklua',
+          city: 'Pattaya',
+          price: 3300000,
+          bedrooms: 1,
+          bathrooms: 1,
+          size: 31,
+          type: 'resale',
+          description: 'Fallback media fixture.',
+          cover_image: null,
+          local_images: null,
+          images: null,
+        };
+      }
+
       if (propertyState.mode === 'thin') {
         return {
           id: 'property-thin',
@@ -161,5 +245,46 @@ describe('property detail shell', () => {
     expect(container.textContent ?? '').toContain('Azure Condo is a 2-bedroom resale unit');
     expect(container.textContent ?? '').toContain('should be read as a unit-level decision point');
     expect(container.textContent ?? '').not.toContain('Description —');
+  });
+
+  it('keeps no-media, missing-field, many-image, rent, and sale states renderable', async () => {
+    const cases: Array<{
+      mode: typeof propertyState.mode;
+      locale: 'en' | 'th';
+      expectGalleryStatus?: boolean;
+      expectManyThumbs?: boolean;
+      expectedPurpose?: 'buy' | 'rent';
+    }> = [
+      { mode: 'strong', locale: 'en', expectedPurpose: 'buy' },
+      { mode: 'rent', locale: 'en', expectedPurpose: 'rent' },
+      { mode: 'missing', locale: 'th', expectGalleryStatus: true, expectedPurpose: 'buy' },
+      { mode: 'noMedia', locale: 'en', expectGalleryStatus: true, expectedPurpose: 'buy' },
+      { mode: 'manyImages', locale: 'en', expectManyThumbs: true, expectedPurpose: 'buy' },
+    ];
+
+    for (const testCase of cases) {
+      propertyState.mode = testCase.mode;
+      const { container, unmount } = render(
+        await PropertyPage({
+          params: Promise.resolve({ locale: testCase.locale, slug: `${testCase.mode}-condo` }),
+        }),
+      );
+
+      const visibleClone = container.cloneNode(true) as HTMLElement;
+      visibleClone.querySelectorAll('script, style').forEach((node) => node.remove());
+      const visibleText = visibleClone.textContent ?? '';
+
+      expect(container.querySelector('#property-hero')).not.toBeNull();
+      expect(container.querySelector('#property-primary-actions')).not.toBeNull();
+      expect(visibleText).not.toMatch(/\b(undefined|null|NaN)\b/);
+      if (testCase.expectGalleryStatus) {
+        expect(container.querySelector('#property-gallery-status')).not.toBeNull();
+      }
+      if (testCase.expectManyThumbs) {
+        expect(container.querySelectorAll('.property-gallery__thumb').length).toBeGreaterThan(6);
+      }
+      expect((container.querySelector('#lead-purpose') as HTMLSelectElement | null)?.value).toBe(testCase.expectedPurpose);
+      unmount();
+    }
   });
 });

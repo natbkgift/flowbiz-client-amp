@@ -139,16 +139,21 @@ function classifyMismatch(label, href) {
   const safeHref = String(href || "").trim();
   if (!safeLabel || !safeHref) return null;
 
-  const isShortlistHandoffLabel = /(build|turn|request|ask|send).{0,24}shortlist|shortlist.{0,24}(team|brief|advisor|tour)/i.test(safeLabel);
-  const isContactLabel = /(advisor|consult|private tour|speak|contact|brief|talk|whatsapp|line|call|viewing plan|tour plan|ปรึกษา|ติดต่อ|นัดชม|โทร)/i.test(safeLabel)
-    || isShortlistHandoffLabel;
+  const hasHashTarget = /^#/.test(safeHref) || /^[a-z][a-z0-9+.-]*:\/\/[^#]+#/i.test(safeHref) || /^\/[^#]+#/i.test(safeHref);
+  const isShortlistHandoffLabel = /(build|turn|request|ask|send).{0,24}shortlist|shortlist.{0,24}(team|brief|advisor|tour)|รายการคัดไว้|(?:ทีม|ที่ปรึกษา).{0,16}คัด|คัด.{0,16}(?:กับทีม|ให้ทีม|ที่ปรึกษา)/i.test(safeLabel);
+  const isAdvisorHandoffLabel = /request.{0,24}guidance|guidance|pressure[- ]test|advisor|consult|brief|talk|contact|ขอคำแนะนำ|เช็กสมมติฐาน|ปรึกษา|ติดต่อ|ส่งรายละเอียด|ส่งข้อมูล|คุยกับ/i.test(safeLabel);
+  const isContactLabel = /(advisor|consult|private tour|speak|contact|brief|talk|whatsapp|line|call|viewing plan|tour plan|ปรึกษา|ติดต่อ|นัดชม|โทร|ส่งรายละเอียด|ส่งข้อมูล|คุยกับ|ให้ทีมคัด)/i.test(safeLabel)
+    || isShortlistHandoffLabel
+    || isAdvisorHandoffLabel;
   const isBrowseLabel = /(view|browse|inventory|details|project|listing|saved shortlist|shortlist-ready|ดู|รายการ|รายละเอียด|โครงการ)/i.test(safeLabel)
-    && !isShortlistHandoffLabel;
-  const isContactHref = /^#/.test(safeHref)
+    && !isShortlistHandoffLabel
+    && !isAdvisorHandoffLabel
+    && !isContactLabel;
+  const isContactHref = hasHashTarget
     || /^tel:/i.test(safeHref)
     || /wa\.me|line\.me/i.test(safeHref)
     || /\/contact\b/i.test(safeHref);
-  const isBrowseHref = /\/(buy|rent|projects|property|areas|developers)\b/i.test(safeHref);
+  const isBrowseHref = hasHashTarget || /\/(buy|rent|projects|property|areas|developers|shortlist|compare|smart-finder)\b/i.test(safeHref);
 
   if (isContactLabel && !isContactHref) {
     return `contact-label-mismatch:${safeHref}`;

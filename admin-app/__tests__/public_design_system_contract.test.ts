@@ -15,6 +15,7 @@ describe('public design system contract', () => {
     const tailwindConfig = read('tailwind.config.ts');
     const globals = read('app/globals.css');
     const foundationSpec = read('../docs/contracts/AMP_UI_FOUNDATION_SPEC_2026-04-08.md');
+    const siteLocaleLayout = read('app/(site)/[locale]/layout.tsx');
     const sharedTokens = read('components/public-system/tokens/publicUiTokens.ts');
     const sectionPrimitive = read('components/public-system/primitives/Section.tsx');
     const cardBasePrimitive = read('components/public-system/primitives/CardBase.tsx');
@@ -51,6 +52,14 @@ describe('public design system contract', () => {
     expect(tokens).toContain('--public-space-1: 8px;');
     expect(tokens).toContain('--public-space-4: 24px;');
     expect(tokens).toContain('--public-space-9: 96px;');
+    expect(tokens).toContain('--public-color-bone: #f8f4ea;');
+    expect(tokens).toContain('--public-color-ink: #14201f;');
+    expect(tokens).toContain('--public-color-teal: #0e3a3a;');
+    expect(tokens).toContain('--public-color-coral: #d96a4e;');
+    expect(tokens).toContain('--public-color-champagne: #c9a677;');
+    expect(tokens).toContain('--public-radius-lg: 16px;');
+    expect(tokens).toContain('--public-shadow-claude-card:');
+    expect(tokens).toContain('--public-type-display-family: var(--font-serif)');
     expect(tokens).toContain('--public-motion-fast: 180ms;');
     expect(tokens).toContain('--public-motion-base: 220ms;');
     expect(tokens).toContain('--public-font-weight-regular: 400;');
@@ -92,6 +101,9 @@ describe('public design system contract', () => {
     expect(primitives).toContain('background: var(--public-surface-signal);');
     expect(primitives).toContain('.btn-cta');
     expect(primitives).toContain('.public-section-header');
+    expect(primitives).toContain('.public-site-shell');
+    expect(primitives).toContain('.public-site-shell .btn-cta');
+    expect(primitives).toContain('.public-site-shell .mobile-cta');
     expect(primitives).toContain('.public-surface-card');
     expect(primitives).toContain('.public-chip');
     expect(primitives).toContain('.public-action-row');
@@ -113,6 +125,7 @@ describe('public design system contract', () => {
     expect(sectionHeaderComponent).toContain("'public-section-header'");
     expect(sectionHeaderComponent).toContain('section-title');
     expect(sectionHeaderComponent).toContain('section-subtitle');
+    expect(siteLocaleLayout).toContain('className="public-site-shell"');
 
     expect(foundationSpec).toContain('## Typography');
     expect(foundationSpec).toContain('## Content Rhythm');
@@ -131,6 +144,7 @@ describe('public design system contract', () => {
     const homeBottomCta = read('components/home/HomeBottomCta.tsx');
     const homeVideoCard = read('components/home/HomeVideoEmbedCard.tsx');
     const featuredProjects = read('components/home/FeaturedProjects.tsx');
+    const projectCard = read('components/project/ProjectCard.tsx');
     const propertyCard = read('components/cards/PropertyCard.tsx');
     const publicSectionHeader = read('components/public/PublicSectionHeader.tsx');
     const publicActionRow = read('components/public/PublicActionRow.tsx');
@@ -185,9 +199,11 @@ describe('public design system contract', () => {
     expect(homeVideoCard).toContain('type-small');
 
     expect(featuredProjects).toContain('PublicSectionHeader');
-    expect(featuredProjects).toContain('PublicChip');
-    expect(featuredProjects).toContain('public-surface-card--interactive');
-    expect(featuredProjects).toContain('premium-project-card__footer');
+    expect(featuredProjects).toContain('ProjectCard');
+    expect(projectCard).toContain('PublicChip');
+    expect(projectCard).toContain('LocalMediaImage');
+    expect(projectCard).toContain('public-surface-card--interactive');
+    expect(projectCard).toContain('premium-project-card__footer');
 
     expect(propertyCard).toContain('PublicSurfaceCard');
     expect(propertyCard).toContain('PublicActionRow');
@@ -232,17 +248,73 @@ describe('public design system contract', () => {
     expect(buyPage).toContain("from '@/components/public-system/primitives/Grid'");
     expect(buyPage).toContain("from '@/components/public-system/primitives/CardBase'");
 
+    expect(projectsPage).toContain("from '@/app/_lib/local-media'");
+    expect(projectsPage).toContain("from '@/components/project/ProjectCard'");
     expect(projectsPage).toContain("from '@/components/public-system/components/Button'");
     expect(projectsPage).toContain("from '@/components/public-system/components/CTAGroup'");
-    expect(projectsPage).toContain("from '@/components/public-system/primitives/CardBase'");
     expect(projectsPage).toContain("from '@/components/public-system/primitives/Section'");
     expect(projectsPage).toContain("from '@/components/public-system/patterns/SectionIntroBlock'");
+    expect(projectsPage).toContain('project-catalogue-toolbar');
+    expect(projectsPage).toContain('ProjectCard');
+    expect(projectsPage).toContain('pickRenderableLocalMedia');
 
     expect(contactPage).toContain("from '@/components/public-system/components/Button'");
     expect(contactPage).toContain("from '@/components/public-system/components/CTAGroup'");
     expect(contactPage).toContain("from '@/components/public-system/primitives/CardBase'");
     expect(contactPage).toContain("from '@/components/public-system/primitives/Section'");
     expect(contactPage).toContain("from '@/components/public-system/patterns/SectionIntroBlock'");
+    expect(contactPage).toContain('className="contact-page decision-page--confidence"');
+  });
+
+  it('extends the Phase 2 public shell across conversion routes without leaving the public scope', () => {
+    const primitives = read('styles/public-primitives.css');
+    const projectsPage = read('app/(site)/[locale]/projects/page.tsx');
+    const projectDetail = read('app/(site)/[locale]/projects/[slug]/page.tsx');
+    const listingGrid = read('components/listing/ListingGrid.tsx');
+    const contactPage = read('app/(site)/[locale]/contact/page.tsx');
+    const buyPage = read('app/(site)/[locale]/buy/page.tsx');
+
+    expect(primitives).toContain('Claude public shell phase 2');
+    expect(primitives).toContain('.public-site-shell .project-catalogue-toolbar');
+    expect(primitives).toContain('.public-site-shell .projects-page .premium-project-card');
+    expect(primitives).toContain('.public-site-shell .buy-page .property-card');
+    expect(primitives).toContain('.public-site-shell .contact-page .contact-form-shell .inquiry-form');
+    expect(primitives).toContain('.public-site-shell .decision-page--project .project-gallery');
+    expect(primitives).toContain('.public-site-shell .decision-page--confidence .public-hero__action--primary');
+
+    expect(projectsPage).toContain('ProjectCard');
+    expect(projectsPage).toContain('buildProjectMedia');
+    expect(projectsPage).not.toContain('project-catalogue-card__visual');
+    expect(projectDetail).toContain('project-gallery__status');
+    expect(listingGrid).toContain('PropertyCard');
+    expect(contactPage).toContain('contact-form-shell');
+    expect(buyPage).toContain('buy-closing-cta-panel');
+  });
+
+  it('extends the Phase 3B shell to property, rent, sell, shortlist, compare, and homepage cleanup surfaces', () => {
+    const primitives = read('styles/public-primitives.css');
+    const homePage = read('app/(site)/[locale]/page.tsx');
+    const propertyDetail = read('app/(site)/[locale]/property/[slug]/page.tsx');
+    const rentPage = read('app/(site)/[locale]/rent/page.tsx');
+    const sellPage = read('app/(site)/[locale]/sell/page.tsx');
+
+    expect(primitives).toContain('Claude public shell phase 3B');
+    expect(primitives).toContain('.public-site-shell .rent-page .property-card');
+    expect(primitives).toContain('.public-site-shell .decision-page--property .property-gallery');
+    expect(primitives).toContain('.public-site-shell .decision-page--shortlist .shortlist-item-card');
+    expect(primitives).toContain('.public-site-shell .decision-page--compare .compare-table-card');
+    expect(primitives).toContain('.public-site-shell .sell-page .inquiry-form');
+    expect(primitives).toContain('.public-site-shell .home-page .home-owner-card');
+
+    expect(homePage).toContain('HomeOwnerBridgeSection');
+    expect(homePage).toContain('home-trust-strip-section home-trust-layer-section');
+    expect(homePage).toContain('secondaryLabel={bottomCtaSecondaryLabel}');
+    expect(homePage).toContain("['owner_bridge', 6]");
+
+    expect(propertyDetail).toContain('PageOwnedMobileCTA');
+    expect(propertyDetail).toContain('property-gallery__status');
+    expect(rentPage).toContain('ListingGrid');
+    expect(sellPage).toContain('SellerForm');
   });
 
   it('keeps undecided listing prompts on shared surface and action primitives with Smart Finder handoff', () => {
@@ -410,19 +482,37 @@ describe('public design system contract', () => {
     const renderStart = homePage.indexOf('return (\n    <main');
     const renderBody = renderStart >= 0 ? homePage.slice(renderStart) : homePage;
 
-    expect(homePage).toMatch(/const defaultSectionOrder = \[\s*'hero',\s*'pathways',\s*'featured_projects',\s*'why_pattaya',\s*'trust_micro_strip',\s*'bottom_cta',\s*\]/);
-    expect(homePage).toContain("['featured_projects', 3]");
-    expect(homePage).toContain("['trust_micro_strip', 5]");
-    expect(homePage).toContain("['why_pattaya', 4]");
+    expect(homePage).toMatch(/const defaultSectionOrder = \[\s*'hero',\s*'pathways',\s*'trust_micro_strip',\s*'featured_projects',\s*'why_pattaya',\s*'owner_bridge',\s*'bottom_cta',\s*\]/);
+    expect(homePage).toContain("['trust_micro_strip', 3]");
+    expect(homePage).toContain("['featured_projects', 4]");
+    expect(homePage).toContain("['why_pattaya', 5]");
+    expect(homePage).toContain("['owner_bridge', 6]");
     expect(homePage).toContain("['pathways', 2]");
     expect(homePage).not.toContain('function HomeOwnerAdvisorySection()');
     expect(homePage).not.toContain('function HomeTeamCtaSection()');
 
     expect(renderBody.indexOf('HomePathwaysSection')).toBeLessThan(renderBody.indexOf('HomeCuratedOpportunitiesSection'));
+    expect(renderBody.indexOf('HomeTrustStripSection')).toBeLessThan(renderBody.indexOf('HomeCuratedOpportunitiesSection'));
     expect(renderBody.indexOf('HomeCuratedOpportunitiesSection')).toBeLessThan(renderBody.indexOf('HomeMarketClaritySection'));
-    expect(renderBody.indexOf('HomeMarketClaritySection')).toBeLessThan(renderBody.indexOf('HomeTrustStripSection'));
-    expect(renderBody.indexOf('HomeTrustStripSection')).toBeLessThan(renderBody.indexOf('HomeBottomCta'));
+    expect(renderBody.indexOf('HomeMarketClaritySection')).toBeLessThan(renderBody.indexOf('HomeOwnerBridgeSection'));
+    expect(renderBody.indexOf('HomeOwnerBridgeSection')).toBeLessThan(renderBody.indexOf('HomeBottomCta'));
+    expect(homePage).toContain('homeUnitGroups');
+    expect(homePage).toContain('home-segmentation-note');
+    expect(homePage).toContain('home-unit-group');
+    expect(homePage).toContain('home_curated_unit_group');
+    expect(homePage).toContain('<PropertyCard key={property.id} item={property} dict={dict} locale={locale} />');
     expect(renderBody).not.toContain('id="home-proof-process"');
+  });
+
+  it('keeps Phase 3C homepage IA fixes scoped to the public shell', () => {
+    const primitives = read('styles/public-primitives.css');
+
+    expect(primitives).toContain('Phase 3C: homepage IA stabilization');
+    expect(primitives).toContain('.public-site-shell .home-page .home-unit-group__grid');
+    expect(primitives).toContain('.public-site-shell .home-page .home-owner-section');
+    expect(primitives).toContain('.public-site-shell .home-page .home-bottom-cta');
+    expect(primitives).toContain('padding-bottom: clamp(12px, 2vw, 20px);');
+    expect(primitives).toContain('padding-top: clamp(32px, 4vw, 48px);');
   });
 
   it('keeps the home trust layer anchored on the lighter trust strip instead of proof/process blocks', () => {

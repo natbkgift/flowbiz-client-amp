@@ -1,19 +1,20 @@
 import type { Metadata } from 'next';
+import type { LocalMediaInput } from '@/app/_lib/local-media';
 import { makePageMetadata } from '@/app/_lib/i18n/metadata';
 import { getAdvisoryLabels, getAdvisoryProofs, withLocaleQuery } from '@/app/_lib/public-advisory';
 import { withLocale } from '@/app/_lib/i18n/routing';
-import { fetchProjects } from '@/app/_lib/public-api-server';
+import { fetchProjects, type ProjectItem } from '@/app/_lib/public-api-server';
 
+import { pickRenderableLocalMedia } from '@/app/_lib/local-media';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
+import { ProjectCard } from '@/components/project/ProjectCard';
 import { PublicAdvisoryHero } from '@/components/public/PublicAdvisoryHero';
 import { Button } from '@/components/public-system/components/Button';
 import { CTAGroup } from '@/components/public-system/components/CTAGroup';
-import { CardBase } from '@/components/public-system/primitives/CardBase';
 import { Grid } from '@/components/public-system/primitives/Grid';
 import { Section } from '@/components/public-system/primitives/Section';
 import { SectionIntroBlock } from '@/components/public-system/patterns/SectionIntroBlock';
 import { EmptyStateCard } from '@/components/ui/StateBlocks';
-import { LocalMediaImage } from '@/components/media/LocalMediaImage';
 
 export const revalidate = 300;
 
@@ -36,6 +37,16 @@ export async function generateMetadata(
 }
 
 const PROJECTS_FETCH_TIMEOUT_MS = 8000;
+const PROJECTS_PAGE_MEDIA_PRELOAD_COUNT = 2;
+const PROJECT_FALLBACK_IMAGES = [
+  '/images/project-overview.png',
+  '/images/condo-view.png',
+  '/images/property-exterior.png',
+  '/images/property-interior.png',
+  '/images/property-pool.png',
+  '/images/villa-garden.png',
+];
+
 type ProjectsLoadState =
   | { kind: 'loaded'; value: Awaited<ReturnType<typeof fetchProjects>> }
   | { kind: 'timeout' };
@@ -106,10 +117,16 @@ function localizeProjectStatus(locale: 'en' | 'th', value: string | null | undef
 
   if (locale === 'th') {
     if (normalized === 'published') return 'เปิดขาย';
+    if (normalized === 'under_construction' || normalized === 'under construction') return 'อยู่ระหว่างก่อสร้าง';
+    if (normalized === 'new_launch' || normalized === 'new launch') return 'เปิดตัวใหม่';
+    if (normalized === 'completed' || normalized === 'ready') return 'พร้อมอยู่';
     if (normalized === 'archived') return 'ปิดการขาย';
     return null;
   }
   if (normalized === 'published') return 'Available';
+  if (normalized === 'under_construction' || normalized === 'under construction') return 'Under construction';
+  if (normalized === 'new_launch' || normalized === 'new launch') return 'New launch';
+  if (normalized === 'completed' || normalized === 'ready') return 'Ready';
   if (normalized === 'archived') return 'Sold Out';
   return null;
 }
@@ -207,6 +224,14 @@ function extractProjectFacts(locale: 'en' | 'th', project: Record<string, unknow
   return [...new Set(facts)].slice(0, 2);
 }
 
+function buildProjectMedia(project: ProjectItem): LocalMediaInput {
+  return {
+    cover_image_url: project.cover_image_url ?? null,
+    hero_image_url: project.hero_image_url ?? null,
+    images: project.images ?? null,
+  };
+}
+
 export default async function ProjectsPage(props: { params: Promise<{ locale: string }> }) {
   const params = await props.params;
   const locale = normalizeLocale(params.locale);
@@ -243,6 +268,16 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
       luxuryProjectCount > 0 ? applyCountTemplate(copy.proofs.luxuryProjectsTemplate, luxuryProjectCount) : null,
       advisoryProofs[2] ?? null,
     ].filter((item): item is string => Boolean(item)).slice(0, 3);
+    const areaChips = [...new Set(sorted
+      .map((project) => localizeAreaLabel(locale, resolveProjectArea(project as unknown as Record<string, unknown>)))
+      .filter((item): item is string => Boolean(item))
+    )].slice(0, 3);
+    const catalogueChips = [
+      applyCountTemplate(copy.proofs.publishedProjectsTemplate, sorted.length),
+      liveEntryPrice ? `${copy.proofs.entryFromPrefix} ${formatCompactPrice(liveEntryPrice, locale)}` : null,
+      luxuryProjectCount > 0 ? applyCountTemplate(copy.proofs.luxuryProjectsTemplate, luxuryProjectCount) : null,
+      ...areaChips,
+    ].filter((item): item is string => Boolean(item)).slice(0, 5);
     const jsonLd = JSON.stringify(
       {
         '@context': 'https://schema.org',
@@ -291,11 +326,25 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
           }}
         />
         <Section className="projects-catalogue-section" container="wide">
-          <CTAGroup className="card-actions mb-4">
-            <Button href={withLocale(locale, '/buy')} prefetch={false} variant="tertiary">
-              {copy.browseListingsLabel}
-            </Button>
-          </CTAGroup>
+          <div className="project-catalogue-toolbar">
+            <div className="project-catalogue-toolbar__summary">
+              <span className="project-catalogue-toolbar__eyebrow">{copy.hero.eyebrow}</span>
+              <h2 className="project-catalogue-toolbar__title">{dict.nav.projects}</h2>
+              <p className="project-catalogue-toolbar__body">{copy.hero.supportNote}</p>
+            </div>
+            <div className="project-catalogue-toolbar__aside">
+              <div className="project-catalogue-toolbar__chips" aria-label={locale === 'th' ? 'ตัวกรองสรุปโครงการ' : 'Project summary filters'}>
+                {catalogueChips.map((chip) => (
+                  <span key={chip} className="project-catalogue-chip">{chip}</span>
+                ))}
+              </div>
+              <CTAGroup className="project-catalogue-toolbar__actions">
+                <Button href={withLocale(locale, '/buy')} prefetch={false} variant="tertiary">
+                  {copy.browseListingsLabel}
+                </Button>
+              </CTAGroup>
+            </div>
+          </div>
           <Grid columns={3} className="grid grid-3 projects-catalogue-grid">
             {sorted.map((p, index) => {
               const area = localizeAreaLabel(locale, resolveProjectArea(p as unknown as Record<string, unknown>)) || copy.card.areaFallback;
@@ -303,57 +352,31 @@ export default async function ProjectsPage(props: { params: Promise<{ locale: st
               const localizedStatus = localizeProjectStatus(locale, p.status);
               const summary = summarizeProject(locale, p as unknown as Record<string, unknown>);
               const facts = extractProjectFacts(locale, p as unknown as Record<string, unknown>);
+              const media = buildProjectMedia(p);
+              const price = formatCompactPrice(p.starting_price ?? null, locale);
+              const badges = [
+                localizedStatus ? { key: 'status', label: localizedStatus } : { key: 'status', label: copy.card.publishedStatus },
+                hasEntryPrice ? { key: 'entry', label: copy.card.entryLabel } : null,
+              ].filter((badge): badge is { key: string; label: string } => Boolean(badge)).slice(0, 2);
+              const signals = localizedStatus ? [`${copy.card.statusLabel}: ${localizedStatus}`] : [];
               return (
-                <CardBase
-                  as="article"
+                <ProjectCard
                   key={p.id}
-                  className="card catalogue-card project-catalogue-card"
-                  padding="none"
-                >
-                  <div className="card-image project-catalogue-card__visual">
-                    <LocalMediaImage
-                      media={{
-                        cover_image_url: p.cover_image_url,
-                        hero_image_url: p.hero_image_url,
-                        images: p.images,
-                      }}
-                      alt={p.name}
-                      className="media-shell project-catalogue-card__media"
-                      imageClassName="media-shell__img"
-                      aspectRatio="16 / 9"
-                    />
-                    <div className="project-catalogue-card__media-scrim" aria-hidden="true" />
-                    <div className="project-catalogue-card__chips">
-                      {area ? <span className="project-catalogue-card__chip">{area}</span> : null}
-                      {hasEntryPrice ? (
-                        <span className="project-catalogue-card__chip project-catalogue-card__chip--value">
-                          {`${copy.card.entryLabel} ${formatCompactPrice(p.starting_price ?? null, locale)}`}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="project-catalogue-card__copy">
-                    <div className="catalogue-card__eyebrow project-catalogue-card__eyebrow">
-                      {localizedStatus
-                        ? `${copy.card.statusLabel} • ${localizedStatus}`
-                        : copy.card.publishedStatus}
-                    </div>
-                    <h2 className="card-title project-catalogue-card__title">{p.name}</h2>
-                    {summary ? <p className="card-subtitle project-catalogue-card__summary">{summary}</p> : null}
-                    {facts.length > 0 ? (
-                      <div className="catalogue-card__meta project-catalogue-card__meta">
-                        {facts.map((fact) => (
-                          <span key={`${p.id}-${fact}`}>{fact}</span>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="card-actions project-catalogue-card__actions">
-                      <Button href={`/${locale}/projects/${p.slug}`} prefetch={false} variant="secondary">
-                        {copy.card.reviewAction}
-                      </Button>
-                    </div>
-                  </div>
-                </CardBase>
+                  href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
+                  name={p.name}
+                  locale={locale}
+                  media={media}
+                  fallbackImage={PROJECT_FALLBACK_IMAGES[index % PROJECT_FALLBACK_IMAGES.length]}
+                  area={area}
+                  price={price}
+                  summary={summary}
+                  badges={badges}
+                  facts={facts}
+                  signals={signals}
+                  ctaLabel={copy.card.reviewAction}
+                  hasLocalMedia={Boolean(pickRenderableLocalMedia(media))}
+                  shouldPreloadMedia={index < PROJECTS_PAGE_MEDIA_PRELOAD_COUNT}
+                />
               );
             })}
           </Grid>

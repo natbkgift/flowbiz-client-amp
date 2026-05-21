@@ -257,7 +257,7 @@ export function HomeHero({
             <PublicActionRow className="hero-cta-row home-hero-slider__actions" stackOnMobile>
               <TrackedLink
                 className={getPublicButtonClassName({
-                  variant: 'primary',
+                  variant: 'cta',
                   className: 'hero-cta hero-cta--primary',
                 })}
                 href={primaryCtaUrl}

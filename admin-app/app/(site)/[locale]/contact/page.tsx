@@ -551,7 +551,7 @@ export default async function ContactPage(
   });
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="contact-page decision-page--confidence">
       <Breadcrumbs
         items={[
           { label: dict.nav.home, href: `/${locale}` },
@@ -716,4 +716,3 @@ export default async function ContactPage(
     </main>
   );
 }
-

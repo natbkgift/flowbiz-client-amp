@@ -38,6 +38,64 @@
   --public-space-8: 80px;
   --public-space-9: 96px;
 
+  --public-space-claude-0: 4px;
+  --public-space-claude-1: 8px;
+  --public-space-claude-2: 12px;
+  --public-space-claude-3: 16px;
+  --public-space-claude-4: 20px;
+  --public-space-claude-5: 24px;
+  --public-space-claude-6: 32px;
+  --public-space-claude-7: 40px;
+  --public-space-claude-8: 48px;
+  --public-space-claude-9: 64px;
+  --public-space-claude-10: 80px;
+  --public-space-claude-11: 96px;
+
+  --public-color-bone: #f8f4ea;
+  --public-color-sand: #efe6d2;
+  --public-color-sand-soft: #f3ead9;
+  --public-color-sand-200: #e4d6b7;
+  --public-color-paper: #ffffff;
+  --public-color-paper-warm: #fdfaf2;
+  --public-color-ink: #14201f;
+  --public-color-ink-2: #2a3736;
+  --public-color-ink-3: #5b6764;
+  --public-color-ink-4: #8a938f;
+  --public-color-ink-5: #b6b8b1;
+  --public-color-line: #d8cdb4;
+  --public-color-line-soft: #e7ddc4;
+  --public-color-teal: #0e3a3a;
+  --public-color-teal-2: #1a5854;
+  --public-color-teal-3: #2c7a73;
+  --public-color-teal-pale: #d9e4e0;
+  --public-color-coral: #d96a4e;
+  --public-color-coral-2: #c4533a;
+  --public-color-coral-pale: #fae0d4;
+  --public-color-champagne: #c9a677;
+  --public-color-champagne-2: #a88656;
+  --public-color-champagne-pale: #f0e3cc;
+  --public-status-green: #2c7a3c;
+  --public-status-green-pale: #dbeed8;
+  --public-status-amber: #c08a1c;
+  --public-status-amber-pale: #f8ebcd;
+  --public-status-red: #b53a2c;
+  --public-status-red-pale: #f7d9d4;
+  --public-status-blue: #2e5d8f;
+  --public-status-blue-pale: #d6e2f0;
+
+  --public-radius-xs: 4px;
+  --public-radius-sm: 6px;
+  --public-radius-md: 10px;
+  --public-radius-lg: 16px;
+  --public-radius-xl: 22px;
+  --public-radius-2xl: 28px;
+  --public-radius-pill: 999px;
+
+  --public-shadow-claude-sm: 0 1px 2px rgba(20, 32, 31, 0.06), 0 1px 1px rgba(20, 32, 31, 0.04);
+  --public-shadow-claude-md: 0 6px 18px -8px rgba(20, 32, 31, 0.18), 0 2px 6px rgba(20, 32, 31, 0.06);
+  --public-shadow-claude-lg: 0 24px 48px -20px rgba(20, 32, 31, 0.25), 0 8px 18px -10px rgba(20, 32, 31, 0.08);
+  --public-shadow-claude-card: 0 1px 2px rgba(20, 32, 31, 0.04), 0 4px 12px -4px rgba(20, 32, 31, 0.06);
+
   --public-stack-gap-compact: var(--public-space-2);
   --public-stack-gap-default: var(--public-space-3);
   --public-stack-gap-relaxed: var(--public-space-5);
@@ -169,6 +227,9 @@
 
   --public-type-title-family: var(--font-serif), Georgia, 'Times New Roman', serif;
   --public-type-body-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
+  --public-type-display-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  --public-type-ui-family: var(--font-sans), 'Prompt', system-ui, sans-serif;
+  --public-type-mono-family: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 
   --public-type-h1-size: clamp(2.05rem, 3.2vw, 3.3rem);
   --public-type-h2-size: clamp(1.48rem, 2.05vw, 2.04rem);
