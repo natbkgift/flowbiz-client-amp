@@ -36,7 +36,7 @@ export default function ProjectDetailLoading() {
           <div className="public-hero">
             <div className="public-hero__content">
               <p className="public-hero__eyebrow">AMP Pattaya Advisory</p>
-              <h1 className="headline public-hero__headline">{copy.title}</h1>
+              <p className="headline public-hero__headline" aria-hidden="true">{copy.title}</p>
               <p className="subhead public-hero__subtitle">{copy.subtitle}</p>
               <div className="public-hero__actions cta-row">
                 <Link className="btn btn-cta" href={`${localePrefix}/contact`}>
