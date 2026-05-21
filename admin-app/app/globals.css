@@ -14666,6 +14666,12 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
 }
 
 @media (max-width: 767.98px) {
+  body.mobile-menu-open .mobile-cta,
+  body.mobile-menu-open .detail-mobile-cta,
+  body.mobile-menu-open .ai-widget-shell {
+    display: none;
+  }
+
   body:has(.mobile-cta--visible) .ai-widget-shell,
   body:has(.mobile-cta--visible) .ai-widget-shell--raised {
     bottom: calc(116px + env(safe-area-inset-bottom, 0px));
