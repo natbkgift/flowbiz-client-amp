@@ -58,7 +58,7 @@ export function HomeBottomCta({
       />
 
       <Container variant="wide">
-        <div className="pattern-split-grid">
+        <div className="pattern-split-grid home-bottom-cta__grid">
           {/* Left Column - Copy and Social Channels */}
           <div className="relative z-10">
             <span 

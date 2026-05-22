@@ -274,13 +274,13 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
             >
               {locale === 'th' ? 'โครงการ · เปิดใหม่ & พรีเซลล์' : 'Projects · New & off-plan'}
             </span>
-            <h1 className="font-serif font-normal text-3xl md:text-4xl lg:text-5xl mt-2 tracking-tight leading-tight">
+            <h2 className="font-serif font-normal text-3xl md:text-4xl lg:text-5xl mt-2 tracking-tight leading-tight">
               {locale === 'th' ? (
                 <>พบ {filteredAndSortedProjects.length} โครงการใน <em className="italic text-[var(--public-color-coral, #d96a4e)]">พัทยา</em></>
               ) : (
                 <>{filteredAndSortedProjects.length} projects across <em className="italic text-[var(--public-color-coral, #d96a4e)]">Pattaya</em></>
               )}
-            </h1>
+            </h2>
             <div className="mt-2.5">
               <Link
                 href={withLocale(locale, '/buy')}

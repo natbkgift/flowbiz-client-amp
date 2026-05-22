@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const path = require('node:path');
 const useMinimalConfig = process.env.NEXT_LOCAL_CONFIG_MINIMAL === '1';
-const localDistDir = process.env.NEXT_LOCAL_DIST_DIR?.trim();
+const localDistDir = process.env.NEXT_LOCAL_DIST_DIR?.trim()
+  ? path.relative(process.cwd(), path.resolve(process.cwd(), process.env.NEXT_LOCAL_DIST_DIR.trim())).replace(/\\/g, '/')
+  : undefined;
 const imageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? '')
   .split(',')
   .map((h) => h.trim())

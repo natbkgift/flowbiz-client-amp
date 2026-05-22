@@ -421,7 +421,7 @@ export default async function HomePage({
     },
   ];
   const showFeaturedProjectsSection = isSectionEnabled('featured_projects');
-  const showCuratedOpportunities = showFeaturedProjectsSection && homeRenderableProjects.length > 0;
+  const showCuratedOpportunities = showFeaturedProjectsSection;
   const curatedOpportunitiesOrder = sectionOrderStyle('featured_projects').order;
   const homeSaleUnits = homePropertiesSnapshot
     .filter((property) => property.slug && property.type !== 'rent')
@@ -543,7 +543,15 @@ export default async function HomePage({
       : (defaultProjects.length > 0
         ? defaultProjects.slice(0, MAX_HOME_FEATURED_PROJECTS)
         : renderableProjects.slice(0, MAX_HOME_FEATURED_PROJECTS));
-    if (featuredProjects.length === 0) return null;
+    if (featuredProjects.length === 0) {
+      return (
+        <div className="home-project-empty py-16 text-center" style={{ padding: '48px 24px', textAlign: 'center' }}>
+          <p className="font-serif text-lg" style={{ color: 'var(--public-color-text-muted, #737373)' }}>
+            {locale === 'th' ? 'ไม่มีโครงการแนะนำในขณะนี้' : 'No curated projects available at the moment.'}
+          </p>
+        </div>
+      );
+    }
     const featuredProjectsTitle =
       typeof composerFeaturedProjects.heading === 'string' && composerFeaturedProjects.heading.trim()
         ? composerFeaturedProjects.heading.trim()
@@ -782,8 +790,8 @@ export default async function HomePage({
     const isCustomSubcopy = whyPattayaSubcopy && whyPattayaSubcopy !== dict.home.insightSubtitle;
 
     return (
-      <section 
-        className="py-16 md:py-[64px] relative overflow-hidden mt-20" 
+      <section
+        className="home-market-section py-16 md:py-[64px] relative overflow-hidden mt-20"
         style={{ background: 'var(--public-color-ink, #14201f)', color: 'var(--public-color-bone, #f8f4ea)' }}
         aria-labelledby="home-market-title"
       >
@@ -791,7 +799,7 @@ export default async function HomePage({
           className="absolute top-0 right-0 w-[480px] h-[480px] pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(201,166,119,.18), transparent 60%)' }}
         />
-        <Container variant="wide" className="relative z-10 px-6 md:px-10">
+        <Container variant="wide" className="home-market-shell relative z-10 px-6 md:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-center">
             <div>
               <span className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--public-color-champagne)] opacity-100">
