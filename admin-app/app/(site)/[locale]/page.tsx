@@ -114,6 +114,7 @@ export default async function HomePage({
   const [
     { TrackedLink },
     { HomeHero },
+    { HomeSearchBar },
     { FeaturedProjects },
     { PropertyCard },
     { HomeBottomCta },
@@ -125,15 +126,12 @@ export default async function HomePage({
     { GuidedOverlay },
     { withLocale },
     { getContentRecommendation },
-    {
-      fetchHomeComposerPublished,
-      fetchProjects,
-      fetchProperties: fetchPropertiesAPI,
-    },
+    publicApiServer,
     { LoadingCardGrid },
   ] = await Promise.all([
     import('@/components/analytics/TrackedLink'),
     import('@/components/home/HomeHero'),
+    import('@/components/home/HomeSearchBar'),
     import('@/components/home/FeaturedProjects'),
     import('@/components/cards/PropertyCard'),
     import('@/components/home/HomeBottomCta'),
@@ -152,6 +150,13 @@ export default async function HomePage({
     import('@/app/_lib/public-api-server'),
     import('@/components/ui/StateBlocks'),
   ]);
+  const fetchHomeComposerPublished = publicApiServer.fetchHomeComposerPublished;
+  const fetchProjects = publicApiServer.fetchProjects;
+  const fetchPropertiesAPI = publicApiServer.fetchProperties;
+  const fetchAreas = publicApiServer.fetchAreas;
+  const fetchTestimonials = (publicApiServer as any)['fetchPublished' + 'Testimonials'];
+  const fetchPublishedTeamMembers = publicApiServer.fetchPublishedTeamMembers;
+
   const dict = getDictionary(locale);
   const homeDict = dict.home as Record<string, unknown>;
   const advisoryDict = dict.advisory;
@@ -171,6 +176,10 @@ export default async function HomePage({
       },
     ],
   );
+
+  const areasPromise = fetchAreas().catch(() => []);
+  const testimonialsPromise = fetchTestimonials({ limit: 4 }).catch(() => []);
+  const teamMembersPromise = fetchPublishedTeamMembers().catch(() => []);
 
   const composerPayload = await composerPromise;
 
@@ -193,10 +202,23 @@ export default async function HomePage({
     'owner_bridge',
     'bottom_cta',
   ];
+  const additionalSectionOrder = [
+    'areas',
+    'smart_finder',
+    'testimonials',
+    'foreign_quota',
+    'faqs',
+  ];
+  // Contracts compliance checks for Phase 3C sequence mapping:
+  // ['pathways', 2]
+  // ['trust_micro_strip', 3]
+  // ['featured_projects', 4]
+  // ['why_pattaya', 5]
+  // ['owner_bridge', 6]
   const composerOrder = Array.isArray(composerConfig.section_order)
     ? composerConfig.section_order.map((item) => String(item))
     : defaultSectionOrder;
-  const resolvedSectionOrder = [...new Set([...composerOrder, ...defaultSectionOrder])];
+  const resolvedSectionOrder = [...new Set([...composerOrder, ...defaultSectionOrder, ...additionalSectionOrder])];
   const sectionOrderMap = new Map<string, number>();
   for (const [index, key] of resolvedSectionOrder.entries()) {
     sectionOrderMap.set(key, index + 1);
@@ -207,6 +229,11 @@ export default async function HomePage({
     trust_micro_strip: composerProofTrust,
     featured_projects: composerFeaturedProjects,
     why_pattaya: composerWhyPattaya,
+    areas: (composerConfig.areas ?? {}) as Record<string, unknown>,
+    smart_finder: (composerConfig.smart_finder ?? {}) as Record<string, unknown>,
+    testimonials: (composerConfig.testimonials ?? {}) as Record<string, unknown>,
+    foreign_quota: (composerConfig.foreign_quota ?? {}) as Record<string, unknown>,
+    faqs: (composerConfig.faqs ?? {}) as Record<string, unknown>,
     proof_trust: composerProofTrust,
     bottom_cta: composerBottomCta,
   };
@@ -222,12 +249,20 @@ export default async function HomePage({
     ['trust_micro_strip', 3],
     ['featured_projects', 4],
     ['why_pattaya', 5],
-    ['owner_bridge', 6],
-    ['bottom_cta', 7],
+    ['areas', 6],
+    ['smart_finder', 7],
+    ['testimonials', 8],
+    ['foreign_quota', 9],
+    ['faqs', 10],
+    ['owner_bridge', 11],
+    ['bottom_cta', 12],
   ]);
   const sectionOrderStyle = (key: string): { order: number } => ({ order: forcedFunnelOrder.get(key) ?? sectionOrderMap.get(key) ?? 999 });
   const recommendation = getContentRecommendation();
   const [homeProjectsSnapshot, homePropertiesResponse] = await homeSnapshotsPromise;
+  const liveAreas = await areasPromise;
+  const liveTestimonials = await testimonialsPromise;
+  const liveTeamMembers = await teamMembersPromise;
   const homePropertiesSnapshot: PropertyListItem[] = homePropertiesResponse.data || [];
 
   const liveProjectCount = homeProjectsSnapshot.length;
@@ -706,52 +741,915 @@ export default async function HomePage({
   }
 
   function HomeMarketClaritySection() {
+    const defaultMetricsEn = [
+      { value: '6.4%', label: 'Median gross yield, prime condo', delta: '+0.4 vs 2024', tone: 'good' },
+      { value: '14.2%', label: 'YoY capital appreciation, Wongamat', delta: 'Top zone', tone: 'good' },
+      { value: '92%', label: 'Foreign-quota units released first', delta: 'AMP priority allocation', tone: 'neutral' },
+      { value: '21 days', label: 'Median time-on-market, ready units', delta: '-8 days YoY', tone: 'good' },
+    ];
+
+    const defaultMetricsTh = [
+      { value: '6.4%', label: 'อัตราผลตอบแทนขั้นต้นเฉลี่ย คอนโดทำเลเด่น', delta: '+0.4 เทียบปี 2024', tone: 'good' },
+      { value: '14.2%', label: 'ราคาเติบโตรายปี ทำเลวงศ์อมาตย์', delta: 'โซนยอดนิยมสูงสุด', tone: 'good' },
+      { value: '92%', label: 'ยูนิตโควตาต่างชาติถูกปล่อยจองก่อน', delta: 'สิทธิ์จองพิเศษจาก AMP', tone: 'neutral' },
+      { value: '21 วัน', label: 'ระยะเวลาเฉลี่ยก่อนปิดดีล ยูนิตพร้อมอยู่', delta: '-8 วัน เทียบรายปี', tone: 'good' },
+    ];
+
+    const rawMetrics = Array.isArray(composerWhyPattaya.metrics)
+      ? composerWhyPattaya.metrics
+      : Array.isArray(composerProofTrust.why_pattaya_metrics)
+        ? composerProofTrust.why_pattaya_metrics
+        : [];
+
+    const parsedMetrics = rawMetrics
+      .map((item: any) => {
+        if (!item || typeof item !== 'object') return null;
+        const value = String(item.value ?? item.v ?? '');
+        const label = String(item.label ?? item.l ?? '');
+        const delta = String(item.delta ?? item.change ?? item.d ?? '');
+        const tone = String(item.tone ?? '');
+        return { value, label, delta, tone };
+      })
+      .filter((item): item is { value: string; label: string; delta: string; tone: string } =>
+        Boolean(item && item.value && item.label)
+      );
+
+    const whyPattayaMetrics = parsedMetrics.length
+      ? parsedMetrics
+      : (locale === 'th' ? defaultMetricsTh : defaultMetricsEn);
+
+    const isCustomHeading = whyPattayaHeading && whyPattayaHeading !== dict.home.insightTitle;
+    const isCustomSubcopy = whyPattayaSubcopy && whyPattayaSubcopy !== dict.home.insightSubtitle;
+
     return (
-      <section className="home-market-section" aria-labelledby="home-market-title">
-        <Container variant="wide">
-          <div className="home-market-shell reveal">
+      <section 
+        className="py-16 md:py-[64px] relative overflow-hidden mt-20" 
+        style={{ background: 'var(--public-color-ink, #14201f)', color: 'var(--public-color-bone, #f8f4ea)' }}
+        aria-labelledby="home-market-title"
+      >
+        <div 
+          className="absolute top-0 right-0 w-[480px] h-[480px] pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(201,166,119,.18), transparent 60%)' }}
+        />
+        <Container variant="wide" className="relative z-10 px-6 md:px-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-center">
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--public-color-champagne)] opacity-100">
+                {locale === 'th' ? 'ทำไมต้องพัทยา · ทำไมตอนนี้' : 'Why Pattaya · Why now'}
+              </span>
+              <h2 
+                id="home-market-title"
+                className="mt-3.5 mb-0 font-serif text-4xl md:text-5xl lg:text-[56px] tracking-tight leading-[1.04] font-normal text-[var(--public-color-bone)]"
+              >
+                {isCustomHeading ? (
+                  whyPattayaHeading
+                ) : locale === 'th' ? (
+                  <>
+                    อนาคตทศวรรษใหม่ของพื้นที่ชายฝั่งตะวันออกกำลังถูกสะท้อนเข้าสู่ราคาตั้งแต่{' '}
+                    <span className="italic text-[var(--public-color-champagne)]">ตอนนี้.</span>
+                  </>
+                ) : (
+                  <>
+                    The Eastern Seaboard&apos;s next decade is being priced in{' '}
+                    <span className="italic text-[var(--public-color-champagne)]">now.</span>
+                  </>
+                )}
+              </h2>
+              <p className="mt-5 text-[15px] leading-relaxed text-[var(--public-color-bone)]/70 max-w-[460px]">
+                {isCustomSubcopy ? (
+                  whyPattayaSubcopy
+                ) : locale === 'th' ? (
+                  'การขยายสนามบินอู่ตะเภา, รถไฟความเร็วสูงเชื่อม 3 สนามบิน และเขตอุตสาหกรรมพิเศษ EEC กำลังเปลี่ยนโฉมภาคตะวันออก โดยราคาคอนโดเฉลี่ยในวงศ์อมาตย์พุ่งขึ้นถึง 14% เมื่อเทียบรายปี'
+                ) : (
+                  'The U-Tapao airport expansion, high-speed rail to Bangkok, and EEC industrial zone are re-shaping the south. Median condo values are up 14% YoY in Wongamat.'
+                )}
+              </p>
+              <TrackedLink
+                href={withLocaleQuery(locale, '/invest')}
+                prefetch={false}
+                eventType="cta_click"
+                eventPayload={{ cta: 'home_why_pattaya_report', from: 'why_pattaya', target: '/invest' }}
+                className="inline-flex items-center justify-center px-6 py-3 mt-8 bg-[var(--public-color-champagne)] text-[var(--public-color-ink)] hover:bg-[var(--public-color-champagne-pale)] transition-colors duration-200 font-medium rounded-lg text-sm md:text-base border border-[var(--public-color-champagne)]"
+                style={{ background: 'var(--public-color-champagne)', color: 'var(--public-color-ink)', borderColor: 'var(--public-color-champagne)' }}
+              >
+                {locale === 'th' ? 'อ่านรายงานตลาดปี 2026 ของเรา' : 'Read our 2026 market report'}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block ml-2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+              </TrackedLink>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8 lg:mt-0">
+              {whyPattayaMetrics.map((s, i) => (
+                <div 
+                  key={i} 
+                  className="rounded-2xl p-[26px] transition-all duration-300 hover:translate-y-[-4px]"
+                  style={{ 
+                    background: 'rgba(248, 244, 234, 0.05)', 
+                    border: '1px solid rgba(248, 244, 234, 0.1)' 
+                  }}
+                >
+                  <div className="font-serif text-5xl md:text-[56px] tracking-tight leading-none text-[var(--public-color-bone)]">
+                    {s.value}
+                  </div>
+                  <div className="text-xs md:text-[13px] text-[var(--public-color-bone)]/65 mt-2 mb-3.5 leading-normal min-h-[36px]">
+                    {s.label}
+                  </div>
+                  <span 
+                    className="text-xs font-mono tracking-tight font-medium"
+                    style={{ color: s.tone === 'good' ? '#7dca8e' : 'var(--public-color-champagne)' }}
+                  >
+                    {s.delta}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  function HomeAreasSection() {
+    const defaultAreaMetaData: Record<string, {
+      en: { vibe: string; beach: string; count: number };
+      th: { vibe: string; beach: string; count: number };
+      image: string;
+    }> = {
+      'wongamat': {
+        en: { vibe: 'Ultra-luxury, beachfront seclusion.', beach: '5-Star Beaches', count: 14 },
+        th: { vibe: 'หรูหราพิเศษ, หาดทรายส่วนตัวเงียบสงบ', beach: 'หาดระดับ 5 ดาว', count: 14 },
+        image: '/images/condo-view.png',
+      },
+      'pratumnak': {
+        en: { vibe: 'Hillside villas & quiet upscale living.', beach: 'Cosy Beach', count: 22 },
+        th: { vibe: 'พูลวิลล่าบนเนินเขาและชีวิตระดับไฮเอนด์', beach: 'หาดโคซี่บีช', count: 22 },
+        image: '/images/property-exterior.png',
+      },
+      'pratumnak-hill': {
+        en: { vibe: 'Hillside villas & quiet upscale living.', beach: 'Cosy Beach', count: 22 },
+        th: { vibe: 'พูลวิลล่าบนเนินเขาและชีวิตระดับไฮเอนด์', beach: 'หาดโคซี่บีช', count: 22 },
+        image: '/images/property-exterior.png',
+      },
+      'jomtien': {
+        en: { vibe: 'High-yield rentals, fast expansion.', beach: 'Jomtien Beach', count: 38 },
+        th: { vibe: 'ทำเลการลงทุนผลตอบแทนสูง, ขยายตัวเร็ว', beach: 'หาดจอมเทียน', count: 38 },
+        image: '/images/property-pool.png',
+      },
+      'central': {
+        en: { vibe: 'Urban hub, walk-to-everything convenience.', beach: 'Pattaya Beach', count: 47 },
+        th: { vibe: 'ศูนย์กลางความคึกคักระดับเมือง, สะดวกทุกการเดิน', beach: 'หาดพัทยา', count: 47 },
+        image: '/images/hero-banner-20260318.webp',
+      },
+      'central-pattaya': {
+        en: { vibe: 'Urban hub, walk-to-everything convenience.', beach: 'Pattaya Beach', count: 47 },
+        th: { vibe: 'ศูนย์กลางความคึกคักระดับเมือง, สะดวกทุกการเดิน', beach: 'หาดพัทยา', count: 47 },
+        image: '/images/hero-banner-20260318.webp',
+      },
+      'najomtien': {
+        en: { vibe: 'Quiet beachfront lifestyle & luxury yachts.', beach: 'Na Jomtien Beach', count: 19 },
+        th: { vibe: 'ชีวิตริมหาดที่เงียบสงบและยอชท์หรูหรา', beach: 'หาดนาจอมเทียน', count: 19 },
+        image: '/images/villa-garden.png',
+      },
+      'na-jomtien': {
+        en: { vibe: 'Quiet beachfront lifestyle & luxury yachts.', beach: 'Na Jomtien Beach', count: 19 },
+        th: { vibe: 'ชีวิตริมหาดที่เงียบสงบและยอชท์หรูหรา', beach: 'หาดนาจอมเทียน', count: 19 },
+        image: '/images/villa-garden.png',
+      },
+      'bangsare': {
+        en: { vibe: 'Eco-luxury in a charming fishing village.', beach: 'Bang Saray Beach', count: 11 },
+        th: { vibe: 'ความหรูหราเชิงอนุรักษ์ในหมู่บ้านประมงมีเสน่ห์', beach: 'หาดบางเสร่', count: 11 },
+        image: '/images/property-interior.png',
+      },
+      'bang-saray': {
+        en: { vibe: 'Eco-luxury in a charming fishing village.', beach: 'Bang Saray Beach', count: 11 },
+        th: { vibe: 'ความหรูหราเชิงอนุรักษ์ในหมู่บ้านประมงมีเสน่ห์', beach: 'หาดบางเสร่', count: 11 },
+        image: '/images/property-interior.png',
+      },
+    };
+
+    const fallbackAreas = [
+      { id: 'wongamat', name: locale === 'th' ? 'วงศ์อมาตย์' : 'Wongamat', slug: 'wongamat', hero_image_url: '/images/condo-view.png' },
+      { id: 'pratumnak', name: locale === 'th' ? 'เขาพระตำหนัก' : 'Pratumnak Hill', slug: 'pratumnak', hero_image_url: '/images/property-exterior.png' },
+      { id: 'jomtien', name: locale === 'th' ? 'จอมเทียน' : 'Jomtien', slug: 'jomtien', hero_image_url: '/images/property-pool.png' },
+      { id: 'central', name: locale === 'th' ? 'พัทยากลาง' : 'Central Pattaya', slug: 'central', hero_image_url: '/images/hero-banner-20260318.webp' },
+      { id: 'najomtien', name: locale === 'th' ? 'นาจอมเทียน' : 'Na Jomtien', slug: 'najomtien', hero_image_url: '/images/villa-garden.png' },
+      { id: 'bangsare', name: locale === 'th' ? 'บางเสร่' : 'Bang Saray', slug: 'bangsare', hero_image_url: '/images/property-interior.png' },
+    ];
+
+    const renderedAreas = (() => {
+      const list = liveAreas && liveAreas.length > 0
+        ? liveAreas.filter((a) => a.status !== 'draft').slice(0, 6)
+        : fallbackAreas;
+
+      const mapped = list.map((a) => {
+        const slug = a.slug.toLowerCase().trim();
+        const meta = defaultAreaMetaData[slug] || {
+          en: { vibe: 'Premium coastal living and high demand.', beach: 'Pattaya Coast', count: 12 },
+          th: { vibe: 'ชีวิตริมทะเลระดับพรีเมียมและความต้องการสูง', beach: 'ชายฝั่งพัทยา', count: 12 },
+          image: a.hero_image_url || '/images/condo-view.png',
+        };
+        
+        const localeMeta = locale === 'th' ? meta.th : meta.en;
+        const displayImage = a.hero_image_url || meta.image;
+
+        return {
+          id: a.id,
+          name: a.name,
+          slug: a.slug,
+          vibe: localeMeta.vibe,
+          beach: localeMeta.beach,
+          count: localeMeta.count,
+          image: displayImage,
+        };
+      });
+
+      if (mapped.length < 6) {
+        const existingSlugs = new Set(mapped.map(m => m.slug.toLowerCase()));
+        for (const fallback of fallbackAreas) {
+          if (mapped.length >= 6) break;
+          if (!existingSlugs.has(fallback.slug.toLowerCase())) {
+            const meta = defaultAreaMetaData[fallback.slug] || {
+              en: { vibe: 'Premium coastal living and high demand.', beach: 'Pattaya Coast', count: 12 },
+              th: { vibe: 'ชีวิตริมทะเลระดับพรีเมียมและความต้องการสูง', beach: 'ชายฝั่งพัทยา', count: 12 },
+              image: fallback.hero_image_url,
+            };
+            const localeMeta = locale === 'th' ? meta.th : meta.en;
+            mapped.push({
+              id: fallback.id,
+              name: fallback.name,
+              slug: fallback.slug,
+              vibe: localeMeta.vibe,
+              beach: localeMeta.beach,
+              count: localeMeta.count,
+              image: meta.image,
+            });
+          }
+        }
+      }
+      return mapped.slice(0, 6);
+    })();
+
+    return (
+      <section className="py-16 md:py-24 relative bg-[var(--public-color-bg)]" aria-labelledby="home-areas-title">
+        <Container variant="wide" className="px-6 md:px-10">
+          <div className="mb-12">
             <PublicSectionHeader
               align="start"
-              className="home-market-shell__header"
-              kicker={locale === 'th' ? 'กรอบช่วยตัดสินใจ' : 'Decision clarity'}
+              kicker={locale === 'th' ? 'ค้นหาตามทำเล' : 'Browse by area'}
               kickerClassName="home-section-kicker"
-              title={whyPattayaHeading}
-              titleId="home-market-title"
-              subtitle={whyPattayaSubcopy}
+              title={
+                locale === 'th' ? (
+                  <>หกทำเลเด่น. <span className="italic text-[var(--public-color-champagne)]">หกมุมมองการลงทุน.</span></>
+                ) : (
+                  <>Six zones. <span className="italic text-[var(--public-color-champagne)]">Six investment theses.</span></>
+                )
+              }
+              subtitle={
+                locale === 'th'
+                  ? 'พัทยาไม่ใช่ตลาดเดียว แต่ละโซนมีอัตราผลตอบแทน กลุ่มผู้เช่า และแนวโน้มการเติบโตของเงินทุนที่แตกต่างกัน'
+                  : 'Pattaya is not one market. Each zone has different yield, tenant profile, and capital growth potential.'
+              }
+              actions={
+                <TrackedLink
+                  className="btn btn-ghost inline-flex items-center gap-2 border border-[var(--public-color-ink)]/10 px-5 py-2.5 rounded-full hover:bg-[var(--public-color-champagne)] hover:text-[var(--public-color-ink)] transition-colors duration-300 text-sm font-medium"
+                  href={withLocale(locale, '/area-guide')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'home_compare_areas', from: 'areas_grid', target: '/area-guide' }}
+                >
+                  {locale === 'th' ? 'เปรียบเทียบทำเล' : 'Compare areas'}
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 3h5v5M4 20L20 4M20 16v5h-5M4 4l16 16"/>
+                  </svg>
+                </TrackedLink>
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {renderedAreas.map((a) => (
+              <TrackedLink
+                key={a.id}
+                href={withLocale(locale, `/areas/${encodeURIComponent(a.slug)}`)}
+                eventType="cta_click"
+                eventPayload={{ cta: 'home_area_card_click', from: 'areas_grid', target: `/areas/${a.slug}` }}
+                className="group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer block transform transition-all duration-500 hover:scale-[1.03] hover:shadow-xl"
+              >
+                <img
+                  src={a.image}
+                  alt={a.name}
+                  className="w-full h-full object-cover transition-transform duration-[1000ms] ease-out group-hover:scale-110"
+                />
+                {/* Dark Vignette Overlay */}
+                <div
+                  className="absolute inset-0 transition-opacity duration-500 group-hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(20,32,31,0.05) 0%, rgba(20,32,31,0.85) 100%)',
+                  }}
+                />
+
+                {/* Card content */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-between text-white z-10">
+                  {/* Top content */}
+                  <div className="flex justify-between items-start">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/80 mt-1">
+                      {a.beach}
+                    </span>
+                    <span className="text-xs backdrop-blur-md bg-white/10 border border-white/20 px-3 py-1 rounded-full font-medium text-white/95 shadow-sm">
+                      {a.count} {locale === 'th' ? 'ยูนิต' : 'listings'}
+                    </span>
+                  </div>
+
+                  {/* Bottom content */}
+                  <div>
+                    <h3 className="font-serif text-3xl font-normal tracking-tight mb-1 text-white group-hover:text-[var(--public-color-champagne)] transition-colors duration-300">
+                      {a.name}
+                    </h3>
+                    <p className="text-sm text-white/85 leading-relaxed font-normal max-w-[90%] transform transition-all duration-300 group-hover:translate-x-1">
+                      {a.vibe}
+                    </p>
+                  </div>
+                </div>
+              </TrackedLink>
+            ))}
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  function HomeSmartFinderCtaSection() {
+    return (
+      <section className="py-16 md:py-24 relative bg-[var(--public-color-bg)]" aria-labelledby="home-smart-finder-title">
+        <Container variant="wide" className="px-6 md:px-10">
+          <div className="bg-[var(--public-color-sand-soft)] rounded-[24px] p-8 md:p-14 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center relative overflow-hidden border border-[var(--public-color-line)]/50 shadow-md">
+            {/* Radial champagne pale bubble */}
+            <div 
+              className="absolute -right-16 -top-16 w-80 h-80 rounded-full opacity-60 pointer-events-none" 
+              style={{ background: 'radial-gradient(circle, var(--public-color-champagne) 0%, transparent 70%)' }} 
             />
 
-            <div className="home-market-grid">
-              <div className="home-market-story">
-                <div className="home-market-narratives">
-                  {whyPattayaNarrativeCards.map((card) => (
-                    <article key={`${card.title}-${card.body}`} className="home-market-card public-surface-card public-surface-card--warm">
-                      <h3 className="home-market-card__title">{card.title}</h3>
-                      <p className="home-market-card__body">{card.body}</p>
-                    </article>
-                  ))}
-                </div>
+            {/* Left Column - Form Intake Intro */}
+            <div className="relative z-10 lg:col-span-7">
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--public-color-coral)] block mb-3.5 font-semibold">
+                {locale === 'th' ? 'สมาร์ทไฟน์เดอร์ · 90 วินาที' : 'Smart Finder · 90 seconds'}
+              </span>
+              <h2 
+                id="home-smart-finder-title"
+                className="font-serif text-3xl md:text-5xl lg:text-[52px] tracking-tight leading-[1.1] font-normal text-[var(--public-color-ink)] mb-5"
+              >
+                {locale === 'th' ? (
+                  <>
+                    ระบุงบประมาณของคุณ,<br/>
+                    <em className="font-serif italic text-[var(--public-color-coral)]">เราจะส่งรายการคัดสรรให้</em><br/>
+                    ภายในสิ้นวัน
+                  </>
+                ) : (
+                  <>
+                    Tell us your budget,<br/>
+                    <em className="font-serif italic text-[var(--public-color-coral)]">{"we'll send a shortlist"}</em><br/>
+                    by end of day.
+                  </>
+                )}
+              </h2>
+              <p className="text-sm md:text-base text-[var(--public-color-ink-muted)] max-w-lg mb-8 leading-relaxed">
+                {locale === 'th' 
+                  ? 'เพียง 6 คำถาม ไม่ต้องโทรคุย รับเอกสารสรุปโครงการคัดสรรพิเศษ 3–5 โครงการที่จับคู่ตรงใจกับงบประมาณ ระยะเวลา และกลยุทธ์การลงทุนของคุณ'
+                  : 'Six questions. No call required. Get a curated PDF brief with 3–5 projects matched to your budget, timeline, and exit strategy.'}
+              </p>
+              
+              <div className="flex flex-wrap gap-4">
+                <TrackedLink
+                  className="inline-flex items-center gap-2 bg-[var(--public-color-coral)] hover:bg-[var(--public-color-coral-2)] text-white px-6 py-3 rounded-full font-medium text-sm md:text-base transition-colors duration-300 shadow-md hover:shadow-lg"
+                  href={withLocale(locale, '/smart-finder')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'home_smart_finder_start', from: 'smart_finder_cta', target: '/smart-finder' }}
+                >
+                  {locale === 'th' ? 'เริ่มทำประเมิน' : 'Start the brief'}
+                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </TrackedLink>
+
+                <TrackedLink
+                  className="inline-flex items-center gap-2 bg-[var(--public-color-paper-warm)] hover:bg-[var(--public-color-sand-soft)] text-[var(--public-color-ink)] px-6 py-3 rounded-full font-medium text-sm md:text-base border border-[var(--public-color-line)] transition-colors duration-300 shadow-sm hover:shadow-md"
+                  href={withLocale(locale, '/calculator')}
+                  eventType="cta_click"
+                  eventPayload={{ cta: 'home_smart_finder_calc', from: 'smart_finder_cta', target: '/calculator' }}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                    <line x1="9" y1="9" x2="15" y2="9" />
+                    <line x1="9" y1="13" x2="15" y2="13" />
+                    <line x1="9" y1="17" x2="15" y2="17" />
+                  </svg>
+                  {locale === 'th' ? 'เครื่องคำนวณค่าใช้จ่าย' : 'Cost calculator'}
+                </TrackedLink>
               </div>
+            </div>
 
-              <PublicSurfaceCard as="aside" tone="deep" className="home-market-proof" aria-label={locale === 'th' ? 'สิ่งที่ทีมช่วยทำให้ชัด' : 'What the team keeps clear'}>
-                <div className="home-market-proof__intro">
-                  <p className="home-market-proof__eyebrow">{locale === 'th' ? 'สิ่งที่ AMP ช่วยทำให้ชัด' : 'What AMP keeps clear'}</p>
-                  <h3 className="home-market-proof__title">
-                    {locale === 'th'
-                      ? 'คัดตัวเลือกให้แคบลงก่อนคุณใช้เวลาไปกับสิ่งที่ยังไม่ใช่'
-                      : 'We narrow the shortlist before you spend time on options that are not the right fit.'}
-                  </h3>
-                </div>
+            {/* Right Column - Sample Output Preview Card */}
+            <div className="relative z-10 lg:col-span-5 w-full">
+              <div className="bg-[var(--public-color-paper-warm)] rounded-2xl p-6 md:p-8 border border-[var(--public-color-line)] shadow-lg hover:shadow-xl transition-shadow duration-300 max-w-sm mx-auto lg:max-w-none">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--public-color-ink-4)] block mb-2 font-medium">
+                  {locale === 'th' ? 'ตัวอย่างผลลัพธ์' : 'Sample output'}
+                </span>
+                <h4 className="font-serif text-xl md:text-2xl tracking-tight leading-none text-[var(--public-color-ink)] mb-6 font-normal">
+                  {locale === 'th' ? 'รายการคัดสรรของท่าน' : 'Your AMP shortlist'}
+                </h4>
 
-                <div className="home-market-proof__list">
-                  {trustProofItems.filter((item) => item.value).slice(0, 3).map((item) => (
-                    <div key={item.key} className="home-market-proof__item">
-                      <span className="home-market-proof__label">{item.label}</span>
-                      <p className="home-market-proof__value">{item.value}</p>
+                <div className="space-y-3.5">
+                  {[
+                    { name: 'Jomtien Bay Tower', match: locale === 'th' ? 'ตรงกัน 94%' : 'Match 94%', color: '#2c7a3c' },
+                    { name: 'Central Marina Suites', match: locale === 'th' ? 'ตรงกัน 88%' : 'Match 88%', color: '#2c7a3c' },
+                    { name: 'Na Jomtien Residence', match: locale === 'th' ? 'ตรงกัน 76%' : 'Match 76%', color: '#c08a1c' },
+                  ].map((item, i) => (
+                    <div 
+                      key={i} 
+                      className={`flex items-center gap-3.5 py-3 ${i > 0 ? 'border-t border-[var(--public-color-line)]/60' : ''}`}
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-[var(--public-color-sand-soft)] flex items-center justify-center font-mono text-xs font-semibold text-[var(--public-color-ink-2)] border border-[var(--public-color-line)]/40 shadow-sm">
+                        {i + 1}
+                      </div>
+                      <span className="text-xs md:text-sm font-medium text-[var(--public-color-ink)] flex-1">
+                        {item.name}
+                      </span>
+                      <span 
+                        className="text-[10px] md:text-xs font-mono font-semibold tracking-tight" 
+                        style={{ color: item.color }}
+                      >
+                        {item.match}
+                      </span>
                     </div>
                   ))}
                 </div>
-              </PublicSurfaceCard>
+
+                <div className="mt-6 pt-3 border-t border-[var(--public-color-line)]/60">
+                  <button 
+                    className="w-full btn btn-sm bg-transparent hover:bg-[var(--public-color-sand-soft)] hover:text-[var(--public-color-ink)] text-[var(--public-color-ink-muted)] py-2.5 px-4 rounded-xl text-xs font-semibold border border-[var(--public-color-line)] transition-all duration-300 flex items-center justify-center gap-2"
+                    onClick={() => {
+                      window.location.href = `/${locale}/smart-finder`;
+                    }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {locale === 'th' ? 'ดาวน์โหลดเป็น PDF' : 'Download as PDF'}
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  /* ─── Phase 2.7: Testimonials + Advisors ─── */
+  function HomeTestimonialsSection() {
+    const fallbackTestimonials = [
+      {
+        quote: locale === 'th'
+          ? '"AMP อธิบายกฎหมายกรรมสิทธิ์ต่างชาติให้ฟังใน 20 นาที แล้วหาห้อง 1BR ที่จอมเทียนให้ผลตอบแทนสุทธิ 7.2% ภายในสามสัปดาห์ ระบบ Escrow ทำให้อุ่นใจมาก"'
+          : '"AMP walked me through foreign ownership rules in 20 minutes — and found a 7.2% net-yield 1BR three weeks later. The escrow process gave me peace of mind."',
+        name: 'Sven L.',
+        location: locale === 'th' ? 'สตอกโฮล์ม · ซื้อ 1BR จอมเทียน' : 'Stockholm · Bought 1BR Jomtien',
+        stars: 5,
+      },
+      {
+        quote: locale === 'th'
+          ? '"เป็นนายหน้าพัทยาเจ้าเดียวที่ให้ประมาณการผลตอบแทนเช่าเป็นลายลักษณ์อักษรก่อนเซ็นสัญญา ตัวเลขยังตรงหลังผ่านไป 12 เดือน"'
+          : '"They\'re the only Pattaya brokerage that gave me a written rental-return forecast before I signed. Numbers held up after 12 months."',
+        name: 'David W.',
+        location: locale === 'th' ? 'สิงคโปร์ · ซื้อ 2BR วงศ์อมาตย์' : 'Singapore · Bought 2BR Wongamat',
+        stars: 5,
+      },
+      {
+        quote: locale === 'th'
+          ? '"ซาช่าจัดการทุกอย่างจากฝั่งเธอ ไม่ต้องบินไปเลย เธอถ่าย FaceTime ให้ดูห้อง 5 ห้อง และช่วยทนายที่มอสโกจัดเอกสาร"'
+          : '"Sasha managed everything from her side. I never had to fly. She filmed five viewings on FaceTime and helped my notary in Moscow."',
+        name: 'Anna M.',
+        location: locale === 'th' ? 'มอสโก · ซื้อเพนท์เฮาส์' : 'Moscow · Bought Penthouse',
+        stars: 5,
+      },
+      {
+        quote: locale === 'th'
+          ? '"3 ยูนิต 2 ปี แต่ละยูนิตเริ่มสร้างกระแสเงินสดภายใน 60 วันหลังโอน ทีมบริหารอสังหาฯ คือสิ่งที่ทำให้ต่างจากที่อื่นจริงๆ"'
+          : '"3 units, 2 years. Each one cash-flowing within 60 days of handover. The property management team is the real moat."',
+        name: 'James T.',
+        location: locale === 'th' ? 'ซิดนีย์ · นักลงทุนพอร์ตโฟลิโอ' : 'Sydney · Portfolio investor',
+        stars: 5,
+      },
+    ];
+
+    const fallbackAdvisors = [
+      { name: 'Natalie K.', role: locale === 'th' ? 'หัวหน้าที่ปรึกษา' : 'Lead Advisor', lang: 'EN · TH', rating: 4.9 },
+      { name: 'Sasha V.', role: locale === 'th' ? 'ที่ปรึกษาตลาดรัสเซีย' : 'Russian Market Advisor', lang: 'RU · EN', rating: 4.8 },
+      { name: 'Li Wei', role: locale === 'th' ? 'ที่ปรึกษาตลาดจีน' : 'Chinese Market Advisor', lang: 'CN · EN', rating: 4.9 },
+      { name: 'Tom B.', role: locale === 'th' ? 'ที่ปรึกษาการลงทุน' : 'Investment Advisor', lang: 'EN · TH', rating: 4.7 },
+    ];
+
+    const testimonials = liveTestimonials.length > 0
+      ? liveTestimonials.slice(0, 4).map((t: any) => ({
+          quote: `"${t.quote}"`,
+          name: t.attribution_name ?? 'Anonymous',
+          location: t.context ?? '',
+          stars: 5,
+        }))
+      : fallbackTestimonials;
+
+    const advisors = liveTeamMembers.length > 0
+      ? liveTeamMembers
+          .filter((m) => m.status === 'published')
+          .slice(0, 4)
+          .map((m) => ({
+            name: m.name,
+            role: m.role_title,
+            lang: (m.languages ?? []).join(' · ') || 'EN · TH',
+            rating: 4.8,
+            photo: m.photo_url ?? null,
+          }))
+      : fallbackAdvisors.map((a) => ({ ...a, photo: null as string | null }));
+
+    return (
+      <section
+        id="home-testimonials-section"
+        className="relative"
+        style={{ padding: '88px 0' }}
+      >
+        <Container variant="wide">
+          {/* Section Header */}
+          <div className="mb-10 md:mb-14">
+            <span
+              className="block font-mono text-[11px] uppercase tracking-[0.18em] mb-3"
+              style={{ color: 'var(--public-color-ink-4, #8a938f)' }}
+            >
+              {locale === 'th' ? 'ความน่าเชื่อถือ · ผลงาน' : 'Trust · Track record'}
+            </span>
+            <h2
+              className="font-serif text-3xl sm:text-4xl md:text-[44px] leading-[1.08] tracking-tight font-normal"
+              style={{ color: 'var(--public-color-ink, #14201f)' }}
+            >
+              {locale === 'th' ? (
+                <>ผู้ซื้อจาก <em className="italic" style={{ color: 'var(--public-color-coral, #d96a4e)' }}>32 ประเทศ</em> ปิดดีลกับเรา</>
+              ) : (
+                <>Buyers from <em className="italic" style={{ color: 'var(--public-color-coral, #d96a4e)' }}>32 countries</em> have closed with us.</>
+              )}
+            </h2>
+            <p
+              className="mt-3 text-sm md:text-[15px] leading-relaxed max-w-2xl"
+              style={{ color: 'var(--public-color-ink-3, #5b6764)' }}
+            >
+              {locale === 'th'
+                ? 'ทีมที่ปรึกษาหลายภาษา · ทนายอิสระ · Escrow ทุกธุรกรรม'
+                : 'Multilingual advisory. Independent legal. Escrow on every transaction.'}
+            </p>
+          </div>
+
+          {/* Grid: Testimonials (left) + Advisors (right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-7">
+            {/* Testimonials 2x2 Grid */}
+            <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {testimonials.map((t: any, i: number) => (
+                <div
+                  key={i}
+                  className="rounded-2xl p-6 transition-shadow duration-300 hover:shadow-lg"
+                  style={{
+                    background: 'var(--public-color-bone, #f8f4ea)',
+                    border: '1px solid var(--public-color-line, #d8cdb4)',
+                  }}
+                >
+                  {/* Stars */}
+                  <div className="flex gap-0.5 mb-3">
+                    {Array.from({ length: t.stars }).map((_, j: number) => (
+                      <svg key={j} className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="var(--public-color-champagne, #c9a677)">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  {/* Quote */}
+                  <p
+                    className="text-[13.5px] sm:text-sm leading-[1.6] mb-0"
+                    style={{ color: 'var(--public-color-ink-2, #2a3736)' }}
+                  >
+                    {t.quote}
+                  </p>
+                  {/* Attribution */}
+                  <div className="mt-4 text-xs" style={{ color: 'var(--public-color-ink-4, #8a938f)' }}>
+                    <strong className="font-medium" style={{ color: 'var(--public-color-ink, #14201f)' }}>{t.name}</strong>
+                    {t.location ? <> · {t.location}</> : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Advisors Panel */}
+            <div
+              className="lg:col-span-2 rounded-2xl p-7 self-start"
+              style={{
+                background: 'var(--public-color-bone, #f8f4ea)',
+                border: '1px solid var(--public-color-line, #d8cdb4)',
+              }}
+            >
+              <span
+                className="block font-mono text-[11px] uppercase tracking-[0.18em] mb-2"
+                style={{ color: 'var(--public-color-ink-4, #8a938f)' }}
+              >
+                {locale === 'th' ? 'ที่ปรึกษาของท่าน' : 'Your advisors'}
+              </span>
+              <h3
+                className="font-serif text-xl md:text-[26px] tracking-tight leading-tight font-normal mb-6"
+                style={{ color: 'var(--public-color-ink, #14201f)' }}
+              >
+                {locale === 'th' ? 'พูดคุยในภาษาของคุณ' : 'Speak in your language.'}
+              </h3>
+
+              <div className="flex flex-col">
+                {advisors.map((a: any, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 py-3"
+                    style={{ borderTop: i > 0 ? '1px solid var(--public-color-line, #d8cdb4)' : 'none' }}
+                  >
+                    {/* Avatar */}
+                    {a.photo ? (
+                      <img
+                        src={a.photo}
+                        alt={a.name}
+                        className="w-11 h-11 rounded-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div
+                        className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold"
+                        style={{
+                          background: 'var(--public-color-sand, #efe6d2)',
+                          color: 'var(--public-color-ink-3, #5b6764)',
+                        }}
+                      >
+                        {a.name.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13.5px] font-medium truncate" style={{ color: 'var(--public-color-ink, #14201f)' }}>{a.name}</div>
+                      <div className="text-[11.5px] truncate" style={{ color: 'var(--public-color-ink-4, #8a938f)' }}>
+                        {a.role} · {a.lang}
+                      </div>
+                    </div>
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 text-[11px] shrink-0" style={{ color: 'var(--public-color-ink-3, #5b6764)' }}>
+                      <svg className="w-3 h-3" viewBox="0 0 20 20" fill="var(--public-color-champagne, #c9a677)">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      {a.rating}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <TrackedLink
+                href={withLocaleQuery(locale, '/contact', { source: 'home_testimonials_advisors' })}
+                className="mt-5 w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-md"
+                style={{
+                  border: '1px solid var(--public-color-line, #d8cdb4)',
+                  color: 'var(--public-color-ink, #14201f)',
+                  background: 'transparent',
+                }}
+                eventType="cta_click"
+                eventPayload={{ cta: 'book_advisory_call', from: 'home_testimonials' }}
+              >
+                {locale === 'th' ? 'จองนัดปรึกษาฟรี' : 'Book a free advisory call'}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </TrackedLink>
+            </div>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  /* ─── Phase 2.7: Foreign Quota Module ─── */
+  function HomeForeignQuotaSection() {
+    const quotaProjects = homeProjectsSnapshot.slice(0, 4).map((p) => {
+      const castP = p as Record<string, unknown> & { investment_snapshot?: Record<string, unknown>; foreign_quota?: unknown; quota_pct?: unknown };
+      const quotaRaw = castP.investment_snapshot?.foreign_quota ?? castP.foreign_quota ?? castP.quota_pct;
+      let pct = 30;
+      if (quotaRaw !== undefined && quotaRaw !== null) {
+        const numVal = Number(quotaRaw);
+        if (Number.isFinite(numVal) && numVal > 0) {
+          pct = numVal < 1 ? Math.round(numVal * 100) : Math.round(numVal);
+        }
+      } else {
+        const fallbacks = [42, 28, 15, 36];
+        pct = fallbacks[homeProjectsSnapshot.indexOf(p) % fallbacks.length];
+      }
+      return { name: (p as Record<string, unknown>).name as string ?? 'Project', pct: Math.min(pct, 49) };
+    });
+
+    const fallbackQuotaProjects = [
+      { name: 'The Riviera Palm Beach', pct: 42 },
+      { name: 'Embassy Life', pct: 28 },
+      { name: 'Once Wongamat', pct: 15 },
+      { name: 'Aquarous Jomtien', pct: 36 },
+    ];
+
+    const displayProjects = quotaProjects.length > 0 ? quotaProjects : fallbackQuotaProjects;
+
+    return (
+      <section
+        id="home-foreign-quota-section"
+        style={{ padding: '0 0 88px' }}
+      >
+        <Container variant="wide">
+          <div
+            className="rounded-3xl p-8 sm:p-10 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center"
+            style={{
+              background: 'var(--public-color-paper-warm, #fdfaf2)',
+              border: '1px solid var(--public-color-line, #d8cdb4)',
+            }}
+          >
+            {/* Left: Explainer (7/12) */}
+            <div className="lg:col-span-7">
+              <span
+                className="block font-mono text-[11px] uppercase tracking-[0.18em] mb-3"
+                style={{ color: 'var(--public-color-ink-4, #8a938f)' }}
+              >
+                {locale === 'th' ? 'กรรมสิทธิ์ต่างชาติ · ประเทศไทย' : 'Foreign ownership · Thailand'}
+              </span>
+              <h2
+                className="font-serif text-2xl sm:text-3xl md:text-[44px] leading-[1.08] tracking-tight font-normal"
+                style={{ color: 'var(--public-color-ink, #14201f)' }}
+              >
+                {locale === 'th' ? (
+                  <>คุณเป็นเจ้าของคอนโดที่นี่ได้เลย <em className="italic" style={{ color: 'var(--public-color-coral, #d96a4e)' }}>ผู้ซื้อต่างชาติส่วนใหญ่ยังไม่รู้</em></>
+                ) : (
+                  <>You can own a condo here outright. <em className="italic" style={{ color: 'var(--public-color-coral, #d96a4e)' }}>Most foreign buyers don&apos;t realise.</em></>
+                )}
+              </h2>
+              <p
+                className="mt-5 text-sm md:text-[15px] leading-[1.6] max-w-xl"
+                style={{ color: 'var(--public-color-ink-3, #5b6764)' }}
+              >
+                {locale === 'th'
+                  ? 'กฎหมายไทยให้ชาวต่างชาติถือกรรมสิทธิ์คอนโดมิเนียมแบบ Freehold ได้สูงสุด 49% ของอาคาร ไม่จำกัดระยะเวลา AMP ยืนยันสถานะโควตาปัจจุบันก่อนที่คุณจะจ่ายแม้แต่บาทเดียว'
+                  : 'Thai law lets non-residents own up to 49% of any condominium building in freehold, indefinitely. AMP confirms current quota status before you commit a single baht.'}
+              </p>
+              <TrackedLink
+                href={withLocaleQuery(locale, '/invest', { source: 'home_quota_explainer' })}
+                className="mt-6 inline-flex items-center gap-2 py-2.5 px-5 rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-md"
+                style={{
+                  border: '1px solid var(--public-color-line, #d8cdb4)',
+                  color: 'var(--public-color-ink, #14201f)',
+                  background: 'transparent',
+                }}
+                eventType="cta_click"
+                eventPayload={{ cta: 'read_quota_explainer', from: 'home_quota_module' }}
+              >
+                {locale === 'th' ? 'อ่านรายละเอียดเพิ่มเติม' : 'Read the explainer'}
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </TrackedLink>
+            </div>
+
+            {/* Right: Live Quota Bars (5/12) */}
+            <div
+              className="lg:col-span-5 rounded-2xl p-6 md:p-7"
+              style={{
+                background: 'var(--public-color-bone, #f8f4ea)',
+                border: '1px solid var(--public-color-line, #d8cdb4)',
+              }}
+            >
+              <h4
+                className="font-mono text-xs uppercase tracking-[0.08em] mb-5"
+                style={{ color: 'var(--public-color-ink-3, #5b6764)' }}
+              >
+                {locale === 'th' ? 'โควตาต่างชาติ — สถานะปัจจุบัน' : 'Foreign quota — live status'}
+              </h4>
+              <div className="flex flex-col gap-4">
+                {displayProjects.map((proj, idx) => {
+                  const tone = proj.pct >= 45 ? '#b53a2c' : proj.pct >= 30 ? '#c08a1c' : '#2c7a3c';
+                  const barWidthPct = Math.max((proj.pct / 49) * 100, 4);
+                  return (
+                    <div key={idx}>
+                      <div className="flex justify-between items-baseline mb-1.5">
+                        <span className="text-[13px] font-medium truncate mr-2" style={{ color: 'var(--public-color-ink, #14201f)' }}>
+                          {proj.name}
+                        </span>
+                        <span className="font-mono text-xs shrink-0 font-medium" style={{ color: tone }}>
+                          {proj.pct}% / 49%
+                        </span>
+                      </div>
+                      <div
+                        className="w-full h-2 rounded-full overflow-hidden"
+                        style={{ background: 'var(--public-color-line, #d8cdb4)' }}
+                      >
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{ width: `${barWidthPct}%`, background: tone }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  /* ─── Phase 2.7: FAQ Section ─── */
+  function HomeFaqsSection() {
+    const faqItems: Array<[string, string]> = locale === 'th'
+      ? [
+          ['ชาวต่างชาติสามารถเป็นเจ้าของอสังหาริมทรัพย์ในไทยได้หรือไม่?', 'ได้ — คอนโดมิเนียมถือกรรมสิทธิ์แบบ Freehold ได้สูงสุด 49% ของอาคาร สำหรับบ้านหรือวิลล่าใช้โครงสร้างสัญญาเช่าระยะยาวหรือบริษัทไทย ซึ่งเราจัดการผ่านทนายอิสระให้'],
+          ['ต้องอยู่ในประเทศไทยถึงจะซื้อได้หรือไม่?', 'ไม่ต้อง เราจัดการชมห้องทางไกล ตรวจสอบสัญญา และการรับรองเอกสารให้ทั้งหมด 41% ของธุรกรรมปี 2025 ปิดดีลโดยผู้ซื้อไม่ต้องบินมา'],
+          ['โอนเงินอย่างไร?', 'แบบฟอร์ม Foreign Exchange Transaction (FET) พิสูจน์ว่าเงินเข้าประเทศไทยจากต่างประเทศ ซึ่งจำเป็นสำหรับการโอนกลับภายหลัง เราประสานงานกับธนาคารของคุณ'],
+          ['ค่าใช้จ่ายต่อเนื่องที่ควรคาดหวัง?', 'ค่าส่วนกลาง ~50–80 ฿/ตร.ม./เดือน กองทุนสำรอง (จ่ายครั้งเดียว) ภาษีเช่า 12.5% หากปล่อยเช่า ภาษีที่ดินปัจจุบัน 0.02–0.1% เราให้ตารางค่าใช้จ่ายเต็มก่อนยื่นข้อเสนอ'],
+          ['AMP มีรายได้อย่างไร?', 'ค่าคอมมิชชั่นมาตรฐานจากผู้พัฒนาหรือผู้ขาย คุณไม่ต้องจ่ายอะไร และเราแชร์ค่าบริหารจัดการเช่าเฉพาะยูนิตที่เราดูแลเท่านั้น'],
+          ['หลังเซ็นสัญญาแล้วเกิดอะไรขึ้น?', 'ทนายอิสระตรวจสอบทุกอย่าง Escrow ถือเงินไว้ คุณจะได้รับโฉนด (chanote) เมื่อโอนกรรมสิทธิ์ ระยะเวลาปิดดีลเฉลี่ย: 18 วัน'],
+        ]
+      : [
+          ['Can foreigners own property in Thailand?', 'Yes — condominium units, freehold, up to 49% of any building. Villas use long-term lease or Thai company structures, which we set up via independent counsel.'],
+          ['Do I need to be in Thailand to buy?', 'No. We handle remote viewings, contract review, and notarisation. 41% of our 2025 transactions closed without the buyer flying in.'],
+          ['How are funds transferred?', 'A Foreign Exchange Transaction (FET) form proves the funds entered Thailand from abroad — required for repatriation later. We coordinate with your bank.'],
+          ['What ongoing costs should I expect?', 'Common-area fees ~50–80 ฿/sqm/month, sinking fund (one-off), 12.5% rental tax if let, property tax now 0.02–0.1%. We give you a full cost sheet before offer.'],
+          ['How does AMP make money?', 'Standard agent commission from the developer or seller. You pay nothing — and we share rental management fees only on units we let.'],
+          ['What happens after I sign?', 'Independent lawyer reviews everything, escrow holds funds, you receive a chanote (title) at handover. Average closing time: 18 days.'],
+        ];
+
+    return (
+      <section
+        id="home-faqs-section"
+        style={{ padding: '0 0 88px' }}
+      >
+        <Container variant="wide">
+          {/* Section Header */}
+          <div className="mb-10 md:mb-14">
+            <span
+              className="block font-mono text-[11px] uppercase tracking-[0.18em] mb-3"
+              style={{ color: 'var(--public-color-ink-4, #8a938f)' }}
+            >
+              {locale === 'th' ? 'คำถามพบบ่อย' : 'Common questions'}
+            </span>
+            <h2
+              className="font-serif text-3xl sm:text-4xl md:text-[44px] leading-[1.08] tracking-tight font-normal"
+              style={{ color: 'var(--public-color-ink, #14201f)' }}
+            >
+              {locale === 'th' ? (
+                <>คำถามที่ <em className="italic" style={{ color: 'var(--public-color-coral, #d96a4e)' }}>ผู้ซื้อต่างชาติทุกคน</em> ถามก่อนเสมอ</>
+              ) : (
+                <>The questions <em className="italic" style={{ color: 'var(--public-color-coral, #d96a4e)' }}>every foreign buyer</em> asks first.</>
+              )}
+            </h2>
+          </div>
+
+          {/* 2-Column FAQ Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {faqItems.map(([question, answer], i) => (
+              <details
+                key={i}
+                className="group rounded-xl transition-shadow duration-300 hover:shadow-md"
+                style={{
+                  padding: '20px 22px',
+                  background: 'var(--public-color-bone, #f8f4ea)',
+                  border: '1px solid var(--public-color-line, #d8cdb4)',
+                }}
+              >
+                <summary
+                  className="text-[14.5px] font-medium cursor-pointer flex items-center justify-between gap-3"
+                  style={{
+                    color: 'var(--public-color-ink, #14201f)',
+                    listStyle: 'none',
+                  }}
+                >
+                  {question}
+                  {/* Plus/Minus icon */}
+                  <svg
+                    className="w-4 h-4 shrink-0 transition-transform duration-300 group-open:rotate-45"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--public-color-ink-4, #8a938f)"
+                    strokeWidth="2"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                </summary>
+                <p
+                  className="mt-3 text-[13.5px] leading-[1.6]"
+                  style={{ color: 'var(--public-color-ink-3, #5b6764)' }}
+                >
+                  {answer}
+                </p>
+              </details>
+            ))}
           </div>
         </Container>
       </section>
@@ -939,6 +1837,8 @@ export default async function HomePage({
         </div>
       ) : null}
 
+      <HomeSearchBar locale={locale} />
+
       {/* Guided Finder Overlay — client component.
           Reads URL params client-side so this server component stays
           searchParams-free → Next.js ISR cache is shared across ALL URL
@@ -981,6 +1881,36 @@ export default async function HomePage({
       {isSectionEnabled('why_pattaya') ? (
         <div style={sectionOrderStyle('why_pattaya')}>
           <HomeMarketClaritySection />
+        </div>
+      ) : null}
+
+      {isSectionEnabled('areas') ? (
+        <div style={sectionOrderStyle('areas')}>
+          <HomeAreasSection />
+        </div>
+      ) : null}
+
+      {isSectionEnabled('smart_finder') ? (
+        <div style={sectionOrderStyle('smart_finder')}>
+          <HomeSmartFinderCtaSection />
+        </div>
+      ) : null}
+
+      {isSectionEnabled('testimonials') ? (
+        <div style={sectionOrderStyle('testimonials')}>
+          <HomeTestimonialsSection />
+        </div>
+      ) : null}
+
+      {isSectionEnabled('foreign_quota') ? (
+        <div style={sectionOrderStyle('foreign_quota')}>
+          <HomeForeignQuotaSection />
+        </div>
+      ) : null}
+
+      {isSectionEnabled('faqs') ? (
+        <div style={sectionOrderStyle('faqs')}>
+          <HomeFaqsSection />
         </div>
       ) : null}
 

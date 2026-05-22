@@ -4655,3 +4655,276 @@
     gap: 4px;
     min-width: 0;
   }
+
+/* ==========================================================================
+   SUNSET PATTAYA LUXURY THEME OVERRIDES (ADMIN WORKSPACE)
+   ========================================================================== */
+
+.admin-root {
+  /* Override core brand color gradients and variables */
+  --admin-color-primary-50: #d9e4e0;
+  --admin-color-primary-100: #b3ccc5;
+  --admin-color-primary-200: #8db5aa;
+  --admin-color-primary-300: #669e8f;
+  --admin-color-primary-400: #408775;
+  --admin-color-primary-500: #0e3a3a; /* Teal */
+  --admin-color-primary-600: #1a5854;
+  --admin-color-primary-700: #2c7a73;
+  --admin-color-primary-800: #102b2b;
+  --admin-color-primary-900: #081a1a;
+
+  --admin-color-neutral-0: #ffffff;
+  --admin-color-neutral-25: #fdfaf2;
+  --admin-color-neutral-50: #f8f4ea; /* Bone background */
+  --admin-color-neutral-100: #efe6d2; /* Sand surface */
+  --admin-color-neutral-150: #e4d6b7;
+  --admin-color-neutral-200: #d8cdb4;
+  --admin-color-neutral-300: #c9a677; /* Coral/gold hint */
+  --admin-color-neutral-400: #8a938f;
+  --admin-color-neutral-500: #5b6764;
+  --admin-color-neutral-600: #475569;
+  --admin-color-neutral-700: #2a3736;
+  --admin-color-neutral-800: #14201f;
+  --admin-color-neutral-900: #0e1616;
+
+  --admin-color-info-50: #fdf6f0;
+  --admin-color-info-100: #fbebd8;
+  --admin-color-info-500: #d96a4e; /* Coral */
+  --admin-color-info-600: #c25339;
+  --admin-color-info-700: #a13d27;
+}
+
+/* 1. Admin Shell Background Overrides */
+.admin-shell {
+  background:
+    radial-gradient(circle at top left, rgba(14, 58, 58, 0.08), transparent 35%),
+    radial-gradient(circle at 82% 0%, rgba(217, 106, 78, 0.06), transparent 28%),
+    linear-gradient(180deg, var(--admin-color-neutral-25) 0%, var(--admin-bg-canvas) 45%, var(--admin-color-neutral-100) 100%) !important;
+}
+
+/* 2. Admin Shell Sidebar Overrides */
+.admin-shell-sidebar {
+  background:
+    linear-gradient(180deg, rgba(253, 250, 242, 0.98), rgba(239, 230, 210, 0.98)),
+    var(--admin-bg-sidebar) !important;
+  border-right: 1px solid var(--admin-border-subtle) !important;
+  box-shadow: 4px 0 18px rgba(14, 58, 58, 0.02) !important;
+}
+
+.admin-shell-sidebar::before {
+  background: radial-gradient(circle at top left, rgba(14, 58, 58, 0.06), transparent 70%) !important;
+}
+
+/* Brand & Meta Info Overrides */
+.admin-shell-brand a {
+  background: linear-gradient(180deg, rgba(253, 250, 242, 0.96), rgba(239, 230, 210, 0.88)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 18px rgba(14, 58, 58, 0.02) !important;
+}
+
+.admin-shell-brand-mark {
+  background: linear-gradient(135deg, rgba(14, 58, 58, 0.15), rgba(217, 106, 78, 0.1)) !important;
+  color: var(--admin-color-primary-500) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 18px rgba(14, 58, 58, 0.08) !important;
+}
+
+.admin-shell-sidebar-meta {
+  border: 1px solid var(--admin-border-subtle) !important;
+  background:
+    linear-gradient(180deg, rgba(239, 230, 210, 0.96), rgba(253, 250, 242, 0.98)),
+    var(--admin-bg-card) !important;
+  box-shadow:
+    var(--admin-shadow-xs),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+}
+
+.admin-shell-sidebar-meta-icon {
+  background: linear-gradient(180deg, rgba(217, 106, 78, 0.12), rgba(14, 58, 58, 0.08)) !important;
+  color: var(--admin-color-primary-500) !important;
+}
+
+/* Nav links & icons */
+.admin-shell-brand-mark,
+.admin-shell-profile-avatar,
+.admin-shell-page-icon,
+.admin-shell-toolbar-chip-icon,
+.admin-shell-nav-link-icon,
+.admin-card-shell__icon,
+.admin-stat-card__icon,
+.dashboard-warning-icon,
+.dashboard-task-item__icon,
+.dashboard-section-state__icon,
+.admin-shell-sidebar-meta-icon,
+.admin-page-header__icon {
+  background: linear-gradient(180deg, rgba(239, 230, 210, 0.98), rgba(217, 106, 78, 0.12)) !important;
+  color: var(--admin-color-primary-500) !important;
+  border: 1px solid rgba(217, 106, 78, 0.08);
+}
+
+.admin-shell-nav-match {
+  background: rgba(217, 106, 78, 0.2) !important;
+  color: var(--admin-color-info-700) !important;
+}
+
+.admin-shell-nav-link,
+.admin-shell-drawer-link {
+  background: linear-gradient(180deg, rgba(253, 250, 242, 0.92), rgba(239, 230, 210, 0.76)) !important;
+  border: 1px solid rgba(217, 106, 78, 0.12) !important;
+}
+
+.admin-shell-nav-link:hover,
+.admin-shell-nav-link.is-active,
+.admin-shell-drawer-link:hover,
+.admin-shell-drawer-link.is-active {
+  background: linear-gradient(180deg, rgba(253, 250, 242, 0.98), rgba(239, 230, 210, 0.94)) !important;
+  border-color: var(--admin-color-primary-300) !important;
+  color: var(--admin-color-primary-500) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(14, 58, 58, 0.04),
+    0 6px 14px rgba(14, 58, 58, 0.04) !important;
+}
+
+.admin-shell-nav-link.is-active .admin-shell-nav-link-icon,
+.admin-shell-drawer-link.is-active .admin-shell-nav-link-icon {
+  background: linear-gradient(180deg, var(--admin-color-primary-500), var(--admin-color-primary-600)) !important;
+  color: var(--admin-text-on-primary) !important;
+  box-shadow: 0 8px 14px rgba(14, 58, 58, 0.16) !important;
+}
+
+/* 3. Topbar & Header Overrides */
+.admin-shell-topbar {
+  background:
+    linear-gradient(180deg, rgba(253, 250, 242, 0.92), rgba(239, 230, 210, 0.88)),
+    var(--admin-bg-header) !important;
+  border-bottom: 1px solid var(--admin-border-subtle) !important;
+  box-shadow: 0 10px 24px rgba(14, 58, 58, 0.02) !important;
+}
+
+.admin-shell-topbar-tools {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.04), transparent 30%),
+    linear-gradient(180deg, rgba(253, 250, 242, 0.985), rgba(239, 230, 210, 0.94)) !important;
+  border: 1px solid var(--admin-border-subtle) !important;
+  box-shadow:
+    0 10px 24px rgba(14, 58, 58, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+.admin-shell-topbar-status,
+.admin-shell-profile {
+  border: 1px solid var(--admin-border-subtle) !important;
+  background: rgba(253, 250, 242, 0.72) !important;
+}
+
+.admin-page-header::before {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.08), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(217, 106, 78, 0.05), transparent 26%),
+    linear-gradient(180deg, rgba(253, 250, 242, 0.98), rgba(239, 230, 210, 0.94)) !important;
+}
+
+.admin-page-header__icon {
+  background: linear-gradient(135deg, rgba(14, 58, 58, 0.15), rgba(217, 106, 78, 0.1)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 18px rgba(14, 58, 58, 0.08) !important;
+}
+
+/* 4. CRM & Table & Cards Overrides */
+.admin-card-shell,
+.admin-table-shell,
+.admin-detail-layout,
+.admin-record-details,
+.admin-field-shell,
+.admin-record-sections,
+.admin-record-section-panel {
+  border-color: var(--admin-border-subtle) !important;
+}
+
+.admin-record-details {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.06), transparent 34%),
+    linear-gradient(180deg, rgba(253, 250, 242, 0.985), rgba(239, 230, 210, 0.97)) !important;
+  box-shadow:
+    0 22px 40px rgba(14, 58, 58, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+.admin-record-section-panel {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.08), transparent 36%),
+    linear-gradient(180deg, rgba(253, 250, 242, 0.995), rgba(239, 230, 210, 0.97)) !important;
+  box-shadow:
+    0 20px 36px rgba(14, 58, 58, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94) !important;
+}
+
+.admin-table-shell {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.04), transparent 32%),
+    var(--admin-bg-card) !important;
+}
+
+.admin-detail-layout {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.03), transparent 34%),
+    var(--admin-bg-canvas) !important;
+}
+
+.admin-field-shell {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.04), transparent 34%),
+    var(--admin-bg-card) !important;
+}
+
+.admin-record-sections {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.04), transparent 34%),
+    var(--admin-bg-canvas) !important;
+}
+
+.admin-modal {
+  box-shadow: 0 14px 28px rgba(14, 58, 58, 0.06) !important;
+}
+
+.admin-auth-shell {
+  background:
+    radial-gradient(circle at top right, rgba(14, 58, 58, 0.04), transparent 30%),
+    linear-gradient(180deg, var(--admin-color-neutral-50) 0%, var(--admin-color-neutral-100) 100%) !important;
+}
+
+/* Media Library Overrides */
+.admin-media-library-page {
+  background: radial-gradient(circle at top right, rgba(14, 58, 58, 0.03), transparent 30%) !important;
+}
+
+.admin-media-library-sidebar {
+  background: linear-gradient(180deg, rgba(253, 250, 242, 0.94), rgba(239, 230, 210, 0.98)) !important;
+  border-right: 1px solid var(--admin-border-subtle) !important;
+}
+
+.admin-media-library-grid {
+  background: linear-gradient(180deg, rgba(253, 250, 242, 0.92), rgba(239, 230, 210, 0.98)) !important;
+}
+
+.admin-media-item {
+  background: radial-gradient(circle at top right, rgba(14, 58, 58, 0.04), transparent 34%) !important;
+  border-color: var(--admin-border-subtle) !important;
+}
+
+.admin-media-upload {
+  background: radial-gradient(circle at top right, rgba(14, 58, 58, 0.03), transparent 28%) !important;
+  border-color: var(--admin-border-default) !important;
+}
+
+.admin-media-preview-icon {
+  background: linear-gradient(180deg, rgba(14, 58, 58, 0.12), rgba(217, 106, 78, 0.08)) !important;
+}
+
+.admin-media-preview-details {
+  background: linear-gradient(180deg, rgba(253, 250, 242, 0.98), rgba(239, 230, 210, 0.98)) !important;
+}
+
