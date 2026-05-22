@@ -47,6 +47,8 @@ type LeadFormProps = {
   inquiryTags?: string[];
   contextSummary?: string[];
   handoff?: LeadHandoff;
+  dark?: boolean;
+  hideSupport?: boolean;
 };
 
 type LeadFormStatus =
@@ -185,6 +187,8 @@ export function LeadForm({
   inquiryTags,
   contextSummary,
   handoff,
+  dark = false,
+  hideSupport = false,
 }: LeadFormProps) {
   const pathname = usePathname() ?? '/';
   const locale = explicitLocale ?? localeFromPathname(pathname);
@@ -539,7 +543,7 @@ export function LeadForm({
   return (
     <form
       id={formId}
-      className="inquiry-form"
+      className={`inquiry-form${dark ? ' lead-form--dark' : ''}`}
       onSubmit={(e) => {
         e.preventDefault();
         void onSubmit();
@@ -765,31 +769,33 @@ export function LeadForm({
           {status.state === 'submitting' ? dict.common.leadForm.submitting : (submitLabel ?? dict.common.leadForm.submit)}
         </Button>
 
-        <div className="mt-4 border-t border-gray-200 pt-4" aria-label="lead-form-support-links">
-          <p className="lead-form__support-copy mb-2">
-            {locale === 'th'
-              ? 'ถ้าคุณอยากคุยก่อน ติดต่อเราได้ทาง WhatsApp หรือ LINE'
-              : 'Prefer to talk first? Reach us on WhatsApp or LINE.'}
-          </p>
-          <div className="flex flex-wrap items-center gap-4">
-            <a
-              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
-              href={CTA.whatsAppUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {dict.cta.whatsapp}
-            </a>
-            <a
-              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
-              href={CTA.lineUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {dict.cta.line}
-            </a>
+        {!hideSupport ? (
+          <div className="mt-4 border-t border-gray-200 pt-4" aria-label="lead-form-support-links">
+            <p className="lead-form__support-copy mb-2">
+              {locale === 'th'
+                ? 'ถ้าคุณอยากคุยก่อน ติดต่อเราได้ทาง WhatsApp หรือ LINE'
+                : 'Prefer to talk first? Reach us on WhatsApp or LINE.'}
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <a
+                className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
+                href={CTA.whatsAppUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {dict.cta.whatsapp}
+              </a>
+              <a
+                className="font-medium text-gray-700 underline-offset-4 hover:text-gray-900 hover:underline lead-form__support-link"
+                href={CTA.lineUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {dict.cta.line}
+              </a>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div id="lead-form-status" aria-live="assertive" aria-atomic="true">
           {status.state === 'success' ? (

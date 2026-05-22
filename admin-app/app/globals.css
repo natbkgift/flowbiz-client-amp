@@ -44,44 +44,44 @@
 */
 
 :root {
-  --color-primary: #0A4D8C;
-  --color-primary-dark: #083D6F;
-  --color-primary-darker: #042D54;
-  --color-primary-light: #E8F1F8;
+  --color-primary: var(--public-color-teal, #0e3a3a);
+  --color-primary-dark: var(--public-color-teal-2, #1a5854);
+  --color-primary-darker: var(--public-color-teal-3, #2c7a73);
+  --color-primary-light: var(--public-color-teal-pale, #d9e4e0);
 
-  --color-success-text: #065f46;
-  --color-success-bg: #ecfdf5;
-  --color-error-text: #991b1b;
-  --color-error-bg: #fef2f2;
-  --color-accent: #8B6E2F;
-  --color-accent-hover: #7D6229;
-  --color-ink: #071327;
-  --color-ink-soft: #0f2745;
-  --color-ink-muted: #173858;
-  --color-stone: #f3ede3;
-  --color-stone-strong: #e7dcc7;
-  --color-warm-surface: #faf7f2;
-  --color-warm-panel: rgba(250, 245, 238, 0.96);
-  --color-gold-muted: #c7ad78;
-  --color-gold-deep: #a18452;
+  --color-success-text: #2c7a3c;
+  --color-success-bg: #dbeed8;
+  --color-error-text: #b53a2c;
+  --color-error-bg: #f7d9d4;
+  --color-accent: var(--public-color-coral, #d96a4e);
+  --color-accent-hover: var(--public-color-coral-2, #c4533a);
+  --color-ink: var(--public-color-ink, #14201f);
+  --color-ink-soft: var(--public-color-ink-2, #2a3736);
+  --color-ink-muted: var(--public-color-ink-3, #5b6764);
+  --color-stone: var(--public-color-sand, #efe6d2);
+  --color-stone-strong: var(--public-color-sand-200, #e4d6b7);
+  --color-warm-surface: var(--public-color-paper-warm, #fdfaf2);
+  --color-warm-panel: var(--public-color-sand-soft, #f3ead9);
+  --color-gold-muted: var(--public-color-champagne, #c9a677);
+  --color-gold-deep: var(--public-color-champagne-2, #a88656);
 
   --color-white: #FFFFFF;
-  --color-bg: #FFFFFF;
-  --color-surface: #F7F9FC;
-  --color-text: #1A1A1A;
-  --color-text-secondary: #4A5568;
-  --color-gray-50: #F7F9FC;
-  --color-gray-100: #EDF2F7;
-  --color-gray-200: #E2E8F0;
-  --color-gray-300: #CBD5E1;
-  --color-gray-400: #A0AEC0;
-  --color-gray-600: #4A5568;
-  --color-gray-700: #2D3748;
-  --color-gray-800: #1A202C;
+  --color-bg: var(--public-color-bone, #f8f4ea);
+  --color-surface: var(--public-color-sand, #efe6d2);
+  --color-text: var(--public-color-ink, #14201f);
+  --color-text-secondary: var(--public-color-ink-3, #5b6764);
+  --color-gray-50: var(--public-color-bone, #f8f4ea);
+  --color-gray-100: var(--public-color-sand-soft, #f3ead9);
+  --color-gray-200: var(--public-color-sand-200, #e4d6b7);
+  --color-gray-300: var(--public-color-line, #d8cdb4);
+  --color-gray-400: var(--public-color-ink-4, #8a938f);
+  --color-gray-600: var(--public-color-ink-3, #5b6764);
+  --color-gray-700: var(--public-color-ink-2, #2a3736);
+  --color-gray-800: var(--public-color-ink, #14201f);
 
-  --color-success: #16a34a;
-  --color-warning: #f59e0b;
-  --color-error: #dc2626;
+  --color-success: var(--public-status-green, #2c7a3c);
+  --color-warning: var(--public-status-amber, #c08a1c);
+  --color-error: var(--public-status-red, #b53a2c);
 
   --font-h1: 32px;
   --font-h2: 26px;
@@ -10758,6 +10758,65 @@ html[lang='th'] .projects-page .public-hero__eyebrow {
   border: 1px solid var(--color-gray-100);
 }
 
+.inquiry-form.lead-form--dark {
+  background: rgba(14, 28, 27, 0.8) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(239, 230, 210, 0.15) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.inquiry-form.lead-form--dark .form-title,
+.inquiry-form.lead-form--dark .form-desc,
+.inquiry-form.lead-form--dark .form-label,
+.inquiry-form.lead-form--dark .form-consent,
+.inquiry-form.lead-form--dark .form-consent__text,
+.inquiry-form.lead-form--dark .lead-form__title,
+.inquiry-form.lead-form--dark .lead-form__label,
+.inquiry-form.lead-form--dark .lead-form__desc {
+  color: var(--color-bg) !important; /* warm bone */
+}
+
+.inquiry-form.lead-form--dark .form-helper.form-helper--muted {
+  color: rgba(248, 244, 238, 0.5) !important;
+}
+
+.inquiry-form.lead-form--dark .form-input,
+.inquiry-form.lead-form--dark .form-select,
+.inquiry-form.lead-form--dark .form-textarea {
+  background: rgba(20, 38, 37, 0.6) !important;
+  border: 1px solid rgba(239, 230, 210, 0.2) !important;
+  color: var(--color-white) !important;
+}
+
+.inquiry-form.lead-form--dark .form-input:focus,
+.inquiry-form.lead-form--dark .form-select:focus,
+.inquiry-form.lead-form--dark .form-textarea:focus {
+  border-color: var(--color-accent) !important; /* coral */
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(217, 106, 78, 0.2) !important;
+}
+
+.inquiry-form.lead-form--dark .form-input::placeholder,
+.inquiry-form.lead-form--dark .form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.inquiry-form.lead-form--dark button.button,
+.inquiry-form.lead-form--dark button[type="submit"] {
+  background: var(--color-accent) !important; /* sunset coral */
+  color: var(--color-white) !important;
+  border: none !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.inquiry-form.lead-form--dark button.button:hover,
+.inquiry-form.lead-form--dark button[type="submit"]:hover {
+  background: var(--color-accent-hover) !important;
+  transform: translateY(-1px);
+}
+
+
 /* ======================== INFO TABLE ======================== */
 
 .info-table {
@@ -15366,6 +15425,14 @@ html[lang='th'] .contact-route-card .card-title {
   backdrop-filter: none;
 }
 
+@media (min-width: 1024px) {
+  .home-page .home-hero-slider__panel {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+
 .home-page .home-hero-slider__eyebrow {
   display: inline-flex;
   align-items: center;
@@ -16109,3 +16176,173 @@ html[lang='th'] .contact-route-card .card-title {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   SUNSET PATTAYA LUXURY DETAILS & TOOLS OVERRIDE (PHASE 4.2 & 4.3)
+   ========================================================================== */
+
+/* 1. Serif Typography for Premium Titles, Headlines & Prices */
+.decision-page--confidence h1,
+.decision-page--confidence h2,
+.decision-page--confidence h3,
+.decision-page--confidence .headline,
+.decision-page--confidence .section-title,
+.decision-page--confidence .card-title,
+.decision-page--confidence .property-price,
+.decision-page--confidence .public-hero__headline,
+.decision-page--property h1,
+.decision-page--property h2,
+.decision-page--property h3,
+.decision-page--property .headline,
+.decision-page--property .section-title,
+.decision-page--property .card-title,
+.decision-page--property .property-price,
+.decision-page--property .property-title .section-title,
+.decision-page--property .property-title,
+.section-title {
+  font-family: var(--font-serif), Georgia, serif !important;
+}
+
+/* 2. Page & Surface Theme (Bone Background & Dark Teal Primary Text) */
+.decision-page--confidence,
+.decision-page--property {
+  background-color: var(--color-bg, #f8f4ea) !important;
+  color: var(--color-primary, #0e3a3a) !important;
+}
+
+/* 3. Cards & Panels Redesign (Resort Luxury Glassmorphism & Soft Shadow) */
+.decision-page--confidence .authority-card,
+.decision-page--confidence .page-rail-card,
+.decision-page--confidence .editorial-card,
+.decision-page--confidence .metric-card,
+.decision-page--confidence .card,
+.decision-page--property .property-fact-card,
+.decision-page--property .property-confidence-card,
+.decision-page--property .property-decision-card,
+.decision-page--property .property-next-steps-card,
+.decision-page--property .property-related-listing-card,
+.authority-card,
+.page-rail-card {
+  background-color: var(--color-surface, #efe6d2) !important;
+  border: 1px solid rgba(14, 58, 58, 0.12) !important;
+  border-radius: 20px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 20px -2px rgba(14, 58, 58, 0.04) !important;
+  padding: 1.5rem !important;
+}
+
+/* Card Hover States - Smooth Resort Style Lift & Elegant Highlight */
+.decision-page--confidence .authority-card:hover,
+.decision-page--confidence .page-rail-card:hover,
+.decision-page--confidence .editorial-card:hover,
+.decision-page--confidence .metric-card:hover,
+.decision-page--confidence .card:hover,
+.decision-page--property .property-fact-card:hover,
+.decision-page--property .property-confidence-card:hover,
+.decision-page--property .property-decision-card:hover,
+.decision-page--property .property-next-steps-card:hover,
+.decision-page--property .property-related-listing-card:hover,
+.authority-card:hover,
+.page-rail-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: var(--color-accent, #d96a4e) !important;
+  box-shadow: 0 16px 32px -4px rgba(14, 58, 58, 0.08), 0 4px 12px -2px rgba(217, 106, 78, 0.1) !important;
+}
+
+/* 4. Advisory Hero Enhancements */
+.decision-page--confidence .public-hero {
+  background: linear-gradient(135deg, var(--color-primary, #0e3a3a) 0%, #061f1f 100%) !important;
+  color: var(--color-bg, #f8f4ea) !important;
+  border-bottom: 4px solid var(--color-accent, #d96a4e) !important;
+  border-radius: 0 0 40px 40px !important;
+  overflow: hidden;
+}
+
+.decision-page--confidence .public-hero__eyebrow {
+  color: var(--color-accent, #d96a4e) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+}
+
+.decision-page--confidence .public-hero__subtitle {
+  color: rgba(248, 244, 234, 0.85) !important;
+}
+
+/* 5. Luxury Form Inputs & Selects Override */
+.form-input,
+.form-select,
+select.form-input,
+input.form-input {
+  background-color: var(--color-bg, #f8f4ea) !important;
+  border: 1px solid rgba(14, 58, 58, 0.2) !important;
+  border-radius: 12px !important;
+  color: var(--color-primary, #0e3a3a) !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.form-input:focus,
+.form-select:focus,
+select.form-input:focus,
+input.form-input:focus {
+  border-color: var(--color-accent, #d96a4e) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(217, 106, 78, 0.15) !important;
+}
+
+/* 6. Buttons Styling for details and tools */
+.decision-page--confidence .btn,
+.decision-page--property .btn,
+.advisory-detail-layout .btn,
+.btn-cta,
+.btn-primary,
+.btn-secondary {
+  border-radius: 50px !important;
+  padding: 0.8rem 1.8rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Primary / CTA Button */
+.btn-cta,
+.btn-primary,
+.decision-page--confidence .public-hero__action--primary,
+.decision-page--confidence .btn-primary,
+.decision-page--property .btn-primary {
+  background-color: var(--color-accent, #d96a4e) !important;
+  border: 1px solid var(--color-accent, #d96a4e) !important;
+  color: #ffffff !important;
+}
+
+.btn-cta:hover,
+.btn-primary:hover,
+.decision-page--confidence .public-hero__action--primary:hover,
+.decision-page--confidence .btn-primary:hover,
+.decision-page--property .btn-primary:hover {
+  background-color: var(--color-primary, #0e3a3a) !important;
+  border-color: var(--color-primary, #0e3a3a) !important;
+  color: var(--color-bg, #f8f4ea) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Secondary Button */
+.btn-secondary,
+.decision-page--confidence .public-hero__action--secondary,
+.decision-page--confidence .btn-secondary,
+.decision-page--property .btn-secondary {
+  background-color: transparent !important;
+  border: 1px solid var(--color-primary, #0e3a3a) !important;
+  color: var(--color-primary, #0e3a3a) !important;
+}
+
+.btn-secondary:hover,
+.decision-page--confidence .public-hero__action--secondary:hover,
+.decision-page--confidence .btn-secondary:hover,
+.decision-page--property .btn-secondary:hover {
+  background-color: var(--color-primary, #0e3a3a) !important;
+  color: var(--color-bg, #f8f4ea) !important;
+  transform: translateY(-2px) !important;
+}
+

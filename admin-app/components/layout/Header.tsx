@@ -10,6 +10,7 @@ import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing'
 import { CTA, getPublicCtaSurface, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
+import { useCurrency, CURRENCIES, type CurrencyCode } from '@/lib/currency';
 
 type DropdownItem = {
   href: string;
@@ -207,6 +208,25 @@ export function Header({
   const [homeHeaderScrolled, setHomeHeaderScrolled] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  const { currency, setCurrency } = useCurrency();
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+  const [localeOpen, setLocaleOpen] = useState(false);
+  const currencyRef = useRef<HTMLDivElement>(null);
+  const localeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
+        setCurrencyOpen(false);
+      }
+      if (localeRef.current && !localeRef.current.contains(e.target as Node)) {
+        setLocaleOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
   const router = useRouter();
   const pathname = usePathname();
   const currentPathname = pathname ?? `/${locale}`;
@@ -364,9 +384,14 @@ export function Header({
         data-locale={locale}
       >
         <div className={`site-header__content header-content${isHomeSurface ? ' header-content--home' : ''}`}>
-          <Link href={withLocale(locale, '/')} prefetch={false} className="logo" aria-label={dict.brand.name}>
-            <span className="logo-mark">AMP</span>
-            <span className="logo-name">{dict.brand.name}</span>
+          <Link href={withLocale(locale, '/')} prefetch={false} className="logo animate-fade-in" aria-label={dict.brand.name}>
+            <svg width="26" height="26" viewBox="0 0 32 32" className="shrink-0 mr-1 text-inherit" style={{ fill: 'none' }}>
+              <rect x="0.5" y="0.5" width="31" height="31" rx="6" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M9 23 L16 9 L23 23 M12 18 L20 18" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="font-serif font-normal tracking-[0.04em] text-2xl flex items-center leading-none" style={{ color: 'inherit' }}>
+              AMP <span className="italic ml-1 font-normal text-inherit">Pattaya</span>
+            </span>
           </Link>
 
           <nav className="nav" aria-label={dict.common.mainNavigation}>
@@ -391,21 +416,137 @@ export function Header({
                 </Link>
               </div>
             ) : null}
-            <button
-              type="button"
-              className="lang-switch"
-              onClick={() => {
-                const next = locale === 'en' ? 'th' : 'en';
-                const nextPath = switchLocaleInPathname(pathname ?? '/', next);
-                const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
-                document.cookie = `amp_locale=${next}; Path=/; Max-Age=31536000; SameSite=Lax${secureFlag}`;
-                document.documentElement.setAttribute('lang', next);
-                router.push(nextPath);
-              }}
-              aria-label={dict.common.language}
-            >
-              <span>{langLabel}</span>
-            </button>
+            {/* Currency Picker */}
+            <div ref={currencyRef} className="relative inline-block text-left mr-1.5 md:mr-2">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+                style={{
+                  color: isHomeSurface && !homeHeaderScrolled ? 'rgba(255, 255, 255, 0.94)' : 'var(--color-ink)',
+                }}
+                onClick={() => setCurrencyOpen((o) => !o)}
+                aria-expanded={currencyOpen}
+                aria-haspopup="true"
+              >
+                <span>{currency}</span>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  style={{ transform: currencyOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                >
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
+              </button>
+              {currencyOpen && (
+                <div
+                  className="absolute right-0 mt-1.5 w-36 rounded-xl border border-[var(--public-color-line-soft, #efe6d2)] shadow-xl p-1 z-[110] text-[var(--public-color-ink, #14201f)]"
+                  style={{
+                    background: 'var(--public-color-paper-warm, #fdfaf2)',
+                  }}
+                >
+                  {(Object.keys(CURRENCIES) as Array<CurrencyCode>).map((code) => {
+                    const active = currency === code;
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        className="flex w-full items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors duration-150 text-left hover:bg-[var(--public-color-sand-soft, #f3ead9)]"
+                        style={{
+                          background: active ? 'var(--public-color-sand-soft, #f3ead9)' : 'transparent',
+                        }}
+                        onClick={() => {
+                          setCurrency(code);
+                          setCurrencyOpen(false);
+                        }}
+                      >
+                        <span>{code}</span>
+                        <span className="font-mono text-[10px] text-gray-500">{CURRENCIES[code].symbol}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Locale Picker */}
+            <div ref={localeRef} className="relative inline-block text-left mr-1.5 md:mr-2">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+                style={{
+                  color: isHomeSurface && !homeHeaderScrolled ? 'rgba(255, 255, 255, 0.94)' : 'var(--color-ink)',
+                }}
+                onClick={() => setLocaleOpen((o) => !o)}
+                aria-expanded={localeOpen}
+                aria-haspopup="true"
+              >
+                <span>{locale === 'th' ? '🇹🇭 TH' : '🇬🇧 EN'}</span>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  style={{ transform: localeOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                >
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
+              </button>
+              {localeOpen && (
+                <div
+                  className="absolute right-0 mt-1.5 w-44 rounded-xl border border-[var(--public-color-line-soft, #efe6d2)] shadow-xl p-1 z-[110] text-[var(--public-color-ink, #14201f)]"
+                  style={{
+                    background: 'var(--public-color-paper-warm, #fdfaf2)',
+                  }}
+                >
+                  {[
+                    { code: 'en', name: 'English', flag: '🇬🇧' },
+                    { code: 'th', name: 'ภาษาไทย', flag: '🇹🇭' },
+                    { code: 'ru', name: 'Русский', flag: '🇷🇺', comingSoon: true },
+                    { code: 'cn', name: '中文', flag: '🇨🇳', comingSoon: true },
+                  ].map((item) => {
+                    const active = locale === item.code;
+                    return (
+                      <button
+                        key={item.code}
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors duration-150 text-left hover:bg-[var(--public-color-sand-soft, #f3ead9)]"
+                        style={{
+                          background: active ? 'var(--public-color-sand-soft, #f3ead9)' : 'transparent',
+                        }}
+                        onClick={() => {
+                          if ('comingSoon' in item && item.comingSoon) {
+                            alert(item.code === 'ru' ? 'Поддержка русского языка скоро появится!' : '中文支持即将推出！');
+                            setLocaleOpen(false);
+                            return;
+                          }
+                          const next = item.code as 'en' | 'th';
+                          const nextPath = switchLocaleInPathname(pathname ?? '/', next);
+                          const secureFlag = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+                          document.cookie = `amp_locale=${next}; Path=/; Max-Age=31536000; SameSite=Lax${secureFlag}`;
+                          document.documentElement.setAttribute('lang', next);
+                          router.push(nextPath);
+                          setLocaleOpen(false);
+                        }}
+                      >
+                        <span className="text-sm">{item.flag}</span>
+                        <span className="flex-1">{item.name}</span>
+                        {'comingSoon' in item && item.comingSoon && (
+                          <span className="text-[9px] px-1 py-0.5 rounded bg-amber-100 text-amber-800 scale-90 origin-right">Soon</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             <button
               ref={hamburgerRef}
