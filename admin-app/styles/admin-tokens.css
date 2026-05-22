@@ -1,28 +1,28 @@
 .admin-root {
-  --admin-color-primary-50: #eef4ff;
-  --admin-color-primary-100: #dbe8ff;
-  --admin-color-primary-200: #bdd3ff;
-  --admin-color-primary-300: #93b6ff;
-  --admin-color-primary-400: #5f8fff;
-  --admin-color-primary-500: #2f6df6;
-  --admin-color-primary-600: #1f56d9;
-  --admin-color-primary-700: #1d48b2;
-  --admin-color-primary-800: #1d3e8d;
-  --admin-color-primary-900: #1d366f;
+  --admin-color-primary-50: #d9e4e0;
+  --admin-color-primary-100: #b3ccc5;
+  --admin-color-primary-200: #8db5aa;
+  --admin-color-primary-300: #669e8f;
+  --admin-color-primary-400: #408775;
+  --admin-color-primary-500: #0e3a3a;
+  --admin-color-primary-600: #1a5854;
+  --admin-color-primary-700: #2c7a73;
+  --admin-color-primary-800: #102b2b;
+  --admin-color-primary-900: #081a1a;
 
     --admin-color-neutral-0: #ffffff;
-    --admin-color-neutral-25: #fcfdff;
-    --admin-color-neutral-50: #f8fafc;
-    --admin-color-neutral-100: #f1f5f9;
-    --admin-color-neutral-150: #e9eef5;
-    --admin-color-neutral-200: #e2e8f0;
-    --admin-color-neutral-300: #cbd5e1;
-    --admin-color-neutral-400: #94a3b8;
-    --admin-color-neutral-500: #64748b;
+    --admin-color-neutral-25: #fdfaf2;
+    --admin-color-neutral-50: #f8f4ea;
+    --admin-color-neutral-100: #efe6d2;
+    --admin-color-neutral-150: #e4d6b7;
+    --admin-color-neutral-200: #d8cdb4;
+    --admin-color-neutral-300: #c9a677;
+    --admin-color-neutral-400: #8a938f;
+    --admin-color-neutral-500: #5b6764;
     --admin-color-neutral-600: #475569;
-    --admin-color-neutral-700: #334155;
-    --admin-color-neutral-800: #1e293b;
-    --admin-color-neutral-900: #0f172a;
+    --admin-color-neutral-700: #2a3736;
+    --admin-color-neutral-800: #14201f;
+    --admin-color-neutral-900: #0e1616;
 
     --admin-color-success-50: #ecfdf3;
     --admin-color-success-100: #d1fadf;
@@ -48,30 +48,30 @@
     --admin-color-info-600: #0086c9;
     --admin-color-info-700: #026aa2;
 
-    --admin-bg-canvas: #f6f8fc;
-    --admin-bg-sidebar: #ffffff;
-    --admin-bg-header: rgba(255, 255, 255, 0.82);
+    --admin-bg-canvas: #f8f4ea;
+    --admin-bg-sidebar: #fdfaf2;
+    --admin-bg-header: rgba(253, 250, 242, 0.85);
     --admin-bg-card: #ffffff;
-    --admin-bg-card-muted: #f8fafc;
-    --admin-bg-hover: #f1f5f9;
-    --admin-bg-active: #eef4ff;
+    --admin-bg-card-muted: #efe6d2;
+    --admin-bg-hover: #efe6d2;
+    --admin-bg-active: #d9e4e0;
 
-    --admin-text-strong: #0f172a;
-    --admin-text-base: #334155;
-    --admin-text-muted: #64748b;
-    --admin-text-soft: #94a3b8;
+    --admin-text-strong: #14201f;
+    --admin-text-base: #2a3736;
+    --admin-text-muted: #5b6764;
+    --admin-text-soft: #8a938f;
     --admin-text-on-primary: #ffffff;
 
-    --admin-border-subtle: #e9eef5;
-    --admin-border-default: #e2e8f0;
-    --admin-border-strong: #cbd5e1;
-    --admin-border-focus: #5f8fff;
+    --admin-border-subtle: #e7ddc4;
+    --admin-border-default: #d8cdb4;
+    --admin-border-strong: #8a938f;
+    --admin-border-focus: #0e3a3a;
 
-    --admin-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --admin-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-    --admin-shadow-md: 0 4px 10px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
-    --admin-shadow-lg: 0 12px 24px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
-    --admin-shadow-focus: 0 0 0 4px rgba(47, 109, 246, 0.12);
+    --admin-shadow-xs: 0 1px 2px rgba(20, 32, 31, 0.04);
+    --admin-shadow-sm: 0 1px 3px rgba(20, 32, 31, 0.06), 0 1px 2px rgba(20, 32, 31, 0.04);
+    --admin-shadow-md: 0 4px 10px rgba(20, 32, 31, 0.06), 0 2px 4px rgba(20, 32, 31, 0.04);
+    --admin-shadow-lg: 0 12px 24px rgba(20, 32, 31, 0.08), 0 4px 8px rgba(20, 32, 31, 0.04);
+    --admin-shadow-focus: 0 0 0 4px rgba(14, 58, 58, 0.12);
 
     --admin-radius-xs: 8px;
     --admin-radius-sm: 10px;

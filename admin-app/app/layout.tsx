@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { getDictionary, normalizeLocale } from '@/app/_lib/i18n/get-dictionary';
-import { sans, serif } from '@/app/root-fonts';
+import { sans, serif, mono } from '@/app/root-fonts';
 
 const useMinimalRootLayout = process.env.NEXT_LOCAL_APP_ROOT_MINIMAL === '1';
 
@@ -30,7 +30,7 @@ async function detectLocale(): Promise<string> {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const lang = useMinimalRootLayout ? 'en' : await detectLocale();
   const dict = useMinimalRootLayout ? null : getDictionary(normalizeLocale(lang));
-  const htmlClassName = [sans.variable, lang === 'en' ? serif.variable : ''].filter(Boolean).join(' ');
+  const htmlClassName = [sans.variable, lang === 'en' ? serif.variable : '', mono.variable].filter(Boolean).join(' ');
   return (
     <html lang={lang} dir="ltr" className={htmlClassName}>
       <head>

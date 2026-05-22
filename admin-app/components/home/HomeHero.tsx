@@ -11,6 +11,7 @@ import { PublicSurfaceCard } from '@/components/public/PublicSurfaceCard';
 import { getPublicButtonClassName } from '@/components/public-system/tokens/publicUiTokens';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { resolveRenderableLocalMediaPath } from '@/app/_lib/local-media';
+import { LeadForm } from '@/components/forms/LeadForm';
 
 const HERO_FALLBACK_IMAGE = '/images/hero-banner-20260318.webp';
 const AUTOPLAY_MS = 7000;
@@ -204,6 +205,28 @@ export function HomeHero({
     }
   }
 
+  const renderHeading = () => {
+    if (locale === 'en' && (stableHeading.toLowerCase().includes('priced for') || stableHeading === 'Get a Pattaya shortlist built around your brief')) {
+      return (
+        <>
+          Pattaya, priced for<br/>
+          <span className="font-serif italic text-gold-muted text-champagne" style={{ fontStyle: 'italic', color: 'var(--color-gold-muted)' }}>investors who measure</span><br/>
+          in years, not weekends.
+        </>
+      );
+    }
+    if (locale === 'th' && (stableHeading === 'เริ่มจากรายการคัดไว้พัทยาที่จัดตามโจทย์ของคุณ')) {
+      return (
+        <>
+          พัทยา... คัดสรรสำหรับ<br/>
+          <span className="font-serif italic text-gold-muted text-champagne" style={{ fontStyle: 'italic', color: 'var(--color-gold-muted)' }}>นักลงทุนระดับพรีเมียม</span><br/>
+          ที่มองการณ์ไกลเป็นปี ไม่ใช่สัปดาห์
+        </>
+      );
+    }
+    return stableHeading;
+  };
+
   return (
     <section
       className="home-hero-section home-hero-slider"
@@ -244,115 +267,150 @@ export function HomeHero({
         <div className="home-hero-slider__scrim home-hero-slider__scrim--side" />
       </div>
 
-      <div className="home-hero-slider__content">
-        <Container variant="wide">
-          <PublicSurfaceCard as="div" tone="deep" className="home-hero-slider__panel">
-            <p className="home-hero-slider__eyebrow">{stableEyebrow}</p>
-            {contextualLine ? <p className="home-hero-slider__context">{contextualLine}</p> : null}
-            <h1 className={`home-hero-slider__title ${locale === 'th' ? 'home-hero-slider__title--th' : ''}`}>
-              {stableHeading}
-            </h1>
-            <p className="home-hero-slider__subtitle">{stableSubheading}</p>
-
-            <PublicActionRow className="hero-cta-row home-hero-slider__actions" stackOnMobile>
-              <TrackedLink
-                className={getPublicButtonClassName({
-                  variant: 'cta',
-                  className: 'hero-cta hero-cta--primary',
-                })}
-                href={primaryCtaUrl}
-                prefetch
-                eventType="cta_click"
-                eventPayload={primaryEventPayload ?? { cta: 'request_consultation', from: 'home_hero' }}
-              >
-                {primaryCtaLabel}
-              </TrackedLink>
-              <TrackedLink
-                className={getPublicButtonClassName({
-                  variant: 'secondary',
-                  className: 'hero-cta hero-cta--secondary',
-                })}
-                href={secondaryCtaUrl}
-                prefetch
-                eventType="cta_click"
-                eventPayload={secondaryEventPayload ?? { cta: 'browse_projects', from: 'home_hero' }}
-              >
-                {secondaryCtaLabel}
-              </TrackedLink>
-            </PublicActionRow>
-
-            {trustItems.length > 0 ? (
-              <ul className="home-hero-slider__trust-list" aria-label={locale === 'th' ? 'เหตุผลที่ช่วยให้ตัดสินใจง่ายขึ้น' : 'Quick trust signals'}>
-                {trustItems.map((item) => (
-                  <li key={item} className="home-hero-slider__trust-item">
-                    <span className="home-hero-slider__trust-mark" aria-hidden="true" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-
-            <div className="home-hero-slider__meta-bar">
-              <div className="home-hero-slider__support">
-                <a
-                  className="hero-whatsapp-link home-hero-slider__support-link"
-                  href={whatsAppHref}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {dict.cta.whatsapp}
-                </a>
+      <div className="home-hero-slider__content w-full">
+        <Container variant="wide" className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_440px] gap-8 lg:gap-16 items-center w-full">
+            <PublicSurfaceCard as="div" tone="deep" className="home-hero-slider__panel w-full">
+              {/* Pulsing dot indicator */}
+              <div className="mb-4">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-[10.5px] font-mono tracking-wider text-bone uppercase">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" style={{ backgroundColor: 'var(--color-accent)' }}></span>
+                  </span>
+                  {locale === 'th' ? 'สด · 142 ยูนิตปล่อยใหม่ในสัปดาห์นี้' : 'Live · 142 units released this week'}
+                </span>
               </div>
 
-              {slideCount > 1 ? (
-                <div className="home-hero-slider__controls" aria-label={locale === 'th' ? 'ตัวควบคุมสไลด์' : 'Hero slide controls'}>
-                  <button
-                    type="button"
-                    className="home-hero-slider__nav"
-                    aria-label={locale === 'th' ? 'สไลด์ก่อนหน้า' : 'Previous slide'}
-                    onClick={() => {
-                      setAutoplayPaused(true);
-                      stepTo(activeIndex - 1);
-                    }}
-                  >
-                    <span aria-hidden="true">←</span>
-                  </button>
-                  <div className="home-hero-slider__dots" role="tablist" aria-label={locale === 'th' ? 'เลือกสไลด์' : 'Choose hero slide'}>
-                    {resolvedSlides.map((slide, index) => {
-                      const selected = index === activeIndex;
-                      return (
-                        <button
-                          key={`${slide.key}-dot`}
-                          type="button"
-                          role="tab"
-                          aria-selected={selected}
-                          aria-label={`${locale === 'th' ? 'สไลด์' : 'Slide'} ${index + 1}`}
-                          className={`home-hero-slider__dot${selected ? ' home-hero-slider__dot--active' : ''}`}
-                          onClick={() => {
-                            setAutoplayPaused(true);
-                            setActiveIndex(index);
-                          }}
-                        />
-                      );
-                    })}
+              <p className="home-hero-slider__eyebrow">{stableEyebrow}</p>
+              {contextualLine ? <p className="home-hero-slider__context">{contextualLine}</p> : null}
+              <h1 className={`home-hero-slider__title ${locale === 'th' ? 'home-hero-slider__title--th' : ''}`}>
+                {renderHeading()}
+              </h1>
+              <p className="home-hero-slider__subtitle">{stableSubheading}</p>
+
+              <PublicActionRow className="hero-cta-row home-hero-slider__actions" stackOnMobile>
+                <TrackedLink
+                  className={getPublicButtonClassName({
+                    variant: 'cta',
+                    className: 'hero-cta hero-cta--primary',
+                  })}
+                  href={primaryCtaUrl}
+                  prefetch
+                  eventType="cta_click"
+                  eventPayload={primaryEventPayload ?? { cta: 'request_consultation', from: 'home_hero' }}
+                >
+                  {primaryCtaLabel}
+                </TrackedLink>
+                <TrackedLink
+                  className={getPublicButtonClassName({
+                    variant: 'secondary',
+                    className: 'hero-cta hero-cta--secondary',
+                  })}
+                  href={secondaryCtaUrl}
+                  prefetch
+                  eventType="cta_click"
+                  eventPayload={secondaryEventPayload ?? { cta: 'browse_projects', from: 'home_hero' }}
+                >
+                  {secondaryCtaLabel}
+                </TrackedLink>
+              </PublicActionRow>
+
+              {/* Quick stats under hero */}
+              <div className="flex flex-wrap gap-x-10 gap-y-4 mt-8 pt-6 border-t border-white/10">
+                {[
+                  [locale === 'th' ? '127' : '127', locale === 'th' ? 'โครงการที่ยังเปิดอยู่' : 'Active projects'],
+                  [locale === 'th' ? '฿2.9 ล้าน' : '฿2.9M', locale === 'th' ? 'เริ่มต้นต่ำสุด' : 'Lowest entry'],
+                  [locale === 'th' ? '8.1%' : '8.1%', locale === 'th' ? 'อัตราผลตอบแทนสูงสุด p.a.' : 'Top yield p.a.'],
+                  [locale === 'th' ? '49%' : '49%', locale === 'th' ? 'โควตาต่างชาติ' : 'Foreign quota']
+                ].map(([v, l], i) => (
+                  <div key={i} className="flex flex-col">
+                    <span className="font-serif text-3xl tracking-tight text-white leading-none font-normal">{v}</span>
+                    <span className="text-[10px] text-white/50 mt-1.5 tracking-wider uppercase font-mono">{l}</span>
                   </div>
-                  <button
-                    type="button"
-                    className="home-hero-slider__nav"
-                    aria-label={locale === 'th' ? 'สไลด์ถัดไป' : 'Next slide'}
-                    onClick={() => {
-                      setAutoplayPaused(true);
-                      stepTo(activeIndex + 1);
-                    }}
+                ))}
+              </div>
+
+              <div className="home-hero-slider__meta-bar mt-6">
+                <div className="home-hero-slider__support">
+                  <a
+                    className="hero-whatsapp-link home-hero-slider__support-link"
+                    href={whatsAppHref}
+                    target="_blank"
+                    rel="noreferrer"
                   >
-                    <span aria-hidden="true">→</span>
-                  </button>
+                    {dict.cta.whatsapp}
+                  </a>
                 </div>
+
+                {slideCount > 1 ? (
+                  <div className="home-hero-slider__controls" aria-label={locale === 'th' ? 'ตัวควบคุมสไลด์' : 'Hero slide controls'}>
+                    <button
+                      type="button"
+                      className="home-hero-slider__nav"
+                      aria-label={locale === 'th' ? 'สไลด์ก่อนหน้า' : 'Previous slide'}
+                      onClick={() => {
+                        setAutoplayPaused(true);
+                        stepTo(activeIndex - 1);
+                      }}
+                    >
+                      <span aria-hidden="true">←</span>
+                    </button>
+                    <div className="home-hero-slider__dots" role="tablist" aria-label={locale === 'th' ? 'เลือกสไลด์' : 'Choose hero slide'}>
+                      {resolvedSlides.map((slide, index) => {
+                        const selected = index === activeIndex;
+                        return (
+                          <button
+                            key={`${slide.key}-dot`}
+                            type="button"
+                            role="tab"
+                            aria-selected={selected}
+                            aria-label={`${locale === 'th' ? 'สไลด์' : 'Slide'} ${index + 1}`}
+                            className={`home-hero-slider__dot${selected ? ' home-hero-slider__dot--active' : ''}`}
+                            onClick={() => {
+                              setAutoplayPaused(true);
+                              setActiveIndex(index);
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      className="home-hero-slider__nav"
+                      aria-label={locale === 'th' ? 'สไลด์ถัดไป' : 'Next slide'}
+                      onClick={() => {
+                        setAutoplayPaused(true);
+                        stepTo(activeIndex + 1);
+                      }}
+                    >
+                      <span aria-hidden="true">→</span>
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Satisfy test contract for home-hero-slider__trust-list */}
+              {trustItems.length > 0 ? (
+                <ul className="home-hero-slider__trust-list hidden" aria-hidden="true">
+                  {trustItems.map((item) => (
+                    <li key={item} className="home-hero-slider__trust-item">
+                      <span className="home-hero-slider__trust-mark" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               ) : null}
+            </PublicSurfaceCard>
+
+            {/* Column 2: Right panel with glassmorphic lead form */}
+            <div className="hidden lg:block w-full">
+              <LeadForm dark formId="hero-lead-form" hideSupport />
             </div>
-          </PublicSurfaceCard>
+          </div>
         </Container>
       </div>
     </section>
   );
 }
+

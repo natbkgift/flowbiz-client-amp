@@ -1,30 +1,18 @@
-import localFont from 'next/font/local';
+import { Instrument_Serif, Geist, Geist_Mono } from 'next/font/google';
 
-export const sans = localFont({
-  src: [
-    {
-      path: './fonts/Prompt-Regular.ttf',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: './fonts/Prompt-SemiBold.ttf',
-      weight: '600',
-      style: 'normal',
-    },
-  ],
-  display: 'swap',
+export const sans = Geist({
+  subsets: ['latin'],
   variable: '--font-sans',
 });
 
-export const serif = localFont({
-  src: [
-    {
-      path: './fonts/NotoSerif-Variable.ttf',
-      weight: '400',
-      style: 'normal',
-    },
-  ],
-  display: 'swap',
+export const serif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: ['400'],
+  style: ['normal', 'italic'],
   variable: '--font-serif',
+});
+
+export const mono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
 });
