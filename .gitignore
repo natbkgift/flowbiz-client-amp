@@ -39,3 +39,5 @@ dev-server.log
 # B13 generated artifacts
 admin-app/public/media/project-covers/
 data/import/
+
+docs/design/Amppattaya_extracted/
