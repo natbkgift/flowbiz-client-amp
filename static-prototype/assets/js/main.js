@@ -6,7 +6,7 @@
   }
 
   function qsa(selector, root) {
-    return Array.prototype.slice.call((root || document).querySelectorAll(selector));
+    return Array.from((root || document).querySelectorAll(selector));
   }
 
   function closeDrawers() {
@@ -54,7 +54,8 @@
     qsa("[data-gallery-thumb]", gallery).forEach(function (thumb) {
       thumb.addEventListener("click", function () {
         if (!main) return;
-        main.setAttribute("src", thumb.getAttribute("data-gallery-thumb"));
+        var thumbSrc = thumb.getAttribute("data-gallery-thumb");
+        if (thumbSrc) main.setAttribute("src", thumbSrc);
         qsa("[data-gallery-thumb]", gallery).forEach(function (x) { x.classList.remove("is-active"); });
         thumb.classList.add("is-active");
       });
@@ -88,10 +89,10 @@
     var adr = qs("[data-adr]", calc);
 
     function updateCalc() {
-      var p = Number(price.value || 0);
-      var d = Number(down.value || 0);
-      var occ = Number(occupancy.value || 0);
-      var nightly = Number(adr.value || 0);
+      var p = Number(price ? price.value : 0);
+      var d = Number(down ? down.value : 0);
+      var occ = Number(occupancy ? occupancy.value : 0);
+      var nightly = Number(adr ? adr.value : 0);
       var downAmount = p * d / 100;
       var transfer = p * 0.02;
       var legal = 77000;

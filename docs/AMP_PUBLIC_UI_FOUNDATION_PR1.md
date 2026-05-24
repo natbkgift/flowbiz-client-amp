@@ -28,6 +28,7 @@ color: var(--amp-public-color-ink);
 background: var(--amp-public-color-paper-warm);
 border-radius: var(--amp-public-radius-card);
 box-shadow: var(--amp-public-shadow-card);
+border-color: var(--amp-public-coral-border);
 ```
 
 These aliases currently point at the existing public token system.

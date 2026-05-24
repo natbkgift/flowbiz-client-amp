@@ -4596,20 +4596,20 @@ html[lang='th'] .decision-page .public-hero__signal-title,
 }
 
 .btn-coral {
-  border-color: rgba(217, 106, 78, 0.28);
+  border-color: var(--amp-public-coral-border);
   background: var(--amp-public-color-coral);
   color: var(--color-white);
-  box-shadow: 0 16px 30px rgba(217, 106, 78, 0.2);
+  box-shadow: var(--amp-public-coral-shadow);
 }
 
 .btn-coral:hover {
-  border-color: rgba(217, 106, 78, 0.4);
+  border-color: var(--amp-public-coral-border-strong);
   background: var(--amp-public-color-coral-hover);
   color: var(--color-white);
 }
 
 .btn-ink {
-  border-color: rgba(20, 32, 31, 0.18);
+  border-color: var(--amp-public-ink-border);
   background: var(--amp-public-color-ink);
   color: var(--amp-public-color-bone);
 }

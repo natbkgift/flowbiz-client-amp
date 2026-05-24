@@ -285,10 +285,16 @@
   --amp-public-color-paper: var(--public-color-paper);
   --amp-public-color-paper-warm: var(--public-color-paper-warm);
   --amp-public-color-coral: var(--public-color-coral);
+  --amp-public-color-coral-rgb: 217, 106, 78;
   --amp-public-color-coral-hover: var(--public-color-coral-2);
   --amp-public-color-champagne: var(--public-color-champagne);
   --amp-public-color-champagne-deep: var(--public-color-champagne-2);
+  --amp-public-color-ink-rgb: 20, 32, 31;
   --amp-public-border-soft: var(--public-color-line-soft);
+  --amp-public-coral-border: rgba(var(--amp-public-color-coral-rgb), 0.28);
+  --amp-public-coral-border-strong: rgba(var(--amp-public-color-coral-rgb), 0.4);
+  --amp-public-coral-shadow: 0 16px 30px rgba(var(--amp-public-color-coral-rgb), 0.2);
+  --amp-public-ink-border: rgba(var(--amp-public-color-ink-rgb), 0.18);
   --amp-public-radius-card: var(--public-radius-card-md);
   --amp-public-radius-panel: var(--public-radius-panel);
   --amp-public-radius-pill: var(--public-radius-pill);
