@@ -116,7 +116,7 @@ export default async function HomePage({
     { HomeHero },
     { HomeSearchBar },
     { FeaturedProjects },
-    { PropertyCard },
+    { HomeFeaturedPropertyCard },
     { HomeBottomCta },
     { HomePerfProbe },
     { LeadForm },
@@ -133,7 +133,7 @@ export default async function HomePage({
     import('@/components/home/HomeHero'),
     import('@/components/home/HomeSearchBar'),
     import('@/components/home/FeaturedProjects'),
-    import('@/components/cards/PropertyCard'),
+    import('@/components/home/HomeFeaturedPropertyCard'),
     import('@/components/home/HomeBottomCta'),
     (enableHomePerfProbe
       ? import('@/components/home/HomePerfProbe')
@@ -636,7 +636,7 @@ export default async function HomePage({
                           </div>
                           <div className="home-unit-group__grid">
                             {group.items.map((property) => (
-                              <PropertyCard key={property.id} item={property} dict={dict} locale={locale} />
+                              <HomeFeaturedPropertyCard key={property.id} property={property} locale={locale} />
                             ))}
                           </div>
                           <TrackedLink

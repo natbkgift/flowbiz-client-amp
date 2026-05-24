@@ -168,6 +168,23 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }
 
+.public-site-shell .home-page .home-featured-property-card {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.public-site-shell .home-page .home-featured-property-card .public-property-card {
+  flex: 1 1 auto;
+}
+
+.public-site-shell .home-page .home-featured-property-card__shortlist {
+  min-height: var(--amp-public-touch-target);
+  justify-content: center;
+}
+
 .public-site-shell .home-page .home-unit-group__route-link {
   justify-self: start;
 }
