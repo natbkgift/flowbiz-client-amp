@@ -500,7 +500,9 @@ describe('public design system contract', () => {
     expect(homePage).toContain('home-segmentation-note');
     expect(homePage).toContain('home-unit-group');
     expect(homePage).toContain('home_curated_unit_group');
-    expect(homePage).toContain('<PropertyCard key={property.id} item={property} dict={dict} locale={locale} />');
+    expect(homePage).toContain('<HomeFeaturedPropertyCard key={property.id} property={property} locale={locale} />');
+    expect(homePage).toContain("import('@/components/home/HomeFeaturedPropertyCard')");
+    expect(homePage).not.toContain("import('@/components/cards/PropertyCard')");
     expect(renderBody).not.toContain('id="home-proof-process"');
   });
 
@@ -509,6 +511,7 @@ describe('public design system contract', () => {
 
     expect(primitives).toContain('Phase 3C: homepage IA stabilization');
     expect(primitives).toContain('.public-site-shell .home-page .home-unit-group__grid');
+    expect(primitives).toContain('.public-site-shell .home-page .home-featured-property-card');
     expect(primitives).toContain('.public-site-shell .home-page .home-owner-section');
     expect(primitives).toContain('.public-site-shell .home-page .home-bottom-cta');
     expect(primitives).toContain('padding-bottom: clamp(12px, 2vw, 20px);');
