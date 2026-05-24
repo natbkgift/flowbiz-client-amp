@@ -4702,6 +4702,226 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   }
 }
 
+/* ======================== AMP PR 3 PUBLIC CARD FOUNDATION ======================== */
+
+.public-card-foundation {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.public-card-foundation__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--amp-public-color-paper-warm);
+}
+
+.public-card-foundation__media-link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.public-card-foundation__image {
+  object-fit: cover;
+  transition: transform var(--public-motion-base) var(--public-ease-standard);
+}
+
+.public-card-foundation:hover .public-card-foundation__image,
+.public-card-foundation:focus-within .public-card-foundation__image {
+  transform: scale(1.035);
+}
+
+.public-card-foundation__badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.public-card-foundation__badge {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: var(--public-shadow-claude-sm);
+}
+
+.public-card-foundation__body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(18px, 2.4vw, 24px);
+}
+
+.public-card-foundation__meta-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.public-card-foundation__location,
+.public-card-foundation__type,
+.public-card-foundation__fact-label {
+  color: var(--amp-public-color-muted);
+  font-family: var(--public-type-mono-family);
+  font-size: 0.72rem;
+  font-weight: var(--public-font-weight-bold);
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.public-card-foundation__location,
+.public-card-foundation__type {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-card-foundation__type {
+  color: var(--amp-public-color-champagne-deep);
+}
+
+.public-card-foundation__headline {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.public-card-foundation__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.public-card-foundation__title-link:hover,
+.public-card-foundation__title-link:focus-visible {
+  color: var(--amp-public-color-coral-hover);
+}
+
+.public-card-foundation__price {
+  margin: 0;
+  color: var(--amp-public-color-ink);
+  font-family: var(--amp-public-display-family);
+  font-size: clamp(1.22rem, 1.8vw, 1.55rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.public-card-foundation__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.public-card-foundation__fact {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--amp-public-border-soft);
+  border-radius: var(--public-radius-md);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.public-card-foundation__fact-label,
+.public-card-foundation__fact-value {
+  margin: 0;
+}
+
+.public-card-foundation__fact-value {
+  margin-top: 4px;
+  color: var(--amp-public-color-ink);
+  font-weight: var(--public-font-weight-semibold);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.public-card-foundation__highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.public-card-foundation__highlight {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--amp-public-border-soft);
+  border-radius: var(--amp-public-radius-pill);
+  background: rgba(var(--amp-public-color-ink-rgb), 0.04);
+  color: var(--amp-public-color-ink);
+  font-size: var(--public-type-caption-size);
+  line-height: var(--public-type-caption-line);
+}
+
+.public-card-foundation__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.public-card-foundation__placeholder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.public-card-foundation__placeholder-action {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px dashed var(--amp-public-border-soft);
+  border-radius: var(--amp-public-radius-pill);
+  background: var(--amp-public-color-paper);
+  color: var(--amp-public-color-muted);
+  font-size: var(--public-type-caption-size);
+}
+
+.public-card-foundation__cta {
+  min-height: var(--amp-public-touch-target);
+}
+
+@media (max-width: 767px) {
+  .public-card-foundation__media {
+    aspect-ratio: 16 / 11;
+  }
+
+  .public-card-foundation__body {
+    padding: var(--public-panel-padding-compact);
+  }
+
+  .public-card-foundation__footer,
+  .public-card-foundation__placeholder-actions {
+    width: 100%;
+  }
+
+  .public-card-foundation__cta,
+  .public-card-foundation__placeholder-action {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
 /* ======================== AMP PR 2 PUBLIC SHELL ======================== */
 
 .public-site-shell .site-header .header-cta--utility {
