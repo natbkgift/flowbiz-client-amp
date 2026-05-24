@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AMP Pattaya — Premium Real Estate Strategic UX Showcase</title>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   AMP Pattaya — Strategic Design System
+   Sunset Pattaya Palette: Bone (#f8f4ea), Ink (#14201f), Coral (#d96a4e), Champagne (#c9a677)
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bone: #f8f4ea;
+  --sand: #efe6d2;
+  --sand-soft: #f3ead9;
+  --sand-200: #e4d6b7;
+  --paper: #ffffff;
+  --paper-warm: #fdfaf2;
+
+  --ink: #14201f;
+  --ink-2: #2a3736;
+  --ink-3: #5b6764;
+  --ink-4: #8a938f;
+  --ink-5: #b6b8b1;
+  --line: #d8cdb4;
+  --line-soft: #e7ddc4;
+
+  --teal: #0e3a3a;
+  --teal-2: #1a5854;
+  --teal-3: #2c7a73;
+  --teal-pale: #d9e4e0;
+
+  --coral: #d96a4e;
+  --coral-2: #c4533a;
+  --coral-pale: #fae0d4;
+  --champagne: #c9a677;
+  --champagne-2: #a88656;
+  --champagne-pale: #f0e3cc;
+
+  --green: #2c7a3c;
+  --green-pale: #dbeed8;
+  --amber: #c08a1c;
+  --amber-pale: #f8ebcd;
+  --red: #b53a2c;
+  --red-pale: #f7d9d4;
+  --blue: #2e5d8f;
+  --blue-pale: #d6e2f0;
+
+  --font-display: 'Instrument Serif', 'EB Garamond', Georgia, serif;
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(20,32,31,.06), 0 1px 1px rgba(20,32,31,.04);
+  --shadow-md: 0 6px 18px -8px rgba(20,32,31,.18), 0 2px 6px rgba(20,32,31,.06);
+  --shadow-lg: 0 24px 48px -20px rgba(20,32,31,.25), 0 8px 18px -10px rgba(20,32,31,.08);
+  --shadow-card: 0 1px 2px rgba(20,32,31,.04), 0 4px 12px -4px rgba(20,32,31,.06);
+
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-7: 32px; --s-8: 40px; --s-9: 48px; --s-10: 64px;
+  --s-11: 80px; --s-12: 96px;
+}
+
+/* ─── Global Reset ─── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; min-height: 100%; background: #f0eee9; font-family: var(--font-sans); color: var(--ink); -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+img { display: block; max-width: 100%; height: auto; }
+a { text-decoration: none; color: inherit; }
+
+/* ─── Simulation Bar Layer ─── */
+#sim-control-bar {
+  position: sticky; top: 0; z-index: 1000;
+  background: var(--ink); color: var(--bone);
+  padding: 10px 24px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(248,244,234,.12);
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+}
+.sim-brand { font-family: var(--font-display); font-size: 20px; letter-spacing: 0.04em; }
+.sim-brand em { font-style: italic; color: var(--champagne); }
+.sim-toggles { display: flex; gap: 16px; align-items: center; }
+.sim-btn-group { display: flex; background: rgba(248,244,234,.08); padding: 3px; border-radius: var(--r-pill); border: 1px solid rgba(248,244,234,.1); }
+.sim-btn {
+  padding: 6px 14px; border-radius: var(--r-pill); font-size: 12px; font-weight: 500;
+  transition: all .15s ease; color: rgba(248,244,234,.65);
+}
+.sim-btn.active { background: var(--bone); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-sm); }
+.sim-btn:hover:not(.active) { color: var(--bone); background: rgba(248,244,234,.04); }
+
+/* ─── Device Mock Containers ─── */
+#app-view-container {
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: 24px; min-height: calc(100vh - 56px); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#app-view-container.fluid { padding: 0; width: 100%; min-height: calc(100vh - 56px); }
+#app-view-container.fluid #main-app-shell { width: 100%; min-height: calc(100vh - 56px); border-radius: 0; box-shadow: none; border: none; }
+
+#app-view-container.desktop { }
+#app-view-container.desktop #main-app-shell {
+  width: 1440px; height: 900px; border-radius: 12px;
+  border: 8px solid var(--ink); box-shadow: var(--shadow-lg);
+  overflow-y: auto; overflow-x: hidden; background: var(--bone);
+}
+#app-view-container.mobile { }
+#app-view-container.mobile #main-app-shell {
+  width: 390px; height: 844px; border-radius: 40px;
+  border: 12px solid var(--ink); box-shadow: var(--shadow-lg);
+  overflow-y: auto; overflow-x: hidden; background: var(--bone);
+  position: relative;
+}
+/* Smartphone notch helper for mock mobile screen */
+#app-view-container.mobile #main-app-shell::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 150px; height: 25px; background: var(--ink);
+  border-bottom-left-radius: 14px; border-bottom-right-radius: 14px;
+  z-index: 10001; pointer-events: none;
+}
+
+/* ─── Main App Structure ─── */
+#main-app-shell {
+  background: var(--bone); color: var(--ink);
+  display: flex; flexDirection: column; min-height: 100%;
+}
+#screen-render-target { flex: 1; display: flex; flex-direction: column; }
+
+/* ─── Type Utilities ─── */
+.t-display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.015em; line-height: 1.02; }
+.t-display-it { font-family: var(--font-display); font-style: italic; font-weight: 400; letter-spacing: -0.01em; line-height: 1.02; }
+.t-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.t-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ─── Shared UI Elements ─── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; height: 44px; padding: 0 20px;
+  border-radius: var(--r-pill); border: 1px solid transparent;
+  font-size: 14px; font-weight: 500; letter-spacing: -0.005em;
+  transition: all .15s ease; white-space: nowrap;
+}
+.btn-sm { height: 36px; padding: 0 14px; font-size: 13px; }
+.btn-lg { height: 52px; padding: 0 28px; font-size: 15px; }
+.btn-xl { height: 60px; padding: 0 32px; font-size: 16px; }
+.btn-primary { background: var(--ink); color: var(--bone); }
+.btn-primary:hover { background: var(--teal); }
+.btn-coral { background: var(--coral); color: #fff; }
+.btn-coral:hover { background: var(--coral-2); }
+.btn-teal { background: var(--teal); color: var(--bone); }
+.btn-teal:hover { background: var(--teal-2); }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-ghost:hover { background: var(--paper); border-color: var(--ink-3); }
+.btn-paper { background: var(--paper); color: var(--ink); border-color: var(--line); }
+.btn-paper:hover { background: var(--paper-warm); }
+.btn-block { width: 100%; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 24px; padding: 0 10px; border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
+  background: var(--sand); color: var(--ink-2);
+}
+.tag-coral { background: var(--coral-pale); color: var(--coral-2); }
+.tag-champagne { background: var(--champagne-pale); color: var(--champagne-2); }
+.tag-teal { background: var(--teal-pale); color: var(--teal); }
+.tag-dark { background: var(--ink); color: var(--bone); }
+.tag-green { background: var(--green-pale); color: var(--green); }
+.tag-amber { background: var(--amber-pale); color: var(--amber); }
+
+.card {
+  background: var(--paper); border-radius: var(--r-lg);
+  border: 1px solid var(--line-soft); overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.card-warm { background: var(--paper-warm); }
+.lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+/* Form Elements */
+.input, .select {
+  width: 100%; height: 44px; padding: 0 14px;
+  border-radius: var(--r-md); border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink);
+  font-size: 14px; transition: border-color .15s, box-shadow .15s;
+}
+.input:focus, .select:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 4px rgba(14,58,58,.08); }
+.input::placeholder { color: var(--ink-5); }
+textarea.input { height: auto; padding: 12px 14px; resize: vertical; min-height: 100px; }
+
+.label-row { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
+.dot-coral { background: var(--coral); }
+.dot-teal { background: var(--teal); }
+.dot-green { background: var(--green); }
+.dot-amber { background: var(--amber); }
+
+.pulse { position: relative; }
+.pulse::before { content:''; position:absolute; inset:-4px; border-radius:50%; background:currentColor; opacity:.25; animation: pulse-anim 1.6s ease-out infinite; }
+@keyframes pulse-anim { 0% { transform: scale(.6); opacity: .4; } 100% { transform: scale(1.6); opacity: 0; } }
+
+.divider { height: 1px; background: var(--line-soft); border: 0; margin: 0; }
+.progress { height: 4px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
+.progress > div { height: 100%; background: var(--teal); border-radius: 999px; transition: width 0.4s ease; }
+
+.zoom-on-hover { transition: transform .6s cubic-bezier(.2,.6,.2,1); }
+.card:hover .zoom-on-hover { transform: scale(1.04); }
+
+/* Checkbox toggle */
+.check { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--line); background: var(--paper); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; cursor: pointer; }
+.check.is-on { background: var(--ink); border-color: var(--ink); color: var(--bone); }
+
+/* ─── Responsive & Grid layout primitives ─── */
+.container { max-width: 1440px; margin: 0 auto; padding: 0 40px; width: 100%; }
+.container-wide { max-width: 1680px; margin: 0 auto; padding: 0 40px; width: 100%; }
+.container-readable { max-width: 840px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+.section { padding: 80px 0; }
+.grid-12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+/* Desktop Topbar */
+#app-topbar {
+  position: sticky; top: 0; z-index: 999;
+  background: rgba(248,244,234,.88); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--line-soft); color: var(--ink);
+}
+#app-topbar.dark-tone { background: rgba(20,32,31,.9); border-bottom: 1px solid rgba(248,244,234,.08); color: var(--bone); }
+.topbar-wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; padding: 0 40px; }
+.topbar-logo { display: flex; align-items: center; gap: 8px; font-size: 22px; font-family: var(--font-display); letter-spacing: 0.04em; cursor: pointer; }
+.topbar-logo em { font-style: italic; font-weight: 400; }
+.topbar-nav { display: flex; gap: 4px; }
+.topbar-nav button { padding: 8px 14px; border-radius: var(--r-pill); font-size: 13.5px; font-weight: 500; transition: all 0.15s ease; color: var(--ink-3); }
+.topbar-nav button.active { background: rgba(20,32,31,.05); color: var(--ink); }
+#app-topbar.dark-tone .topbar-nav button { color: rgba(248,244,234,.7); }
+#app-topbar.dark-tone .topbar-nav button.active { background: rgba(248,244,234,.08); color: var(--bone); }
+.topbar-nav button:hover:not(.active) { color: var(--ink); }
+#app-topbar.dark-tone .topbar-nav button:hover:not(.active) { color: var(--bone); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Custom selector dropdowns */
+.pill-dropdown { position: relative; }
+.pill-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
+.pill-btn:hover { background: rgba(20,32,31,.05); }
+#app-topbar.dark-tone .pill-btn:hover { background: rgba(248,244,234,.08); }
+.dropdown-menu {
+  position: absolute; top: 110%; right: 0; background: var(--paper); border: 1px solid var(--line-soft);
+  border-radius: 10px; padding: 4px; min-width: 140px; z-index: 1000; box-shadow: var(--shadow-md); color: var(--ink);
+  display: none; flex-direction: column;
+}
+.dropdown-menu.open { display: flex; }
+.dropdown-item {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  padding: 8px 10px; border-radius: 6px; font-size: 13px; transition: background .12s ease;
+}
+.dropdown-item:hover { background: var(--sand-soft); }
+.dropdown-item.active { background: var(--sand); font-weight: 500; }
+
+/* Collapsible drawer components */
+details { padding: 20px 22px; background: var(--paper); border-radius: 12px; border: 1px solid var(--line-soft); transition: all 0.15s ease; }
+details[open] { border-color: var(--line); box-shadow: var(--shadow-sm); }
+summary { font-size: 15px; font-weight: 500; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; outline: none; }
+summary::-webkit-details-marker { display: none; }
+details p { margin: 12px 0 0; font-size: 13.5px; color: var(--ink-3); line-height: 1.6; }
+
+/* Desktop Hero & Conversion intake form styling */
+.hero-sec { position: relative; min-height: 720px; background: var(--ink); color: var(--bone); overflow: hidden; display: flex; align-items: center; }
+.hero-bg { position: absolute; inset: 0; z-index: 1; }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.55; }
+.hero-gradient { position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, rgba(20,32,31,.55) 0%, rgba(20,32,31,.4) 30%, rgba(20,32,31,.95) 100%); }
+.hero-glow { position: absolute; inset: 0; z-index: 3; background: radial-gradient(ellipse at 80% 20%, rgba(217,106,78,.18), transparent 50%); }
+.hero-wrap { position: relative; z-index: 5; padding: 80px 40px; display: grid; grid-template-columns: 1.3fr 460px; gap: 56px; align-items: center; width: 100%; }
+
+/* Featured listings filters layout */
+.sticky-filter-panel { position: sticky; top: 96px; background: var(--paper-warm); border-radius: 16px; border: 1px solid var(--line-soft); padding: 24px; height: fit-content; }
+.project-list-col { display: flex; flex-direction: column; gap: 20px; }
+.map-placeholder-box { height: 100%; min-height: 500px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line-soft); position: relative; box-shadow: var(--shadow-sm); }
+
+/* Layout grids */
+.flex-row-center { display: flex; align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+
+/* ─── Mobile Overrides & Breakpoints (Responsive System) ─── */
+.mobile-topbar { display: none; height: 56px; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--bone); border-bottom: 1px solid var(--line-soft); }
+.mobile-bottom-nav { display: none; position: absolute; bottom: 0; left: 0; right: 0; height: 72px; background: var(--paper); border-top: 1px solid var(--line-soft); z-index: 9999; justify-content: space-around; align-items: center; padding-bottom: 16px; }
+.mobile-bottom-nav button { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--ink-4); font-weight: 500; width: 64px; }
+.mobile-bottom-nav button.active { color: var(--ink); }
+
+/* Lock layout states dynamically for simulated sizes */
+.device-mobile #app-topbar { display: none !important; }
+.device-mobile .mobile-topbar { display: flex !important; }
+.device-mobile .mobile-bottom-nav { display: flex !important; }
+.device-mobile #app-view-container { padding: 24px !important; }
+.device-mobile #main-app-shell { height: 820px !important; overflow-y: auto !important; padding-bottom: 72px !important; }
+.device-mobile footer { padding: 32px 16px !important; }
+.device-mobile .section { padding: 48px 0 !important; }
+.device-mobile .container, .device-mobile .container-wide { padding: 0 16px !important; }
+.device-mobile .grid-12, .device-mobile .grid-3, .device-mobile .grid-2 { grid-template-columns: 1fr !important; gap: 16px !important; }
+.device-mobile .hero-wrap { grid-template-columns: 1fr !important; padding: 64px 16px 32px !important; gap: 32px !important; }
+.device-mobile .hero-wrap h1 { font-size: 42px !important; }
+.device-mobile .hero-sec { min-height: fit-content !important; }
+.device-mobile .hero-search-row { grid-template-columns: 1fr !important; gap: 8px !important; }
+.device-mobile .hero-search-row button { width: 100% !important; margin-left: 0 !important; margin-top: 12px !important; }
+.device-mobile .sticky-filter-panel { position: static !important; margin-bottom: 20px !important; }
+.device-mobile .split-view-container { grid-template-columns: 1fr !important; }
+.device-mobile .map-column { display: none !important; }
+
+/* Real viewport query */
+@media (max-width: 767px) {
+  body:not(.simulated-layout) #app-topbar { display: none !important; }
+  body:not(.simulated-layout) .mobile-topbar { display: flex !important; }
+  body:not(.simulated-layout) .mobile-bottom-nav { display: flex !important; }
+  body:not(.simulated-layout) #app-view-container { padding: 0 !important; }
+  body:not(.simulated-layout) #main-app-shell { border-radius: 0; border: none; box-shadow: none; padding-bottom: 72px !important; }
+  body:not(.simulated-layout) footer { padding: 32px 16px !important; }
+  body:not(.simulated-layout) .section { padding: 48px 0 !important; }
+  body:not(.simulated-layout) .container, body:not(.simulated-layout) .container-wide { padding: 0 16px !important; }
+  body:not(.simulated-layout) .grid-12, body:not(.simulated-layout) .grid-3, body:not(.simulated-layout) .grid-2 { grid-template-columns: 1fr !important; gap: 16px !important; }
+  body:not(.simulated-layout) .hero-wrap { grid-template-columns: 1fr !important; padding: 64px 16px 32px !important; gap: 32px !important; }
+  body:not(.simulated-layout) .hero-wrap h1 { font-size: 42px !important; }
+  body:not(.simulated-layout) .hero-sec { min-height: fit-content !important; }
+  body:not(.simulated-layout) .hero-search-row { grid-template-columns: 1fr !important; gap: 8px !important; }
+  body:not(.simulated-layout) .hero-search-row button { width: 100% !important; margin-left: 0 !important; margin-top: 12px !important; }
+  body:not(.simulated-layout) .sticky-filter-panel { position: static !important; margin-bottom: 20px !important; }
+  body:not(.simulated-layout) .split-view-container { grid-template-columns: 1fr !important; }
+  body:not(.simulated-layout) .map-column { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── SIMULATION FLOATING TOOLBAR ─── -->
+<div id="sim-control-bar">
+  <div class="sim-brand">AMP <em>Pattaya</em> Strategic Lab</div>
+  <div class="sim-toggles">
+    <!-- Viewport simulator button group -->
+    <div class="sim-btn-group">
+      <button class="sim-btn active" onclick="setSimView('fluid')">Fluid Browser</button>
+      <button class="sim-btn" onclick="setSimView('desktop')">Desktop (1440px)</button>
+      <button class="sim-btn" onclick="setSimView('mobile')">Mobile (390px)</button>
+    </div>
+    <!-- Locale switcher button group -->
+    <div class="sim-btn-group">
+      <button id="sim-lang-en" class="sim-btn active" onclick="setLocaleCode('EN')">EN</button>
+      <button id="sim-lang-th" class="sim-btn" onclick="setLocaleCode('TH')">TH</button>
+    </div>
+    <!-- Currency switcher dropdown -->
+    <div style="position: relative;">
+      <button id="sim-currency-btn" class="btn btn-sm btn-ghost" style="color: var(--bone); border-color: rgba(248,244,234,.3);" onclick="toggleSimCurrencyMenu()">
+        THB (฿) ▼
+      </button>
+      <div id="sim-currency-menu" class="dropdown-menu" style="right: 0; min-width: 100px;">
+        <button class="dropdown-item" onclick="setSimCurrency('THB')">฿ THB</button>
+        <button class="dropdown-item" onclick="setSimCurrency('USD')">$ USD</button>
+        <button class="dropdown-item" onclick="setSimCurrency('EUR')">€ EUR</button>
+        <button class="dropdown-item" onclick="setSimCurrency('CNY')">¥ CNY</button>
+        <button class="dropdown-item" onclick="setSimCurrency('RUB')">₽ RUB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── DEVICE FRAME CONTAINER ─── -->
+<div id="app-view-container" class="fluid">
+  
+  <div id="main-app-shell">
+    
+    <!-- ─── MOBILE MOCK STATUS BAR (When simulated) ─── -->
+    <div class="mobile-topbar">
+      <button onclick="gotoScreen('home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <div class="topbar-logo" onclick="gotoScreen('home')" style="font-size: 16px;">AMP <em>Pattaya</em></div>
+      <button onclick="gotoScreen('contact')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </button>
+    </div>
+
+    <!-- ─── DESKTOP NAVIGATION BAR ─── -->
+    <header id="app-topbar" class="dark-tone">
+      <div class="topbar-wrap">
+        <div class="topbar-logo" onclick="gotoScreen('home')">
+          <svg width="26" height="26" viewBox="0 0 32 32" style="flex-shrink: 0;">
+            <rect x="0.5" y="0.5" width="31" height="31" rx="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M9 23 L16 9 L23 23 M12 18 L20 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>AMP <em>Pattaya</em></span>
+        </div>
+        <nav class="topbar-nav">
+          <button id="nav-home" class="active" onclick="gotoScreen('home')">Home</button>
+          <button id="nav-listing" onclick="gotoScreen('listing')">Projects</button>
+          <button id="nav-areas" onclick="gotoScreen('areas')">Areas</button>
+          <button id="nav-quota" onclick="gotoScreen('quota')">Foreign Quota</button>
+          <button id="nav-calculator" onclick="gotoScreen('calculator')">Calculator</button>
+          <button id="nav-contact" onclick="gotoScreen('contact')">Contact</button>
+        </nav>
+        <div class="topbar-actions">
+          <button class="btn btn-sm btn-ghost" onclick="gotoScreen('compare')" style="color: inherit; border-color: rgba(248,244,234,.2);">
+            Compare (<span id="compare-count-badge">0</span>)
+          </button>
+          <button class="btn btn-sm btn-coral" onclick="gotoScreen('finder')">
+            ✦ Smart Finder
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─── SCREEN RENDER TARGET (Dynamic SPA view) ─── -->
+    <main id="screen-render-target">
+      <!-- Generated screen layout injected here -->
+    </main>
+
+    <!-- ─── MOBILE BOTTOM BAR ─── -->
+    <div class="mobile-bottom-nav">
+      <button id="m-nav-home" class="active" onclick="gotoScreen('home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </button>
+      <button id="m-nav-listing" onclick="gotoScreen('listing')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        <span>Projects</span>
+      </button>
+      <button id="m-nav-finder" onclick="gotoScreen('finder')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        <span>Finder</span>
+      </button>
+      <button id="m-nav-contact" onclick="gotoScreen('contact')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        <span>Advisor</span>
+      </button>
+    </div>
+
+    <!-- ─── FOOTER ─── -->
+    <footer style="background: var(--ink); color: var(--bone); padding: 60px 40px 32px; border-top: 1px solid rgba(248,244,234,.08);">
+      <div class="container">
+        <div class="grid-12">
+          <div style="grid-column: span 4;">
+            <div class="topbar-logo" style="padding:0; font-size:24px; color: var(--bone);">AMP <em>Pattaya</em></div>
+            <p id="footer-desc" style="margin-top: 14px; font-size: 13px; line-height: 1.6; color: rgba(248,244,234,.65); max-width: 320px;">
+              Pattaya's investor-grade property advisory. Licensed brokerage est. 2018. Member, Thai Real Estate Association.
+            </p>
+          </div>
+          <div style="grid-column: span 2;">
+            <div class="t-eyebrow" id="footer-col-browse" style="color: rgba(248,244,234,.5); margin-bottom: 14px;">Browse</div>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; font-size: 13px; color: rgba(248,244,234,.8);">
+              <li style="cursor:pointer;" onclick="gotoScreen('listing')">New Projects</li>
+              <li style="cursor:pointer;" onclick="gotoScreen('areas')">Areas Guide</li>
+              <li style="cursor:pointer;" onclick="gotoScreen('quota')">Foreign Quota</li>
+            </ul>
+          </div>
+          <div style="grid-column: span 3;">
+            <div class="t-eyebrow" id="footer-col-invest" style="color: rgba(248,244,234,.5); margin-bottom: 14px;">Investment</div>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; font-size: 13px; color: rgba(248,244,234,.8);">
+              <li style="cursor:pointer;" onclick="gotoScreen('calculator')">Fee Calculator</li>
+              <li style="cursor:pointer;" onclick="gotoScreen('finder')">Smart Shortlist</li>
+              <li style="cursor:pointer;" onclick="gotoScreen('quota')">Foreign Ownership Rules</li>
+            </ul>
+          </div>
+          <div style="grid-column: span 3;">
+            <div class="t-eyebrow" id="footer-col-office" style="color: rgba(248,244,234,.5); margin-bottom: 14px;">Office</div>
+            <p style="font-size: 13px; line-height: 1.6; color: rgba(248,244,234,.8); margin: 0;">
+              333/12 Pratumnak Road<br/>
+              Banglamung, Chonburi 20150<br/>
+              Mon–Sat · 9:00–19:00 ICT
+            </p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(248,244,234,.1); font-size: 12px; color: rgba(248,244,234,.5);">
+          <span>© 2026 AMP Pattaya Property Co., Ltd · License #BR-2018-0992</span>
+          <span style="display: flex; gap: 18px;">
+            <span style="cursor:pointer;" onclick="gotoScreen('quota')">Terms</span>
+            <span style="cursor:pointer;" onclick="gotoScreen('quota')">Privacy</span>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ─── DATABASE & STATE ENGINE ─── -->
+<script>
+// Unsplash curated high-fidelity real estate assets
+const PHOTOS = {
+  pattaya_skyline: 'https://images.unsplash.com/photo-1565967511849-76a60a516170?w=1200&q=80&auto=format&fit=crop',
+  pattaya_beach:   'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1200&q=80&auto=format&fit=crop',
+  bangkok_sky:     'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=1200&q=80&auto=format&fit=crop',
+  ocean_resort:    'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_1:  'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_2:  'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_3:  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_4:  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_5:  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_6:  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_7:  'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80&auto=format&fit=crop',
+  condo_modern_8:  'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200&q=80&auto=format&fit=crop',
+  interior_1:      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80&auto=format&fit=crop',
+  interior_2:      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80&auto=format&fit=crop',
+  interior_3:      'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&q=80&auto=format&fit=crop',
+  interior_4:      'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1200&q=80&auto=format&fit=crop',
+  interior_5:      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&q=80&auto=format&fit=crop',
+  pool_1:          'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&q=80&auto=format&fit=crop',
+  pool_2:          'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&q=80&auto=format&fit=crop',
+  agent_1:         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80&auto=format&fit=crop',
+  agent_2:         'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&auto=format&fit=crop',
+  agent_3:         'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80&auto=format&fit=crop',
+  agent_4:         'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80&auto=format&fit=crop',
+  agent_5:         'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80&auto=format&fit=crop',
+  wongamat:        'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=1200&q=80&auto=format&fit=crop',
+  pratumnak:       'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80&auto=format&fit=crop',
+  jomtien:         'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&q=80&auto=format&fit=crop',
+  na_jomtien:      'https://images.unsplash.com/photo-1582610116397-edb318620f90?w=1200&q=80&auto=format&fit=crop',
+};
+
+const PROJECTS = [
+  {
+    id: 'amp-skyharbor',
+    name: 'Skyharbor Residences',
+    developer: 'AMP Property Group',
+    area: 'Wongamat',
+    completion: 'Q4 2026',
+    status: 'Under construction',
+    units: 348,
+    floors: 53,
+    foreignQuotaPct: 32,
+    startingPriceTHB: 6900000,
+    pricePerSqmTHB: 132000,
+    rentalYieldPct: 6.8,
+    cover: PHOTOS.condo_modern_1,
+    gallery: [PHOTOS.condo_modern_1, PHOTOS.pool_1, PHOTOS.interior_1],
+    distance_beach_m: 80,
+    bedrooms: ['Studio', '1BR', '2BR', 'Penthouse'],
+    tag: 'New launch',
+    tagTone: 'coral',
+    tagline: 'Beachfront living on Wongamat’s last private cove.',
+    summary: 'A 53-storey beachfront tower with private cove access, sky-lobby pools and direct beach walkway.',
+    amenities: ['Infinity pool', 'Sky lobby', 'Private beach', 'Wellness floor', 'EV charging']
+  },
+  {
+    id: 'amp-jomtien-bay',
+    name: 'Jomtien Bay Tower',
+    developer: 'Sansiri × AMP',
+    area: 'Jomtien',
+    completion: 'Q2 2027',
+    status: 'Pre-sale',
+    units: 412,
+    floors: 47,
+    foreignQuotaPct: 18,
+    startingPriceTHB: 3950000,
+    pricePerSqmTHB: 98000,
+    rentalYieldPct: 7.4,
+    cover: PHOTOS.condo_modern_2,
+    gallery: [PHOTOS.condo_modern_2, PHOTOS.interior_2, PHOTOS.pool_2],
+    distance_beach_m: 220,
+    bedrooms: ['Studio', '1BR', '2BR'],
+    tag: 'Best yield',
+    tagTone: 'champagne',
+    tagline: 'High-yield investor tower minutes from Beach Road.',
+    summary: 'A scale investor-focused tower opposite Jomtien Beach with on-site rental management.',
+    amenities: ['Rooftop pool', 'Co-living', 'Rental program', 'Smart locks', 'Pet-friendly']
+  },
+  {
+    id: 'amp-pratumnak-villas',
+    name: 'Pratumnak Villas',
+    developer: 'AMP Property Group',
+    area: 'Pratumnak Hill',
+    completion: 'Ready to move',
+    status: 'Completed',
+    units: 14,
+    floors: 3,
+    foreignQuotaPct: 71,
+    startingPriceTHB: 28500000,
+    pricePerSqmTHB: 142000,
+    rentalYieldPct: 5.2,
+    cover: PHOTOS.condo_modern_3,
+    gallery: [PHOTOS.condo_modern_3, PHOTOS.interior_3, PHOTOS.ocean_resort],
+    distance_beach_m: 380,
+    bedrooms: ['3BR Villa', '4BR Villa'],
+    tag: 'Move-in ready',
+    tagTone: 'teal',
+    tagline: 'Fourteen private hillside villas with full sea view.',
+    summary: 'Limited collection of detached pool villas on Pratumnak Hill, all with unobstructed Gulf views.',
+    amenities: ['Private pool', '24h security', 'Hillside garden', 'Servant quarters']
+  },
+  {
+    id: 'amp-na-jomtien',
+    name: 'Na Jomtien Residence',
+    developer: 'Property Perfect',
+    area: 'Na Jomtien',
+    completion: 'Q1 2028',
+    status: 'Pre-sale',
+    units: 286,
+    floors: 39,
+    foreignQuotaPct: 8,
+    startingPriceTHB: 4500000,
+    pricePerSqmTHB: 105000,
+    rentalYieldPct: 6.9,
+    cover: PHOTOS.condo_modern_4,
+    gallery: [PHOTOS.condo_modern_4, PHOTOS.interior_2, PHOTOS.pool_1],
+    distance_beach_m: 50,
+    bedrooms: ['1BR', '2BR', '3BR'],
+    tag: 'Early bird -12%',
+    tagTone: 'coral',
+    tagline: 'Direct beachfront access on the quieter southern coast.',
+    summary: 'Beachfront low-rise on the quiet Na Jomtien stretch, ten minutes south of central Pattaya.',
+    amenities: ['Beachfront', 'Infinity pool', 'Spa', 'Tennis', 'Kids club']
+  },
+  {
+    id: 'amp-central-marina',
+    name: 'Central Marina Suites',
+    developer: 'AP Thailand',
+    area: 'Central Pattaya',
+    completion: 'Q3 2026',
+    status: 'Under construction',
+    units: 530,
+    floors: 45,
+    foreignQuotaPct: 41,
+    startingPriceTHB: 2980000,
+    pricePerSqmTHB: 89000,
+    rentalYieldPct: 8.1,
+    cover: PHOTOS.condo_modern_5,
+    gallery: [PHOTOS.condo_modern_5, PHOTOS.interior_1, PHOTOS.pool_2],
+    distance_beach_m: 450,
+    bedrooms: ['Studio', '1BR'],
+    tag: 'Highest yield',
+    tagTone: 'champagne',
+    tagline: 'Walking distance to Beach Road, Terminal 21, and the pier.',
+    summary: 'Compact investor units in the centre of Pattaya, perfect for short-stay rental.',
+    amenities: ['Sky pool', 'Co-work', 'Rental pool', 'Concierge']
+  },
+  {
+    id: 'amp-bangsare-view',
+    name: 'Bang Saray View',
+    developer: 'Origin Property',
+    area: 'Bang Saray',
+    completion: 'Q4 2027',
+    status: 'Pre-sale',
+    units: 198,
+    floors: 32,
+    foreignQuotaPct: 4,
+    startingPriceTHB: 3200000,
+    pricePerSqmTHB: 92000,
+    rentalYieldPct: 6.4,
+    cover: PHOTOS.condo_modern_6,
+    gallery: [PHOTOS.condo_modern_6, PHOTOS.interior_3],
+    distance_beach_m: 120,
+    bedrooms: ['1BR', '2BR'],
+    tag: 'Quiet zone',
+    tagTone: 'teal',
+    tagline: 'Quiet seaside escape, twenty minutes south.',
+    summary: 'A boutique tower in the sleepy fishing village of Bang Saray, popular with retirees.',
+    amenities: ['Beach club', 'Yoga deck', 'Library', 'Pet-friendly']
+  },
+  {
+    id: 'amp-skyline-plaza',
+    name: 'Skyline Plaza Pattaya',
+    developer: 'Sansiri',
+    area: 'Central Pattaya',
+    completion: 'Ready to move',
+    status: 'Completed',
+    units: 612,
+    floors: 56,
+    foreignQuotaPct: 49,
+    startingPriceTHB: 4700000,
+    pricePerSqmTHB: 118000,
+    rentalYieldPct: 6.0,
+    cover: PHOTOS.condo_modern_7,
+    gallery: [PHOTOS.condo_modern_7, PHOTOS.interior_2],
+    distance_beach_m: 200,
+    bedrooms: ['Studio', '1BR', '2BR'],
+    tag: 'Quota filled',
+    tagTone: 'dark',
+    tagline: 'Iconic 56-storey tower in the heart of Pattaya.',
+    summary: 'Established luxury tower with proven rental returns and full amenity floor.',
+    amenities: ['Sky pool', 'Cinema', 'Spa', 'Restaurant', 'Concierge']
+  },
+  {
+    id: 'amp-rayong-coast',
+    name: 'Rayong Coast Villas',
+    developer: 'AMP Property Group',
+    area: 'Rayong',
+    completion: 'Q2 2027',
+    status: 'Pre-sale',
+    units: 22,
+    floors: 2,
+    foreignQuotaPct: 0,
+    startingPriceTHB: 18900000,
+    pricePerSqmTHB: 95000,
+    rentalYieldPct: 5.6,
+    cover: PHOTOS.condo_modern_8,
+    gallery: [PHOTOS.condo_modern_8, PHOTOS.interior_1],
+    distance_beach_m: 0,
+    bedrooms: ['3BR Villa', '4BR Villa'],
+    tag: 'Beachfront villa',
+    tagTone: 'champagne',
+    tagline: 'Twenty-two private beachfront pool villas.',
+    summary: 'Direct beachfront villa community an hour east of Pattaya.',
+    amenities: ['Private beach', 'Pool villa', 'Concierge', 'Gym']
+  }
+];
+
+const PROPERTIES = [
+  { id: 'u-001', projectId: 'amp-skyharbor', unit: 'Tower A · 28-12', bedrooms: 2, baths: 2, sqm: 84, priceTHB: 14800000, view: 'Sea view', floor: 28, listed: '3 days ago', cover: PHOTOS.condo_modern_1, hot: true },
+  { id: 'u-002', projectId: 'amp-skyharbor', unit: 'Tower B · 41-04', bedrooms: 3, baths: 3, sqm: 168, priceTHB: 39500000, view: 'Panoramic Gulf', floor: 41, listed: '1 week ago', cover: PHOTOS.interior_1, hot: true },
+  { id: 'u-003', projectId: 'amp-jomtien-bay', unit: 'Tower A · 18-22', bedrooms: 1, baths: 1, sqm: 38, priceTHB: 46500000, view: 'Sea view', floor: 18, listed: '2 days ago', cover: PHOTOS.interior_4, hot: false },
+  { id: 'u-004', projectId: 'amp-jomtien-bay', unit: 'Tower B · 09-14', bedrooms: 0, baths: 1, sqm: 28, priceTHB: 3200000, view: 'City View', floor: 9, listed: 'New Release', cover: PHOTOS.interior_2, hot: false },
+  { id: 'u-005', projectId: 'amp-pratumnak-villas', unit: 'Villa 06', bedrooms: 3, baths: 4, sqm: 380, priceTHB: 32500000, view: 'Full Sea View', floor: 0, listed: '2 weeks ago', cover: PHOTOS.condo_modern_3, hot: true },
+  { id: 'u-006', projectId: 'amp-central-marina', unit: 'Tower 1 · 22-08', bedrooms: 0, baths: 1, sqm: 26, priceTHB: 2980000, view: 'Urban View', floor: 22, listed: 'New Release', cover: PHOTOS.condo_modern_5, hot: false },
+  { id: 'u-007', projectId: 'amp-skyline-plaza', unit: 'Tower 2 · 34-18', bedrooms: 2, baths: 2, sqm: 76, priceTHB: 9800000, view: 'Sea & city skyline', floor: 34, listed: '5 days ago', cover: PHOTOS.condo_modern_7, hot: false },
+  { id: 'u-008', projectId: 'amp-na-jomtien', unit: 'Tower A · 12-06', bedrooms: 2, baths: 2, sqm: 68, priceTHB: 7100000, view: 'Pool side', floor: 12, listed: '1 day ago', cover: PHOTOS.condo_modern_4, hot: false }
+];
+
+const AGENTS = [
+  { id: 'a1', name: 'Khun Apinya', avatar: PHOTOS.agent_1, role: 'Senior Advisor', lang: 'TH · EN', deals: 142, rating: 4.95 },
+  { id: 'a2', name: 'Marcus Lee', avatar: PHOTOS.agent_2, role: 'Investor Lead', lang: 'EN · CN', deals: 88, rating: 4.92 },
+  { id: 'a3', name: 'Sasha Volkov', avatar: PHOTOS.agent_3, role: 'Russian lead', lang: 'RU · EN', deals: 64, rating: 4.88 },
+  { id: 'a4', name: 'Nattapong S.', avatar: PHOTOS.agent_4, role: 'Property Manager', lang: 'TH · EN', deals: 215, rating: 4.97 }
+];
+
+const AREAS = [
+  { id: 'wongamat', name: 'Wongamat', count: 14, vibe: 'Quiet luxury, family', beach: '5-star beaches', img: PHOTOS.wongamat, descTH: 'โซนสุดหรูริมหาดที่มีความเงียบสงบสูงสุด เหมาะแก่การพักผ่อนอย่างแท้จริง', descEN: 'Ultra-luxury quiet beach zone, perfect for serene living.' },
+  { id: 'pratumnak', name: 'Pratumnak Hill', count: 22, vibe: 'Hillside villas', beach: 'Cosy Beach', img: PHOTOS.pratumnak, descTH: 'เนินเขาที่มีความเป็นส่วนตัวสูง วิวอ่าวพัทยาแบบพาโนรามา', descEN: 'Hillside privacy with panoramic Gulf views.' },
+  { id: 'jomtien', name: 'Jomtien', count: 38, vibe: 'High-yield investor', beach: 'Jomtien Beach', img: PHOTOS.jomtien, descTH: 'ทำเลยอดนิยมสำหรับปล่อยเช่า ยอดจองสูงตลอดปี', descEN: 'Top yield area with high booking demand.' },
+  { id: 'central', name: 'Central Pattaya', count: 47, vibe: 'Urban, walk-to-all', beach: 'Pattaya Beach', img: PHOTOS.pattaya_beach, descTH: 'ใจกลางเมืองที่รวมความบันเทิง ร้านค้า และสีสันของพัทยาไว้ครบครัน', descEN: 'Downtown core combining entertainment, shopping, and dynamic city life.' }
+];
+
+const CURRENCIES = {
+  THB: { symbol: '฿', rate: 1, locale: 'th-TH' },
+  USD: { symbol: '$', rate: 1 / 36, locale: 'en-US' },
+  EUR: { symbol: '€', rate: 1 / 39, locale: 'en-US' },
+  CNY: { symbol: '¥', rate: 1 / 5, locale: 'en-US' },
+  RUB: { symbol: '₽', rate: 1 / 0.4, locale: 'ru-RU' }
+};
+
+// ─── STATE ENGINE ───
+let activeScreen = 'home';
+let activeScreenArg = null;
+let currentLocale = 'EN';
+let currentCurrency = 'THB';
+let comparedProjects = [];
+let shortlistedBrief = [];
+let searchTab = 'buy';
+
+// Router History
+let historyStack = [];
+
+// ─── TRANSLATION DICTIONARY (Strict copy parity) ───
+const dict = {
+  EN: {
+    hero_kicker: "Live · 142 units released this week",
+    hero_title_1: "Pattaya, priced for",
+    hero_title_2: "investors who measure",
+    hero_title_3: "in years, not weekends.",
+    hero_desc: "A licensed brokerage matching foreign buyers and Thai investors with off-plan, resale and pool-villa inventory across Pattaya's Eastern Seaboard. Transparent yields. Verified foreign quota.",
+    hero_cta_1: "View Available Units",
+    hero_cta_2: "✦ 90-Second Smart Finder",
+    featured_eyebrow: "Hand-picked, this quarter",
+    featured_title: "The investor-grade shortlist",
+    featured_desc: "Three projects we'd put our own money in. Verified developers, capital-protected terms.",
+    all_projects: "All Projects",
+    why_title: "The Eastern Seaboard's next decade is being priced in now.",
+    why_desc: "The U-Tapao airport expansion, high-speed rail to Bangkok, and EEC industrial zone are re-shaping the south. Median condo values are up 14% YoY in Wongamat.",
+    read_report: "Read 2026 Market Report",
+    why_metric_1_label: "Median gross yield, prime condo",
+    why_metric_2_label: "YoY appreciation, Wongamat",
+    why_metric_3_label: "Foreign-quota allocated first",
+    why_metric_4_label: "Median time-on-market",
+    areas_title: "Six zones. Six investment theses.",
+    areas_desc: "Pattaya is not one market. Each zone has different yield, tenant profile, and growth potential.",
+    compare_areas: "Compare areas",
+    finder_title: "Tell us your budget, we'll send a shortlist",
+    finder_desc: "Six questions. No call required. Get a curated PDF brief with 3-5 projects matched to your budget.",
+    finder_cta: "Start the brief",
+    calculator_cta: "Cost calculator",
+    faq_title: "The questions every foreign buyer asks first",
+    cta_whatsapp: "WhatsApp Us",
+    cta_line: "LINE Chat",
+    cta_book: "Book a Viewing",
+    quota_header: "Foreign Ownership Rules",
+    quota_desc: "Thai law lets non-residents own up to 49% of any condominium building in freehold, indefinitely. AMP confirms current quota status before you commit a single baht.",
+    speak_advisor: "Speak to an Advisor",
+    name_placeholder: "Your Name *",
+    phone_placeholder: "Phone Number",
+    email_placeholder: "Email Address",
+    budget_label: "Investment Budget",
+    bedrooms_label: "Bedrooms Needed",
+    timeline_label: "Purchase Timeline",
+    whatsapp_agree: "Contact me on WhatsApp for fastest reply",
+    send_brief_cta: "Send Brief & Get Same-day Reply",
+    advisor_tag: "Multilingual advisory. Escrow on every transaction.",
+    footer_desc: "Pattaya's investor-grade property advisory. Licensed brokerage est. 2018. Member, Thai Real Estate Association."
+  },
+  TH: {
+    hero_kicker: "ความเคลื่อนไหว · ปล่อยยูนิตใหม่แล้ว 142 ห้องในสัปดาห์นี้",
+    hero_title_1: "เพื่อการลงทุนในพัทยา",
+    hero_title_2: "ที่ประเมินผลตอบแทน",
+    hero_title_3: "เป็นรายปี ไม่ใช่รายวัน",
+    hero_desc: "ที่ปรึกษาอสังหาริมทรัพย์และตัวแทนอย่างเป็นทางการ เพื่อช่วยจับคู่ผู้ซื้อชาวต่างชาติและนักลงทุนชาวไทยกับห้องชุดมือหนึ่ง รีเซล และพูลวิลล่าในทำเลเด่นของพัทยา พร้อมรายงานผลตอบแทนและโควตา외ชาติที่ชัดเจน",
+    hero_cta_1: "ดูโครงการทั้งหมด",
+    hero_cta_2: "✦ แบบประเมินความต้องการใน 90 วินาที",
+    featured_eyebrow: "การคัดสรรประจำไตรมาสนี้",
+    featured_title: "รายการคัดสรรเพื่อการลงทุนที่ดีที่สุด",
+    featured_desc: "สามโครงการเด่นที่เรามั่นใจในศักยภาพ ร่วมมือกับผู้พัฒนาโครงการที่ผ่านการรับรองและเงื่อนไขการคุ้มครองเงินทุนอย่างรัดกุม",
+    all_projects: "โครงการทั้งหมด",
+    why_title: "โอกาสทองในทศวรรษถัดไปของพื้นที่ชายฝั่งตะวันออก เริ่มต้นขึ้นแล้ววันนี้",
+    why_desc: "โครงการขยายสนามบินอู่ตะเภา รถไฟความเร็วสูงเชื่อมต่อกรุงเทพฯ และเขตเศรษฐกิจพิเศษ EEC กำลังเปลี่ยนโฉมหน้าเมืองพัทยา โดยมูลค่าคอนโดมิเนียมเฉลี่ยในทำเลวงศ์อมาตย์ปรับตัวสูงขึ้นถึง 14% เมื่อเทียบรายปี",
+    read_report: "อ่านรายงานวิเคราะห์ตลาดปี 2026",
+    why_metric_1_label: "อัตราผลตอบแทนคอนโดมิเนียมทำเลหลัก",
+    why_metric_2_label: "อัตราเติบโตของราคาเฉลี่ยต่อปี วงศ์อมาตย์",
+    why_metric_3_label: "สัดส่วนโควตาต่างชาติที่คัดสรรเป็นพิเศษ",
+    why_metric_4_label: "ระยะเวลาเฉลี่ยก่อนปิดการขายห้องชุดพร้อมอยู่",
+    areas_title: "สี่ทำเลทอง กับเหตุผลเพื่อการลงทุนที่แตกต่าง",
+    areas_desc: "ตลาดพัทยาไม่ได้มีเพียงทำเลเดียว แต่ละพื้นที่มีความโดดเด่นของผลตอบแทน โปรไฟล์ผู้เช่า และการเติบโตที่เฉพาะตัว",
+    compare_areas: "เปรียบเทียบทำเล",
+    finder_title: "เล่าโจทย์และงบประมาณของคุณ เพื่อให้เราคัดสรรรายการที่ตรงใจที่สุด",
+    finder_desc: "ตอบคำถามเพียง 6 ข้อ โดยไม่ต้องผ่านระบบโทรศัพท์ เพื่อรับเอกสารรายงานรายการคัดสรรพิเศษ 3-5 โครงการที่เหมาะกับเป้าหมายของคุณโดยเฉพาะ",
+    finder_cta: "เริ่มต้นประเมิน",
+    calculator_cta: "เครื่องคำนวณค่าธรรมเนียม",
+    faq_title: "คำถามยอดนิยมที่ผู้ซื้อต่างชาติสอบถามบ่อยที่สุด",
+    cta_whatsapp: "ติดต่อผ่าน WhatsApp",
+    cta_line: "ติดต่อผ่าน LINE",
+    cta_book: "นัดหมายชมโครงการ",
+    quota_header: "กฎเกณฑ์โควตาการถือครองอสังหาริมทรัพย์ของชาวต่างชาติ",
+    quota_desc: "กฎหมายไทยอนุญาตให้ชาวต่างชาติสามารถถือครองกรรมสิทธิ์ห้องชุดคอนโดมิเนียมได้สูงสุดถึง 49% ของพื้นที่ทั้งหมดในโครงการได้อย่างไม่มีกำหนด โดยทีมงาน AMP จะตรวจสอบสถานะโควตาในโครงการอย่างละเอียดก่อนการทำรายการทุกครั้งเพื่อความปลอดภัยของเงินทุนคุณ",
+    speak_advisor: "คุยกับที่ปรึกษาของเรา",
+    name_placeholder: "ชื่อ-นามสกุลของคุณ *",
+    phone_placeholder: "เบอร์โทรศัพท์ติดต่อ",
+    email_placeholder: "ที่อยู่อีเมลของคุณ",
+    budget_label: "งบประมาณการลงทุน",
+    bedrooms_label: "จำนวนห้องนอนที่ต้องการ",
+    timeline_label: "ระยะเวลาที่ต้องการตัดสินใจ",
+    whatsapp_agree: "อนุญาตให้ติดต่อผ่าน WhatsApp เพื่อรับข้อมูลข่าวสารรวดเร็วที่สุด",
+    send_brief_cta: "ส่งรายละเอียดและติดต่อเราทันที",
+    advisor_tag: "คำแนะนำในหลากหลายภาษา พร้อมบริการเปิดบัญชีเอสโครว์เพื่อความปลอดภัยในการทำธุรกรรม",
+    footer_desc: "ที่ปรึกษาและตัวแทนการลงทุนอสังหาริมทรัพย์ชั้นนำของพัทยา ได้รับใบอนุญาตจดทะเบียนก่อตั้งเมื่อปี 2018 สมาชิกสมาคมอสังหาริมทรัพย์ไทย"
+  }
+};
+
+// ─── UTILITIES ───
+function t(key) {
+  return dict[currentLocale][key] || key;
+}
+
+function formatCurrency(thbValue) {
+  const c = CURRENCIES[currentCurrency];
+  const converted = thbValue * c.rate;
+  if (converted >= 1000000) {
+    return `${c.symbol}${(converted / 1000000).toFixed(converted >= 10000000 ? 0 : 1)}M`;
+  }
+  if (converted >= 1000) {
+    return `${c.symbol}${Math.round(converted / 1000)}k`;
+  }
+  return `${c.symbol}${Math.round(converted).toLocaleString(c.locale)}`;
+}
+
+// SIMULATOR CONTROLS
+function setSimView(viewMode) {
+  const container = document.getElementById('app-view-container');
+  container.className = viewMode;
+  
+  // Update simulated layout tag on body
+  if (viewMode === 'fluid') {
+    document.body.classList.remove('simulated-layout');
+  } else {
+    document.body.classList.add('simulated-layout');
+  }
+  
+  const btns = document.querySelectorAll('.sim-btn-group:first-child .sim-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  const idx = viewMode === 'fluid' ? 0 : (viewMode === 'desktop' ? 1 : 2);
+  btns[idx].classList.add('active');
+}
+
+function setLocaleCode(loc) {
+  currentLocale = loc;
+  document.getElementById('sim-lang-en').classList.toggle('active', loc === 'EN');
+  document.getElementById('sim-lang-th').classList.toggle('active', loc === 'TH');
+  renderCurrentScreen();
+  updateStaticTexts();
+}
+
+function toggleSimCurrencyMenu() {
+  document.getElementById('sim-currency-menu').classList.toggle('open');
+}
+
+function setSimCurrency(cur) {
+  currentCurrency = cur;
+  const menu = document.getElementById('sim-currency-menu');
+  menu.classList.remove('open');
+  document.getElementById('sim-currency-btn').innerText = `${cur} (${CURRENCIES[cur].symbol}) ▼`;
+  renderCurrentScreen();
+}
+
+// Router & Screens Transitions
+function gotoScreen(screen, arg = null) {
+  activeScreen = screen;
+  activeScreenArg = arg;
+  historyStack.push({ screen, arg });
+  
+  // Update desktop navigations active status
+  const navIds = ['home', 'listing', 'areas', 'quota', 'calculator', 'contact'];
+  navIds.forEach(id => {
+    const el = document.getElementById(`nav-${id}`);
+    if (el) el.classList.toggle('active', screen === id);
+    const mel = document.getElementById(`m-nav-${id}`);
+    if (mel) mel.classList.toggle('active', screen === id);
+  });
+  
+  renderCurrentScreen();
+}
+
+function goBack() {
+  if (historyStack.length > 1) {
+    historyStack.pop(); // remove current
+    const prev = historyStack.pop();
+    gotoScreen(prev.screen, prev.arg);
+  } else {
+    gotoScreen('home');
+  }
+}
+
+// Toggle project comparisons
+function toggleCompare(projId, event) {
+  if (event) event.stopPropagation();
+  const idx = comparedProjects.indexOf(projId);
+  if (idx > -1) {
+    comparedProjects.splice(idx, 1);
+  } else {
+    if (comparedProjects.length < 4) {
+      comparedProjects.push(projId);
+    } else {
+      alert(currentLocale === 'EN' ? 'Maximum comparison limit is 4 projects.' : 'สามารถเปรียบเทียบได้สูงสุด 4 โครงการครับ');
+      return;
+    }
+  }
+  document.getElementById('compare-count-badge').innerText = comparedProjects.length;
+  renderCurrentScreen();
+}
+
+// Toggle project shortlists
+function toggleShortlist(projId, event) {
+  if (event) event.stopPropagation();
+  const idx = shortlistedBrief.indexOf(projId);
+  if (idx > -1) {
+    shortlistedBrief.splice(idx, 1);
+  } else {
+    shortlistedBrief.push(projId);
+  }
+  renderCurrentScreen();
+}
+
+// Render dynamic screen
+function renderCurrentScreen() {
+  const target = document.getElementById('screen-render-target');
+  target.innerHTML = '';
+  
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  
+  switch(activeScreen) {
+    case 'home':
+      renderHomeScreen(target);
+      break;
+    case 'listing':
+      renderListingScreen(target);
+      break;
+    case 'project-detail':
+      renderProjectDetailScreen(target, activeScreenArg);
+      break;
+    case 'property-detail':
+      renderPropertyDetailScreen(target, activeScreenArg);
+      break;
+    case 'finder':
+      renderFinderScreen(target);
+      break;
+    case 'compare':
+      renderCompareScreen(target);
+      break;
+    case 'calculator':
+      renderCalculatorScreen(target);
+      break;
+    case 'areas':
+      renderAreasScreen(target);
+      break;
+    case 'quota':
+      renderQuotaScreen(target);
+      break;
+    case 'contact':
+      renderContactScreen(target);
+      break;
+  }
+}
+
+// Header & footer localization updates
+function updateStaticTexts() {
+  // Footer elements translation
+  document.getElementById('footer-desc').innerText = t('footer-desc') || t('footer_desc');
+  document.getElementById('footer-col-browse').innerText = currentLocale === 'EN' ? 'Browse' : 'รายการบริการ';
+  document.getElementById('footer-col-invest').innerText = currentLocale === 'EN' ? 'Investment' : 'การลงทุน';
+  document.getElementById('footer-col-office').innerText = currentLocale === 'EN' ? 'Office' : 'สำนักงานตัวแทน';
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 1: HOMEPAGE
+// ─────────────────────────────────────────────────────────────
+function renderHomeScreen(container) {
+  const isTH = currentLocale === 'TH';
+  const html = `
+    <!-- HERO SECTION -->
+    <section class="hero-sec">
+      <div class="hero-bg">
+        <img src="${PHOTOS.bangkok_sky}" alt="Bangkok Pattaya investment"/>
+      </div>
+      <div class="hero-gradient"></div>
+      <div class="hero-glow"></div>
+      
+      <div class="hero-wrap">
+        <div>
+          <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; borderRadius: 999px; border: 1px solid rgba(248,244,234,.22); background: rgba(248,244,234,.06); font-size: 11.5px; letter-spacing: 0.04em;">
+            <span class="dot dot-coral pulse"></span>
+            ${t('hero_kicker')}
+          </span>
+          <h1 class="t-display" style="margin: 24px 0 0; font-size: clamp(2.5rem, 5.5vw, 4.8rem); line-height: 0.98; letter-spacing: -0.03em; font-weight: 400; max-width: 880px;">
+            ${isTH ? 'การลงทุนอสังหาริมทรัพย์ระดับพรีเมียม' : t('hero_title_1')}<br/>
+            <span style="font-style: italic; color: var(--champagne);">${isTH ? 'ที่วัดผลด้วยความยั่งยืนระยะยาว' : t('hero_title_2')}</span><br/>
+            ${isTH ? 'คัดกรองโจทย์เพื่อตัวเลือกที่ดีที่สุดในพัทยา' : t('hero_title_3')}
+          </h1>
+          <p style="margin: 24px 0 0; font-size: 16px; color: rgba(248,244,234,.78); max-width: 580px; line-height: 1.55;">
+            ${t('hero_desc')}
+          </p>
+
+          <div style="display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap;">
+            <button onclick="gotoScreen('listing')" class="btn btn-coral btn-lg">
+              ${t('hero_cta_1')} →
+            </button>
+            <button onclick="gotoScreen('finder')" class="btn btn-lg" style="background: rgba(248,244,234,.08); color: var(--bone); border: 1px solid rgba(248,244,234,.24);">
+              ${t('hero_cta_2')}
+            </button>
+          </div>
+
+          <!-- Quick statistics grid -->
+          <div style="display: flex; gap: 40px; margin-top: 56px; padding-top: 28px; border-top: 1px solid rgba(248,244,234,.14); flex-wrap: wrap;">
+            <div>
+              <div class="t-display" style="font-size: 32px; letter-spacing: -0.02em; line-height: 1;">127</div>
+              <div style="font-size: 11px; color: rgba(248,244,234,.55); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase;">${isTH ? 'โครงการทั้งหมด' : 'Active Projects'}</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size: 32px; letter-spacing: -0.02em; line-height: 1;">${formatCurrency(2900000)}</div>
+              <div style="font-size: 11px; color: rgba(248,244,234,.55); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase;">${isTH ? 'ราคาเริ่มต้นต่ำสุด' : 'Lowest Entry'}</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size: 32px; letter-spacing: -0.02em; line-height: 1;">8.1%</div>
+              <div style="font-size: 11px; color: rgba(248,244,234,.55); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase;">${isTH ? 'ผลตอบแทนปล่อยเช่าสูงสุด' : 'Top yield p.a.'}</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size: 32px; letter-spacing: -0.02em; line-height: 1;">49%</div>
+              <div style="font-size: 11px; color: rgba(248,244,234,.55); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase;">${isTH ? 'โควตาซื้อขาดชาวต่างชาติ' : 'Foreign Quota'}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK INTRO FORM CARD -->
+        <div id="hero-lead-card-box">
+          <!-- Form rendering done dynamically below -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH GRID ROW -->
+    <section class="container" style="margin-top: -42px; position: relative; z-index: 20;">
+      <div style="background: var(--paper); border-radius: var(--r-xl); padding: 16px; box-shadow: var(--shadow-lg); border: 1px solid var(--line-soft);">
+        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+          ${['buy', 'rent', 'offplan', 'villas'].map(tab => `
+            <button class="sim-btn ${searchTab === tab ? 'active' : ''}" style="border: 0;" onclick="setSearchTypeTab('${tab}')">
+              ${tab === 'buy' ? (isTH ? 'ซื้อ' : 'Buy') : tab === 'rent' ? (isTH ? 'เช่า' : 'Rent') : tab === 'offplan' ? (isTH ? 'โครงการใหม่' : 'Off-Plan') : (isTH ? 'พูลวิลล่า' : 'Villas')}
+            </button>
+          `).join('')}
+        </div>
+        <div class="hero-search-row" style="display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr auto; gap: 12px; align-items: center;">
+          <div style="padding: 6px 12px; border-right: 1px solid var(--line-soft);">
+            <div class="t-eyebrow" style="font-size:9px;">${isTH ? 'ทำเลที่ตั้ง' : 'Location'}</div>
+            <div style="font-size:14px; font-weight:500; margin-top:2px;">Anywhere in Pattaya</div>
+          </div>
+          <div style="padding: 6px 12px; border-right: 1px solid var(--line-soft);">
+            <div class="t-eyebrow" style="font-size:9px;">${isTH ? 'ประเภทอสังหาฯ' : 'Type'}</div>
+            <div style="font-size:14px; font-weight:500; margin-top:2px;">Condo, Villa, Penthouse</div>
+          </div>
+          <div style="padding: 6px 12px; border-right: 1px solid var(--line-soft);">
+            <div class="t-eyebrow" style="font-size:9px;">${isTH ? 'จำนวนห้องนอน' : 'Bedrooms'}</div>
+            <div style="font-size:14px; font-weight:500; margin-top:2px;">Studio - 3 BR</div>
+          </div>
+          <div style="padding: 6px 12px;">
+            <div class="t-eyebrow" style="font-size:9px;">${isTH ? 'งบประมาณสูงสุด' : 'Max Budget'}</div>
+            <div style="font-size:14px; font-weight:500; margin-top:2px;">${formatCurrency(15000000)}</div>
+          </div>
+          <button onclick="gotoScreen('listing')" class="btn btn-coral" style="height: 52px; padding: 0 24px;">
+            ${isTH ? 'ค้นหา 127 รายการ' : 'Search 127 listings'}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURATED SHORTLIST SECTION -->
+    <section class="section container">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <span class="t-eyebrow">${t('featured_eyebrow')}</span>
+          <h2 class="t-display" style="font-size: 38px; margin: 8px 0 0; font-weight: 400;">
+            ${isTH ? 'รายการโครงการคัดสรรสี่ดาวประจำไตรมาส' : t('featured_title')}
+          </h2>
+          <p style="font-size: 14px; color: var(--ink-3); margin-top: 6px;">
+            ${t('featured_desc')}
+          </p>
+        </div>
+        <button onclick="gotoScreen('listing')" class="btn btn-ghost">${t('all_projects')} →</button>
+      </div>
+
+      <div class="grid-3">
+        ${PROJECTS.slice(0, 3).map(p => renderProjectCardHTML(p)).join('')}
+      </div>
+    </section>
+
+    <!-- DECISION FRAMING & WHY PATTAYA -->
+    <section class="section" style="background: var(--ink); color: var(--bone); overflow: hidden; position: relative;">
+      <div style="position: absolute; top: 0; right: 0; width: 480px; height: 480px; background: radial-gradient(circle, rgba(201,166,119,.18), transparent 60%); pointer-events: none;"></div>
+      <div class="container">
+        <div class="grid-12" style="align-items: center;">
+          <div style="grid-column: span 5;">
+            <span class="t-eyebrow" style="color: var(--champagne); opacity: 1;">Why Pattaya · Why now</span>
+            <h2 class="t-display" style="margin: 14px 0 0; font-size: 42px; line-height: 1.05; font-weight: 400;">
+              ${t('why_title')}
+            </h2>
+            <p style="margin: 20px 0 0; font-size: 14px; color: rgba(248,244,234,.7); line-height: 1.6;">
+              ${t('why_desc')}
+            </p>
+            <button onclick="gotoScreen('quota')" class="btn btn-lg" style="margin-top: 32px; background: var(--champagne); color: var(--ink); font-weight: 600;">
+              ${t('read_report')}
+            </button>
+          </div>
+          <div style="grid-column: span 7;" class="grid-2">
+            <div style="background: rgba(248,244,234,.05); border: 1px solid rgba(248,244,234,.1); border-radius: 16px; padding: 24px;">
+              <div class="t-display" style="font-size: 48px; line-height: 1; color: var(--champagne);">6.4%</div>
+              <p style="font-size: 13px; color: rgba(248,244,234,.65); margin: 8px 0 0;">${t('why_metric_1_label')}</p>
+            </div>
+            <div style="background: rgba(248,244,234,.05); border: 1px solid rgba(248,244,234,.1); border-radius: 16px; padding: 24px;">
+              <div class="t-display" style="font-size: 48px; line-height: 1; color: var(--champagne);">+14.2%</div>
+              <p style="font-size: 13px; color: rgba(248,244,234,.65); margin: 8px 0 0;">${t('why_metric_2_label')}</p>
+            </div>
+            <div style="background: rgba(248,244,234,.05); border: 1px solid rgba(248,244,234,.1); border-radius: 16px; padding: 24px;">
+              <div class="t-display" style="font-size: 48px; line-height: 1; color: var(--champagne);">92%</div>
+              <p style="font-size: 13px; color: rgba(248,244,234,.65); margin: 8px 0 0;">${t('why_metric_3_label')}</p>
+            </div>
+            <div style="background: rgba(248,244,234,.05); border: 1px solid rgba(248,244,234,.1); border-radius: 16px; padding: 24px;">
+              <div class="t-display" style="font-size: 48px; line-height: 1; color: var(--champagne);">21 days</div>
+              <p style="font-size: 13px; color: rgba(248,244,234,.65); margin: 8px 0 0;">${t('why_metric_4_label')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AREAS LISTING SECTION -->
+    <section class="section container">
+      <div style="text-align: center; max-width: 680px; margin: 0 auto 48px;">
+        <span class="t-eyebrow">Neighborhoods guide</span>
+        <h2 class="t-display" style="font-size: 38px; margin: 8px 0 0; font-weight: 400;">
+          ${t('areas_title')}
+        </h2>
+        <p style="font-size: 14px; color: var(--ink-3); margin-top: 8px;">
+          ${t('areas_desc')}
+        </p>
+      </div>
+
+      <div class="grid-3" style="grid-template-columns: repeat(4, 1fr);">
+        ${AREAS.map(a => `
+          <div class="card lift" onclick="gotoScreen('areas', '${a.id}')" style="cursor: pointer; position: relative; aspect-ratio: 3/4;">
+            <img src="${a.img}" alt="${a.name}" class="zoom-on-hover" style="position: absolute; inset:0; width:100%; height:100%; object-fit: cover; opacity: 0.85;"/>
+            <div style="position: absolute; inset:0; background: linear-gradient(180deg, transparent 40%, rgba(20,32,31,.9) 100%);"></div>
+            <div style="position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; color: var(--bone);">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="t-eyebrow" style="color: rgba(248,244,234,.7);">${a.beach}</span>
+                <span class="tag tag-coral tag-sm" style="font-size: 10px;">${a.count} list</span>
+              </div>
+              <div>
+                <h3 class="t-display" style="font-size: 26px; margin: 0; font-weight:400;">${a.name}</h3>
+                <p style="font-size: 11px; opacity: 0.8; margin: 4px 0 0;">${a.vibe}</p>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex; justify-content:center; margin-top: 32px;">
+        <button onclick="gotoScreen('areas')" class="btn btn-ghost">${t('compare_areas')} →</button>
+      </div>
+    </section>
+
+    <!-- INTRO TO SMART FINDER -->
+    <section class="section container" style="padding-top: 0;">
+      <div style="background: var(--sand-soft); border-radius: 24px; padding: 56px 48px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items: center;">
+        <div>
+          <span class="t-eyebrow">Smart Finder Intake</span>
+          <h2 class="t-display" style="font-size: 40px; margin: 12px 0 0; font-weight:400;">
+            ${t('finder_title')}
+          </h2>
+          <p style="font-size:14px; color: var(--ink-3); margin-top:16px;">
+            ${t('finder_desc')}
+          </p>
+          <div style="display:flex; gap: 12px; margin-top: 24px;">
+            <button onclick="gotoScreen('finder')" class="btn btn-coral">${t('finder_cta')}</button>
+            <button onclick="gotoScreen('calculator')" class="btn btn-paper">${t('calculator_cta')}</button>
+          </div>
+        </div>
+        <div style="background: var(--paper); border-radius: 16px; padding: 24px; border: 1px solid var(--line-soft); box-shadow: var(--shadow-sm);">
+          <h3 class="t-display" style="font-size:22px; margin: 0 0 16px;">Sample matching</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--line-soft);">
+              <span style="font-size:13.5px; font-weight:500;">Skyharbor Residences</span>
+              <span class="tag tag-coral">94% Fit</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--line-soft);">
+              <span style="font-size:13.5px; font-weight:500;">Jomtien Bay Tower</span>
+              <span class="tag tag-coral">88% Fit</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:13.5px; font-weight:500;">Na Jomtien Residence</span>
+              <span class="tag tag-teal">76% Fit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUST STRIP BAR -->
+    <section style="background: var(--sand); padding: 32px 0; border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);">
+      <div class="container" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+        <div style="text-align:center;">
+          <div class="t-display" style="font-size:36px; font-weight:400; line-height:1;">฿4.2B+</div>
+          <div style="font-size:11px; color:var(--ink-3); text-transform:uppercase; margin-top:4px;">Transacted Volume</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="t-display" style="font-size:36px; font-weight:400; line-height:1;">1,840</div>
+          <div style="font-size:11px; color:var(--ink-3); text-transform:uppercase; margin-top:4px;">Units Sold</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="t-display" style="font-size:36px; font-weight:400; line-height:1;">96%</div>
+          <div style="font-size:11px; color:var(--ink-3); text-transform:uppercase; margin-top:4px;">Buyer Satisfaction</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="t-display" style="font-size:36px; font-weight:400; line-height:1;">62%</div>
+          <div style="font-size:11px; color:var(--ink-3); text-transform:uppercase; margin-top:4px;">International Buyers</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ BLOCK SECTION -->
+    <section class="section container">
+      <div style="text-align:center; max-width:680px; margin: 0 auto 48px;">
+        <span class="t-eyebrow">Information support</span>
+        <h2 class="t-display" style="font-size:38px; margin:8px 0 0; font-weight:400;">
+          ${t('faq_title')}
+        </h2>
+      </div>
+
+      <div class="grid-2">
+        <details>
+          <summary>
+            <span>${isTH ? 'ชาวต่างชาติสามารถซื้อคอนโดมิเนียมในไทยแบบกรรมสิทธิ์สมบูรณ์ได้จริงหรือไม่?' : 'Can foreigners own property in Thailand?'}</span>
+            <span>＋</span>
+          </summary>
+          <p>
+            ${isTH ? 'สามารถเป็นเจ้าของในกรรมสิทธิ์สมบูรณ์ (Freehold) ได้ตามกฎหมายสูงสุด 49% ของพื้นที่ขายโครงการคอนโดมิเนียมทั้งหมดอย่างเป็นทางการ' : 'Yes, condominium freehold ownership is allowed up to 49% of the building sale area under the Thai Condominium Act.'}
+          </p>
+        </details>
+        <details>
+          <summary>
+            <span>${isTH ? 'จำเป็นต้องพำนักอยู่ในประเทศไทยเพื่อทำการซื้อหรือไม่?' : 'Do I need to be in Thailand to buy?'}</span>
+            <span>＋</span>
+          </summary>
+          <p>
+            ${isTH ? 'ไม่จำเป็นครับ เราสามารถจัดส่งเอกสารและจัดการทำธุรกรรมผ่านบริการนัดหมายออนไลน์ พร้อมที่ปรึกษากฎหมายดูแลให้ครบถ้วนในทุกขั้นตอนอย่างปลอดภัย' : 'No. We manage remote transactions, lawyer reviews, and digital notarisation. Over 40% of our buyers closed their units remotely.'}
+          </p>
+        </details>
+        <details>
+          <summary>
+            <span>${isTH ? 'การโอนเงินซื้อทรัพย์สินดำเนินการอย่างไร?' : 'How are funds transferred?'}</span>
+            <span>＋</span>
+          </summary>
+          <p>
+            ${isTH ? 'ต้องมีการโอนเงินสกุลต่างประเทศเข้ามายังบัญชีธนาคารในประเทศไทยเป็นสกุลเงินบาทไทยของตน และทางธนาคารผู้รับปลายทางจะเป็นผู้ดำเนินการแปลงแลกเปลี่ยนเป็นเงินบาทไทย พร้อมออกเอกสาร \"ใบทำธุรกรรมทางการเงินต่างประเทศ (FET)\" เพื่อใช้ยื่นรับใบโอนโฉนดคอนโดที่กรมที่ดินพัทยาต่อไป' : 'Funds must be transferred in foreign currency into a Thai commercial bank. The local bank converts it to Thai Baht and issues a Foreign Exchange Transaction (FET) certificate, essential for Land Department transfer.'}
+          </p>
+        </details>
+        <details>
+          <summary>
+            <span>${isTH ? 'AMP ได้รับรายได้จากการเป็นนายหน้าอย่างไร?' : 'How does AMP make money?'}</span>
+            <span>＋</span>
+          </summary>
+          <p>
+            ${isTH ? 'เราได้รับส่วนแบ่งเป็นค่าคอมมิชชั่นตามสัญญากับเจ้าของอสังหาริมทรัพย์และทางผู้พัฒนาโครงการ ผู้ซื้อจึงใช้บริการกับเราได้ฟรีและไม่มีค่าใช้จ่ายแฝงเพิ่มเติมครับ' : 'Standard brokerage commission is paid by developers or sellers. Buyers pay nothing extra for our advisory services.'}
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <!-- BOTTOM ACTION BRAND STRIP -->
+    <section class="container" style="padding-bottom: 80px;">
+      <div style="background: var(--ink); color: var(--bone); border-radius: 24px; padding: 56px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 32px;">
+        <div>
+          <span class="t-eyebrow" style="color: var(--champagne);">Connect with our advisors</span>
+          <h3 class="t-display" style="font-size: 36px; margin: 12px 0 0; font-weight:400; max-width: 540px;">
+            ${isTH ? 'นัดชมโครงการหรือคุยกับเราเพื่อวิเคราะห์ความเหมาะสมฟรี' : 'Ready to start? Speak with our Pattaya property experts.'}
+          </h3>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-lg" style="background:#25D366; color:#fff;" onclick="window.open('https://whatsapp.com')">${t('cta_whatsapp')}</button>
+          <button class="btn btn-lg" style="background:#06C755; color:#fff;" onclick="window.open('https://line.me')">${t('cta_line')}</button>
+          <button onclick="gotoScreen('contact')" class="btn btn-coral btn-lg">${t('cta_book')}</button>
+        </div>
+      </div>
+    </section>
+  `;
+  
+  container.innerHTML = html;
+  renderLeadForm(document.getElementById('hero-lead-card-box'), true);
+}
+
+function setSearchTypeTab(tab) {
+  searchTab = tab;
+  renderCurrentScreen();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 2: PROJECT LISTING (Filterable view)
+// ─────────────────────────────────────────────────────────────
+let filterArea = 'all';
+let filterStatus = 'all';
+let filterPrice = 'all';
+
+function renderListingScreen(container) {
+  const isTH = currentLocale === 'TH';
+  
+  // Filter core calculations
+  let filtered = PROJECTS;
+  if (filterArea !== 'all') filtered = filtered.filter(p => p.area.toLowerCase() === filterArea.toLowerCase());
+  if (filterStatus !== 'all') filtered = filtered.filter(p => p.statusKey === filterStatus);
+  if (filterPrice !== 'all') {
+    if (filterPrice === 'low') filtered = filtered.filter(p => p.startingPriceTHB < 5000000);
+    if (filterPrice === 'mid') filtered = filtered.filter(p => p.startingPriceTHB >= 5000000 && p.startingPriceTHB <= 15000000);
+    if (filterPrice === 'high') filtered = filtered.filter(p => p.startingPriceTHB > 15000000);
+  }
+
+  const html = `
+    <section class="section" style="padding-top: 40px; background: var(--bone);">
+      <div class="container-wide">
+        <div style="margin-bottom: 32px;">
+          <span class="t-eyebrow">${isTH ? 'รายการคัดสรรประจำสัปดาห์' : 'Pattaya Real Estate SHORTLIST'}</span>
+          <h1 class="t-display" style="font-size: 42px; margin: 8px 0 0; font-weight: 400;">
+            ${isTH ? 'โครงการและคอนโดมิเนียมที่แนะนำเพื่อการลงทุน' : 'Verified Condos & Premium Pool Villas'}
+          </h1>
+        </div>
+
+        <div class="grid-12 split-view-container">
+          <!-- LEFT SIDE: FILTER COLUMN -->
+          <div style="grid-column: span 4;">
+            <div class="sticky-filter-panel">
+              <h3 class="t-display" style="font-size:24px; margin: 0 0 20px; font-weight:400;">${isTH ? 'ตัวกรองเพื่อค้นหา' : 'Filter Shortlist'}</h3>
+              
+              <div class="label-row" style="margin-bottom:16px;">
+                <label class="label">${isTH ? 'เลือกทำเลที่ตั้ง' : 'Location Zone'}</label>
+                <select class="select" id="filter-select-area" onchange="applyFilters()">
+                  <option value="all" ${filterArea === 'all' ? 'selected' : ''}>${isTH ? 'ทุกทำเลในพัทยา' : 'All Zones'}</option>
+                  <option value="wongamat" ${filterArea === 'wongamat' ? 'selected' : ''}>Wongamat</option>
+                  <option value="jomtien" ${filterArea === 'jomtien' ? 'selected' : ''}>Jomtien</option>
+                  <option value="pratumnak hill" ${filterArea === 'pratumnak hill' ? 'selected' : ''}>Pratumnak Hill</option>
+                  <option value="na jomtien" ${filterArea === 'na jomtien' ? 'selected' : ''}>Na Jomtien</option>
+                </select>
+              </div>
+
+              <div class="label-row" style="margin-bottom:16px;">
+                <label class="label">${isTH ? 'สถานะโครงการ' : 'Construction Status'}</label>
+                <select class="select" id="filter-select-status" onchange="applyFilters()">
+                  <option value="all" ${filterStatus === 'all' ? 'selected' : ''}>${isTH ? 'ทุกสถานะ' : 'All Status'}</option>
+                  <option value="presale" ${filterStatus === 'presale' ? 'selected' : ''}>${isTH ? 'กำลังเปิดพรีเซล' : 'Pre-Sale'}</option>
+                  <option value="construction" ${filterStatus === 'construction' ? 'selected' : ''}>${isTH ? 'กำลังก่อสร้าง' : 'Under Construction'}</option>
+                  <option value="ready" ${filterStatus === 'ready' ? 'selected' : ''}>${isTH ? 'พร้อมเข้าอยู่' : 'Completed / Ready'}</option>
+                </select>
+              </div>
+
+              <div class="label-row" style="margin-bottom:24px;">
+                <label class="label">${isTH ? 'ช่วงงบประมาณสูงสุด' : 'Budget Bracket'}</label>
+                <select class="select" id="filter-select-price" onchange="applyFilters()">
+                  <option value="all" ${filterPrice === 'all' ? 'selected' : ''}>${isTH ? 'ทุกระดับราคา' : 'All Budgets'}</option>
+                  <option value="low" ${filterPrice === 'low' ? 'selected' : ''}>${isTH ? 'ต่ำกว่า 5 ล้านบาท' : 'Below ฿5M'}</option>
+                  <option value="mid" ${filterPrice === 'mid' ? 'selected' : ''}>฿5M - ฿15M</option>
+                  <option value="high" ${filterPrice === 'high' ? 'selected' : ''}>${isTH ? 'มากกว่า 15 ล้านบาท' : 'Above ฿15M'}</option>
+                </select>
+              </div>
+
+              <button onclick="resetFilters()" class="btn btn-ghost btn-block btn-sm">
+                ${isTH ? 'ล้างตัวกรองทั้งหมด' : 'Reset Filters'}
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDE: CARDS LISTING & SIMULATED MAP -->
+          <div style="grid-column: span 8;" class="grid-12">
+            <div style="grid-column: span 7;" class="project-list-col">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:13.5px; color: var(--ink-3);">${isTH ? `พบโครงการที่สอดคล้อง ${filtered.length} รายการ` : `Showing ${filtered.length} verified matches`}</span>
+                <span class="tag tag-dark">${currentCurrency} Selected</span>
+              </div>
+              
+              ${filtered.length > 0 ? filtered.map(p => renderProjectCardHTML(p, 'sm')).join('') : `
+                <div style="background:var(--paper); padding:48px; border-radius:16px; text-align:center; border:1px solid var(--line-soft);">
+                  <h3 class="t-display" style="font-size:24px; margin: 0 0 8px;">${isTH ? 'ไม่พบข้อมูลโครงการที่ตรงกับเงื่อนไข' : 'No matches found'}</h3>
+                  <p style="font-size:13.5px; color: var(--ink-3);">${isTH ? 'กรุณาปรับปรุงตัวเลือกตัวกรองของคุณใหม่อีกครั้ง' : 'Please adjust your search criteria or reset filters.'}</p>
+                </div>
+              `}
+            </div>
+
+            <!-- DYNAMIC MAP BOX (Right wing) -->
+            <div style="grid-column: span 5;" class="map-column">
+              <div class="map-placeholder-box map-bg">
+                <!-- Inner mock pins -->
+                ${filtered.map(p => `
+                  <div style="position: absolute; top: ${p.id.includes('skyharbor') ? '25%' : p.id.includes('jomtien') ? '55%' : '40%'}; left: ${p.id.includes('villas') ? '45%' : '60%'}; transform: translate(-50%, -50%); cursor: pointer;" onclick="gotoScreen('project-detail', '${p.id}')">
+                    <div style="background: var(--ink); color: var(--bone); border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight:600; box-shadow: var(--shadow-md); border: 1.5px solid var(--champagne); display: flex; align-items: center; gap: 4px;">
+                      <span class="dot dot-coral" style="width: 5px; height: 5px;"></span>
+                      ${p.name.split(' ')[0]}
+                    </div>
+                  </div>
+                `).join('')}
+                <div style="position: absolute; bottom: 16px; left: 16px; background: rgba(255,255,255,.94); padding: 8px 12px; border-radius: 8px; font-size: 10.5px; border:1px solid var(--line-soft); font-weight:500;">
+                  🗺️ Interactive Pattaya Map Simulator
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+}
+
+function applyFilters() {
+  filterArea = document.getElementById('filter-select-area').value;
+  filterStatus = document.getElementById('filter-select-status').value;
+  filterPrice = document.getElementById('filter-select-price').value;
+  renderCurrentScreen();
+}
+
+function resetFilters() {
+  filterArea = 'all';
+  filterStatus = 'all';
+  filterPrice = 'all';
+  renderCurrentScreen();
+}
+
+// PROJECT CARD RENDER ENGINE
+function renderProjectCardHTML(p, size = 'lg') {
+  const isTH = currentLocale === 'TH';
+  const isShortlisted = shortlistedBrief.includes(p.id);
+  const isCompared = comparedProjects.includes(p.id);
+  
+  return `
+    <article class="card lift" style="background: var(--paper); cursor: pointer;" onclick="gotoScreen('project-detail', '${p.id}')">
+      <div style="position: relative; aspect-ratio: ${size === 'lg' ? '4/3' : '16/10'}; overflow: hidden; background: var(--sand);">
+        <img class="zoom-on-hover" src="${p.cover}" alt="${p.name}" style="width: 100%; height:100%; object-fit: cover;"/>
+        
+        <!-- Hearts active togglers -->
+        <button style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.92); border:0; display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow-sm); color: ${isShortlisted ? 'var(--coral)' : 'var(--ink)'}; z-index: 10;" onclick="toggleShortlist('${p.id}', event)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isShortlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+
+        <span class="tag tag-${p.tagTone}" style="position: absolute; top: 12px; left: 12px;">${p.tag}</span>
+        <div style="position: absolute; bottom: 12px; left: 12px; color: #fff; font-size: 12px; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.5); display:flex; align-items:center; gap: 4px;">
+          📍 ${p.area}
+        </div>
+      </div>
+
+      <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <h3 class="t-display" style="font-size: 24px; margin: 0; font-weight: 400; line-height: 1.1;">${p.name}</h3>
+        </div>
+        <p style="margin: 4px 0 0; font-size: 12px; color: var(--ink-4);">${p.developer} · ${p.completion}</p>
+        
+        <div class="divider" style="margin: 16px 0;"></div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+          <div>
+            <span class="t-eyebrow" style="font-size: 9px;">${isTH ? 'ราคาเริ่มต้น' : 'From'}</span>
+            <div class="t-display" style="font-size: 18px; margin-top: 2px;">${formatCurrency(p.startingPriceTHB)}</div>
+          </div>
+          <div>
+            <span class="t-eyebrow" style="font-size: 9px;">${isTH ? 'คาดการณ์ผลตอบแทน' : 'Yield'}</span>
+            <div class="t-display" style="font-size: 18px; margin-top: 2px; color: var(--teal);">${p.rentalYieldPct}% p.a.</div>
+          </div>
+          <div>
+            <span class="t-eyebrow" style="font-size: 9px;">${isTH ? 'สัดส่วนโควตาต่างชาติ' : 'Foreign Quota'}</span>
+            <div class="t-display" style="font-size: 18px; margin-top: 2px;">${p.foreignQuotaPct}% / 49%</div>
+          </div>
+          <div>
+            <span class="t-eyebrow" style="font-size: 9px;">${isTH ? 'ระยะห่างจากชายหาด' : 'Beach Distance'}</span>
+            <div class="t-display" style="font-size: 18px; margin-top: 2px;">${p.distance_beach_m === 0 ? (isTH ? 'ติดหน้าหาด' : 'Beachfront') : `${p.distance_beach_m}m`}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 20px;">
+          <button class="btn btn-sm btn-ghost btn-block" onclick="toggleCompare('${p.id}', event)">
+            ${isCompared ? (isTH ? '✓ เปรียบเทียบแล้ว' : '✓ Compared') : (isTH ? '＋ เปรียบเทียบ' : '＋ Compare')}
+          </button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 3: PROJECT DETAIL SCREEN
+// ─────────────────────────────────────────────────────────────
+function renderProjectDetailScreen(container, projectId) {
+  const p = PROJECTS.find(item => item.id === projectId);
+  if (!p) {
+    container.innerHTML = `<div class="container" style="padding: 80px 24px; text-align: center;">Project not found.</div>`;
+    return;
+  }
+  const isTH = currentLocale === 'TH';
+  const matchingProperties = PROPERTIES.filter(u => u.projectId === p.id);
+
+  const html = `
+    <!-- HEADER PHOTO WALL -->
+    <section style="position: relative; height: 460px; background: var(--ink); color: var(--bone); overflow: hidden;">
+      <img src="${p.cover}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.75;"/>
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,32,31,.3) 0%, rgba(20,32,31,.9) 100%);"></div>
+      
+      <div class="container" style="position: absolute; bottom: 40px; left: 0; right: 0;">
+        <button class="btn btn-sm btn-ghost" onclick="goBack()" style="color: var(--bone); border-color: rgba(248,244,234,0.4); margin-bottom: 20px;">
+          ← ${isTH ? 'ย้อนกลับ' : 'Back'}
+        </button>
+        <div>
+          <span class="tag tag-coral" style="margin-bottom:12px;">${p.tag}</span>
+          <h1 class="t-display" style="font-size: clamp(2.2rem, 5vw, 3.8rem); margin: 0; font-weight:400; line-height: 1.1;">${p.name}</h1>
+          <p style="margin: 8px 0 0; font-size:16px; color: rgba(248,244,234,.8); max-width: 620px;">${p.tagline}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- KEY STATS ROW -->
+    <section style="background: var(--sand-soft); border-bottom: 1px solid var(--line-soft); padding: 24px 0;">
+      <div class="container" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div>
+          <div class="t-eyebrow" style="font-size: 10px;">${isTH ? 'ราคาเริ่มต้น' : 'Starting Price'}</div>
+          <div class="t-display" style="font-size: 28px; color: var(--ink); margin-top:2px;">${formatCurrency(p.startingPriceTHB)}</div>
+        </div>
+        <div>
+          <div class="t-eyebrow" style="font-size: 10px;">${isTH ? 'เฉลี่ยต่อ ตร.ม.' : 'Avg per Sqm'}</div>
+          <div class="t-display" style="font-size: 28px; color: var(--ink); margin-top:2px;">${formatCurrency(p.pricePerSqmTHB)}</div>
+        </div>
+        <div>
+          <div class="t-eyebrow" style="font-size: 10px;">${isTH ? 'ประมาณการผลตอบแทนปล่อยเช่า' : 'Estimated Rental Yield'}</div>
+          <div class="t-display" style="font-size: 28px; color: var(--teal); margin-top:2px;">${p.rentalYieldPct}% p.a.</div>
+        </div>
+        <div>
+          <div class="t-eyebrow" style="font-size: 10px;">${isTH ? 'สัดส่วนโควตาต่างชาติที่มีอยู่' : 'Foreign Freehold Quota'}</div>
+          <div class="t-display" style="font-size: 28px; color: var(--ink); margin-top:2px;">${p.foreignQuotaPct}% / 49%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPANDED SPECIFICATION DETAILS -->
+    <section class="section container">
+      <div class="grid-12">
+        <!-- LEFT WING: PROJECT OVERVIEW -->
+        <div style="grid-column: span 8;">
+          <h2 class="t-display" style="font-size: 32px; font-weight: 400; margin: 0 0 16px;">${isTH ? 'ข้อมูลโครงการเด่น' : 'Project Executive Summary'}</h2>
+          <p style="font-size:15px; color: var(--ink-2); line-height: 1.6; margin-bottom:32px;">
+            ${p.summary}
+          </p>
+
+          <h3 class="t-display" style="font-size: 26px; font-weight: 400; margin: 0 0 16px;">${isTH ? 'คอลเลกชันภาพโครงการ' : 'Visual Gallery'}</h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 40px;">
+            ${p.gallery.map(img => `
+              <div style="border-radius:8px; overflow:hidden; aspect-ratio: 4/3;">
+                <img src="${img}" alt="Skyharbor details gallery" style="width: 100%; height: 100%; object-fit: cover;"/>
+              </div>
+            `).join('')}
+          </div>
+
+          <h3 class="t-display" style="font-size: 26px; font-weight: 400; margin: 0 0 16px;">${isTH ? 'สิ่งอำนวยความสะดวกพรีเมียม' : 'Premium Amenities'}</h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 40px;">
+            ${p.amenities.map(a => `
+              <div style="background: var(--paper-warm); border: 1.5px solid var(--line-soft); padding: 14px 18px; border-radius: 10px; font-size:13.5px; font-weight:500; display:flex; align-items:center; gap:8px;">
+                <span class="dot dot-coral" style="width:6px; height:6px;"></span>
+                ${a}
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- SECTION: UNITS LISTING -->
+          <h3 class="t-display" style="font-size: 26px; font-weight: 400; margin: 0 0 16px;">${isTH ? 'รายการยูนิตและชั้นที่เปิดจอง' : 'Available Units & Floorplans'}</h3>
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom:40px;">
+            ${matchingProperties.length > 0 ? matchingProperties.map(u => `
+              <div class="card" onclick="gotoScreen('property-detail', '${u.id}')" style="padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.15s ease;">
+                <div>
+                  <div style="font-size: 16px; font-weight: 600; color: var(--ink);">${u.unit}</div>
+                  <div style="font-size: 13px; color: var(--ink-4); margin-top: 4px;">${u.bedrooms} BR · ${u.baths} Bath · ${u.sqm} m² · ${u.view} · Floor ${u.floor}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div class="t-display" style="font-size: 22px; color: var(--coral);">${formatCurrency(u.priceTHB)}</div>
+                  <span class="tag tag-teal tag-sm" style="font-size: 10px; margin-top: 4px;">${u.listed}</span>
+                </div>
+              </div>
+            `).join('') : `
+              <div style="background:var(--paper-warm); padding:32px; border-radius:12px; text-align:center; border:1px solid var(--line-soft);">
+                <p style="font-size:13.5px; color: var(--ink-3); margin:0;">${isTH ? 'ยูนิตกำลังได้รับการสรุปข้อมูลเพิ่มเติม กรุณาติดต่อฝ่ายบริการเพื่อรับข้อมูลทันที' : 'Specific resale units details are being finalized. Please contact advisory.'}</p>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- RIGHT WING: TRUST ADVISORY CARD -->
+        <div style="grid-column: span 4;">
+          <div style="position: sticky; top: 96px; display: flex; flex-direction: column; gap: 24px;">
+            
+            <!-- Quota meter component -->
+            <div style="background: var(--paper-warm); border: 1px solid var(--line-soft); border-radius: 16px; padding: 24px;">
+              <h4 class="t-eyebrow" style="font-size:10px; margin: 0 0 12px; color: var(--ink-3);">${isTH ? 'สถานะโควตาซื้อขาดชาวต่างชาติล่าสุด' : 'Foreign Ownership Live Tracker'}</h4>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+                <span class="t-display" style="font-size:36px; color: var(--coral);">${p.foreignQuotaPct}%</span>
+                <span style="font-size:13px; color: var(--ink-3);">/ 49% ${isTH ? 'สูงสุดตามกฎหมาย' : 'max cap'}</span>
+              </div>
+              <div class="progress" style="height: 6px; margin-bottom:12px;">
+                <div style="width: ${(p.foreignQuotaPct / 49) * 100}%; background: var(--coral);"></div>
+              </div>
+              <p style="font-size:11.5px; color: var(--ink-4); line-height: 1.5; margin:0;">
+                ${isTH ? 'ระบบทีมงานของเราจะดำเนินการประสานงานเพื่อคุ้มครองสิทธิ์สัญญารับรองโควตากับทนายความอิสระก่อนการชำระมัดจำ' : 'AMP lawyers secure your official quota registration and escrow protection with absolute legal priority.'}
+              </p>
+            </div>
+
+            <div id="project-detail-lead-box"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+  renderLeadForm(document.getElementById('project-detail-lead-box'), true);
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 4: PROPERTY DETAIL SCREEN
+// ─────────────────────────────────────────────────────────────
+function renderPropertyDetailScreen(container, unitId) {
+  const u = PROPERTIES.find(item => item.id === unitId);
+  if (!u) {
+    container.innerHTML = `<div class="container" style="padding: 80px 24px; text-align: center;">Property unit not found.</div>`;
+    return;
+  }
+  const p = PROJECTS.find(proj => proj.id === u.projectId);
+  const isTH = currentLocale === 'TH';
+
+  const html = `
+    <section class="section" style="padding-top: 40px; background: var(--bone);">
+      <div class="container-wide">
+        
+        <button class="btn btn-sm btn-ghost" onclick="goBack()" style="margin-bottom: 24px;">
+          ← ${isTH ? 'ย้อนกลับ' : 'Back'}
+        </button>
+
+        <div class="grid-12">
+          <!-- LEFT WING: BIG PICTURE PHOTO -->
+          <div style="grid-column: span 7;">
+            <div style="border-radius: 20px; overflow: hidden; aspect-ratio: 4/3; border: 1.5px solid var(--line-soft); box-shadow: var(--shadow-md);">
+              <img src="${u.cover}" alt="${u.unit}" style="width:100%; height:100%; object-fit:cover;"/>
+            </div>
+            
+            <div style="margin-top: 24px; display:flex; gap:12px;">
+              ${p ? `
+                <div class="card" onclick="gotoScreen('project-detail', '${p.id}')" style="flex: 1; padding: 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                  <div>
+                    <span class="t-eyebrow" style="font-size:9px;">${isTH ? 'โครงการในเครือหลัก' : 'Part of Project'}</span>
+                    <h4 class="t-display" style="font-size:20px; margin: 4px 0 0; font-weight:400;">${p.name}</h4>
+                  </div>
+                  <span style="font-size:18px;">→</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- RIGHT WING: PROPERTY SPECS -->
+          <div style="grid-column: span 5;">
+            <div style="background: var(--paper); border: 1.5px solid var(--line-soft); border-radius: 20px; padding: 32px; box-shadow: var(--shadow-sm);">
+              
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span class="tag tag-coral">${isTH ? 'กรรมสิทธิ์สมบูรณ์คอนโด' : 'Freehold Condo Unit'}</span>
+                ${u.hot ? `<span class="tag tag-amber">🔥 High Demand</span>` : ''}
+              </div>
+
+              <h1 class="t-display" style="font-size: 38px; margin: 0 0 6px; font-weight:400;">${u.unit}</h1>
+              <p style="font-size: 14px; color: var(--ink-3); margin: 0 0 24px;">📍 ${p ? p.area : 'Pattaya'}</p>
+              
+              <div class="divider" style="margin-bottom:24px;"></div>
+
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
+                <span style="font-size:14px; color: var(--ink-3);">${isTH ? 'ราคาเสนอขาย' : 'Asking Price'}</span>
+                <span class="t-display" style="font-size: 38px; color: var(--coral);">${formatCurrency(u.priceTHB)}</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;">
+                <div style="background: var(--sand-soft); padding: 12px; border-radius: 8px; text-align: center;">
+                  <div class="t-eyebrow" style="font-size:8px;">${isTH ? 'ห้องนอน' : 'Bedrooms'}</div>
+                  <div style="font-size: 16px; font-weight: 600; margin-top:2px;">${u.bedrooms === 0 ? 'Studio' : u.bedrooms}</div>
+                </div>
+                <div style="background: var(--sand-soft); padding: 12px; border-radius: 8px; text-align: center;">
+                  <div class="t-eyebrow" style="font-size:8px;">${isTH ? 'ห้องน้ำ' : 'Baths'}</div>
+                  <div style="font-size: 16px; font-weight: 600; margin-top:2px;">${u.baths}</div>
+                </div>
+                <div style="background: var(--sand-soft); padding: 12px; border-radius: 8px; text-align: center;">
+                  <div class="t-eyebrow" style="font-size:8px;">${isTH ? 'พื้นที่' : 'Area'}</div>
+                  <div style="font-size: 16px; font-weight: 600; margin-top:2px;">${u.sqm} m²</div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:12px; font-size:13.5px; color:var(--ink-2); margin-bottom:32px;">
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="color:var(--ink-3);">${isTH ? 'ตำแหน่งชั้น' : 'Floor Level'}</span>
+                  <span style="font-weight:500;">Floor ${u.floor}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="color:var(--ink-3);">${isTH ? 'ทิศทางระเบียง/วิว' : 'Unit View Direction'}</span>
+                  <span style="font-weight:500;">${u.view}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="color:var(--ink-3);">${isTH ? 'ประมาณการค่าเช่า/เดือน' : 'Est. Monthly Rent'}</span>
+                  <span style="font-weight:500; color:var(--teal);">${formatCurrency(Math.round(u.priceTHB * (p ? p.rentalYieldPct / 100 : 0.065) / 12))} / ${isTH ? 'เดือน' : 'mo'}</span>
+                </div>
+              </div>
+
+              <div id="property-detail-lead-box"></div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+  renderLeadForm(document.getElementById('property-detail-lead-box'), true);
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 5: SMART FINDER (7-Step Wizard Flow)
+// ─────────────────────────────────────────────────────────────
+let finderStep = 1;
+let finderData = {
+  intent: 'buy',
+  location: 'anywhere',
+  type: 'condo',
+  budget: '5-10M',
+  bedrooms: '1-2',
+  timeline: 'soon',
+  name: '',
+  phone: '',
+  email: ''
+};
+
+function renderFinderScreen(container) {
+  const isTH = currentLocale === 'TH';
+  const stepsCount = 7;
+  
+  // Custom smart finder steps content generator
+  let stepHTML = '';
+  
+  if (finderStep === 1) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'เป้าหมายหลักของการมองหาอสังหาริมทรัพย์?' : 'What is your main investment objective?'}</h3>
+      <p style="font-size:14px; color: var(--ink-3); margin-bottom:28px;">
+        ${isTH ? 'เพื่อประเมินความต้องการและแนวทางการวิเคราะห์ตัวเลขผลตอบแทนที่แม่นยำขึ้น' : 'Helps us tailor performance yield targets and capital protection guides.'}
+      </p>
+      
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="card ${finderData.intent === 'buy' ? 'card-warm' : ''}" style="padding:20px; cursor:pointer; border-width:${finderData.intent === 'buy' ? '2px' : '1px'}; border-color:${finderData.intent === 'buy' ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('intent', 'buy')">
+          <h4 style="margin:0; font-size:16px;">${isTH ? 'เพื่อการลงทุนระยะยาว (High Rental Yield / Capital Gain)' : 'High-Yield Investment Portfolio'}</h4>
+          <p style="margin:4px 0 0; font-size:12.5px; color:var(--ink-3);">${isTH ? 'เน้นตัวเลขผลตอบแทนปล่อยเช่า อัตราการเติบโต และความคุ้มค่าด้านภาษีอสังหาริมทรัพย์' : 'Focused on occupancy rates, rental yields, and premium capital growth zones.'}</p>
+        </div>
+        <div class="card ${finderData.intent === 'holiday' ? 'card-warm' : ''}" style="padding:20px; cursor:pointer; border-width:${finderData.intent === 'holiday' ? '2px' : '1px'}; border-color:${finderData.intent === 'holiday' ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('intent', 'holiday')">
+          <h4 style="margin:0; font-size:16px;">${isTH ? 'เพื่อเป็นบ้านพักตากอากาศ/วัยเกษียณ (Holiday Home & Retirement)' : 'Personal Holiday Home or Retirement'}</h4>
+          <p style="margin:4px 0 0; font-size:12.5px; color:var(--ink-3);">${isTH ? 'เน้นความสงบ การคมนาคม พื้นที่ใช้สอยและสิ่งอำนวยความสะดวกในทำเลชั้นนำ' : 'Focused on neighborhood vibe, beach proximity, accessibility, and lifestyle convenience.'}</p>
+        </div>
+      </div>
+    `;
+  }
+  else if (finderStep === 2) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'เลือกทำเลในพัทยาที่สนใจมากที่สุด?' : 'Which Pattaya zone do you prefer?'}</h3>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        ${[['anywhere', isTH ? 'ทุกทำเลที่คุ้มค่าสูงสุด' : 'Anywhere / Yield Optimized'], ['wongamat', 'Wongamat (Quiet Luxury)'], ['jomtien', 'Jomtien (High-Yield Focus)'], ['pratumnak', 'Pratumnak Hill (Sea View Villas)']].map(([val, label]) => `
+          <div class="card ${finderData.location === val ? 'card-warm' : ''}" style="padding:20px; cursor:pointer; text-align:center; border-width:${finderData.location === val ? '2px' : '1px'}; border-color:${finderData.location === val ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('location', '${val}')">
+            <div style="font-weight:600; font-size:15.5px;">${label}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  else if (finderStep === 3) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'รูปแบบทรัพย์สินที่ต้องการมองหา?' : 'What type of property fits your brief?'}</h3>
+      
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        ${[['condo', isTH ? 'คอนโดมิเนียม High-Rise (เน้นวิวสวยและโควตาต่างชาติ)' : 'Luxury High-Rise Condominium'], ['villa', isTH ? 'พูลวิลล่าส่วนตัว / ทาวน์โฮมขนาดใหญ่' : 'Private Pool Villa'], ['penthouse', isTH ? 'ห้องเพนท์เฮาส์สุดหรู (Penthouse Collection)' : 'Panoramic Sea View Penthouse']].map(([val, label]) => `
+          <div class="card ${finderData.type === val ? 'card-warm' : ''}" style="padding:16px 20px; cursor:pointer; border-width:${finderData.type === val ? '2px' : '1px'}; border-color:${finderData.type === val ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('type', '${val}')">
+            <div style="font-weight:600; font-size:15.5px;">${label}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  else if (finderStep === 4) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'ช่วงงบประมาณการลงทุนสูงสุดที่สอดคล้อง?' : 'What is your maximum target budget?'}</h3>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        ${[['3-5M', '฿3M - ฿5M'], ['5-10M', '฿5M - ฿10M'], ['10-20M', '฿10M - ฿20M'], ['20M+', '฿20M+']].map(([val, label]) => `
+          <div class="card ${finderData.budget === val ? 'card-warm' : ''}" style="padding:20px; cursor:pointer; text-align:center; border-width:${finderData.budget === val ? '2px' : '1px'}; border-color:${finderData.budget === val ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('budget', '${val}')">
+            <div style="font-weight:600; font-size:16px;">${label}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  else if (finderStep === 5) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'ขนาดจำนวนห้องนอนที่จำเป็น?' : 'How many bedrooms do you need?'}</h3>
+      
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        ${[['studio', isTH ? 'ห้องสตูดิโอ (Studio · สิ้นสุดขนาด 30 ตร.ม.)' : 'Studio Units'], ['1-2', isTH ? '1 - 2 ห้องนอน (เหมาะเพื่อปล่อยเช่ามากที่สุด)' : '1 - 2 Bedrooms (Best for rentals)'], ['3+', isTH ? '3 ห้องนอนขึ้นไป หรือพูลวิลล่าขนาดครอบครัว' : '3+ Bedrooms / Grand Family Suite']].map(([val, label]) => `
+          <div class="card ${finderData.bedrooms === val ? 'card-warm' : ''}" style="padding:16px 20px; cursor:pointer; border-width:${finderData.bedrooms === val ? '2px' : '1px'}; border-color:${finderData.bedrooms === val ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('bedrooms', '${val}')">
+            <div style="font-weight:600; font-size:15.5px;">${label}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  else if (finderStep === 6) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'ระยะเวลาในการตัดสินใจครอบครองที่วางแผนไว้?' : 'What is your target purchase timeline?'}</h3>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        ${[['now', isTH ? 'พร้อมทำธุรกรรมทันที' : 'Within 30 Days'], ['soon', isTH ? 'ภายใน 3 เดือนข้างหน้า' : 'Within 3 Months'], ['research', isTH ? 'กำลังวิจัยตลาดเปรียบเทียบ' : 'Just Researching']].map(([val, label]) => `
+          <div class="card ${finderData.timeline === val ? 'card-warm' : ''}" style="padding:20px; cursor:pointer; text-align:center; border-width:${finderData.timeline === val ? '2px' : '1px'}; border-color:${finderData.timeline === val ? 'var(--coral)' : 'var(--line-soft)'};" onclick="selectFinderValue('timeline', '${val}')">
+            <div style="font-weight:600; font-size:16px;">${label}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  else if (finderStep === 7) {
+    stepHTML = `
+      <h3 class="t-display" style="font-size:32px; font-weight:400; margin:0 0 12px;">${isTH ? 'คุยกับที่ปรึกษาเพื่อสรุปรายงานคัดเลือกพิเศษ' : 'We are ready to build your shortlist'}</h3>
+      <p style="font-size:14px; color: var(--ink-3); margin-bottom:24px;">
+        ${isTH ? 'กรุณากรอกข้อมูลเพื่อส่งรายงานการวิเคราะห์รายการคัดเลือก 3-5 ยูนิตที่ดีที่สุดให้คุณผ่านทาง WhatsApp หรือช่องทางอีเมลโดยทันที' : 'AMP advisors will secure 3-5 unit matches and send a complete PDF portfolio to your email or WhatsApp.'}
+      </p>
+      
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <input class="input" id="finder-name" placeholder="${t('name_placeholder')}" value="${finderData.name}"/>
+        <input class="input" id="finder-phone" placeholder="${t('phone_placeholder')}" value="${finderData.phone}"/>
+        <input class="input" id="finder-email" placeholder="${t('email_placeholder')}" value="${finderData.email}"/>
+      </div>
+    `;
+  }
+
+  const html = `
+    <section class="section" style="padding-top: 40px; background: var(--bone); flex: 1; display:flex; align-items:center;">
+      <div class="container-readable" style="max-width: 600px;">
+        
+        <!-- Wizard status header -->
+        <div style="margin-bottom: 32px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:12px; color:var(--ink-4); font-weight:600;">
+            <span class="t-mono">STEP ${finderStep} / ${stepsCount}</span>
+            <span>${Math.round((finderStep / stepsCount) * 100)}% COMPLETE</span>
+          </div>
+          <div class="progress" style="height: 6px;">
+            <div style="width: ${(finderStep / stepsCount) * 100}%; background: var(--coral);"></div>
+          </div>
+        </div>
+
+        <div style="background:var(--paper); border: 1.5px solid var(--line-soft); border-radius:24px; padding: 40px; box-shadow: var(--shadow-lg);">
+          
+          <div id="finder-inner-step-box">
+            ${stepHTML}
+          </div>
+
+          <div style="display:flex; justify-content:space-between; margin-top:40px; padding-top:20px; border-top:1px solid var(--line-soft);">
+            <button class="btn btn-ghost" onclick="prevFinderStep()" style="${finderStep === 1 ? 'visibility:hidden;' : ''}">
+              ← ${isTH ? 'ย้อนกลับ' : 'Back'}
+            </button>
+            
+            ${finderStep < stepsCount ? `
+              <button class="btn btn-coral" onclick="nextFinderStep()">
+                ${isTH ? 'ถัดไป' : 'Next Step'} →
+              </button>
+            ` : `
+              <button class="btn btn-coral" onclick="submitFinderFinal()">
+                ${isTH ? 'สร้างคัดเลือกยูนิตของฉัน' : 'Generate Brief & Send'} ✦
+              </button>
+            `}
+          </div>
+        </div>
+
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+}
+
+function selectFinderValue(field, value) {
+  finderData[field] = value;
+  nextFinderStep();
+}
+
+function prevFinderStep() {
+  if (finderStep > 1) {
+    finderStep--;
+    renderCurrentScreen();
+  }
+}
+
+function nextFinderStep() {
+  if (finderStep < 7) {
+    finderStep++;
+    renderCurrentScreen();
+  }
+}
+
+function submitFinderFinal() {
+  const isTH = currentLocale === 'TH';
+  finderData.name = document.getElementById('finder-name').value;
+  finderData.phone = document.getElementById('finder-phone').value;
+  finderData.email = document.getElementById('finder-email').value;
+
+  if (!finderData.name.trim()) {
+    alert(isTH ? 'กรุณากรอกชื่อของคุณเพื่อดำเนินการต่อ' : 'Please provide your name.');
+    return;
+  }
+  
+  // Show gorgeous loading matched state
+  const target = document.getElementById('screen-render-target');
+  target.innerHTML = `
+    <section class="section container" style="flex:1; display:flex; align-items:center; justify-content:center; text-align:center;">
+      <div style="max-width:540px; padding:48px; background:var(--paper); border-radius:24px; border:1px solid var(--line-soft); box-shadow:var(--shadow-lg);">
+        <div class="dot dot-coral pulse" style="width:48px; height:48px; margin-bottom:24px;"></div>
+        <h2 class="t-display" style="font-size:32px; margin: 0 0 12px; font-weight:400;">${isTH ? 'กำลังวิเคราะห์จับคู่ห้องชุดที่เหมาะสม...' : 'AMP AI is matching the ideal portfolios...'}</h2>
+        <p style="font-size:14px; color: var(--ink-3);">${isTH ? 'ประเมินราคา ความปลอดภัยทางกฎหมาย และสัดส่วนโควตาต่างชาติล่าสุดในพัทยา' : 'Running capital yield calculations, tax brackets, and foreign quota availability.'}</p>
+      </div>
+    </section>
+  `;
+
+  setTimeout(() => {
+    // Transition to success matched report screen
+    target.innerHTML = `
+      <section class="section container" style="flex:1; display:flex; align-items:center; justify-content:center;">
+        <div style="max-width:680px; padding:48px; background:var(--paper); border-radius:24px; border:1px solid var(--line-soft); box-shadow:var(--shadow-lg); text-align:center;">
+          <div style="width:56px; height:56px; border-radius:50%; background:var(--green-pale); color:var(--green); display:flex; align-items:center; justify-content:center; margin: 0 auto 24px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h2 class="t-display" style="font-size:38px; margin: 0 0 12px; font-weight:400;">
+            ${isTH ? `สำเร็จแล้ว, คุณ ${finderData.name}` : `Match complete, ${finderData.name}`}
+          </h2>
+          <p style="font-size:15px; color: var(--ink-3); margin-bottom:32px; line-height:1.6;">
+            ${isTH ? 'ที่ปรึกษาระดับสูงกำลังดำเนินการตรวจสอบเอกสารโควตาและจัดทำแฟ้มรายการวิเคราะห์ยูนิตคัดเฉพาะ 3-5 รายการที่ตรงงบประมาณของคุณ และจะจัดส่งความคืบหน้าให้คุณในอีก 30 นาที' : 'Your professional portfolio is ready. AMP senior advisor has locked 3 target-units matching your budget and is preparing your tailored report.'}
+          </p>
+
+          <div style="background:var(--sand-soft); border-radius:12px; padding:20px; margin-bottom:32px; text-align:left;">
+            <h4 class="t-eyebrow" style="font-size:10px; margin:0 0 12px;">Locked Matches Preview</h4>
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:13.5px;">
+              <div style="display:flex; justify-content:space-between;">
+                <strong>1. Skyharbor Residences · Wongamat</strong>
+                <span class="tag tag-coral">94% Match</span>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <strong>2. Jomtien Bay Tower · Jomtien</strong>
+                <span class="tag tag-coral">88% Match</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-lg" style="background:#25D366; color:#fff;" onclick="window.open('https://whatsapp.com')">
+              ${isTH ? 'คุยต่อผ่าน WhatsApp' : 'Open WhatsApp'}
+            </button>
+            <button onclick="gotoScreen('home')" class="btn btn-lg btn-primary">
+              ${isTH ? 'กลับสู่หน้าหลัก' : 'Return Home'}
+            </button>
+          </div>
+        </div>
+      </section>
+    `;
+    
+    // Reset wizard
+    finderStep = 1;
+  }, 1800);
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 6: COMPARE PROJECTS SCREEN
+// ─────────────────────────────────────────────────────────────
+function renderCompareScreen(container) {
+  const isTH = currentLocale === 'TH';
+  const list = PROJECTS.filter(p => comparedProjects.includes(p.id));
+
+  const html = `
+    <section class="section container" style="padding-top:40px; background:var(--bone); flex:1;">
+      <div style="margin-bottom:32px;">
+        <span class="t-eyebrow">${isTH ? 'ตารางวิเคราะห์คุณสมบัติ' : 'Project Spec Comparison Grid'}</span>
+        <h1 class="t-display" style="font-size: 42px; margin: 8px 0 0; font-weight: 400;">
+          ${isTH ? 'เปรียบเทียบข้อมูลโครงการอสังหาริมทรัพย์' : 'Compare Investor-Grade Condominiums'}
+        </h1>
+      </div>
+
+      ${list.length > 0 ? `
+        <div style="background:var(--paper); border:1px solid var(--line-soft); border-radius:20px; padding:32px; box-shadow:var(--shadow-md); overflow-x:auto;">
+          <table style="width:100%; border-collapse: collapse; font-size:14px; text-align:left;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--line-soft);">
+                <th style="padding: 16px 8px; font-weight:600; width:200px;">Features</th>
+                ${list.map(p => `
+                  <th style="padding: 16px; font-weight:600; min-width:180px;">
+                    <div style="font-size:16px; font-family:var(--font-display);">${p.name}</div>
+                    <span style="font-size:12px; color:var(--ink-4); font-weight:400;">${p.area}</span>
+                  </th>
+                `).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--line-soft);">
+                <td style="padding:16px 8px; font-weight:500; color:var(--ink-3);">${isTH ? 'ราคาเริ่มต้น' : 'Starting Price'}</td>
+                ${list.map(p => `<td style="padding:16px; font-weight:600; font-size:15px; color:var(--coral);">${formatCurrency(p.startingPriceTHB)}</td>`).join('')}
+              </tr>
+              <tr style="border-bottom:1px solid var(--line-soft);">
+                <td style="padding:16px 8px; font-weight:500; color:var(--ink-3);">${isTH ? 'ผลตอบแทนคาดการณ์' : 'Target Rental Yield'}</td>
+                ${list.map(p => `<td style="padding:16px; font-weight:600; color:var(--teal);">${p.rentalYieldPct}% p.a.</td>`).join('')}
+              </tr>
+              <tr style="border-bottom:1px solid var(--line-soft);">
+                <td style="padding:16px 8px; font-weight:500; color:var(--ink-3);">${isTH ? 'โควตาต่างชาติล่าสุด' : 'Foreign Freehold Quota'}</td>
+                ${list.map(p => `<td style="padding:16px;">${p.foreignQuotaPct}% / 49%</td>`).join('')}
+              </tr>
+              <tr style="border-bottom:1px solid var(--line-soft);">
+                <td style="padding:16px 8px; font-weight:500; color:var(--ink-3);">${isTH ? 'ระยะห่างหาด' : 'Beach Distance'}</td>
+                ${list.map(p => `<td style="padding:16px;">${p.distance_beach_m === 0 ? 'ติดชายหาด' : `${p.distance_beach_m}m`}</td>`).join('')}
+              </tr>
+              <tr style="border-bottom:1px solid var(--line-soft);">
+                <td style="padding:16px 8px; font-weight:500; color:var(--ink-3);">${isTH ? 'ความคืบหน้าก่อสร้าง' : 'Completion Schedule'}</td>
+                ${list.map(p => `<td style="padding:16px;">${p.completion}</td>`).join('')}
+              </tr>
+              <tr>
+                <td style="padding:16px 8px;"></td>
+                ${list.map(p => `
+                  <td style="padding:16px;">
+                    <button class="btn btn-sm btn-coral btn-block" onclick="gotoScreen('project-detail', '${p.id}')">
+                      ${isTH ? 'ดูรายละเอียด' : 'Details'}
+                    </button>
+                    <button class="btn btn-sm btn-ghost btn-block" style="margin-top:8px; font-size:11px;" onclick="toggleCompare('${p.id}')">
+                      ${isTH ? 'ลบออก' : 'Remove'}
+                    </button>
+                  </td>
+                `).join('')}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div style="background:var(--paper); padding:64px; border-radius:20px; border:1px solid var(--line-soft); text-align:center;">
+          <h3 class="t-display" style="font-size:26px; margin: 0 0 12px; font-weight:400;">
+            ${isTH ? 'ตารางเปรียบเทียบของคุณยังว่างเปล่า' : 'Comparison spec board is empty'}
+          </h3>
+          <p style="font-size:14px; color:var(--ink-3); margin-bottom:24px;">
+            ${isTH ? 'กรุณาเลือกปุ่มเปรียบเทียบในหน้าโครงการเด่นเพื่อเพิ่มรายชื่อเข้ามาวิเคราะห์ร่วมกัน' : 'Select projects and click Compare on their preview cards to start comparing values.'}
+          </p>
+          <button onclick="gotoScreen('listing')" class="btn btn-primary">${isTH ? 'ดูโครงการแนะนำ' : 'Explore Projects'}</button>
+        </div>
+      `}
+    </section>
+  `;
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 7: COST & YIELD CALCULATOR
+// ─────────────────────────────────────────────────────────────
+let calcPrice = 5000000;
+let calcMonthlyRent = 30000;
+
+function renderCalculatorScreen(container) {
+  const isTH = currentLocale === 'TH';
+  
+  // Real-time commercial yield calculations
+  const grossYield = ((calcMonthlyRent * 12) / calcPrice) * 100;
+  
+  // Simulated premium expense rates
+  const sinkingFund = calcPrice * 0.005; // 0.5% one-off
+  const maintenanceAnnual = calcPrice * 0.008; // 0.8% annually
+  const transferFeeHalf = calcPrice * 0.01; // 1% buyer side (out of 2%)
+  const netYield = (((calcMonthlyRent * 12) - maintenanceAnnual) / calcPrice) * 100;
+
+  const html = `
+    <section class="section container" style="padding-top:40px; background:var(--bone); flex:1;">
+      <div style="margin-bottom:32px;">
+        <span class="t-eyebrow">${isTH ? 'เครื่องมือคำนวณผลตอบแทนและการโอนกรรมสิทธิ์' : 'Investment Return & Fee Calculator'}</span>
+        <h1 class="t-display" style="font-size: 42px; margin: 8px 0 0; font-weight: 400;">
+          ${isTH ? 'เครื่องคำนวณค่าธรรมเนียมและผลตอบแทนการปล่อยเช่า' : 'Rental Yield & Acquisition Cost Estimator'}
+        </h1>
+      </div>
+
+      <div class="grid-2">
+        <!-- LEFT WING: SLIDERS CONTROL -->
+        <div style="background:var(--paper); border:1.5px solid var(--line-soft); border-radius:20px; padding:32px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:24px;">
+          
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label class="label" style="font-size:14px;">${isTH ? 'ราคาเสนอซื้อห้องชุด (THB)' : 'Property Purchase Price (THB)'}</label>
+              <strong style="font-size:18px; color:var(--coral);">${calcPrice.toLocaleString()} ฿</strong>
+            </div>
+            <input type="range" min="2000000" max="40000000" step="500000" value="${calcPrice}" style="width:100%; accent-color:var(--coral);" oninput="updateCalcPrice(this.value)"/>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--ink-4); margin-top:4px;">
+              <span>฿2.0M</span>
+              <span>฿40.0M</span>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label class="label" style="font-size:14px;">${isTH ? 'ประมาณการค่าเช่าต่อเดือน (THB)' : 'Estimated Monthly Rental Rate (THB)'}</label>
+              <strong style="font-size:18px; color:var(--teal);">${calcMonthlyRent.toLocaleString()} ฿</strong>
+            </div>
+            <input type="range" min="10000" max="150000" step="1000" value="${calcMonthlyRent}" style="width:100%; accent-color:var(--teal);" oninput="updateCalcRent(this.value)"/>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--ink-4); margin-top:4px;">
+              <span>฿10k</span>
+              <span>฿150k</span>
+            </div>
+          </div>
+
+          <div style="background:var(--paper-warm); border-radius:12px; padding:18px; border:1px solid var(--line-soft); font-size:12.5px; color:var(--ink-3); line-height:1.6;">
+            💡 <strong>${isTH ? 'เงื่อนไขวิเคราะห์ความเสี่ยง' : 'Advisory Note:'}</strong><br/>
+            ${isTH ? 'ค่าธรรมเนียมการโอนกรรมสิทธิ์สูงสุด 2% ของกรมที่ดิน มักจะมีการตกลงแบ่งชำระฝั่งละ 1% (ฝั่งละกึ่งหนึ่ง) ระหว่างผู้ซื้อและผู้ขายเป็นเงื่อนไขสากลในพัทยา' : 'The Land Department 2% transfer fee is routinely split 50/50 between buyer and seller as standard practice.'}
+          </div>
+        </div>
+
+        <!-- RIGHT WING: COMMERCIAL PERFORMANCE OUTPUTS -->
+        <div style="background:var(--paper-warm); border:1.5px solid var(--line-soft); border-radius:20px; padding:32px; box-shadow:var(--shadow-md); display:flex; flex-direction:column; gap:24px;">
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div style="background:var(--paper); border-radius:12px; border:1px solid var(--line-soft); padding:20px; text-align:center;">
+              <span class="t-eyebrow" style="font-size:9px;">${isTH ? 'อัตราผลตอบแทนขั้นต้น' : 'Gross Rental Yield'}</span>
+              <div class="t-display" style="font-size:38px; color:var(--coral); margin-top:4px;">${grossYield.toFixed(2)}%</div>
+            </div>
+            <div style="background:var(--paper); border-radius:12px; border:1px solid var(--line-soft); padding:20px; text-align:center;">
+              <span class="t-eyebrow" style="font-size:9px;">${isTH ? 'อัตราผลตอบแทนสุทธิ' : 'Net Rental Yield'}</span>
+              <div class="t-display" style="font-size:38px; color:var(--teal); margin-top:4px;">${netYield.toFixed(2)}%</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h4 class="t-eyebrow" style="font-size:10px; margin: 0 0 14px; color:var(--ink-3);">${isTH ? 'ประมาณการค่าธรรมเนียมธุรกรรมแรกเริ่ม' : 'Estimated Acquisition / Closing Fees'}</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:13.5px;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>${isTH ? 'ค่าธรรมเนียมการโอน (ผู้ซื้อชำระ 1%)' : 'Transfer Duty (Buyer 1% split)'}</span>
+                <strong>฿ ${transferFeeHalf.toLocaleString()}</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>${isTH ? 'เงินกองทุนส่วนกลาง (จ่ายครั้งแรกครั้งเดียว)' : 'Sinking Fund (One-off reserve)'}</span>
+                <strong>฿ ${sinkingFund.toLocaleString()}</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>${isTH ? 'ค่าบำรุงรักษาส่วนกลางล่วงหน้า (1 ปี)' : 'Annual Maintenance Fee (1st Yr prepaid)'}</span>
+                <strong>฿ ${maintenanceAnnual.toLocaleString()}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:12px; color:var(--ink-4);">${isTH ? 'ยอดเงินชำระ ณ วันโอนกรรมสิทธิ์จริง' : 'Total Acquisition Cost'}</div>
+              <div class="t-display" style="font-size:24px; color:var(--ink);">${(calcPrice + transferFeeHalf + sinkingFund + maintenanceAnnual).toLocaleString()} ฿</div>
+            </div>
+            <button onclick="gotoScreen('contact')" class="btn btn-coral">${isTH ? 'ขอใบเสนอราคาอย่างเป็นทางการ' : 'Get Official Quotation'}</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+}
+
+function updateCalcPrice(val) {
+  calcPrice = parseInt(val);
+  renderCurrentScreen();
+}
+
+function updateCalcRent(val) {
+  calcMonthlyRent = parseInt(val);
+  renderCurrentScreen();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 8: AREA GUIDE SCREEN
+// ─────────────────────────────────────────────────────────────
+function renderAreasScreen(container) {
+  const isTH = currentLocale === 'TH';
+
+  const html = `
+    <section class="section container" style="padding-top:40px; background:var(--bone); flex:1;">
+      <div style="text-align:center; max-width:680px; margin: 0 auto 48px;">
+        <span class="t-eyebrow">${isTH ? 'รายงานไกด์วิเคราะห์พื้นที่เพื่อนักลงทุน' : 'Pattaya Neighborhood Intelligence'}</span>
+        <h1 class="t-display" style="font-size:42px; margin:8px 0 0; font-weight:400;">
+          ${isTH ? 'ไกด์แนะนำและเปรียบเทียบทำเลทองพัทยา' : 'Pattaya Area & Lifestyle Guide'}
+        </h1>
+        <p style="font-size:14px; color: var(--ink-3); margin-top:8px;">
+          ${isTH ? 'เจาะลึกศักยภาพ อัตราการเติบโต และความคุ้มค่าของการปล่อยเช่าแต่ละโซน' : 'Evaluate high-signal investment properties by zone, demographics, and returns.'}
+        </p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:24px; margin-bottom:48px;">
+        ${AREAS.map(a => `
+          <div class="card" style="padding:24px; display:grid; grid-template-columns: 240px 1.4fr; gap:32px; align-items:center;">
+            <div style="border-radius:12px; overflow:hidden; aspect-ratio:4/3;">
+              <img src="${a.img}" alt="${a.name}" style="width:100%; height:100%; object-fit:cover;"/>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span class="tag tag-coral">${a.beach}</span>
+                <span class="t-mono" style="font-size:12px; color:var(--ink-4);">${a.count} active listings</span>
+              </div>
+              <h3 class="t-display" style="font-size:28px; margin:0 0 10px; font-weight:400;">${a.name}</h3>
+              <p style="font-size:14px; color:var(--ink-3); line-height:1.6; margin: 0 0 16px;">
+                ${isTH ? a.descTH : a.descEN}
+              </p>
+              <div style="display:flex; gap:12px; flex-wrap:wrap; font-size:12px; font-weight:600; color:var(--teal);">
+                <span>Vibe: ${a.vibe}</span>
+                <span>·</span>
+                <span style="cursor:pointer; text-decoration:underline;" onclick="gotoScreen('listing')">Browse list →</span>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 9: FOREIGN-OWNERSHIP EXPLAINER (QUOTA)
+// ─────────────────────────────────────────────────────────────
+function renderQuotaScreen(container) {
+  const isTH = currentLocale === 'TH';
+
+  const html = `
+    <section class="section container" style="padding-top:40px; background:var(--bone); flex:1;">
+      <div style="text-align:center; max-width:680px; margin: 0 auto 48px;">
+        <span class="t-eyebrow">${isTH ? 'รายงานความรู้กฎหมายอสังหาริมทรัพย์ไทย' : 'Thailand Legal Framework Series'}</span>
+        <h1 class="t-display" style="font-size:42px; margin:8px 0 0; font-weight:400;">
+          ${t('quota_header')}
+        </h1>
+        <p style="font-size:14px; color: var(--ink-3); margin-top:8px;">
+          ${isTH ? 'รายละเอียดข้อตกลงและหลักการครอบครองสิทธิ์ห้องชุด freehold สำหรับผู้ซื้อชาวต่างชาติ' : 'Understand how to acquire real estate legally under the Thai condominium act.'}
+        </p>
+      </div>
+
+      <div class="grid-12" style="align-items: flex-start; gap:40px;">
+        <!-- LEFT WING: EDUCATIONAL ARTICLES -->
+        <div style="grid-column: span 8; display:flex; flex-direction:column; gap:32px;">
+          
+          <div style="background:var(--paper); border:1.5px solid var(--line-soft); border-radius:16px; padding:32px; box-shadow:var(--shadow-sm);">
+            <h3 class="t-display" style="font-size:26px; margin:0 0 14px; font-weight:400;">
+              ${isTH ? '1. กฎเกณฑ์สัดส่วนสิทธิ์การถือครอง 49%' : '1. The 49% Freehold Quota Rule'}
+            </h3>
+            <p style="font-size:14px; color:var(--ink-2); line-height:1.6; margin:0;">
+              ${isTH ? 'พระราชบัญญัติอาคารชุดของประเทศไทย ระบุไว้ว่าผู้ซื้อชาวต่างชาติสามารถซื้อและถือกรรมสิทธิ์ห้องชุดคอนโดมิเนียมรวมกันได้ไม่เกิน 49% ของพื้นที่ขายของโครงการอาคารชุดนั้นๆ เรียกว่า \"สิทธิ์โควตาชาวต่างชาติ\" ซึ่งทำให้คุณได้ครอบครองสิทธิ์ขาดเหนืออสังหาริมทรัพย์และสามารถจดทะเบียนการโอนกรรมสิทธิ์ ณ กรมที่ดินได้อย่างถูกต้องถาวร' : 'Under the Thai Condominium Act, non-residents can hold absolute freehold ownership of up to 49% of the total sellable space in any registered condominium project. This is officially recorded at the land office.'}
+            </p>
+          </div>
+
+          <div style="background:var(--paper); border:1.5px solid var(--line-soft); border-radius:16px; padding:32px; box-shadow:var(--shadow-sm);">
+            <h3 class="t-display" style="font-size:26px; margin:0 0 14px; font-weight:400;">
+              ${isTH ? '2. ข้อตกลงการทำธุรกรรมและเงินโอน (FET)' : '2. Currency and Financial Requirements (FET)'}
+            </h3>
+            <p style="font-size:14px; color:var(--ink-2); line-height:1.6; margin:0;">
+              ${isTH ? 'ผู้ชำระเงินชาวต่างชาติต้องทำรายการโอนเงินซื้อทรัพย์สินเข้ามายังบัญชีธนาคารในประเทศไทยเป็นสกุลเงินต่างประเทศของตน และทางธนาคารผู้รับปลายทางจะเป็นผู้ดำเนินการแปลงแลกเปลี่ยนเป็นเงินบาทไทย พร้อมออกเอกสาร \"ใบทำธุรกรรมทางการเงินต่างประเทศ (FET)\" เพื่อใช้ยื่นรับใบโอนโฉนดคอนโดที่กรมที่ดินพัทยาต่อไป' : 'Foreign buyers must transfer the funds in foreign currency into a Thai commercial bank. The local bank converts it to Thai Baht and issues a Foreign Exchange Transaction (FET) certificate, essential for Land Department transfer.'}
+            </p>
+          </div>
+
+          <div style="background:var(--paper); border:1.5px solid var(--line-soft); border-radius:16px; padding:32px; box-shadow:var(--shadow-sm);">
+            <h3 class="t-display" style="font-size:26px; margin:0 0 14px; font-weight:400;">
+              ${isTH ? '3. การถือครองที่ดินและโครงการประเภทพูลวิลล่า' : '3. Landed Estates & Private Pool Villas'}
+            </h3>
+            <p style="font-size:14px; color:var(--ink-2); line-height:1.6; margin:0;">
+              ${isTH ? 'เนื่องจากกฎหมายไทยไม่อนุญาตให้ชาวต่างชาติถือกรรมสิทธิ์ที่ดินได้โดยตรง การเป็นเจ้าของพูลวิลล่าหรือทาวน์เฮาส์จึงมักจะทำผ่านโครงสร้างสัญญาเช่าระยะยาว (Leasehold สูงสุด 30+30+30 ปี) หรือการจัดตั้งนิติบุคคลสัดส่วนผู้ถือหุ้นไทยร่วมกับทนายความความเชี่ยวชาญสูงสุดของเรา' : 'As Thai law restricts direct land ownership for foreigners, villa structures are acquired either via secured long-term leasehold registrations (30+30+30 years) or via a structured Thai majority-owned corporate framework.'}
+            </p>
+          </div>
+        </div>
+
+        <!-- RIGHT WING: TRACKER CARD -->
+        <div style="grid-column: span 4; position:sticky; top:96px;">
+          <div style="background: var(--paper-warm); border: 1.5px solid var(--line-soft); border-radius:16px; padding:24px;">
+            <h4 class="t-eyebrow" style="font-size:9px; margin:0 0 12px; color:var(--ink-3);">${isTH ? 'ความพร้อมโควตาต่างชาติรายโครงการ' : 'Quota Cap Availability Tracker'}</h4>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              ${PROJECTS.slice(0, 4).map(p => `
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:500; margin-bottom:4px;">
+                    <span>${p.name}</span>
+                    <span style="color:var(--coral);">${p.foreignQuotaPct}% / 49%</span>
+                  </div>
+                  <div class="progress" style="height:4px;">
+                    <div style="width:${(p.foreignQuotaPct / 49) * 100}%; background:var(--coral);"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <button onclick="gotoScreen('contact')" class="btn btn-coral btn-block btn-sm" style="margin-top:24px;">
+              ${isTH ? 'คุยเรื่องกฎหมายทรัพย์สินพัทยา' : 'Talk with Legal Advisor'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 10: CONTACT & LEAD CAPTURE PAGE
+// ─────────────────────────────────────────────────────────────
+function renderContactScreen(container) {
+  const isTH = currentLocale === 'TH';
+
+  const html = `
+    <section class="section container" style="padding-top:40px; background:var(--bone); flex:1;">
+      <div style="text-align:center; max-width:680px; margin: 0 auto 48px;">
+        <span class="t-eyebrow">${isTH ? 'ติดต่อทีมงานและสำนักงานพัทยา' : 'Connect with our Pattaya Office'}</span>
+        <h1 class="t-display" style="font-size:42px; margin:8px 0 0; font-weight:400;">
+          ${isTH ? 'ติดต่อรับบริการข้อมูลและนัดหมายโครงการ' : 'Request Private Consultation'}
+        </h1>
+        <p style="font-size:14px; color: var(--ink-3); margin-top:8px;">
+          ${isTH ? 'คำแนะนำด้านการลงทุนอย่างเป็นทางการ ปลอดภัย มั่นใจได้ในทุกสัญญากรรมสิทธิ์' : 'Licensed brokerage assistance. Same-day replies guaranteed.'}
+        </p>
+      </div>
+
+      <div class="grid-2" style="align-items: flex-start; gap:40px;">
+        <!-- LEFT WING: INTAKE INQUIRY FORM -->
+        <div id="contact-page-lead-box"></div>
+
+        <!-- RIGHT WING: ADVISORS ROSTER & MAP GUIDE -->
+        <div style="display:flex; flex-direction:column; gap:24px;">
+          <div style="background:var(--paper); border:1.5px solid var(--line-soft); border-radius:20px; padding:28px; box-shadow:var(--shadow-sm);">
+            <h3 class="t-display" style="font-size:24px; margin: 0 0 16px; font-weight:400;">${isTH ? 'สำนักงานตัวแทนบริการพัทยา' : 'Pattaya Headquarters'}</h3>
+            <p style="font-size:14px; color:var(--ink-3); line-height:1.6; margin:0 0 16px;">
+              📍 333/12 Pratumnak Road, Banglamung, Chonburi 20150<br/>
+              📞 +66 38 123 4567<br/>
+              ✉️ advisory@amppattaya.com
+            </p>
+            <div class="map-placeholder-box map-bg" style="min-height: 180px; border-radius:12px;">
+              <div style="position: absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
+                <span class="tag tag-coral">AMP Headquarters</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:var(--paper); border:1.5px solid var(--line-soft); border-radius:20px; padding:28px; box-shadow:var(--shadow-sm);">
+            <h3 class="t-display" style="font-size:24px; margin: 0 0 16px; font-weight:400;">${isTH ? 'ทีมงานที่ปรึกษาเชี่ยวชาญของเรา' : 'Licensed Senior Advisors'}</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              ${AGENTS.map(a => `
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img src="${a.avatar}" alt="${a.name}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"/>
+                  <div style="flex:1;">
+                    <div style="font-size:13.5px; font-weight:600;">${a.name}</div>
+                    <div style="font-size:11px; color:var(--ink-4);">${a.role} · ${a.lang}</div>
+                  </div>
+                  <span style="font-size:11.5px; font-weight:600; color:var(--teal);">★ ${a.rating}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+  container.innerHTML = html;
+  renderLeadForm(document.getElementById('contact-page-lead-box'));
+}
+
+// ─────────────────────────────────────────────────────────────
+// CORE REUSABLE INTAKE LEAD FORM RENDER ENGINE
+// ─────────────────────────────────────────────────────────────
+function renderLeadForm(targetElement, isDark = false) {
+  if (!targetElement) return;
+  const isTH = currentLocale === 'TH';
+  
+  const formHtml = `
+    <div style="background: ${isDark ? 'rgba(20,32,31,.65)' : 'var(--paper)'}; backdrop-filter: ${isDark ? 'blur(20px)' : 'none'}; -webkit-backdrop-filter: ${isDark ? 'blur(20px)' : 'none'}; border: 1.5px solid ${isDark ? 'rgba(248,244,234,0.14)' : 'var(--line-soft)'}; border-radius: 20px; padding: 28px; box-shadow: var(--shadow-lg); color: ${isDark ? 'var(--bone)' : 'var(--ink)'};">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+          <span class="t-eyebrow" style="font-size:9.5px; color:${isDark ? 'rgba(248,244,234,.6)' : 'var(--ink-3)'};">${isTH ? 'ติดต่อจองโควตาและสิทธิ์ราคาพิเศษ' : 'GET PRICE & FLOOR PLAN'}</span>
+          <h3 class="t-display" style="font-size:24px; margin: 4px 0 0; font-weight:400;">${t('speak_advisor')}</h3>
+        </div>
+        <span style="font-size:11px; color: var(--green); font-weight:500;">
+          <span class="dot dot-green" style="margin-right: 4px;"></span>${isTH ? 'ตอบกลับภายใน 30 นาที' : 'Reply in 30 min'}
+        </span>
+      </div>
+
+      <form id="lead-intake-form" onsubmit="handleLeadSubmit(event, ${isDark})">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          
+          <input class="input" style="${isDark ? 'background:rgba(248,244,234,.06); border-color:rgba(248,244,234,.16); color:var(--bone);' : ''}" placeholder="${t('name_placeholder')}" required id="lead-name"/>
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <input class="input" style="${isDark ? 'background:rgba(248,244,234,.06); border-color:rgba(248,244,234,.16); color:var(--bone);' : ''}" placeholder="${t('phone_placeholder')}" id="lead-phone"/>
+            <input class="input" style="${isDark ? 'background:rgba(248,244,234,.06); border-color:rgba(248,244,234,.16); color:var(--bone);' : ''}" placeholder="${t('email_placeholder')}" id="lead-email" required type="email"/>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="label-row">
+              <label class="label" style="${isDark ? 'color:rgba(248,244,234,.7);' : ''}">${t('budget_label')}</label>
+              <select class="select" style="${isDark ? 'background:rgba(20,32,31,.9); border-color:rgba(248,244,234,.16); color:var(--bone);' : ''}" id="lead-budget">
+                <option>Below 5M</option>
+                <option>5M - 10M</option>
+                <option>10M - 20M</option>
+                <option>20M+</option>
+              </select>
+            </div>
+            <div class="label-row">
+              <label class="label" style="${isDark ? 'color:rgba(248,244,234,.7);' : ''}">${t('bedrooms_label')}</label>
+              <select class="select" style="${isDark ? 'background:rgba(20,32,31,.9); border-color:rgba(248,244,234,.16); color:var(--bone);' : ''}" id="lead-bedrooms">
+                <option>Studio</option>
+                <option>1 - 2 BR</option>
+                <option>3+ BR / Villa</option>
+              </select>
+            </div>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; font-size:12px; color: ${isDark ? 'rgba(248,244,234,.7)' : 'var(--ink-3)'}; margin-top:8px; cursor:pointer;">
+            <div class="check is-on" id="lead-whatsapp-check" onclick="toggleWhatsAppCheck()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            ${t('whatsapp_agree')}
+          </label>
+
+          <button type="submit" class="btn btn-coral btn-lg btn-block" style="margin-top:12px;">
+            ${t('send_brief_cta')} →
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  targetElement.innerHTML = formHtml;
+}
+
+let isWhatsAppOn = true;
+function toggleWhatsAppCheck() {
+  isWhatsAppOn = !isWhatsAppOn;
+  const checkbox = document.getElementById('lead-whatsapp-check');
+  checkbox.classList.toggle('is-on', isWhatsAppOn);
+}
+
+function handleLeadSubmit(event, isDark) {
+  event.preventDefault();
+  const isTH = currentLocale === 'TH';
+  const name = document.getElementById('lead-name').value;
+  
+  // Custom successful popup render inside form card
+  const container = event.target.parentElement;
+  container.innerHTML = `
+    <div style="text-align: center; padding: 24px 0;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--green-pale); color: var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h3 class="t-display" style="font-size: 24px; margin: 0 0 8px; font-weight:400;">
+        ${isTH ? `ขอบคุณครับ, คุณ ${name.split(' ')[0]}` : `Thank you, ${name.split(' ')[0]}`}
+      </h3>
+      <p style="font-size: 13.5px; color: ${isDark ? 'rgba(248,244,234,.7)' : 'var(--ink-3)'}; margin-bottom: 24px; line-height: 1.5;">
+        ${isTH ? 'รายละเอียดการนัดหมายและใบเสนอราคาโครงการกำลังได้รับการประสานงาน และเจ้าหน้าที่อาวุโสจะติดต่อคุณผ่าน WhatsApp ใน 30 นาที' : 'Your inquiry has been logged securely. AMP senior advisor will coordinate quota checks and contact you on WhatsApp.'}
+      </p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn-sm" style="background:#25D366; color:#fff;" onclick="window.open('https://whatsapp.com')">
+          ${isTH ? 'คุยต่อผ่าน WhatsApp' : 'Open WhatsApp chat'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Initialize and route default load screen
+window.onload = function() {
+  setLocaleCode('EN');
+  setSimView('fluid');
+};
+</script>
+
+</body>
+</html>
