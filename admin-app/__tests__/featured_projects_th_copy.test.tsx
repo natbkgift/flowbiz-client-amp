@@ -7,15 +7,11 @@ vi.mock('next/image', () => ({
   default: ({
     alt,
     className,
-    fill,
-    loader,
-    priority,
     src,
     style,
-    unoptimized,
-    fetchPriority,
   }: any) => (
     <div
+      role="img"
       aria-label={alt ?? ''}
       className={className}
       data-next-image={typeof src === 'string' ? src : ''}
@@ -62,8 +58,59 @@ describe('FeaturedProjects Thai copy', () => {
     );
 
     expect(screen.getByText('โครงการแนะนำ')).toBeInTheDocument();
-    expect(screen.getByText('ดูสรุปโครงการ')).toBeInTheDocument();
+    expect(container.querySelector('article.public-project-card.public-card-foundation')).not.toBeNull();
+    expect(screen.getByRole('heading', { name: 'Alpha Residence' })).toBeInTheDocument();
+    expect(screen.getByText('จอมเทียน')).toBeInTheDocument();
+    expect(screen.getByText('เริ่มต้น ฿6,900,000')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Alpha Residence' })).toHaveAttribute(
+      'href',
+      '/th/projects/alpha-residence',
+    );
+    expect(screen.getByRole('link', { name: 'ดูสรุปโครงการ' })).toHaveAttribute(
+      'href',
+      '/th/projects/alpha-residence',
+    );
     expect(screen.queryByText(/shortlist/i)).toBeNull();
+    expect(container.querySelector('.premium-project-card')).toBeNull();
     expect(container.querySelector('.premium-project-card__fact-label')).toBeNull();
+    expect(container.textContent).not.toContain('undefined');
+    expect(container.textContent).not.toContain('null');
+  });
+
+  it('keeps sparse home project data renderable through the public card mapper', () => {
+    const { container } = render(
+      <FeaturedProjects
+        locale="en"
+        title="Featured projects"
+        subtitle="Curated for Pattaya buyers"
+        projects={[
+          {
+            id: 'project-2',
+            slug: 'minimal-project',
+            name: 'Minimal Pattaya Project',
+            status: 'published',
+            cover_image_url: null,
+            starting_price: null,
+            summary: null,
+            description: null,
+            area: null,
+            created_at: null,
+            updated_at: null,
+          },
+        ]}
+      />,
+    );
+
+    const card = container.querySelector('article.public-project-card.public-card-foundation');
+    expect(card).not.toBeNull();
+    expect(screen.getByRole('heading', { name: 'Minimal Pattaya Project' })).toBeInTheDocument();
+    expect(screen.getByText('Pattaya')).toBeInTheDocument();
+    expect(screen.getByText('Price on request')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Minimal Pattaya Project' })).toHaveAttribute(
+      'href',
+      '/en/projects/minimal-project',
+    );
+    expect(container.textContent).not.toContain('undefined');
+    expect(container.textContent).not.toContain('null');
   });
 });
