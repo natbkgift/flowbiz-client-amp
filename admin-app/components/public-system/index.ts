@@ -13,6 +13,8 @@ export * from '@/components/public-system/components/CTAGroup';
 export * from '@/components/public-system/components/SectionHeader';
 export * from '@/components/public-system/components/Button';
 export * from '@/components/public-system/components/Card';
+export * from '@/components/public-system/components/PropertyCard';
+export * from '@/components/public-system/components/ProjectCard';
 export * from '@/components/public-system/components/InputBase';
 export * from '@/components/public-system/components/SelectBase';
 export * from '@/components/public-system/components/TextAreaBase';
