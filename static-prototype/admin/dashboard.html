@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - AMP Pattaya</title>
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="admin-body">
+  <div class="drawer-backdrop" data-drawer-backdrop></div>
+  <div class="admin-shell">
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <a class="brand" href="dashboard.html"><span class="brand-mark">A</span><span>AMP <em>Admin</em></span></a>
+      <nav class="admin-nav">
+        <div class="admin-nav-title">Workspace</div><a class="active" href="dashboard.html">Dashboard</a><a href="leads.html">Leads</a><a href="lead-detail.html">Lead Detail</a>
+        <div class="admin-nav-title">Inventory</div><a href="properties.html">Properties</a><a href="property-form.html">Add/Edit Property</a><a href="projects.html">Projects</a><a href="project-form.html">Add/Edit Project</a>
+        <div class="admin-nav-title">System</div><a href="users.html">Users</a><a href="settings.html">Settings</a><a href="../index.html">Back to Website</a>
+      </nav>
+    </aside>
+    <main class="admin-main">
+      <header class="admin-topbar"><button class="admin-menu-toggle" data-admin-toggle="#admin-sidebar" type="button">Menu</button><div><h1 class="headline" style="font-size:34px">Good morning, Apinya</h1><p class="card-meta">3 hot leads need a reply - 6 viewings this week - THB 4.2M closed yesterday</p></div><div class="button-row" style="margin:0"><a class="btn btn-sm btn-paper" href="leads.html">New Lead</a><a class="btn btn-sm btn-coral" href="property-form.html">Add Property</a></div></header>
+      <section class="admin-content">
+        <div class="admin-kpis"><div class="card card-pad kpi"><span class="text-muted">New leads</span><strong>48</strong><p class="tag tag-green">+12%</p></div><div class="card card-pad kpi"><span class="text-muted">Qualified rate</span><strong>62%</strong><p class="tag tag-green">+4 pp</p></div><div class="card card-pad kpi"><span class="text-muted">Viewings booked</span><strong>14</strong><p class="tag tag-green">+3</p></div><div class="card card-pad kpi"><span class="text-muted">Pipeline value</span><strong>THB 324M</strong><p class="tag tag-green">+THB 28M</p></div></div>
+        <div class="admin-grid" style="margin-top:22px"><div class="card card-pad"><div class="section-head"><div><h2 class="card-title">Pipeline funnel</h2><p class="card-meta">New to won conversion is 11.4%.</p></div><a class="btn btn-sm btn-paper" href="leads.html">View all</a></div><div style="display:grid;gap:12px"><div><span>New - 410 leads</span><div class="progress"><span style="width:100%;background:var(--blue)"></span></div></div><div><span>Qualified - 254 leads</span><div class="progress"><span style="width:62%;background:var(--teal)"></span></div></div><div><span>Viewing - 168 leads</span><div class="progress"><span style="width:41%;background:var(--champagne)"></span></div></div><div><span>Negotiating - 82 leads</span><div class="progress"><span style="width:20%;background:var(--coral)"></span></div></div><div><span>Won - 47 leads</span><div class="progress"><span style="width:11%;background:var(--green)"></span></div></div></div></div><div class="card card-pad"><h2 class="card-title">Top lead sources</h2><p>Google Ads - 142</p><p>WhatsApp inbound - 88</p><p>Referrals - 72</p><p>Property portals - 58</p><p>LINE / WeChat - 34</p></div></div>
+        <div class="admin-grid" style="margin-top:20px"><div class="card card-pad"><div class="section-head"><div><h2 class="card-title">Recent leads</h2><p class="card-meta">SLA: 30 minutes</p></div><a class="btn btn-sm btn-paper" href="leads.html">Open leads</a></div><div class="table-wrap"><table class="tbl"><thead><tr><th>Lead</th><th>Interest</th><th>Score</th><th>Source</th><th>Last contact</th><th></th></tr></thead><tbody><tr><td>Sven Larsson</td><td>Skyharbor 2BR</td><td>92</td><td>Google Ads</td><td>2 hrs ago</td><td><a class="btn btn-sm btn-paper" href="lead-detail.html">Open</a></td></tr><tr><td>Anna Markova</td><td>Penthouse Wongamat</td><td>88</td><td>Referral</td><td>12m ago</td><td><a class="btn btn-sm btn-paper" href="lead-detail.html">Open</a></td></tr><tr><td>Lin Wei</td><td>Jomtien 1BR</td><td>84</td><td>WeChat</td><td>1 hr ago</td><td><a class="btn btn-sm btn-paper" href="lead-detail.html">Open</a></td></tr></tbody></table></div></div><div class="card card-pad"><h2 class="card-title">Recent properties</h2><p>Grand Solaire 2BR - updated 2h ago</p><p>Once Wongamat 1BR - 12 inquiries</p><p>Riviera Beverly Hills launch - 48 views</p><a class="btn btn-paper btn-block" href="properties.html">Manage Inventory</a></div></div>
+        <div class="admin-grid" style="margin-top:20px"><div class="card card-pad"><h2 class="card-title">Tasks</h2><p><span class="tag tag-coral">Overdue</span> Send floor plan to Sven Larsson.</p><p><span class="tag tag-amber">Today</span> Confirm viewing pickup for Anna Markova.</p><p><span class="tag">Tomorrow</span> Review new Riviera project prices.</p></div><div class="card card-pad"><h2 class="card-title">Activity</h2><p>Apinya booked viewing for Sven.</p><p>Sasha closed penthouse Wongamat deal.</p><p>Mark added 3 new Jomtien units.</p></div></div>
+      </section>
+    </main>
+  </div>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

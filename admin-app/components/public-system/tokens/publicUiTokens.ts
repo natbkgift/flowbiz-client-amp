@@ -40,6 +40,9 @@ export const publicButtonVariantClassNames = {
   secondary: 'btn-secondary',
   tertiary: 'btn-tertiary',
   link: 'btn-tertiary',
+  coral: 'btn-coral',
+  ink: 'btn-ink',
+  paper: 'btn-paper',
 } as const;
 
 export type PublicButtonVariant = keyof typeof publicButtonVariantClassNames;
@@ -69,6 +72,8 @@ export const publicCardToneClassNames = {
   light: null,
   warm: 'public-surface-card--warm',
   deep: 'public-surface-card--deep',
+  premium: 'public-surface-card--premium',
+  flat: 'public-surface-card--flat',
 } as const;
 
 export type PublicCardTone = keyof typeof publicCardToneClassNames;
