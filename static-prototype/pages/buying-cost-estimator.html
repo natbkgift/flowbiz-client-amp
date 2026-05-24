@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buying Cost Estimator - AMP Pattaya</title>
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="page">
+  <header class="site-header"><div class="site-header-inner"><a class="brand" href="../index.html"><span class="brand-mark">A</span><span>AMP <em>Pattaya</em></span></a><nav class="site-nav" id="site-nav"><a href="../index.html">Home</a><a href="buy.html">Buy</a><a href="rent.html">Rent</a><a href="projects.html">Projects</a><a href="sell.html">Sell</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="shortlist.html">Shortlist</a><a href="compare.html">Compare</a><a class="active" href="buying-cost-estimator.html">Cost Estimator</a><a href="../admin/dashboard.html">Admin</a></nav><div class="site-actions"><button class="menu-toggle" data-menu-toggle="#site-nav" type="button">Menu</button></div></div></header>
+  <main data-cost-estimator>
+    <section class="page-hero"><div class="container"><span class="eyebrow">Investor toolkit</span><h1 class="headline"><em>Total-cost</em> and rental yield estimator</h1><p class="subhead">A safe, isolated frontend mock calculation. It does not connect to a database or backend.</p></div></section>
+    <section class="section"><div class="container calculator-grid">
+      <div class="card card-pad"><h2 class="card-title">Inputs</h2><div class="range-row"><label>Purchase price <span class="mono">THB 14.8M</span></label><input data-price type="range" min="2000000" max="80000000" step="100000" value="14800000"></div><div class="range-row"><label>Down payment <span class="mono">30%</span></label><input data-down type="range" min="0" max="100" step="5" value="30"></div><div class="range-row"><label>Avg. daily rate <span class="mono">THB 4,800</span></label><input data-adr type="range" min="1500" max="12000" step="100" value="4800"></div><div class="range-row"><label>Occupancy <span class="mono">72%</span></label><input data-occupancy type="range" min="20" max="95" step="1" value="72"></div><p class="text-muted" style="margin-top:18px">Defaults reflect a 2BR sea-view Wongamat example. These are placeholders for design review only.</p></div>
+      <div><div class="result-grid"><div><span class="eyebrow" style="color:rgba(248,244,234,.55)">Cash to close</span><strong data-out="cash">THB 0</strong></div><div><span class="eyebrow" style="color:rgba(248,244,234,.55)">Net yield p.a.</span><strong data-out="yield">0%</strong></div><div><span class="eyebrow" style="color:rgba(248,244,234,.55)">Monthly net</span><strong data-out="net">THB 0/mo</strong></div></div><div class="card card-pad" style="margin-top:20px"><h2 class="card-title">Upfront cost breakdown</h2><p>Down payment, transfer fee and legal escrow estimate.</p><div style="display:grid;gap:12px"><div><div style="display:flex;justify-content:space-between"><span>Transfer fee estimate</span><span data-out="transfer" class="mono">THB 0</span></div><div class="progress"><span style="width:18%;background:var(--coral)"></span></div></div><div><div style="display:flex;justify-content:space-between"><span>Legal and escrow placeholder</span><span class="mono">THB 77,000</span></div><div class="progress"><span style="width:8%;background:var(--champagne)"></span></div></div></div></div><div class="card card-pad" style="margin-top:20px"><h2 class="card-title">Disclaimer</h2><p class="text-muted">This static UI is for prototype review only. Tax, transfer, mortgage and rental assumptions must be confirmed by a licensed advisor and independent counsel before purchase.</p><a class="btn btn-coral" href="contact.html">Request Verified Projection</a></div></div>
+    </div></section>
+  </main>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

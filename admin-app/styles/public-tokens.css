@@ -273,6 +273,54 @@
   --public-font-weight-regular: 400;
   --public-font-weight-semibold: 600;
   --public-font-weight-bold: 700;
+
+  /* AMP PR 1 foundation aliases.
+     These map the static prototype language onto the existing public token system.
+     They are opt-in only and do not affect current routes until a component uses them. */
+  --amp-public-color-ink: var(--public-color-ink);
+  --amp-public-color-ink-soft: var(--public-color-ink-2);
+  --amp-public-color-muted: var(--public-color-ink-3);
+  --amp-public-color-bone: var(--public-color-bone);
+  --amp-public-color-sand: var(--public-color-sand);
+  --amp-public-color-paper: var(--public-color-paper);
+  --amp-public-color-paper-warm: var(--public-color-paper-warm);
+  --amp-public-color-coral: var(--public-color-coral);
+  --amp-public-color-coral-rgb: 217, 106, 78;
+  --amp-public-color-coral-hover: var(--public-color-coral-2);
+  --amp-public-color-champagne: var(--public-color-champagne);
+  --amp-public-color-champagne-deep: var(--public-color-champagne-2);
+  --amp-public-color-ink-rgb: 20, 32, 31;
+  --amp-public-border-soft: var(--public-color-line-soft);
+  --amp-public-coral-border: rgba(var(--amp-public-color-coral-rgb), 0.28);
+  --amp-public-coral-border-strong: rgba(var(--amp-public-color-coral-rgb), 0.4);
+  --amp-public-coral-shadow: 0 16px 30px rgba(var(--amp-public-color-coral-rgb), 0.2);
+  --amp-public-ink-border: rgba(var(--amp-public-color-ink-rgb), 0.18);
+  --amp-public-radius-card: var(--public-radius-card-md);
+  --amp-public-radius-panel: var(--public-radius-panel);
+  --amp-public-radius-pill: var(--public-radius-pill);
+  --amp-public-shadow-card: var(--public-shadow-claude-card);
+  --amp-public-shadow-lift: var(--public-shadow-lift);
+  --amp-public-section-space: var(--public-section-space-desktop);
+  --amp-public-panel-padding: var(--public-panel-padding-fluid);
+  --amp-public-grid-gap: var(--public-grid-gap-default);
+  --amp-public-touch-target: var(--public-control-height);
+  --amp-public-display-family: var(--public-type-display-family);
+  --amp-public-body-family: var(--public-type-body-family);
+  --amp-public-display-size: clamp(2.45rem, 5.6vw, 5.5rem);
+  --amp-public-display-line: 0.98;
+  --amp-public-display-track: -0.035em;
+  --amp-public-headline-size: clamp(1.65rem, 3.8vw, 3.625rem);
+  --amp-public-headline-line: 1.04;
+  --amp-public-headline-track: -0.02em;
+  --amp-public-lead-size: var(--public-type-small-size);
+  --amp-public-card-title-size: clamp(1.125rem, 1.7vw, 1.5625rem);
+  --amp-public-fact-value-size: clamp(1.45rem, 2.2vw, 2rem);
+  --amp-public-mobile-display-size: clamp(2.5rem, 11vw, 2.875rem);
+  --amp-public-mobile-headline-size: clamp(1.625rem, 7.4vw, 2rem);
+  --amp-public-mobile-lead-size: 0.875rem;
+  --amp-public-mobile-card-title-size: 1.25rem;
+  --amp-public-mobile-fact-value-size: 1.45rem;
+  --amp-public-eyebrow-track: 0.14em;
 }
 
 html[lang='th'] {
