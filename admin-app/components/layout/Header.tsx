@@ -7,29 +7,20 @@ import { useEffect, useRef, useState } from 'react';
 import type { ResolvedLayoutCms } from '../../app/_lib/layout-cms';
 import type { Dictionary, Locale } from '../../app/_lib/i18n/types';
 import { switchLocaleInPathname, withLocale } from '../../app/_lib/i18n/routing';
-import { CTA, getPublicCtaSurface, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
+import { getPublicCtaSurface, routeOwnsPrimaryCta } from '../../app/_lib/public-cta';
+import {
+  getHomeMobileNavItems,
+  getHomePublicNavItems,
+  getMobileQuickPaths,
+  getPublicCtaItems,
+  getPublicNavItems,
+  type PublicCtaItem,
+  type PublicNavItem,
+} from '../../app/_lib/public-navigation';
 import { en } from '../../app/_lib/i18n/en';
 import { th } from '../../app/_lib/i18n/th';
 import { useCurrency, CURRENCIES, type CurrencyCode } from '@/lib/currency';
-
-type DropdownItem = {
-  href: string;
-  label: string;
-  desc?: string;
-};
-
-type NavGroup = {
-  key: string;
-  label: string;
-  href?: string;
-  items?: DropdownItem[];
-};
-
-type QuickPath = {
-  href: string;
-  label: string;
-  detail: string;
-};
+import { MobileMenu } from '@/components/layout/MobileMenu';
 
 function ChevronDown({ open }: { open: boolean }) {
   return (
@@ -64,7 +55,7 @@ function DesktopNavGroup({
   locale,
   isActive,
 }: {
-  group: NavGroup;
+  group: PublicNavItem;
   locale: Locale;
   isActive: (href: string) => boolean;
 }) {
@@ -148,65 +139,28 @@ function DesktopNavGroup({
   );
 }
 
-function MobileSection({
-  group,
-  locale,
-  onNavClick,
-}: {
-  group: NavGroup;
-  locale: Locale;
-  onNavClick: () => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (!group.items?.length) {
-    return (
-      <Link href={withLocale(locale, group.href ?? '/')} prefetch={false} className="mobile-nav__item" onClick={onNavClick}>
-        {group.label}
-      </Link>
-    );
-  }
-
-  return (
-    <div className="mobile-nav__section">
-      <button
-        type="button"
-        className={`mobile-nav__trigger ${expanded ? 'mobile-nav__trigger--open' : ''}`}
-        aria-expanded={expanded}
-        onClick={() => setExpanded((v) => !v)}
-      >
-        <span>{group.label}</span>
-        <ChevronDown open={expanded} />
-      </button>
-      {expanded ? (
-        <div className="mobile-nav__sub">
-          {group.items.map((item) => (
-            <Link key={item.href} href={withLocale(locale, item.href)} prefetch={false} className="mobile-nav__sub-item" onClick={onNavClick}>
-              <span className="mobile-nav__sub-label">{item.label}</span>
-              {item.desc ? <span className="mobile-nav__sub-desc">{item.desc}</span> : null}
-            </Link>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 type HeaderCms = ResolvedLayoutCms['header'];
 
-export function Header({
-  locale,
-  dict: dictProp,
-  cms,
-}: {
+type HeaderProps = {
   locale: Locale;
   dict?: Dictionary;
   cms?: HeaderCms;
-}) {
+};
+
+function resolveCtaHref(locale: Locale, item: PublicCtaItem): string {
+  if (item.external || !item.href.startsWith('/')) return item.href;
+  return withLocale(locale, item.href);
+}
+
+export function SiteHeader({
+  locale,
+  dict: dictProp,
+  cms,
+}: HeaderProps) {
   const dict = dictProp ?? (locale === 'th' ? th : en);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [homeHeaderScrolled, setHomeHeaderScrolled] = useState(false);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   const { currency, setCurrency } = useCurrency();
@@ -231,98 +185,18 @@ export function Header({
   const pathname = usePathname();
   const currentPathname = pathname ?? `/${locale}`;
 
-  const investLabel = locale === 'th' ? 'วางแผนลงทุน' : 'Investment Guides';
-  const smartFinderLabel = locale === 'th' ? 'ตัวช่วยคัดตัวเลือก' : 'Smart Finder';
-  const compareLabel = locale === 'th' ? 'เทียบตัวเลือก' : 'Compare';
-  const marketplaceLabel = locale === 'th' ? 'ประกาศทั้งหมด' : 'Marketplace';
-  const rentLabel = locale === 'th' ? 'เช่า / ย้ายมาอยู่' : 'Rent / Relocate';
-  const sellLabel = locale === 'th' ? 'ขายกับ AMP' : 'Sell with AMP';
-  const homeAreaLabel = locale === 'th' ? 'พื้นที่' : 'Areas';
-
-  const defaultNavConfig: NavGroup[] = [
-    {
-      key: 'buy',
-      label: dict.nav.buy,
-      href: '/buy',
-      items: [
-        { href: '/buy', label: dict.nav.buy, desc: locale === 'th' ? 'เส้นทางซื้อสำหรับผู้ซื้อชาวต่างชาติและผู้ที่มองหาบ้านพักตากอากาศ' : 'Buyer route for foreign nationals and second-home clients' },
-        { href: '/projects', label: dict.nav.projects, desc: locale === 'th' ? 'ดูโครงการใหม่และโครงการที่ผ่านการคัดกรอง' : 'Review vetted projects and launches first' },
-        { href: '/marketplace', label: marketplaceLabel, desc: locale === 'th' ? 'ดูรายการที่ยังเปิดขายอยู่ในระบบ' : 'Open active inventory across the catalogue' },
-      ],
-    },
-    {
-      key: 'invest',
-      label: dict.nav.invest,
-      href: '/invest',
-      items: [
-        { href: '/invest', label: dict.nav.invest, desc: locale === 'th' ? 'เส้นทางลงทุนสำหรับผู้ซื้อระหว่างประเทศ' : 'Investment-first path for international buyers' },
-        { href: '/investment', label: investLabel, desc: locale === 'th' ? 'กรอบคิดเรื่องผลตอบแทน ดีมานด์ และความเสี่ยงของพัทยา' : 'Yield, demand, and risk framing for Pattaya' },
-        { href: '/smart-finder', label: smartFinderLabel, desc: locale === 'th' ? 'ช่วยคัดจากงบประมาณและโจทย์การลงทุนของคุณ' : 'Guided matching by budget and investment thesis' },
-        { href: '/compare', label: compareLabel, desc: locale === 'th' ? 'เทียบตัวเลือกแบบวางข้างกันอย่างชัดเจน' : 'Compare options side-by-side' },
-      ],
-    },
-    { key: 'rent', label: rentLabel, href: '/rent' },
-    { key: 'sell', label: sellLabel, href: '/sell' },
-    { key: 'projects', label: dict.nav.projects, href: '/projects' },
-    {
-      key: 'area-guide',
-      label: dict.nav.areaGuide,
-      href: '/area-guide',
-      items: [
-        { href: '/area-guide', label: dict.nav.areaGuide, desc: locale === 'th' ? 'ภาพรวมแต่ละโซนในพัทยา' : 'Understand Pattaya zone differences' },
-        { href: '/contact', label: dict.nav.contact, desc: locale === 'th' ? 'คุยกับที่ปรึกษาก่อนเลือกทำเล' : 'Talk to an advisor before selecting an area' },
-      ],
-    },
-  ];
-  const cmsNavConfig: NavGroup[] = (cms?.primaryLinks || []).map((item, index) => ({
-    key: `cms-${index}`,
-    label: item.label,
-    href: item.href,
-  }));
-  const fullNavConfig = cmsNavConfig.length > 0 ? cmsNavConfig : defaultNavConfig;
-  const homeNavConfig: NavGroup[] = [
-    { key: 'home-buy', label: dict.nav.buy, href: '/buy' },
-    { key: 'home-invest', label: dict.nav.invest, href: '/invest' },
-    { key: 'home-rent', label: locale === 'th' ? 'เช่า' : 'Rent', href: '/rent' },
-    { key: 'home-sell', label: locale === 'th' ? 'ขาย' : 'Sell', href: '/sell' },
-    { key: 'home-projects', label: dict.nav.projects, href: '/projects' },
-    { key: 'home-areas', label: homeAreaLabel, href: '/area-guide' },
-  ];
-  const homeMobileNavConfig: NavGroup[] = [
-    { key: 'home-mobile-projects', label: dict.nav.projects, href: '/projects' },
-    { key: 'home-mobile-areas', label: homeAreaLabel, href: '/area-guide' },
-  ];
-  const mobileQuickPaths: QuickPath[] = [
-    {
-      href: '/buy',
-      label: locale === 'th' ? 'ซื้อ' : 'Buy',
-      detail: locale === 'th' ? 'ซื้อในพัทยา' : 'Buy in Pattaya',
-    },
-    {
-      href: '/invest',
-      label: locale === 'th' ? 'ลงทุน' : 'Invest',
-      detail: locale === 'th' ? 'เส้นทางการลงทุน' : 'Investment route',
-    },
-    {
-      href: '/rent',
-      label: locale === 'th' ? 'เช่า' : 'Rent',
-      detail: locale === 'th' ? 'เช่าหรือย้ายมาอยู่' : 'Rent or relocate',
-    },
-    {
-      href: '/sell',
-      label: locale === 'th' ? 'ขาย' : 'Sell',
-      detail: locale === 'th' ? 'ขายหรือปล่อยเช่า' : 'Sell or rent out',
-    },
-  ];
-  const contactCtaHref = cms?.contactCta?.href || '/contact';
-  const contactCtaLabel = cms?.contactCta?.label || dict.cta.speakToAdvisor;
+  const fullNavConfig = getPublicNavItems(locale, dict, cms);
+  const homeNavConfig = getHomePublicNavItems(locale, dict);
+  const homeMobileNavConfig = getHomeMobileNavItems(locale, dict);
+  const mobileQuickPaths = getMobileQuickPaths(locale);
+  const ctaItems = getPublicCtaItems(locale, dict, cms);
+  const shortlistCta = ctaItems.find((item) => item.key === 'shortlist');
+  const conversionCtas = ctaItems.filter((item) => item.tone !== 'utility');
   const currentSurface = getPublicCtaSurface(currentPathname);
   const isHomeSurface = currentSurface === 'home';
   const showGlobalCtas = !routeOwnsPrimaryCta(currentPathname);
   const desktopNavConfig = isHomeSurface ? homeNavConfig : fullNavConfig;
   const mobileNavConfig = isHomeSurface ? homeMobileNavConfig : fullNavConfig;
-
-  const langLabel = locale === 'th' ? dict.common.thai : dict.common.english;
 
   /** Strip /<locale> prefix from pathname to compare with nav item hrefs */
   const pathWithoutLocale = pathname?.replace(new RegExp(`^/${locale}`), '') || '/';
@@ -401,19 +275,42 @@ export function Header({
           </nav>
 
           <div className="header-actions">
+            {shortlistCta ? (
+              <Link
+                href={resolveCtaHref(locale, shortlistCta)}
+                prefetch={false}
+                className={`header-cta header-cta--utility desktop-only ${isActive(shortlistCta.href) ? 'header-cta--active' : ''}`}
+                aria-current={isActive(shortlistCta.href) ? 'page' : undefined}
+              >
+                {shortlistCta.label}
+              </Link>
+            ) : null}
             {showGlobalCtas ? (
               <div className="header-cta-group desktop-only">
-                <Link href={CTA.whatsAppUrl} className="header-cta header-cta--secondary" target="_blank" rel="noreferrer">
-                  {dict.cta.whatsapp}
-                </Link>
-                <Link
-                  href={withLocale(locale, contactCtaHref)}
-                  prefetch={false}
-                  className={`header-cta header-cta--primary ${isActive(contactCtaHref) ? 'header-cta--active' : ''}`}
-                  aria-current={isActive(contactCtaHref) ? 'page' : undefined}
-                >
-                  {contactCtaLabel}
-                </Link>
+                {conversionCtas.map((item) => {
+                  const href = resolveCtaHref(locale, item);
+                  const className = `header-cta header-cta--${item.tone} ${!item.external && isActive(item.href) ? 'header-cta--active' : ''}`;
+
+                  if (item.external) {
+                    return (
+                      <a key={item.key} href={href} className={className} target="_blank" rel="noreferrer">
+                        {item.label}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={item.key}
+                      href={href}
+                      prefetch={false}
+                      className={className}
+                      aria-current={isActive(item.href) ? 'page' : undefined}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </div>
             ) : null}
             {/* Currency Picker */}
@@ -572,70 +469,21 @@ export function Header({
         onClick={() => setMobileOpen(false)}
       />
 
-      <nav
-        ref={mobileMenuRef}
-        className={mobileOpen ? 'mobile-menu active' : 'mobile-menu'}
-        id="mobile-menu"
-        role="navigation"
-        aria-label={dict.common.mainNavigation}
-        aria-hidden={!mobileOpen}
-        data-locale={locale}
-      >
-        <div className="mobile-menu__inner">
-          <div className="mobile-menu__intro">
-            <p className="mobile-menu__eyebrow">
-              {locale === 'th' ? 'เส้นทางอสังหาริมทรัพย์พัทยา' : 'Pattaya real estate routes'}
-            </p>
-            <p className="mobile-menu__title">
-              {locale === 'th'
-                ? 'เลือกเส้นทางที่ใช่ก่อน'
-                : 'Choose the right route first.'}
-            </p>
-            <div className="mobile-menu__quick-grid">
-              {mobileQuickPaths.map((item) => (
-                <Link
-                  key={item.href}
-                  href={withLocale(locale, item.href)}
-                  prefetch={false}
-                  className="mobile-menu__quick-link"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <strong>{item.label}</strong>
-                  <span>{item.detail}</span>
-                </Link>
-              ))}
-            </div>
-            {isHomeSurface ? (
-              <Link
-                href={withLocale(locale, '/contact')}
-                prefetch={false}
-                className="mobile-menu__advisor-link"
-                onClick={() => setMobileOpen(false)}
-              >
-                <strong>{locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}</strong>
-                <span>
-                  {locale === 'th'
-                    ? 'ส่งโจทย์สั้น ๆ แล้วให้ทีมช่วยคัดทางต่อ'
-                    : 'Send a short brief and let the team narrow the next step.'}
-                </span>
-              </Link>
-            ) : null}
-          </div>
-          {mobileNavConfig.map((group) => (
-            <MobileSection key={group.key} group={group} locale={locale} onNavClick={() => setMobileOpen(false)} />
-          ))}
-          {showGlobalCtas ? (
-            <>
-              <Link href={CTA.whatsAppUrl} className="mobile-nav__item" onClick={() => setMobileOpen(false)} target="_blank" rel="noreferrer">
-                {dict.cta.whatsapp}
-              </Link>
-              <Link href={withLocale(locale, contactCtaHref)} prefetch={false} className="mobile-nav__cta" onClick={() => setMobileOpen(false)}>
-                {contactCtaLabel}
-              </Link>
-            </>
-          ) : null}
-        </div>
-      </nav>
+      <MobileMenu
+        ctaItems={ctaItems}
+        isHomeSurface={isHomeSurface}
+        locale={locale}
+        menuRef={mobileMenuRef}
+        navItems={mobileNavConfig}
+        onClose={() => setMobileOpen(false)}
+        open={mobileOpen}
+        quickPaths={mobileQuickPaths}
+        showGlobalCtas={showGlobalCtas}
+      />
     </>
   );
+}
+
+export function Header(props: HeaderProps) {
+  return <SiteHeader {...props} />;
 }

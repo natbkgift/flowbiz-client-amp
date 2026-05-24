@@ -4701,3 +4701,82 @@ html[lang='th'] .decision-page .public-hero__signal-title,
     padding: var(--public-panel-padding-compact);
   }
 }
+
+/* ======================== AMP PR 2 PUBLIC SHELL ======================== */
+
+.public-site-shell .site-header .header-cta--utility {
+  border: 1px solid var(--amp-public-border-soft);
+  background: var(--amp-public-color-paper);
+  color: var(--amp-public-color-ink);
+  box-shadow: var(--public-shadow-claude-sm);
+}
+
+.public-site-shell .site-header .header-cta--utility:hover,
+.public-site-shell .site-header .header-cta--utility.header-cta--active {
+  border-color: var(--public-border-strong);
+  background: var(--amp-public-color-paper-warm);
+  color: var(--amp-public-color-ink);
+}
+
+.public-site-shell .site-header .header-cta--secondary {
+  border-color: var(--amp-public-coral-border);
+  color: var(--amp-public-color-ink);
+}
+
+.public-site-shell .site-header .header-cta--primary {
+  background: var(--amp-public-color-coral);
+  color: var(--color-white);
+  box-shadow: var(--amp-public-coral-shadow);
+}
+
+.public-site-shell .site-header .header-cta--primary:hover,
+.public-site-shell .site-header .header-cta--primary.header-cta--active {
+  background: var(--amp-public-color-coral-hover);
+}
+
+.public-site-shell .site-footer .footer-cta-link {
+  min-height: 40px;
+  padding-inline: 16px;
+  text-decoration: none;
+}
+
+@media (min-width: 768px) and (max-width: 1179px) {
+  .public-site-shell .site-header .nav,
+  .public-site-shell .site-header .header-cta-group.desktop-only,
+  .public-site-shell .site-header .header-cta--utility.desktop-only {
+    display: none !important;
+  }
+
+  .public-site-shell .site-header .hamburger.mobile-only {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1180px) {
+  .public-site-shell .site-header .nav {
+    display: flex;
+    gap: clamp(6px, 0.9vw, 16px);
+  }
+
+  .public-site-shell .site-header .header-cta-group.desktop-only {
+    display: flex;
+  }
+
+  .public-site-shell .site-header .header-cta--utility.desktop-only {
+    display: inline-flex;
+  }
+
+  .public-site-shell .site-header .hamburger.mobile-only {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-site-shell .mobile-menu {
+    width: min(92vw, 380px);
+  }
+
+  .public-site-shell .mobile-menu__quick-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
