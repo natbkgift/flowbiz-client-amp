@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 import { headers } from 'next/headers';
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
+import { SiteFooter } from '@/components/layout/Footer';
+import { SiteHeader } from '@/components/layout/Header';
 import { PublicClientEnhancements } from '@/components/layout/PublicClientEnhancements';
 import { resolveLayoutCms, SITE_LAYOUT_CMS_SLUG } from '@/app/_lib/layout-cms';
 import { fetchCompanyInfoBySlug } from '@/app/_lib/public-api-server';
@@ -82,9 +82,9 @@ export default async function SiteLayout(
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="public-site-shell" data-locale={locale}>
-        <Header locale={locale} cms={layoutCms.header} />
+        <SiteHeader locale={locale} cms={layoutCms.header} />
         {children}
-        <Footer locale={locale} cms={layoutCms.footer} />
+        <SiteFooter locale={locale} cms={layoutCms.footer} />
         <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
         <Suspense fallback={null}>
           <PublicClientEnhancements />
@@ -93,4 +93,3 @@ export default async function SiteLayout(
     </>
   );
 }
-
