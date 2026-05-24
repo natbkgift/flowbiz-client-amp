@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ProjectCard } from '@/components/project/ProjectCard';
+import { mapProjectToPublicCardData } from '@/app/_lib/public-card-mappers';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { withLocaleQuery } from '@/app/_lib/public-advisory';
+import { ProjectCard as PublicProjectCard } from '@/components/public-system/components/ProjectCard';
 
 // Basic Type matching ProjectItem in public-api-server
 export interface ProjectItem {
@@ -85,8 +85,6 @@ function getProjectCoords(project: ProjectItem, index: number): { x: number; y: 
 }
 
 export function ProjectsListingClient({ initialProjects, locale, dict, copy }: ProjectsListingClientProps) {
-  const pathname = usePathname() ?? '/';
-  
   // UI states
   const [view, setView] = useState<'split' | 'grid' | 'map'>('split');
   const [sort, setSort] = useState<string>('relevance');
@@ -557,7 +555,6 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
               >
                 {filteredAndSortedProjects.map((p, index) => {
                   const area = p.area_name || p.area?.name || p.district || p.city || copy.card.areaFallback;
-                  const hasEntryPrice = Boolean(p.starting_price && Number.isFinite(p.starting_price));
                   
                   // Extract status translation
                   let localizedStatus = locale === 'th' ? 'เปิดขาย' : 'Available';
@@ -569,11 +566,6 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                   } else if (normStat.includes('complete') || normStat.includes('ready')) {
                     localizedStatus = locale === 'th' ? 'พร้อมอยู่' : 'Ready';
                   }
-
-                  const badges = [
-                    { key: 'status', label: localizedStatus },
-                    ...(hasEntryPrice ? [{ key: 'entry', label: copy.card.entryLabel }] : []),
-                  ];
 
                   const summary = p.summary?.[locale] || p.summary?.en || p.description?.[locale] || p.description?.en || '';
                   const shortSummary = summary.length > 80 ? `${summary.slice(0, 80).trim()}…` : summary;
@@ -593,6 +585,12 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                   const developerName = p.developer?.name ?? p.developer_name ?? null;
                   const completion = p.completion_date ?? p.delivery_date ?? p.completion ?? null;
                   const coverImage = p.cover_image_url ?? '/images/project-overview.png';
+                  const publicCardHighlights = [
+                    shortSummary,
+                    yieldPctVal ? `${yieldPct} ${locale === 'th' ? 'ผลตอบแทน' : 'yield'}` : '',
+                    quotaVal ? (locale === 'th' ? `โควต้าต่างชาติ ${foreignQuota}` : `Foreign quota ${foreignQuota}`) : '',
+                    beachVal !== undefined && beachVal !== null ? beachDistance : '',
+                  ].filter((item): item is string => Boolean(item));
 
                   const isSavedToCompare = compareList.includes(p.id);
 
@@ -701,41 +699,39 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                     );
                   }
 
-                  // Grid Layout using ProjectCard
+                  const publicProjectCard = mapProjectToPublicCardData(
+                    {
+                      id: p.id,
+                      slug: p.slug,
+                      name: p.name,
+                      starting_price: p.starting_price,
+                      status: p.status ?? undefined,
+                      cover_image_url: p.cover_image_url ?? undefined,
+                      hero_image_url: p.hero_image_url ?? undefined,
+                      images: p.images ?? undefined,
+                      location: String(area),
+                      status_label: p.status ? localizedStatus : undefined,
+                      completion,
+                      highlights: publicCardHighlights,
+                    },
+                    { locale },
+                  );
+
+                  // Grid Layout using the public-system ProjectCard. Split/map views keep their existing rendering.
                   return (
                     <div key={p.id} className="relative group">
-                      <ProjectCard
-                        href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
-                        name={p.name}
-                        locale={locale}
-                        media={{
-                          cover_image_url: coverImage,
-                          hero_image_url: coverImage,
-                          images: p.images ?? [],
-                        }}
-                        fallbackImage="/images/project-overview.png"
-                        area={area}
-                        price={formatCompactPrice(p.starting_price)}
-                        summary={shortSummary}
-                        badges={badges}
-                        facts={[
-                          p.property_type ? p.property_type : '',
-                          developerName ? `${locale === 'th' ? 'ผู้พัฒนา' : 'Developer'} ${developerName}` : '',
-                        ].filter(Boolean)}
+                      <PublicProjectCard
+                        project={publicProjectCard}
                         ctaLabel={copy.card.reviewAction}
-                        yieldPct={yieldPct}
-                        foreignQuota={foreignQuota}
-                        beachDistance={beachDistance}
-                        developerName={developerName}
-                        completion={completion}
-                        propertyId={p.id}
+                        fallbackImageSrc="/images/project-overview.png"
+                        imagePriority={index < 2}
                       />
                       
                       {/* Compare Overlay Button */}
                       <button
                         type="button"
                         onClick={() => toggleCompare(p.id)}
-                        className={`absolute bottom-5 right-5 z-20 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border shadow-sm transition-all duration-300 ${
+                        className={`absolute right-4 top-4 z-20 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border shadow-sm transition-all duration-300 ${
                           isSavedToCompare
                             ? 'bg-[var(--public-color-ink, #14201f)] text-[var(--public-color-bone, #f8f4ea)] border-[var(--public-color-ink, #14201f)]'
                             : 'bg-white text-[var(--public-color-ink, #14201f)] border-[var(--public-color-line-soft, #efe6d2)] hover:bg-[var(--public-color-sand-soft, #f3ead9)]'
