@@ -4181,6 +4181,10 @@ html[lang='th'] .decision-page .public-hero__signal-title,
     min-width: 0;
   }
 
+  .public-site-shell .projects-listing-control-stack select {
+    width: min(100%, 196px);
+  }
+
   .public-site-shell .projects-listing-result-card:hover {
     transform: none;
   }
