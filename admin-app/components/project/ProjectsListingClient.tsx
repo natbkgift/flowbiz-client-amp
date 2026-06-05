@@ -5,7 +5,16 @@ import Link from 'next/link';
 import { mapProjectToPublicCardData } from '@/app/_lib/public-card-mappers';
 import { withLocale } from '@/app/_lib/i18n/routing';
 import { withLocaleQuery } from '@/app/_lib/public-advisory';
+import { SafeCoverImage } from '@/components/media/SafeCoverImage';
 import { ProjectCard as PublicProjectCard } from '@/components/public-system/components/ProjectCard';
+import {
+  IconArrowRight,
+  IconCheck,
+  IconFilter,
+  IconLocation,
+  IconSearch,
+  IconTrendingUp,
+} from '@/components/icons/SvgIcons';
 
 // Basic Type matching ProjectItem in public-api-server
 export interface ProjectItem {
@@ -84,10 +93,115 @@ function getProjectCoords(project: ProjectItem, index: number): { x: number; y: 
   };
 }
 
+function firstText(...values: unknown[]): string | null {
+  for (const value of values) {
+    const trimmed = typeof value === 'string' || typeof value === 'number'
+      ? String(value).trim()
+      : '';
+    if (trimmed) return trimmed;
+  }
+  return null;
+}
+
+function localizedRecordText(value: unknown, locale: 'en' | 'th'): string | null {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  return firstText(record[locale], record.en, record.th);
+}
+
+function humanizeToken(value: string): string {
+  return value
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function projectArea(project: ProjectItem, fallback: string): string {
+  return firstText(project.area_name, project.area?.name, project.district, project.city) ?? fallback;
+}
+
+function projectDeveloper(project: ProjectItem): string | null {
+  return firstText(project.developer?.name, project.developer_name);
+}
+
+function projectCompletion(project: ProjectItem): string | null {
+  return firstText(project.completion_date, project.delivery_date, project.handover_date, project.completion);
+}
+
+function projectSummary(project: ProjectItem, locale: 'en' | 'th'): string | null {
+  const summary = localizedRecordText(project.summary, locale) ?? localizedRecordText(project.description, locale);
+  if (!summary) return null;
+  const compact = summary.replace(/\s+/g, ' ').trim();
+  if (!compact) return null;
+  return compact.length > 96 ? `${compact.slice(0, 96).trim().replace(/[,:;.\s]+$/g, '')}…` : compact;
+}
+
+function projectStatusLabel(locale: 'en' | 'th', status: string | null | undefined): string | null {
+  const normalized = String(status ?? '').trim().toLowerCase();
+  if (!normalized) return null;
+  if (locale === 'th') {
+    if (normalized === 'published') return 'เปิดขาย';
+    if (normalized.includes('new')) return 'เปิดตัวใหม่';
+    if (normalized.includes('construction')) return 'อยู่ระหว่างก่อสร้าง';
+    if (normalized.includes('complete') || normalized.includes('ready')) return 'พร้อมอยู่';
+    if (normalized.includes('archived') || normalized.includes('sold')) return 'ปิดการขาย';
+    return humanizeToken(normalized);
+  }
+  if (normalized === 'published') return 'Available';
+  if (normalized.includes('new')) return 'New launch';
+  if (normalized.includes('construction')) return 'Under construction';
+  if (normalized.includes('complete') || normalized.includes('ready')) return 'Ready';
+  if (normalized.includes('archived') || normalized.includes('sold')) return 'Sold Out';
+  return humanizeToken(normalized);
+}
+
+function numericMetric(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const numeric = typeof value === 'number' ? value : Number(String(value).replace('%', '').trim());
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function percentLabel(value: unknown): string | null {
+  const numeric = numericMetric(value);
+  if (numeric === null || numeric <= 0) return null;
+  const pct = numeric > 1 ? numeric : numeric * 100;
+  const rounded = Math.round(pct * 10) / 10;
+  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)}%`;
+}
+
+function beachDistanceLabel(locale: 'en' | 'th', value: unknown): string | null {
+  if (value === null || value === undefined || value === '') return null;
+  const text = String(value).trim();
+  if (!text) return null;
+  if (/beach\s*front|beachfront/i.test(text)) {
+    return locale === 'th' ? 'ติดชายหาด' : 'Beachfront';
+  }
+  const numeric = Number(text);
+  if (Number.isFinite(numeric)) {
+    if (numeric <= 0) return locale === 'th' ? 'ติดชายหาด' : 'Beachfront';
+    return `${Math.round(numeric).toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')}m`;
+  }
+  return text;
+}
+
+function projectSearchText(project: ProjectItem, locale: 'en' | 'th', fallbackArea: string): string {
+  return [
+    project.name,
+    project.slug,
+    projectArea(project, fallbackArea),
+    projectDeveloper(project),
+    projectCompletion(project),
+    projectStatusLabel(locale, project.status),
+    projectSummary(project, locale),
+  ].filter(Boolean).join(' ').toLowerCase();
+}
+
 export function ProjectsListingClient({ initialProjects, locale, dict, copy }: ProjectsListingClientProps) {
   // UI states
   const [view, setView] = useState<'split' | 'grid' | 'map'>('split');
   const [sort, setSort] = useState<string>('relevance');
+  const [searchQuery, setSearchQuery] = useState('');
   const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
   
   // Filters state
@@ -146,6 +260,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
   };
 
   const resetFilters = () => {
+    setSearchQuery('');
     setFilters({
       areas: [],
       status: [],
@@ -157,8 +272,8 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
   };
 
   // Helper for pricing format
-  const formatCompactPrice = (value: number | null | undefined): string => {
-    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return '—';
+  const formatCompactPrice = (value: number | null | undefined): string | null => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return null;
     if (locale === 'th') {
       if (value >= 1_000_000) {
         const millionValue = value / 1_000_000;
@@ -176,6 +291,13 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
   // Apply filters and sort
   const filteredAndSortedProjects = useMemo(() => {
     let result = [...initialProjects];
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
+    if (normalizedSearch) {
+      result = result.filter((project) =>
+        projectSearchText(project, locale, copy.card.areaFallback).includes(normalizedSearch)
+      );
+    }
 
     // 1. Area Filter
     if (filters.areas.length > 0) {
@@ -248,7 +370,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
     }
 
     return result;
-  }, [initialProjects, filters, sort]);
+  }, [initialProjects, filters, sort, searchQuery, locale, copy.card.areaFallback]);
 
   const mapProjects = useMemo(() => {
     return filteredAndSortedProjects.map((p, idx) => ({
@@ -258,14 +380,11 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
   }, [filteredAndSortedProjects]);
 
   return (
-    <div className="w-full flex flex-col" style={{ background: 'var(--public-color-bone, #f8f4ea)' }}>
-      {/* ── Toolbar / Header Strip ── */}
-      <div 
-        className="w-full border-b border-[var(--public-color-line-soft, #efe6d2)] py-8 px-6 md:px-10"
-        style={{ background: 'var(--public-color-paper-warm, #fdfaf2)' }}
-      >
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-6">
-          <div>
+    <div className="projects-listing-shell w-full flex flex-col">
+      {/* Toolbar / Header Strip */}
+      <div className="projects-listing-control-panel w-full border-b border-[var(--public-color-line-soft, #efe6d2)] py-7 px-4 sm:px-6 md:px-10">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-6">
+          <div className="min-w-0">
             <span 
               className="text-[10px] md:text-xs font-mono uppercase tracking-[0.18em] font-semibold"
               style={{ color: 'var(--public-color-teal, #0e3a3a)' }}
@@ -279,21 +398,41 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                 <>{filteredAndSortedProjects.length} projects across <em className="italic text-[var(--public-color-coral, #d96a4e)]">Pattaya</em></>
               )}
             </h2>
-            <div className="mt-2.5">
+            <div className="projects-listing-header-actions mt-3 flex flex-wrap gap-3">
               <Link
                 href={withLocale(locale, '/buy')}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--public-color-teal,#0e3a3a)] hover:text-[var(--public-color-coral,#d96a4e)] transition-colors group"
               >
                 <span>{copy.browseListingsLabel || 'Browse shortlist-ready listings'}</span>
-                <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                <IconArrowRight size="sm" className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href={withLocaleQuery(locale, '/contact', { intent: 'project_consultation', source: 'projects_listing_price_list' })}
+                prefetch={false}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--public-color-coral,#d96a4e)] hover:text-[var(--public-color-teal,#0e3a3a)] transition-colors group"
+              >
+                <span>{locale === 'th' ? 'ขอราคาอัปเดต' : 'Request Updated Price List'}</span>
+                <IconArrowRight size="sm" className="transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>
           
           {/* View Toggler and Sorting */}
-          <div className="flex items-center gap-3.5 flex-wrap">
+          <div className="projects-listing-control-stack flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3.5 sm:items-center lg:items-end xl:items-center">
+            <label className="projects-listing-search relative flex items-center gap-2 rounded-full border border-[var(--public-color-line-soft, #efe6d2)] bg-white px-4 py-2.5 shadow-sm">
+              <IconSearch size="sm" className="text-[var(--public-color-teal,#0e3a3a)]" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label={locale === 'th' ? 'ค้นหาโครงการ' : 'Search projects'}
+                placeholder={locale === 'th' ? 'ค้นหาโครงการหรือทำเล' : 'Search project or area'}
+                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--public-color-ink,#14201f)] outline-none placeholder:text-[var(--public-color-ink,#14201f)]/45"
+              />
+            </label>
+            <div className="flex items-center gap-3.5 flex-wrap justify-start sm:justify-end">
             {/* Toggle Segment */}
-            <div className="inline-flex rounded-full p-1 bg-black/[0.04] dark:bg-white/[0.04] text-xs font-medium border border-black/[0.02]">
+            <div className="inline-flex rounded-full p-1 bg-black/[0.04] dark:bg-white/[0.04] text-xs font-medium border border-black/[0.02]" aria-label={locale === 'th' ? 'เลือกรูปแบบการแสดงผล' : 'Choose project view'}>
               {(['grid', 'split', 'map'] as const).map((v) => {
                 const active = view === v;
                 const label = v === 'grid' ? (locale === 'th' ? 'ตาราง' : 'Grid') : v === 'split' ? (locale === 'th' ? 'สองฝั่ง' : 'Split') : (locale === 'th' ? 'แผนที่' : 'Map');
@@ -318,6 +457,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
+              aria-label={locale === 'th' ? 'จัดเรียงโครงการ' : 'Sort projects'}
               className="px-4 py-2 text-xs font-semibold rounded-full border border-[var(--public-color-line-soft, #efe6d2)] outline-none cursor-pointer bg-white transition-all duration-300 hover:bg-[var(--public-color-sand-soft, #f3ead9)] text-[var(--public-color-ink, #14201f)]"
             >
               <option value="relevance">{locale === 'th' ? 'จัดเรียง: แนะนำสำหรับคุณ' : 'Sort: Most relevant'}</option>
@@ -326,6 +466,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
               <option value="yield">{locale === 'th' ? 'ผลตอบแทนเช่า: สูงสุด' : 'Yield · highest'}</option>
               <option value="completion">{locale === 'th' ? 'สร้างเสร็จเร็วๆ นี้' : 'Soonest completion'}</option>
             </select>
+            </div>
           </div>
         </div>
 
@@ -335,9 +476,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-semibold border border-[var(--public-color-line-soft, #efe6d2)] text-[var(--public-color-ink, #14201f)]"
             style={{ background: 'var(--public-color-sand-soft, #efe6d2)' }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-            </svg>
+            <IconFilter size="sm" />
             <span>{locale === 'th' ? 'ตัวกรอง' : 'Filters'}</span>
           </span>
           
@@ -382,22 +521,11 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
         </div>
       </div>
 
-      {/* ── Main Workspace ── */}
-      <div 
-        className="w-full grid"
-        style={{ 
-          gridTemplateColumns: view === 'grid' 
-            ? '280px 1fr' 
-            : view === 'map' 
-              ? '280px 1fr' 
-              : '280px 1.1fr 1.3fr',
-          gap: 0 
-        }}
-      >
+      {/* Main Workspace */}
+      <div className={`projects-listing-workspace projects-listing-workspace--${view} w-full grid`}>
         {/* Sidebar Filters */}
         <aside 
-          className="p-6 md:p-8 sticky border-r border-[var(--public-color-line-soft, #efe6d2)] flex flex-col gap-6"
-          style={{ top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto' }}
+          className="projects-listing-sidebar p-5 sm:p-6 md:p-8 border-r border-[var(--public-color-line-soft, #efe6d2)] flex flex-col gap-6"
         >
           {/* Price max slider */}
           <div className="border-b border-[var(--public-color-line-soft, #efe6d2)] pb-6">
@@ -529,23 +657,33 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
         {/* List Results Column */}
         {view !== 'map' && (
           <div 
-            className="p-6 md:p-8 flex flex-col gap-6"
-            style={{ 
-              maxHeight: view === 'split' ? 'calc(100vh - 80px)' : 'none',
-              overflowY: view === 'split' ? 'auto' : 'visible'
-            }}
+            className={`projects-listing-results ${view === 'split' ? 'projects-listing-results--split' : ''} p-4 sm:p-6 md:p-8 flex flex-col gap-6`}
           >
             {filteredAndSortedProjects.length === 0 ? (
               <div className="py-16 text-center text-gray-500 text-sm flex flex-col items-center justify-center border border-dashed border-[var(--public-color-line-soft, #efe6d2)] rounded-2xl bg-white/50">
-                <svg className="w-12 h-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 0 1 5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                </svg>
+                <IconSearch size="xl" className="text-gray-300 mb-4" />
                 <p className="font-semibold mb-1 text-[var(--public-color-ink, #14201f)]">
                   {locale === 'th' ? 'ไม่พบโครงการที่ตรงกับตัวกรอง' : 'No projects match your filters'}
                 </p>
                 <p className="text-xs text-gray-400 max-w-xs px-4">
                   {locale === 'th' ? 'โปรดลองปรับช่วงราคา ย่าน หรือฟิลเตอร์อื่นๆ เพื่อดูโครงการเพิ่มเติม' : 'Try expanding your price range, choosing another location, or resetting filters.'}
                 </p>
+                <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="px-4 py-2 rounded-full text-xs font-semibold border border-[var(--public-color-line-soft, #efe6d2)] text-[var(--public-color-ink, #14201f)] bg-white hover:bg-[var(--public-color-sand-soft, #f3ead9)] transition-colors"
+                  >
+                    {locale === 'th' ? 'ล้างตัวกรองทั้งหมด' : 'Reset all filters'}
+                  </button>
+                  <Link
+                    href={withLocaleQuery(locale, '/contact', { intent: 'project_consultation', source: 'projects_listing_empty' })}
+                    prefetch={false}
+                    className="px-4 py-2 rounded-full text-xs font-semibold bg-[var(--public-color-coral, #d96a4e)] text-white hover:bg-[var(--public-color-coral-2, #c95c43)] transition-colors"
+                  >
+                    {locale === 'th' ? 'ขอราคาอัปเดต' : 'Request Updated Price List'}
+                  </Link>
+                </div>
               </div>
             ) : (
               <div 
@@ -554,42 +692,27 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                 }`}
               >
                 {filteredAndSortedProjects.map((p, index) => {
-                  const area = p.area_name || p.area?.name || p.district || p.city || copy.card.areaFallback;
-                  
-                  // Extract status translation
-                  let localizedStatus = locale === 'th' ? 'เปิดขาย' : 'Available';
-                  const normStat = String(p.status ?? '').toLowerCase();
-                  if (normStat.includes('new')) {
-                    localizedStatus = locale === 'th' ? 'เปิดตัวใหม่' : 'New launch';
-                  } else if (normStat.includes('construction')) {
-                    localizedStatus = locale === 'th' ? 'อยู่ระหว่างก่อสร้าง' : 'Under construction';
-                  } else if (normStat.includes('complete') || normStat.includes('ready')) {
-                    localizedStatus = locale === 'th' ? 'พร้อมอยู่' : 'Ready';
-                  }
-
-                  const summary = p.summary?.[locale] || p.summary?.en || p.description?.[locale] || p.description?.en || '';
-                  const shortSummary = summary.length > 80 ? `${summary.slice(0, 80).trim()}…` : summary;
-                  
-                  // Extract metric info
+                  const area = projectArea(p, copy.card.areaFallback);
+                  const localizedStatus = projectStatusLabel(locale, p.status);
+                  const shortSummary = projectSummary(p, locale);
                   const yieldPctVal = p.investment_snapshot?.gross_yield ?? p.gross_yield;
-                  const yieldPct = yieldPctVal ? `${(Number(yieldPctVal) * 100).toFixed(1)}%` : '6.0%';
-
+                  const yieldPct = percentLabel(yieldPctVal);
                   const quotaVal = p.investment_snapshot?.foreign_quota ?? p.foreign_quota ?? p.quota_pct;
-                  const foreignQuota = quotaVal ? `${Math.round(Number(quotaVal) * 100)}%` : '49%';
-
+                  const foreignQuota = percentLabel(quotaVal);
                   const beachVal = p.location?.walk_to_beach ?? p.beach_distance ?? p.location?.beach_access;
-                  const beachDistance = beachVal !== undefined && beachVal !== null 
-                    ? (Number(beachVal) === 0 ? (locale === 'th' ? 'ติดทะเล' : 'Beachfront') : `${beachVal}m`)
-                    : 'Near Beach';
-
-                  const developerName = p.developer?.name ?? p.developer_name ?? null;
-                  const completion = p.completion_date ?? p.delivery_date ?? p.completion ?? null;
-                  const coverImage = p.cover_image_url ?? '/images/project-overview.png';
+                  const beachDistance = beachDistanceLabel(locale, beachVal);
+                  const developerName = projectDeveloper(p);
+                  const completion = projectCompletion(p);
+                  const coverImage = p.cover_image_url ?? p.hero_image_url ?? p.images?.[0] ?? '/images/project-overview.png';
+                  const startingPriceLabel = formatCompactPrice(p.starting_price);
+                  const detailFacts = [
+                    yieldPct ? `${yieldPct} ${locale === 'th' ? 'ผลตอบแทน' : 'yield'}` : null,
+                    foreignQuota ? (locale === 'th' ? `โควต้าต่างชาติ ${foreignQuota}` : `Foreign quota ${foreignQuota}`) : null,
+                    beachDistance,
+                  ].filter((item): item is string => Boolean(item));
                   const publicCardHighlights = [
                     shortSummary,
-                    yieldPctVal ? `${yieldPct} ${locale === 'th' ? 'ผลตอบแทน' : 'yield'}` : '',
-                    quotaVal ? (locale === 'th' ? `โควต้าต่างชาติ ${foreignQuota}` : `Foreign quota ${foreignQuota}`) : '',
-                    beachVal !== undefined && beachVal !== null ? beachDistance : '',
+                    ...detailFacts,
                   ].filter((item): item is string => Boolean(item));
 
                   const isSavedToCompare = compareList.includes(p.id);
@@ -601,7 +724,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                         key={p.id}
                         onMouseEnter={() => setHoveredProjectId(p.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
-                        className={`flex flex-col sm:flex-row rounded-2xl overflow-hidden border transition-all duration-300 bg-white hover:shadow-lg ${
+                        className={`projects-listing-result-card flex flex-col sm:flex-row rounded-2xl overflow-hidden border transition-all duration-300 bg-white hover:shadow-lg ${
                           hoveredProjectId === p.id 
                             ? 'border-[var(--public-color-teal, #0e3a3a)] translate-x-1' 
                             : 'border-[var(--public-color-line-soft, #efe6d2)]'
@@ -612,16 +735,23 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                           href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
                           className="w-full sm:w-[220px] md:w-[260px] h-[200px] sm:h-auto relative overflow-hidden shrink-0"
                         >
-                          <img 
-                            src={coverImage} 
+                          <SafeCoverImage
+                            src={coverImage}
                             alt={p.name}
                             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            fallbackSrc="/images/project-overview.png"
+                            loading={index < 2 ? 'eager' : 'lazy'}
+                            priority={index < 2}
+                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 260px, 22vw"
+                            ssrStartWithPrimary={index < 2}
                           />
-                          <span 
-                            className="absolute top-3 left-3 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-black/60 text-white backdrop-blur-md"
-                          >
-                            {localizedStatus}
-                          </span>
+                          {localizedStatus ? (
+                            <span
+                              className="absolute top-3 left-3 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-black/60 text-white backdrop-blur-md"
+                            >
+                              {localizedStatus}
+                            </span>
+                          ) : null}
                         </Link>
 
                         {/* Content Right */}
@@ -634,44 +764,50 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                                 </h3>
                               </Link>
                               <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                                  <circle cx="12" cy="10" r="3"/>
-                                </svg>
+                                <IconLocation size="sm" />
                                 <span>{area}</span>
                                 {developerName && <span>· {developerName}</span>}
                                 {completion && <span>· {completion}</span>}
                               </div>
                             </div>
-                            <div className="text-right shrink-0">
-                              <span className="block text-[9.5px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">
-                                {locale === 'th' ? 'เริ่มต้น' : 'From'}
-                              </span>
-                              <span className="font-serif text-xl font-normal text-[var(--public-color-teal, #0e3a3a)]">
-                                {formatCompactPrice(p.starting_price)}
-                              </span>
-                            </div>
+                            {startingPriceLabel ? (
+                              <div className="text-right shrink-0">
+                                <span className="block text-[9.5px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">
+                                  {locale === 'th' ? 'เริ่มต้น' : 'From'}
+                                </span>
+                                <span className="font-serif text-xl font-normal text-[var(--public-color-teal, #0e3a3a)]">
+                                  {startingPriceLabel}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="text-right shrink-0">
+                                <span className="block text-[9.5px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">
+                                  {locale === 'th' ? 'ราคา' : 'Price'}
+                                </span>
+                                <span className="text-xs font-semibold text-[var(--public-color-teal, #0e3a3a)]">
+                                  {locale === 'th' ? 'ขอราคาอัปเดต' : 'Price on request'}
+                                </span>
+                              </div>
+                            )}
                           </div>
 
-                          <p className="text-xs text-[var(--public-color-ink, #14201f)]/70 leading-relaxed mb-4">
-                            {shortSummary}
-                          </p>
+                          {shortSummary ? (
+                            <p className="text-xs text-[var(--public-color-ink, #14201f)]/70 leading-relaxed mb-4">
+                              {shortSummary}
+                            </p>
+                          ) : null}
 
                           {/* Details line */}
-                          <div className="flex flex-wrap gap-4 text-[11px] text-gray-500 mt-auto border-t border-[var(--public-color-line-soft, #efe6d2)] pt-3.5">
-                            <span className="flex items-center gap-1.5">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M2 22 22 2"/><path d="M22 22V2h-4v4h-4v4H9v4H5v8"/></svg>
-                              <span>{yieldPct} {locale === 'th' ? 'ผลตอบแทน' : 'yield'}</span>
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
-                              <span>{locale === 'th' ? `โควต้าต่างชาติ ${foreignQuota}` : `Foreign quota ${foreignQuota}`}</span>
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M2 10h20M2 14h20M2 18h20M2 22h20M2 6h20"/></svg>
-                              <span>{beachDistance}</span>
-                            </span>
-                          </div>
+                          {detailFacts.length ? (
+                            <div className="flex flex-wrap gap-4 text-[11px] text-gray-500 mt-auto border-t border-[var(--public-color-line-soft, #efe6d2)] pt-3.5">
+                              {detailFacts.map((fact, factIndex) => (
+                                <span key={fact} className="flex items-center gap-1.5">
+                                  {factIndex === 0 ? <IconTrendingUp size="sm" /> : factIndex === 1 ? <IconCheck size="sm" /> : <IconLocation size="sm" />}
+                                  <span>{fact}</span>
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
 
                           {/* Quick CTA Actions */}
                           <div className="flex items-center gap-3 mt-4">
@@ -679,7 +815,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                               href={withLocale(locale, `/projects/${encodeURIComponent(p.slug)}`)}
                               className="px-4 py-2 rounded-full text-xs font-semibold bg-[var(--public-color-sand-soft, #efe6d2)] text-[var(--public-color-ink, #14201f)] hover:bg-opacity-80 transition-colors"
                             >
-                              {locale === 'th' ? 'รายละเอียดเพิ่มเติม →' : 'View details →'}
+                              {locale === 'th' ? 'ดูโครงการ' : 'View Project'}
                             </Link>
 
                             <button
@@ -691,7 +827,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                                   : 'border-[var(--public-color-line-soft, #efe6d2)] text-[var(--public-color-ink, #14201f)] hover:bg-black/5'
                               }`}
                             >
-                              {locale === 'th' ? 'เปรียบเทียบ' : 'Compare'}
+                              {locale === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare Projects'}
                             </button>
                           </div>
                         </div>
@@ -710,7 +846,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                       hero_image_url: p.hero_image_url ?? undefined,
                       images: p.images ?? undefined,
                       location: String(area),
-                      status_label: p.status ? localizedStatus : undefined,
+                      status_label: localizedStatus ?? undefined,
                       completion,
                       highlights: publicCardHighlights,
                     },
@@ -722,7 +858,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                     <div key={p.id} className="relative group">
                       <PublicProjectCard
                         project={publicProjectCard}
-                        ctaLabel={copy.card.reviewAction}
+                        ctaLabel={locale === 'th' ? 'ดูโครงการ' : 'View Project'}
                         fallbackImageSrc="/images/project-overview.png"
                         imagePriority={index < 2}
                       />
@@ -737,7 +873,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                             : 'bg-white text-[var(--public-color-ink, #14201f)] border-[var(--public-color-line-soft, #efe6d2)] hover:bg-[var(--public-color-sand-soft, #f3ead9)]'
                         }`}
                       >
-                        {isSavedToCompare ? '✓ Selected' : '+ Compare'}
+                        {isSavedToCompare ? (locale === 'th' ? 'เลือกแล้ว' : 'Selected') : (locale === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare Projects')}
                       </button>
                     </div>
                   );
@@ -750,13 +886,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
         {/* Map Panel Column */}
         {view !== 'grid' && (
           <div 
-            className="relative border-l border-[var(--public-color-line-soft, #efe6d2)] sticky"
-            style={{ 
-              top: '80px', 
-              height: 'calc(100vh - 80px)', 
-              minHeight: '600px', 
-              background: '#e5e9f0' 
-            }}
+            className="projects-listing-map relative border-l border-[var(--public-color-line-soft, #efe6d2)]"
           >
             {/* Coastline shape (decorative) */}
             <div className="absolute inset-0 bg-[#e4dfd5] opacity-40 z-0 pointer-events-none" />
@@ -809,7 +939,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                         : 'bg-[var(--public-color-teal, #0e3a3a)] text-[var(--public-color-bone, #f8f4ea)] hover:bg-[var(--public-color-coral, #d96a4e)]'
                     }`}
                   >
-                    {formatCompactPrice(p.starting_price)}
+                    {formatCompactPrice(p.starting_price) ?? (locale === 'th' ? 'สอบถาม' : 'Ask')}
                   </div>
                   <div 
                     className={`w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] mx-auto transition-colors ${
@@ -841,7 +971,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                   <div className="p-3">
                     <h4 className="font-serif text-sm font-semibold text-[var(--public-color-ink, #14201f)] leading-tight mb-1">{p.name}</h4>
                     <div className="text-[10px] text-gray-500">
-                      {area} · <span className="font-semibold text-[var(--public-color-teal, #0e3a3a)]">{formatCompactPrice(p.starting_price)}</span>
+                      {area} · <span className="font-semibold text-[var(--public-color-teal, #0e3a3a)]">{formatCompactPrice(p.starting_price) ?? (locale === 'th' ? 'ขอราคาอัปเดต' : 'Price on request')}</span>
                     </div>
                   </div>
                 </div>
@@ -868,7 +998,8 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
               <span 
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-semibold border border-[var(--public-color-line-soft, #efe6d2)] shadow-sm bg-[var(--public-color-paper-warm, #fdfaf2)] text-[var(--public-color-ink, #14201f)]"
               >
-                🗺️ Coastline Map
+                <IconLocation size="sm" />
+                <span>Coastline Map</span>
               </span>
             </div>
           </div>
@@ -883,7 +1014,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
           >
             <div className="flex-1">
               <div className="text-xs md:text-sm font-semibold flex items-center gap-2">
-                <span>🔄</span>
+                <IconCheck size="sm" />
                 <span>
                   {locale === 'th' 
                     ? `เลือกไว้ ${compareList.length} โครงการเพื่อเปรียบเทียบ` 
@@ -918,7 +1049,7 @@ export function ProjectsListingClient({ initialProjects, locale, dict, copy }: P
                   }
                 }}
               >
-                {locale === 'th' ? 'เปรียบเทียบเลย →' : 'Compare now →'}
+                {locale === 'th' ? 'เปรียบเทียบโครงการ' : 'Compare Projects'}
               </Link>
             </div>
           </div>
