@@ -53,7 +53,8 @@ export function PublicClientEnhancements() {
   const [showAiWidget, setShowAiWidget] = useState(false);
   const showFloatingWhatsApp = shouldRenderFloatingWhatsApp(pathname);
   const pathWithoutLocale = pathname.replace(/^\/(en|th)(?=\/|$)/, '') || '/';
-  const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects';
+  const isPreviewSurface = pathWithoutLocale === '/v2-preview';
+  const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects' || isPreviewSurface;
 
   useEffect(() => {
     const locale = localeFromPathname(pathname);
@@ -176,8 +177,8 @@ export function PublicClientEnhancements() {
           {showFloatingWhatsApp && !showAiWidget ? <FloatingWhatsAppCTA /> : null}
         </>
       ) : null}
-      <StickyMobileCTA />
-      {showAiWidget ? <AIChatWidget /> : null}
+      {isPreviewSurface ? null : <StickyMobileCTA />}
+      {showAiWidget && !isPreviewSurface ? <AIChatWidget /> : null}
       {showConsent ? <CookieConsent /> : null}
     </>
   );

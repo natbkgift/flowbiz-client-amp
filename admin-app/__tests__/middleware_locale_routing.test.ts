@@ -62,6 +62,17 @@ describe('middleware locale routing', () => {
     expect(response.cookies.get(LOCALE_COOKIE_NAME)?.value).toBe('th');
   });
 
+  it('returns a real 404 for the Thai-only AMP public v2 preview path', () => {
+    const request = new NextRequest('https://amppattaya.com/th/v2-preview');
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('x-next-pathname')).toBe('/th/v2-preview');
+    expect(response.cookies.get(LOCALE_COOKIE_NAME)?.value).toBe('th');
+  });
+
   it('bypasses locale redirects for media proxy routes', () => {
     const request = new NextRequest('https://amppattaya.com/media/project-covers/hero.webp');
 
