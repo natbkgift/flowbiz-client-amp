@@ -1159,21 +1159,30 @@ export default async function HomePage({
               </div>
             </div>
 
-            {/* Right Column - Sample Output Preview Card */}
+            {/* Right Column - Advisor Preview Card */}
             <div className="relative z-10 lg:col-span-5 w-full">
               <div className="bg-[var(--public-color-paper-warm)] rounded-2xl p-6 md:p-8 border border-[var(--public-color-line)] shadow-lg hover:shadow-xl transition-shadow duration-300 max-w-sm mx-auto lg:max-w-none">
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--public-color-ink-4)] block mb-2 font-medium">
-                  {locale === 'th' ? 'ตัวอย่างผลลัพธ์' : 'Sample output'}
+                  {locale === 'th' ? 'บรีฟจากที่ปรึกษา' : 'Advisor preview'}
                 </span>
                 <h4 className="font-serif text-xl md:text-2xl tracking-tight leading-none text-[var(--public-color-ink)] mb-6 font-normal">
-                  {locale === 'th' ? 'รายการคัดสรรของท่าน' : 'Your AMP shortlist'}
+                  {locale === 'th' ? 'สิ่งที่ทีมจะตรวจให้ก่อนนัดชม' : 'What the team checks before a viewing'}
                 </h4>
 
                 <div className="space-y-3.5">
                   {[
-                    { name: 'Jomtien Bay Tower', match: locale === 'th' ? 'ตรงกัน 94%' : 'Match 94%', color: '#2c7a3c' },
-                    { name: 'Central Marina Suites', match: locale === 'th' ? 'ตรงกัน 88%' : 'Match 88%', color: '#2c7a3c' },
-                    { name: 'Na Jomtien Residence', match: locale === 'th' ? 'ตรงกัน 76%' : 'Match 76%', color: '#c08a1c' },
+                    {
+                      title: locale === 'th' ? 'ยืนยันเส้นทางกรรมสิทธิ์' : 'Confirm ownership route',
+                      note: locale === 'th' ? 'ตรวจโควตาต่างชาติและเอกสารก่อนเริ่มนัดชม' : 'Check foreign quota and paperwork before viewings.',
+                    },
+                    {
+                      title: locale === 'th' ? 'เทียบต้นทุนรวม' : 'Compare total cost',
+                      note: locale === 'th' ? 'แยกค่าธรรมเนียม โอน เฟอร์นิเจอร์ และงบหลังซื้อ' : 'Separate transfer, fit-out, and first-year ownership costs.',
+                    },
+                    {
+                      title: locale === 'th' ? 'ขอสถานะล่าสุด' : 'Request current availability',
+                      note: locale === 'th' ? 'ให้ทีมตรวจราคาและยูนิตว่างล่าสุดก่อนตัดสินใจ' : 'Ask the team to verify live price and unit availability.',
+                    },
                   ].map((item, i) => (
                     <div 
                       key={i} 
@@ -1182,14 +1191,13 @@ export default async function HomePage({
                       <div className="w-8 h-8 rounded-lg bg-[var(--public-color-sand-soft)] flex items-center justify-center font-mono text-xs font-semibold text-[var(--public-color-ink-2)] border border-[var(--public-color-line)]/40 shadow-sm">
                         {i + 1}
                       </div>
-                      <span className="text-xs md:text-sm font-medium text-[var(--public-color-ink)] flex-1">
-                        {item.name}
-                      </span>
-                      <span 
-                        className="text-[10px] md:text-xs font-mono font-semibold tracking-tight" 
-                        style={{ color: item.color }}
-                      >
-                        {item.match}
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-xs md:text-sm font-semibold text-[var(--public-color-ink)]">
+                          {item.title}
+                        </span>
+                        <span className="block mt-1 text-[11px] md:text-xs leading-relaxed text-[var(--public-color-ink-muted)]">
+                          {item.note}
+                        </span>
                       </span>
                     </div>
                   ))}
@@ -1206,7 +1214,7 @@ export default async function HomePage({
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    {locale === 'th' ? 'ดาวน์โหลดเป็น PDF' : 'Download as PDF'}
+                    {locale === 'th' ? 'ขอบรีฟรายการล่าสุด' : 'Request updated availability'}
                   </TrackedLink>
                 </div>
               </div>
