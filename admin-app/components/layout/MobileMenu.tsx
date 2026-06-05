@@ -115,6 +115,19 @@ export function MobileMenu({
       data-locale={locale}
     >
       <div className="mobile-menu__inner">
+        <div className="mobile-menu__top">
+          <span className="mobile-menu__brand">AMP Pattaya</span>
+          <button
+            type="button"
+            className="mobile-menu__close"
+            onClick={onClose}
+            aria-label={locale === 'th' ? 'ปิดเมนู' : 'Close menu'}
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 4l10 10M14 4L4 14" />
+            </svg>
+          </button>
+        </div>
         <div className="mobile-menu__intro">
           <p className="mobile-menu__eyebrow">
             {locale === 'th' ? 'เส้นทางอสังหาริมทรัพย์พัทยา' : 'Pattaya real estate routes'}
@@ -145,7 +158,7 @@ export function MobileMenu({
               className="mobile-menu__advisor-link"
               onClick={onClose}
             >
-              <strong>{locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}</strong>
+              <strong>{locale === 'th' ? 'คุยกับที่ปรึกษาอสังหาฯ พัทยา' : 'Speak with a Pattaya Property Advisor'}</strong>
               <span>
                 {locale === 'th'
                   ? 'ส่งโจทย์สั้น ๆ แล้วให้ทีมช่วยคัดทางต่อ'

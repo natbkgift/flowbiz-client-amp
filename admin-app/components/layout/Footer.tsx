@@ -38,8 +38,8 @@ export function SiteFooter({
   const facebookLabel = cms?.contact.facebookLabel || dict.common.facebookLabel || 'Facebook';
 
   const brandDesc = locale === 'th'
-    ? 'ที่ปรึกษาอสังหาริมทรัพย์ระดับผู้เชี่ยวชาญของพัทยา ได้รับใบอนุญาตจัดตั้งปี 2018 สมาชิกสมาคมอสังหาริมทรัพย์ไทย'
-    : "Pattaya's investor-grade property advisory. Licensed brokerage est. 2018. Member, Thai Real Estate Association.";
+    ? 'ที่ปรึกษาอสังหาริมทรัพย์พัทยาสำหรับผู้ซื้อ นักลงทุน และเจ้าของทรัพย์ที่ต้องการทางเลือกชัดเจนก่อนตัดสินใจ'
+    : 'Pattaya property advisory for buyers, investors, and owners who need clear next steps before a decision.';
 
   const officeAddress = locale === 'th' ? (
     <>
@@ -66,8 +66,11 @@ export function SiteFooter({
     >
       <Container variant="wide">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12">
-          <div className="lg:col-span-4 flex flex-col items-start">
-            <Link href={withLocale(locale, '/')} prefetch={false} className="flex items-center text-white mb-4 hover:opacity-90 transition-opacity">
+          <div className="site-footer__brand lg:col-span-4 flex flex-col items-start">
+            <span className="site-footer__eyebrow">
+              {locale === 'th' ? 'AMP Pattaya Advisory' : 'AMP Pattaya Advisory'}
+            </span>
+            <Link href={withLocale(locale, '/')} prefetch={false} className="site-footer__logo flex items-center text-white mb-4 hover:opacity-90 transition-opacity">
               <svg width="24" height="24" viewBox="0 0 32 32" className="shrink-0 mr-1 text-white" style={{ fill: 'none' }} aria-hidden="true">
                 <rect x="0.5" y="0.5" width="31" height="31" rx="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
                 <path d="M9 23 L16 9 L23 23 M12 18 L20 18" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -81,15 +84,15 @@ export function SiteFooter({
               {brandDesc}
             </p>
 
-            <div className="footer-contact-block mb-6 text-sm leading-relaxed text-[var(--public-color-bone, #f8f4ea)]/80">
+            <div className="footer-contact-block site-footer__contact-card mb-6 text-sm leading-relaxed text-[var(--public-color-bone, #f8f4ea)]/80">
               <span className="block font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--public-color-bone, #f8f4ea)]/50 mb-3 font-semibold">
                 {locale === 'th' ? 'ติดต่อ AMP Pattaya' : 'Contact AMP Pattaya'}
               </span>
               <p className="mb-3">{officeAddress}</p>
-              <a href={CTA.phoneTel} className="block text-white hover:text-[var(--public-color-champagne)] transition-colors duration-200 font-medium">
+              <a href={CTA.phoneTel} className="site-footer__contact-link block text-white hover:text-[var(--public-color-champagne)] transition-colors duration-200 font-medium">
                 {CTA.phoneTel.replace('tel:', '')}
               </a>
-              <a href={`mailto:${contactEmail}`} className="block text-[var(--public-color-bone, #f8f4ea)]/80 hover:text-white transition-colors duration-200">
+              <a href={`mailto:${contactEmail}`} className="site-footer__contact-link block text-[var(--public-color-bone, #f8f4ea)]/80 hover:text-white transition-colors duration-200">
                 {contactEmail}
               </a>
             </div>
@@ -103,7 +106,7 @@ export function SiteFooter({
                 className: 'footer-cta-link mb-5',
               })}
             >
-              {locale === 'th' ? 'คุยกับที่ปรึกษา' : 'Speak to an advisor'}
+              {locale === 'th' ? 'คุยกับที่ปรึกษาอสังหาฯ พัทยา' : 'Speak with a Pattaya Property Advisor'}
             </Link>
 
             <div className="footer-signal-list flex items-center gap-2">
@@ -142,7 +145,7 @@ export function SiteFooter({
           </div>
 
           {visibleLinkGroups.map((group) => (
-            <div key={group.key} className="lg:col-span-2">
+            <div key={group.key} className="site-footer__link-group lg:col-span-2">
               <span className="block font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--public-color-bone, #f8f4ea)]/50 mb-4 font-semibold">
                 {group.title}
               </span>
@@ -165,7 +168,7 @@ export function SiteFooter({
 
         <div className="mt-12 pt-6 border-t border-[rgba(248,244,234,0.1)] flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[var(--public-color-bone, #f8f4ea)]/50">
           <div>
-            <span>© {new Date().getFullYear()} AMP Pattaya Property Co., Ltd · License #BR-2018-0992</span>
+            <span>© {new Date().getFullYear()} AMP Pattaya Property Co., Ltd · Pattaya property advisory</span>
             {facebookUrl && !/flowbiz/i.test(facebookUrl) ? (
               <span className="ml-3">
                 ·{' '}

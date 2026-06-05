@@ -152,6 +152,11 @@ function resolveCtaHref(locale: Locale, item: PublicCtaItem): string {
   return withLocale(locale, item.href);
 }
 
+function getShellCtaLabel(locale: Locale, item: PublicCtaItem): string {
+  if (item.key !== 'contact') return item.label;
+  return locale === 'th' ? 'คุยกับที่ปรึกษาอสังหาฯ พัทยา' : 'Speak with a Pattaya Property Advisor';
+}
+
 export function SiteHeader({
   locale,
   dict: dictProp,
@@ -189,7 +194,10 @@ export function SiteHeader({
   const homeNavConfig = getHomePublicNavItems(locale, dict);
   const homeMobileNavConfig = getHomeMobileNavItems(locale, dict);
   const mobileQuickPaths = getMobileQuickPaths(locale);
-  const ctaItems = getPublicCtaItems(locale, dict, cms);
+  const ctaItems = getPublicCtaItems(locale, dict, cms).map((item) => ({
+    ...item,
+    label: getShellCtaLabel(locale, item),
+  }));
   const shortlistCta = ctaItems.find((item) => item.key === 'shortlist');
   const conversionCtas = ctaItems.filter((item) => item.tone !== 'utility');
   const currentSurface = getPublicCtaSurface(currentPathname);
@@ -258,13 +266,18 @@ export function SiteHeader({
         data-locale={locale}
       >
         <div className={`site-header__content header-content${isHomeSurface ? ' header-content--home' : ''}`}>
-          <Link href={withLocale(locale, '/')} prefetch={false} className="logo animate-fade-in" aria-label={dict.brand.name}>
-            <svg width="26" height="26" viewBox="0 0 32 32" className="shrink-0 mr-1 text-inherit" style={{ fill: 'none' }}>
+          <Link href={withLocale(locale, '/')} prefetch={false} className="logo site-header__brand animate-fade-in" aria-label={dict.brand.name}>
+            <svg width="26" height="26" viewBox="0 0 32 32" className="site-header__brand-mark shrink-0 mr-1 text-inherit" style={{ fill: 'none' }}>
               <rect x="0.5" y="0.5" width="31" height="31" rx="6" fill="none" stroke="currentColor" strokeWidth="1.2"/>
               <path d="M9 23 L16 9 L23 23 M12 18 L20 18" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="font-serif font-normal tracking-[0.04em] text-2xl flex items-center leading-none" style={{ color: 'inherit' }}>
-              AMP <span className="italic ml-1 font-normal text-inherit">Pattaya</span>
+            <span className="site-header__brand-copy">
+              <span className="site-header__brand-name font-serif font-normal tracking-[0.04em] text-2xl flex items-center leading-none" style={{ color: 'inherit' }}>
+                AMP <span className="italic ml-1 font-normal text-inherit">Pattaya</span>
+              </span>
+              <span className="site-header__brand-line">
+                {locale === 'th' ? 'ที่ปรึกษาอสังหาฯ พัทยา' : 'Pattaya Property Advisory'}
+              </span>
             </span>
           </Link>
 
@@ -314,16 +327,17 @@ export function SiteHeader({
               </div>
             ) : null}
             {/* Currency Picker */}
-            <div ref={currencyRef} className="relative inline-block text-left mr-1.5 md:mr-2">
+            <div ref={currencyRef} className="header-picker header-picker--currency relative inline-block text-left mr-1.5 md:mr-2">
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+                className="header-picker__button inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
                 style={{
                   color: isHomeSurface && !homeHeaderScrolled ? 'rgba(255, 255, 255, 0.94)' : 'var(--color-ink)',
                 }}
                 onClick={() => setCurrencyOpen((o) => !o)}
                 aria-expanded={currencyOpen}
                 aria-haspopup="true"
+                aria-label={locale === 'th' ? 'เลือกสกุลเงิน' : 'Select currency'}
               >
                 <span>{currency}</span>
                 <svg
@@ -341,7 +355,7 @@ export function SiteHeader({
               </button>
               {currencyOpen && (
                 <div
-                  className="absolute right-0 mt-1.5 w-36 rounded-xl border border-[var(--public-color-line-soft, #efe6d2)] shadow-xl p-1 z-[110] text-[var(--public-color-ink, #14201f)]"
+                  className="header-picker__menu absolute right-0 mt-1.5 w-36 rounded-xl border border-[var(--public-color-line-soft, #efe6d2)] shadow-xl p-1 z-[110] text-[var(--public-color-ink, #14201f)]"
                   style={{
                     background: 'var(--public-color-paper-warm, #fdfaf2)',
                   }}
@@ -371,16 +385,17 @@ export function SiteHeader({
             </div>
 
             {/* Locale Picker */}
-            <div ref={localeRef} className="relative inline-block text-left mr-1.5 md:mr-2">
+            <div ref={localeRef} className="header-picker header-picker--locale relative inline-block text-left mr-1.5 md:mr-2">
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+                className="header-picker__button inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
                 style={{
                   color: isHomeSurface && !homeHeaderScrolled ? 'rgba(255, 255, 255, 0.94)' : 'var(--color-ink)',
                 }}
                 onClick={() => setLocaleOpen((o) => !o)}
                 aria-expanded={localeOpen}
                 aria-haspopup="true"
+                aria-label={locale === 'th' ? 'เลือกภาษา' : 'Select language'}
               >
                 <span>{locale === 'th' ? '🇹🇭 TH' : '🇬🇧 EN'}</span>
                 <svg
@@ -398,7 +413,7 @@ export function SiteHeader({
               </button>
               {localeOpen && (
                 <div
-                  className="absolute right-0 mt-1.5 w-44 rounded-xl border border-[var(--public-color-line-soft, #efe6d2)] shadow-xl p-1 z-[110] text-[var(--public-color-ink, #14201f)]"
+                  className="header-picker__menu absolute right-0 mt-1.5 w-44 rounded-xl border border-[var(--public-color-line-soft, #efe6d2)] shadow-xl p-1 z-[110] text-[var(--public-color-ink, #14201f)]"
                   style={{
                     background: 'var(--public-color-paper-warm, #fdfaf2)',
                   }}
