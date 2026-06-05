@@ -321,6 +321,12 @@
   --amp-public-mobile-card-title-size: 1.25rem;
   --amp-public-mobile-fact-value-size: 1.45rem;
   --amp-public-eyebrow-track: 0.14em;
+  --amp-home-search-stack-offset: clamp(8px, 1.4vw, 18px);
+  --amp-home-search-stack-offset-mobile: 8px;
+  --amp-home-search-z: 88;
+  --amp-public-media-fallback:
+    radial-gradient(circle at 18% 18%, rgba(201, 166, 119, 0.24), transparent 34%),
+    linear-gradient(135deg, rgba(248, 244, 234, 0.92) 0%, rgba(239, 230, 210, 0.82) 55%, rgba(217, 106, 78, 0.12) 100%);
 }
 
 html[lang='th'] {

@@ -72,7 +72,7 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
     { value: 'gt_20m', label: locale === 'th' ? '20 ล้านบาทขึ้นไป' : 'Above ฿20M' },
   ];
 
-  const handleSearch = () => {
+  const buildSearchHref = (tab: SearchTab = activeTab) => {
     const params = new URLSearchParams();
     params.set('source', 'home_search_bar');
 
@@ -112,19 +112,22 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
     }
 
     let route = `/${locale}/buy`;
-    if (activeTab === 'rent') {
+    if (tab === 'rent') {
       route = `/${locale}/rent`;
-    } else if (activeTab === 'offplan') {
+    } else if (tab === 'offplan') {
       route = `/${locale}/projects`;
       params.set('status', 'off-plan');
-    } else if (activeTab === 'villas') {
+    } else if (tab === 'villas') {
       route = `/${locale}/buy`;
       params.set('type', 'villa');
     }
 
     const queryString = params.toString();
-    const targetUrl = queryString ? `${route}?${queryString}` : route;
-    router.push(targetUrl);
+    return queryString ? `${route}?${queryString}` : route;
+  };
+
+  const handleSearch = () => {
+    router.push(buildSearchHref());
   };
 
   const getActiveLabel = (value: string, options: Array<{ value: string; label: string }>) => {
@@ -134,43 +137,46 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
   return (
     <div
       ref={containerRef}
-      className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 md:-mt-14 lg:-mt-16 xl:-mt-20 select-none pb-8"
+      className="home-search-shell relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 md:-mt-14 lg:-mt-16 xl:-mt-20 select-none pb-8"
       data-testid="home-search-bar"
     >
-      <div className="bg-[#fcfaf2] border border-[#d8cdb4] shadow-2xl rounded-2xl md:rounded-3xl p-4 sm:p-5 lg:p-6 transition-all duration-300">
+      <div className="home-search-shell__panel bg-[#fcfaf2] border border-[#d8cdb4] shadow-2xl rounded-2xl md:rounded-3xl p-4 sm:p-5 lg:p-6 transition-all duration-300">
         {/* Search Tabs */}
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-4 md:mb-5 pb-3 border-b border-[#efe6d2]">
+        <div className="home-search-shell__tabs flex items-center gap-1.5 sm:gap-2 mb-4 md:mb-5 pb-3 border-b border-[#efe6d2]">
           {[
             { id: 'buy', label: locale === 'th' ? 'ซื้อ (Buy)' : 'Buy' },
             { id: 'rent', label: locale === 'th' ? 'เช่า (Rent)' : 'Rent' },
             { id: 'offplan', label: locale === 'th' ? 'พรีเซลล์ / โครงการใหม่' : 'Off-plan' },
             { id: 'villas', label: locale === 'th' ? 'วิลล่า (Villas)' : 'Villas' },
           ].map((tab) => (
-            <button
+            <a
               key={tab.id}
-              onClick={() => {
+              href={buildSearchHref(tab.id as SearchTab)}
+              onClick={(event) => {
+                event.preventDefault();
                 setActiveTab(tab.id as SearchTab);
                 setActiveDropdown(null);
               }}
-              className={`px-3.5 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
+              aria-current={activeTab === tab.id ? 'true' : undefined}
+              className={`home-search-shell__tab px-3.5 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
                 activeTab === tab.id
                   ? 'bg-[#0e3a3a] text-[#f8f4ea] shadow-md'
                   : 'text-[#5b6764] hover:bg-[#efe6d2]/50 hover:text-[#0e3a3a]'
               }`}
             >
               {tab.label}
-            </button>
+            </a>
           ))}
         </div>
 
         {/* Search Inputs Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto] gap-2 lg:gap-0 lg:divide-x lg:divide-[#d8cdb4] items-center bg-white rounded-xl lg:rounded-2xl border border-[#efe6d2] overflow-visible p-2 lg:p-1.5">
+        <div className="home-search-shell__grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto] gap-2 lg:gap-0 lg:divide-x lg:divide-[#d8cdb4] items-center bg-white rounded-xl lg:rounded-2xl border border-[#efe6d2] overflow-visible p-2 lg:p-1.5">
           {/* Location Selector */}
-          <div className="relative w-full overflow-visible">
+          <div className="home-search-shell__field relative w-full overflow-visible">
             <button
               type="button"
               onClick={() => setActiveDropdown(activeDropdown === 'location' ? null : 'location')}
-              className={`w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
+              className={`home-search-shell__control w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
                 activeDropdown === 'location' ? 'bg-[#f8f4ea]/60' : ''
               }`}
             >
@@ -183,7 +189,7 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
               </span>
             </button>
             {activeDropdown === 'location' && (
-              <div className="absolute left-0 right-0 lg:w-72 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="home-search-shell__dropdown absolute left-0 right-0 lg:w-72 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                 {locations.map((opt) => (
                   <button
                     key={opt.value}
@@ -205,12 +211,12 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
           </div>
 
           {/* Property Type Selector */}
-          <div className="relative w-full overflow-visible">
+          <div className="home-search-shell__field relative w-full overflow-visible">
             <button
               type="button"
               disabled={activeTab === 'villas'}
               onClick={() => setActiveDropdown(activeDropdown === 'type' ? null : 'type')}
-              className={`w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
+              className={`home-search-shell__control w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
                 activeTab === 'villas' ? 'opacity-50 cursor-not-allowed' : ''
               } ${activeDropdown === 'type' ? 'bg-[#f8f4ea]/60' : ''}`}
             >
@@ -226,7 +232,7 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
               </span>
             </button>
             {activeDropdown === 'type' && activeTab !== 'villas' && (
-              <div className="absolute left-0 right-0 lg:w-64 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="home-search-shell__dropdown absolute left-0 right-0 lg:w-64 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                 {propTypes.map((opt) => (
                   <button
                     key={opt.value}
@@ -248,11 +254,11 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
           </div>
 
           {/* Bedrooms Selector */}
-          <div className="relative w-full overflow-visible">
+          <div className="home-search-shell__field relative w-full overflow-visible">
             <button
               type="button"
               onClick={() => setActiveDropdown(activeDropdown === 'bedrooms' ? null : 'bedrooms')}
-              className={`w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
+              className={`home-search-shell__control w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
                 activeDropdown === 'bedrooms' ? 'bg-[#f8f4ea]/60' : ''
               }`}
             >
@@ -264,7 +270,7 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
               </span>
             </button>
             {activeDropdown === 'bedrooms' && (
-              <div className="absolute left-0 right-0 lg:w-64 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="home-search-shell__dropdown absolute left-0 right-0 lg:w-64 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                 {bedroomOptions.map((opt) => (
                   <button
                     key={opt.value}
@@ -286,11 +292,11 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
           </div>
 
           {/* Budget Selector */}
-          <div className="relative w-full overflow-visible">
+          <div className="home-search-shell__field relative w-full overflow-visible">
             <button
               type="button"
               onClick={() => setActiveDropdown(activeDropdown === 'budget' ? null : 'budget')}
-              className={`w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
+              className={`home-search-shell__control w-full flex flex-col justify-start text-left px-4 py-3 sm:py-3.5 rounded-xl hover:bg-[#f8f4ea]/40 transition-colors ${
                 activeDropdown === 'budget' ? 'bg-[#f8f4ea]/60' : ''
               }`}
             >
@@ -302,7 +308,7 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
               </span>
             </button>
             {activeDropdown === 'budget' && (
-              <div className="absolute left-0 right-0 lg:w-64 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="home-search-shell__dropdown absolute left-0 right-0 lg:w-64 mt-2 bg-white border border-[#efe6d2] shadow-xl rounded-xl p-2 z-50 animate-in slide-in-from-top-1 duration-200">
                 {budgets.map((opt) => (
                   <button
                     key={opt.value}
@@ -324,16 +330,19 @@ export function HomeSearchBar({ locale }: HomeSearchBarProps) {
           </div>
 
           {/* Search CTA Button */}
-          <div className="w-full lg:w-auto p-2 lg:p-0 flex justify-end">
-            <button
-              type="button"
-              onClick={handleSearch}
-              className="w-full lg:w-auto h-12 sm:h-14 px-6 sm:px-8 bg-[#d96a4e] hover:bg-[#c4533a] active:scale-95 text-[#f8f4ea] font-medium text-sm rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
+          <div className="home-search-shell__submit-wrap w-full lg:w-auto p-2 lg:p-0 flex justify-end">
+            <a
+              href={buildSearchHref()}
+              onClick={(event) => {
+                event.preventDefault();
+                handleSearch();
+              }}
+              className="home-search-shell__submit w-full lg:w-auto h-12 sm:h-14 px-6 sm:px-8 bg-[#d96a4e] hover:bg-[#c4533a] active:scale-95 text-[#f8f4ea] font-medium text-sm rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
             >
               <IconSearch size="sm" />
               <span>{locale === 'th' ? 'ค้นหาทรัพย์' : 'Search Listings'}</span>
               <IconArrowRight size="sm" className="hidden lg:inline" />
-            </button>
+            </a>
           </div>
         </div>
       </div>

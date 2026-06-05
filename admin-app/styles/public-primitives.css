@@ -4971,6 +4971,248 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   background: var(--amp-public-color-coral-hover);
 }
 
+/* ======================== AMP PR 1B HOMEPAGE RUNTIME BLOCKERS ======================== */
+
+.public-site-shell .home-page {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  .public-site-shell .home-page {
+    overflow-x: hidden;
+  }
+}
+
+.public-site-shell .home-page > *,
+.public-site-shell .home-page section {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.public-site-shell .home-page .home-hero-slider,
+.public-site-shell .home-page .home-hero-slider__media-stack,
+.public-site-shell .home-page .home-market-section,
+.public-site-shell .home-page .home-bottom-cta {
+  overflow-x: clip;
+}
+
+.public-site-shell .home-page .home-hero-slider__media {
+  background:
+    linear-gradient(90deg, rgba(20, 32, 31, 0.72), rgba(20, 32, 31, 0.28)),
+    url('/images/hero-banner-20260318.webp') center 44% / cover no-repeat,
+    var(--public-color-ink);
+}
+
+.public-site-shell .home-page .home-hero-slider__media,
+.public-site-shell .home-page .home-hero-slider__image {
+  inset: 0;
+  max-width: 100%;
+}
+
+.public-site-shell .home-page .home-hero-slider__image[src*='project-overview'],
+.public-site-shell .home-page .home-hero-slider__image[src*='property-exterior'],
+.public-site-shell .home-page .home-hero-slider__image[src*='property-placeholder'] {
+  opacity: 0;
+}
+
+.public-site-shell .home-page .home-search-shell {
+  z-index: var(--amp-home-search-z);
+  box-sizing: border-box;
+  width: min(100%, calc(100vw - 24px));
+  max-width: min(72rem, calc(100vw - 24px));
+  margin-top: var(--amp-home-search-stack-offset) !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+  isolation: isolate;
+}
+
+.public-site-shell .home-page .home-search-shell__panel {
+  overflow: hidden;
+}
+
+.public-site-shell .home-page .home-search-shell__tabs {
+  min-width: 0;
+  gap: 8px !important;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.public-site-shell .home-page .home-search-shell__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.public-site-shell .home-page .home-search-shell__tab,
+.public-site-shell .home-page .home-search-shell__submit {
+  min-height: var(--amp-public-touch-target);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.public-site-shell .home-page .home-search-shell__tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: var(--amp-public-radius-pill);
+}
+
+.public-site-shell .home-page .home-search-shell__grid,
+.public-site-shell .home-page .home-search-shell__field,
+.public-site-shell .home-page .home-search-shell__control {
+  min-width: 0;
+}
+
+.public-site-shell .home-page .home-search-shell__dropdown {
+  max-width: min(100%, calc(100vw - 32px));
+}
+
+.public-site-shell .home-page .public-card-foundation__media {
+  background: var(--amp-public-media-fallback);
+}
+
+.public-site-shell .home-page .public-card-foundation__media::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 42%),
+    repeating-linear-gradient(135deg, rgba(20, 32, 31, 0.035) 0 1px, transparent 1px 18px);
+  pointer-events: none;
+}
+
+.public-site-shell .home-page .public-card-foundation__media-link {
+  z-index: 1;
+}
+
+.public-site-shell .home-page .public-card-foundation__image {
+  background: var(--amp-public-media-fallback);
+}
+
+.public-site-shell .home-page .public-card-foundation__image[src*='project-overview'],
+.public-site-shell .home-page .public-card-foundation__image[src*='property-exterior'],
+.public-site-shell .home-page .public-card-foundation__image[src*='property-placeholder'] {
+  opacity: 0;
+}
+
+@media (max-width: 1179px) {
+  .public-site-shell .home-page .home-search-shell {
+    width: min(100%, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+  }
+
+  .public-site-shell .home-page .home-search-shell__panel {
+    padding: clamp(12px, 2vw, 18px) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .public-site-shell .site-header .header-content {
+    gap: 8px;
+    padding-inline: clamp(10px, 3vw, 14px);
+  }
+
+  .public-site-shell .site-header .logo {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 4px;
+  }
+
+  .public-site-shell .site-header .logo svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .public-site-shell .site-header .logo span {
+    overflow: hidden;
+    font-size: clamp(1.05rem, 5vw, 1.35rem) !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .public-site-shell .site-header .header-actions {
+    flex: 0 0 auto;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .public-site-shell .site-header .header-actions > .relative {
+    margin-right: 0 !important;
+  }
+
+  .public-site-shell .site-header .header-cta--utility.desktop-only {
+    display: none !important;
+  }
+
+  .public-site-shell .site-header .header-actions button {
+    min-height: 40px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .public-site-shell .site-header .hamburger.mobile-only {
+    display: flex !important;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .public-site-shell .home-page .home-search-shell {
+    width: min(100%, calc(100vw - 4px));
+    max-width: calc(100vw - 4px);
+    margin-top: var(--amp-home-search-stack-offset-mobile) !important;
+    padding-bottom: 0 !important;
+  }
+
+  .public-site-shell .home-page .home-search-shell__panel {
+    border-radius: 18px;
+    padding: 10px !important;
+  }
+
+  .public-site-shell .home-page .home-search-shell__tabs {
+    margin-bottom: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .public-site-shell .home-page .home-search-shell__tab {
+    min-height: 38px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .public-site-shell .home-page .home-search-shell__grid {
+    gap: 0;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .public-site-shell .home-page .home-search-shell__field + .home-search-shell__field,
+  .public-site-shell .home-page .home-search-shell__submit-wrap {
+    border-top: 1px solid var(--public-color-line-soft);
+  }
+
+  .public-site-shell .home-page .home-search-shell__control {
+    min-height: 68px;
+    border-radius: 0;
+  }
+
+  .public-site-shell .home-page .home-search-shell__submit-wrap {
+    padding: 0 !important;
+  }
+
+  .public-site-shell .home-page .home-search-shell__submit {
+    height: 46px;
+    min-height: 46px;
+    border-radius: 0 0 14px 14px;
+  }
+}
+
 .public-site-shell .site-footer .footer-cta-link {
   min-height: 40px;
   padding-inline: 16px;
