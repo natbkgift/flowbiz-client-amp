@@ -90,7 +90,7 @@ describe('Projects listing PR5 card surface', () => {
       'href',
       '/en/projects/once-wongamat',
     );
-    expect(onceCard.getByRole('link', { name: 'View project' })).toHaveAttribute(
+    expect(onceCard.getByRole('link', { name: 'View Project' })).toHaveAttribute(
       'href',
       '/en/projects/once-wongamat',
     );

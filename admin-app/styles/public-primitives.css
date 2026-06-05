@@ -4067,6 +4067,137 @@ html[lang='th'] .decision-page .public-hero__signal-title,
   padding-top: clamp(34px, 5vw, 58px);
 }
 
+.public-site-shell .projects-listing-shell {
+  overflow-x: clip;
+  background: var(--public-color-bone);
+}
+
+.public-site-shell .projects-listing-control-panel {
+  background: linear-gradient(180deg, var(--public-color-paper), var(--public-color-paper-warm));
+}
+
+.public-site-shell .projects-page.decision-page--confidence .public-hero__subtitle {
+  color: rgba(20, 32, 31, 0.72) !important;
+}
+
+.public-site-shell .projects-listing-header-actions .icon,
+.public-site-shell .projects-listing-search .icon,
+.public-site-shell .projects-listing-map .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.public-site-shell .projects-listing-control-stack {
+  min-width: min(100%, 620px);
+}
+
+.public-site-shell .projects-listing-search {
+  width: min(100%, 340px);
+  min-height: 42px;
+}
+
+.public-site-shell .projects-listing-workspace {
+  grid-template-columns: minmax(0, 1fr);
+  background:
+    linear-gradient(180deg, rgba(253, 250, 242, 0.72), rgba(248, 244, 234, 0.96)),
+    var(--public-color-bone);
+}
+
+.public-site-shell .projects-listing-sidebar,
+.public-site-shell .projects-listing-results,
+.public-site-shell .projects-listing-map {
+  min-width: 0;
+}
+
+.public-site-shell .projects-listing-sidebar {
+  position: relative;
+  height: auto;
+  border-right-width: 0;
+  border-bottom: 1px solid var(--public-color-line-soft);
+  background: rgba(253, 250, 242, 0.84);
+}
+
+.public-site-shell .projects-listing-results {
+  background: rgba(248, 244, 234, 0.55);
+}
+
+.public-site-shell .projects-listing-result-card {
+  box-shadow: var(--public-shadow-claude-card);
+}
+
+.public-site-shell .projects-listing-result-card:hover {
+  box-shadow: var(--public-shadow-claude-lg);
+}
+
+.public-site-shell .projects-listing-map {
+  min-height: clamp(360px, 58vw, 560px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.5), transparent 30%),
+    linear-gradient(135deg, #e8e3d8 0%, #d8e4e4 58%, #e9edf1 100%);
+}
+
+@media (min-width: 1024px) {
+  .public-site-shell .projects-listing-workspace--grid,
+  .public-site-shell .projects-listing-workspace--map {
+    grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  }
+
+  .public-site-shell .projects-listing-workspace--split {
+    grid-template-columns: minmax(240px, 280px) minmax(0, 1.08fr) minmax(360px, 1.26fr);
+  }
+
+  .public-site-shell .projects-listing-sidebar {
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    border-right-width: 1px;
+    border-bottom: 0;
+  }
+
+  .public-site-shell .projects-listing-results--split {
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+
+  .public-site-shell .projects-listing-map {
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 80px);
+    min-height: 600px;
+  }
+}
+
+@media (max-width: 767px) {
+  .public-site-shell .projects-listing-control-stack,
+  .public-site-shell .projects-listing-search,
+  .public-site-shell .projects-listing-control-stack select {
+    width: 100%;
+  }
+
+  .public-site-shell .projects-listing-control-stack > div,
+  .public-site-shell .projects-listing-control-stack select {
+    min-width: 0;
+  }
+
+  .public-site-shell .projects-listing-control-stack select {
+    width: min(100%, 196px);
+  }
+
+  .public-site-shell .projects-listing-result-card:hover {
+    transform: none;
+  }
+
+  .public-site-shell .projects-listing-map {
+    min-height: 360px;
+  }
+
+  body:has(.projects-page) .ai-widget-shell {
+    bottom: calc(-4px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .public-site-shell .project-catalogue-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.78fr);
