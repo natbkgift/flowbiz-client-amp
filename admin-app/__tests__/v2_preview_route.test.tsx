@@ -34,20 +34,6 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-vi.mock('@/components/forms/LeadForm', () => ({
-  LeadForm: (props: {
-    heading?: string;
-    formId?: string;
-    submitLabel?: string;
-    defaultMessage?: string;
-  }) => (
-    <form aria-label={props.heading ?? 'Lead form'} data-form-id={props.formId}>
-      <p>{props.defaultMessage}</p>
-      <button type="submit">{props.submitLabel ?? 'Submit'}</button>
-    </form>
-  ),
-}));
-
 vi.mock('@/app/_lib/public-api-server', () => ({
   fetchAreas: publicApiMock.fetchAreas,
   fetchProjects: publicApiMock.fetchProjects,
@@ -113,18 +99,21 @@ describe('AMP Public v2 preview route', () => {
     render(await AmpPublicV2PreviewPage({ params: Promise.resolve({ locale: 'en' }) }));
 
     expect(screen.getByRole('heading', {
-      name: /find the pattaya property that fits the way you want to live/i,
+      name: /pattaya, priced for investors who measure in years, not weekends/i,
     })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /browse verified projects/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /90-second smart finder/i })).toHaveAttribute(
       'href',
-      '/en/projects?source=v2_preview_hero',
+      '/en/smart-finder?source=v2_preview_hero',
     );
     expect(screen.getByRole('heading', { name: 'Alpha Residence' })).toBeInTheDocument();
     expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Availability to be confirmed').length).toBeGreaterThan(0);
-    expect(screen.getByRole('form', { name: /speak with a pattaya property advisor/i })).toHaveAttribute(
-      'data-form-id',
-      'v2-preview-advisor',
+    expect(screen.getByRole('navigation', { name: /amp public v2 preview navigation/i })).toHaveTextContent(
+      'New Projects',
+    );
+    expect(screen.getByRole('link', { name: /request private recommendation/i })).toHaveAttribute(
+      'href',
+      '/en/contact?source=v2_preview_advisor_cta',
     );
     expect(publicApiMock.fetchProjects).toHaveBeenCalledWith({ limit: 12 });
   });
@@ -187,6 +176,11 @@ describe('AMP Public v2 preview route', () => {
     expect(previewSource).not.toContain('src/app/data/mockData');
     expect(previewSource).not.toContain('figma/make');
     expect(previewSource).not.toContain('RXcIsp7lQNDW95nPm20Zwu');
+    expect(previewSource).not.toContain('@/components/forms/LeadForm');
+    expect(previewSource).not.toContain('@/components/public-system/components/ProjectCard');
+    expect(previewSource).not.toContain('@/components/public-system/components/PropertyCard');
+    expect(previewSource).toContain('function V2Header');
+    expect(previewSource).toContain('function V2Footer');
     expect(enhancementsSource).toContain("pathWithoutLocale === '/v2-preview'");
     expect(enhancementsSource).toContain('{isPreviewSurface ? null : <StickyMobileCTA />}');
     expect(headerSource).toContain("pathWithoutLocale === '/v2-preview'");

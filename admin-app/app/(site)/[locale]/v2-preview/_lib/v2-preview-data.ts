@@ -5,13 +5,10 @@ import {
   fetchProjects,
   fetchProperties,
   type AreaItem,
+  type ProjectItem,
 } from '@/app/_lib/public-api-server';
-import {
-  mapProjectToPublicCardData,
-  mapPropertyToPublicCardData,
-} from '@/app/_lib/public-card-mappers';
-import type { PublicProjectCardData } from '@/components/public-system/components/ProjectCard';
-import type { PublicPropertyCardData } from '@/components/public-system/components/PropertyCard';
+import { pickRenderableLocalMedia } from '@/app/_lib/local-media';
+import { pickCoverImage } from '@/app/_lib/public-api-shared';
 import type { PropertyListItem } from '@/app/public/_shared/types';
 
 const PRICE_ON_REQUEST = 'Price on request';
@@ -28,6 +25,32 @@ export type V2PreviewAreaCard = {
   description: string;
 };
 
+export type V2PreviewProjectCard = {
+  id: string;
+  name: string;
+  href: string;
+  imageSrc: string;
+  imageAlt: string;
+  location: string;
+  startingPriceLabel: string;
+  completionLabel: string;
+  statusLabel: string;
+  highlights: string[];
+};
+
+export type V2PreviewPropertyCard = {
+  id: string;
+  title: string;
+  href: string;
+  imageSrc: string;
+  imageAlt: string;
+  location: string;
+  priceLabel: string;
+  listingType: 'sale' | 'rent';
+  propertyType: string;
+  statusLabel: string;
+};
+
 export type V2PreviewSourceState = {
   projectsFromApi: boolean;
   propertiesFromApi: boolean;
@@ -37,13 +60,13 @@ export type V2PreviewSourceState = {
 export type V2PreviewData = {
   heroImageSrc: string;
   heroImageAlt: string;
-  projectCards: PublicProjectCardData[];
-  propertyCards: PublicPropertyCardData[];
+  projectCards: V2PreviewProjectCard[];
+  propertyCards: V2PreviewPropertyCard[];
   areaCards: V2PreviewAreaCard[];
   sourceState: V2PreviewSourceState;
 };
 
-const FALLBACK_PROJECT_CARDS: PublicProjectCardData[] = [
+const FALLBACK_PROJECT_CARDS: V2PreviewProjectCard[] = [
   {
     id: 'v2-fallback-riviera-palm-beach',
     name: 'The Riviera Palm Beach',
@@ -69,12 +92,12 @@ const FALLBACK_PROJECT_CARDS: PublicProjectCardData[] = [
     highlights: [REQUEST_PRICE_LIST, ADVISOR_CTA],
   },
   {
-    id: 'v2-fallback-embassy-life',
-    name: 'Embassy Life',
-    href: '/en/projects/embassy-life',
-    imageSrc: '/media/import-assets/projects/embassy-life/asset_81006320dc6a.png',
-    imageAlt: 'Project image for Embassy Life in Pattaya',
-    location: 'Pattaya',
+    id: 'v2-fallback-wyndham-jomtien',
+    name: 'Wyndham Jomtien Pattaya',
+    href: '/en/projects/wyndham-jomtien-pattaya',
+    imageSrc: '/media/import-assets/projects/wyndham-jomtien-pattaya/asset_f20721152575.jpg',
+    imageAlt: 'Project image for Wyndham Jomtien Pattaya in Jomtien',
+    location: 'Jomtien',
     startingPriceLabel: PRICE_ON_REQUEST,
     completionLabel: AVAILABILITY_TO_CONFIRM,
     statusLabel: AVAILABILITY_TO_CONFIRM,
@@ -82,12 +105,12 @@ const FALLBACK_PROJECT_CARDS: PublicProjectCardData[] = [
   },
 ];
 
-const FALLBACK_PROPERTY_CARDS: PublicPropertyCardData[] = [
+const FALLBACK_PROPERTY_CARDS: V2PreviewPropertyCard[] = [
   {
     id: 'v2-fallback-sale-jomtien',
     title: 'Pattaya coastal condominium',
     href: '/en/buy',
-    imageSrc: '/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_19abb0a5cf9d.jpg',
+    imageSrc: '/media/import-assets/units-buy/amp-s010126-arom-jomtien/asset_ee3843fba37d.jpg',
     imageAlt: 'Pattaya coastal condominium interior',
     location: 'Jomtien',
     priceLabel: PRICE_ON_REQUEST,
@@ -99,7 +122,7 @@ const FALLBACK_PROPERTY_CARDS: PublicPropertyCardData[] = [
     id: 'v2-fallback-sale-central',
     title: 'City-view Pattaya residence',
     href: '/en/buy',
-    imageSrc: '/media/import-assets/units-buy/amp-s010726-grand-solaire-pattaya/asset_4f131eb7400b.jpg',
+    imageSrc: '/media/import-assets/units-buy/resale-en-condo-for-sale-3457/asset_3271c159a374.jpg',
     imageAlt: 'City-view Pattaya residence interior',
     location: 'Central Pattaya',
     priceLabel: PRICE_ON_REQUEST,
@@ -109,14 +132,14 @@ const FALLBACK_PROPERTY_CARDS: PublicPropertyCardData[] = [
   },
   {
     id: 'v2-fallback-rent-wongamat',
-    title: 'Wongamat rental residence',
+    title: 'Pattaya rental residence',
     href: '/en/rent',
-    imageSrc: '/media/import-assets/units-rent/amp-r030926-the-riviera-wongamat-beach/asset_0a4420696493.jpg',
-    imageAlt: 'Wongamat rental residence interior',
-    location: 'Wongamat',
+    imageSrc: '/media/import-assets/units-rent/rent-en-villa-for-rent-3400/asset_5c40f79016c9.jpg',
+    imageAlt: 'Pattaya rental residence exterior',
+    location: 'Pattaya',
     priceLabel: PRICE_ON_REQUEST,
     listingType: 'rent',
-    propertyType: 'Condominium',
+    propertyType: 'Residence',
     statusLabel: AVAILABILITY_TO_CONFIRM,
   },
 ];
@@ -126,7 +149,7 @@ const FALLBACK_AREA_CARDS: V2PreviewAreaCard[] = [
     id: 'area-jomtien',
     name: 'Jomtien',
     href: '/en/areas/jomtien',
-    imageSrc: '/images/area-guide-pattaya.png',
+    imageSrc: '/media/import-assets/projects/the-riviera-palm-beach/asset_1789e74af538.jpg',
     imageAlt: 'Pattaya coastal area guide image',
     description: 'A practical beachside route for buyers comparing lifestyle, rental use, and access to central Pattaya.',
   },
@@ -134,7 +157,7 @@ const FALLBACK_AREA_CARDS: V2PreviewAreaCard[] = [
     id: 'area-wongamat',
     name: 'Wongamat',
     href: '/en/areas/wongamat',
-    imageSrc: '/images/condo-view.png',
+    imageSrc: '/media/import-assets/projects/once-wongamat/asset_b4ef0491685f.jpg',
     imageAlt: 'Wongamat condominium view',
     description: 'A quieter coastal fit for buyers who want a more residential feel near the sea.',
   },
@@ -142,7 +165,7 @@ const FALLBACK_AREA_CARDS: V2PreviewAreaCard[] = [
     id: 'area-pratumnak',
     name: 'Pratumnak',
     href: '/en/areas/pratumnak',
-    imageSrc: '/images/property-pool.png',
+    imageSrc: '/media/import-assets/units-buy/resale-en-condo-for-sale-1904/asset_60a7db9f5d72.jpg',
     imageAlt: 'Pratumnak property pool and residence',
     description: 'A hillside-to-coast option for comparing privacy, access, and everyday convenience.',
   },
@@ -150,7 +173,7 @@ const FALLBACK_AREA_CARDS: V2PreviewAreaCard[] = [
     id: 'area-central',
     name: 'Central Pattaya',
     href: '/en/areas/central',
-    imageSrc: '/images/property-exterior.png',
+    imageSrc: '/media/import-assets/units-buy/resale-en-condo-for-sale-3389/asset_5a44ec786f49.jpg',
     imageAlt: 'Central Pattaya property exterior',
     description: 'A city-led route for buyers who prioritize transport, restaurants, and active rental demand.',
   },
@@ -164,13 +187,45 @@ async function resolveOrEmpty<T>(promise: Promise<T[]>): Promise<T[]> {
   }
 }
 
+function trimString(value: unknown): string | null {
+  const trimmed = typeof value === 'string' || typeof value === 'number'
+    ? String(value).trim()
+    : '';
+  return trimmed || null;
+}
+
+function firstText(...values: unknown[]): string | null {
+  for (const value of values) {
+    const trimmed = trimString(value);
+    if (trimmed) return trimmed;
+  }
+  return null;
+}
+
+function cleanPropertyTitle(raw: string): string {
+  return raw
+    .replace(/\s*-\s*#[A-Z0-9]+\s*\|\s*\w+$/i, '')
+    .replace(/\s*\|\s*Renthai$/i, '')
+    .trim() || raw;
+}
+
+function humanizeToken(value: unknown): string | null {
+  const trimmed = trimString(value);
+  if (!trimmed) return null;
+  return trimmed
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
 function limitTextList(values: string[] | undefined, fallback: string[]): string[] {
   const cleaned = (values ?? []).map((item) => item.trim()).filter(Boolean);
   const source = cleaned.length ? cleaned : fallback;
   return Array.from(new Set(source)).slice(0, 3);
 }
 
-function safeProjectCard(card: PublicProjectCardData): PublicProjectCardData {
+function safeProjectCard(card: V2PreviewProjectCard): V2PreviewProjectCard {
   return {
     ...card,
     startingPriceLabel: card.startingPriceLabel?.trim() || PRICE_ON_REQUEST,
@@ -180,12 +235,87 @@ function safeProjectCard(card: PublicProjectCardData): PublicProjectCardData {
   };
 }
 
-function safePropertyCard(card: PublicPropertyCardData): PublicPropertyCardData {
+function safePropertyCard(card: V2PreviewPropertyCard): V2PreviewPropertyCard {
   return {
     ...card,
     priceLabel: card.priceLabel?.trim() || PRICE_ON_REQUEST,
     statusLabel: card.statusLabel?.trim() || AVAILABILITY_TO_CONFIRM,
   };
+}
+
+function mapProjectCard(project: ProjectItem): V2PreviewProjectCard | null {
+  const source = project as ProjectItem & {
+    area_name?: string | null;
+    city?: string | null;
+    cover_image?: string | null;
+    imageAlt?: string | null;
+    image_url?: string | null;
+    location?: string | null;
+    status_label?: string | null;
+    title?: string | null;
+  };
+  const slug = trimString(project.slug);
+  const name = firstText(project.name, source.title);
+
+  if (!slug || !name) return null;
+
+  const location = firstText(source.location, project.area?.name, source.area_name, source.city) ?? 'Pattaya';
+  const imageSrc = pickRenderableLocalMedia({
+    cover_image: source.cover_image ?? null,
+    cover_image_url: project.cover_image_url ?? null,
+    hero_image_url: project.hero_image_url ?? null,
+    image_url: source.image_url ?? null,
+    images: project.images ?? null,
+  }) ?? '/images/project-overview.png';
+
+  return safeProjectCard({
+    id: firstText(project.id) ?? `project-${slug}`,
+    name,
+    href: `/en/projects/${encodeURIComponent(slug)}`,
+    imageSrc,
+    imageAlt: firstText(source.imageAlt) ?? `Project image for ${name} in ${location}`,
+    location,
+    startingPriceLabel: PRICE_ON_REQUEST,
+    completionLabel: AVAILABILITY_TO_CONFIRM,
+    statusLabel: AVAILABILITY_TO_CONFIRM,
+    highlights: [REQUEST_PRICE_LIST, ADVISOR_CTA],
+  });
+}
+
+function mapPropertyCard(property: PropertyListItem): V2PreviewPropertyCard | null {
+  const source = property as PropertyListItem & {
+    area_name?: string | null;
+    cover_image_url?: string | null;
+    imageAlt?: string | null;
+    image_url?: string | null;
+    location?: string | null;
+  };
+  const slug = trimString(property.slug);
+  const title = firstText(property.title);
+
+  if (!title) return null;
+
+  const listingType = String(property.type ?? '').trim().toLowerCase() === 'rent' ? 'rent' : 'sale';
+  const location = firstText(source.location, property.address, property.city, source.area_name) ?? 'Pattaya';
+  const fallbackHref = listingType === 'rent' ? '/en/rent' : '/en/buy';
+  const imageSrc = pickCoverImage({
+    cover_image: property.cover_image ?? source.cover_image_url ?? source.image_url ?? null,
+    local_images: property.local_images ?? null,
+    images: property.images ?? null,
+  }) ?? '/images/property-exterior.png';
+
+  return safePropertyCard({
+    id: firstText(property.id, property.source_id, slug) ?? `property-${listingType}`,
+    title: cleanPropertyTitle(title),
+    href: slug ? `/en/property/${encodeURIComponent(slug)}` : fallbackHref,
+    imageSrc,
+    imageAlt: firstText(source.imageAlt) ?? `${cleanPropertyTitle(title)} in ${location}`,
+    location,
+    priceLabel: PRICE_ON_REQUEST,
+    listingType,
+    propertyType: humanizeToken(property.property_type) ?? 'Residence',
+    statusLabel: AVAILABILITY_TO_CONFIRM,
+  });
 }
 
 function mapAreaCard(area: AreaItem): V2PreviewAreaCard | null {
@@ -207,7 +337,7 @@ function mapAreaCard(area: AreaItem): V2PreviewAreaCard | null {
   };
 }
 
-function pickHeroImage(projectCards: PublicProjectCardData[]): Pick<V2PreviewData, 'heroImageSrc' | 'heroImageAlt'> {
+function pickHeroImage(projectCards: V2PreviewProjectCard[]): Pick<V2PreviewData, 'heroImageSrc' | 'heroImageAlt'> {
   const heroProject = projectCards.find((card) => card.imageSrc?.startsWith('/images/') && card.imageSrc !== '/images/project-overview.png');
   if (heroProject) {
     return {
@@ -235,11 +365,13 @@ export async function loadV2PreviewData(): Promise<V2PreviewData> {
   ]);
 
   const projectCards = projects
-    .map((project) => safeProjectCard(mapProjectToPublicCardData(project, { locale: 'en' })))
+    .map(mapProjectCard)
+    .filter((project): project is V2PreviewProjectCard => Boolean(project))
     .slice(0, 6);
 
   const propertyCards = [...saleProperties.slice(0, 3), ...rentProperties.slice(0, 3)]
-    .map((property) => safePropertyCard(mapPropertyToPublicCardData(property, { locale: 'en' })))
+    .map(mapPropertyCard)
+    .filter((property): property is V2PreviewPropertyCard => Boolean(property))
     .slice(0, 6);
 
   const areaCards = areas
