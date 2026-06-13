@@ -164,6 +164,19 @@ describe('AMP Public v2 preview route', () => {
     expect(document.body.textContent).not.toContain('Figma Make');
   });
 
+  it('renders fallback cards when API returns null or non-array payloads', async () => {
+    publicApiMock.fetchProjects.mockResolvedValue(null);
+    publicApiMock.fetchAreas.mockResolvedValue(null);
+    publicApiMock.fetchProperties.mockResolvedValue({ data: null, meta: { page: 1, limit: 0, total: 0 } });
+
+    render(await AmpPublicV2PreviewPage({ params: Promise.resolve({ locale: 'en' }) }));
+
+    expect(screen.getByRole('heading', { name: 'The Riviera Palm Beach' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pattaya coastal condominium' })).toBeInTheDocument();
+    expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Availability to be confirmed').length).toBeGreaterThan(0);
+  });
+
   it('keeps preview implementation isolated from Figma mock sources and production route files', () => {
     const previewSource = [
       read('app/(site)/[locale]/v2-preview/page.tsx'),
@@ -181,9 +194,9 @@ describe('AMP Public v2 preview route', () => {
     expect(previewSource).not.toContain('@/components/public-system/components/PropertyCard');
     expect(previewSource).toContain('function V2Header');
     expect(previewSource).toContain('function V2Footer');
-    expect(enhancementsSource).toContain("pathWithoutLocale === '/v2-preview'");
+    expect(enhancementsSource).toContain('isV2PreviewPath');
     expect(enhancementsSource).toContain('{isPreviewSurface ? null : <StickyMobileCTA />}');
-    expect(headerSource).toContain("pathWithoutLocale === '/v2-preview'");
+    expect(headerSource).toContain('isV2PreviewPath');
     expect(headerSource).toContain('shortlistCta && !isV2PreviewSurface');
     expect(read('app/(site)/[locale]/page.tsx')).not.toContain('v2-preview');
     expect(read('app/(site)/[locale]/projects/page.tsx')).not.toContain('v2-preview');

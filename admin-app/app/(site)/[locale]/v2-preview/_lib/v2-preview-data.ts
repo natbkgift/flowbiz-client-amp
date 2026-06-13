@@ -179,12 +179,17 @@ const FALLBACK_AREA_CARDS: V2PreviewAreaCard[] = [
   },
 ];
 
-async function resolveOrEmpty<T>(promise: Promise<T[]>): Promise<T[]> {
+async function resolveArray<T>(promise: Promise<unknown>): Promise<T[]> {
   try {
-    return await promise;
+    const value = await promise;
+    return Array.isArray(value) ? (value as T[]) : [];
   } catch {
     return [];
   }
+}
+
+function responseDataArray<T>(response: { data?: unknown } | null | undefined): T[] {
+  return Array.isArray(response?.data) ? (response.data as T[]) : [];
 }
 
 function trimString(value: unknown): string | null {
@@ -243,7 +248,9 @@ function safePropertyCard(card: V2PreviewPropertyCard): V2PreviewPropertyCard {
   };
 }
 
-function mapProjectCard(project: ProjectItem): V2PreviewProjectCard | null {
+function mapProjectCard(project: ProjectItem | null | undefined): V2PreviewProjectCard | null {
+  if (!project) return null;
+
   const source = project as ProjectItem & {
     area_name?: string | null;
     city?: string | null;
@@ -282,7 +289,9 @@ function mapProjectCard(project: ProjectItem): V2PreviewProjectCard | null {
   });
 }
 
-function mapPropertyCard(property: PropertyListItem): V2PreviewPropertyCard | null {
+function mapPropertyCard(property: PropertyListItem | null | undefined): V2PreviewPropertyCard | null {
+  if (!property) return null;
+
   const source = property as PropertyListItem & {
     area_name?: string | null;
     cover_image_url?: string | null;
@@ -318,7 +327,9 @@ function mapPropertyCard(property: PropertyListItem): V2PreviewPropertyCard | nu
   });
 }
 
-function mapAreaCard(area: AreaItem): V2PreviewAreaCard | null {
+function mapAreaCard(area: AreaItem | null | undefined): V2PreviewAreaCard | null {
+  if (!area) return null;
+
   const slug = area.slug?.trim();
   const name = area.name?.trim();
   if (!slug || !name) return null;
@@ -354,14 +365,14 @@ function pickHeroImage(projectCards: V2PreviewProjectCard[]): Pick<V2PreviewData
 
 export async function loadV2PreviewData(): Promise<V2PreviewData> {
   const [projects, saleProperties, rentProperties, areas] = await Promise.all([
-    resolveOrEmpty(fetchProjects({ limit: 12 })),
+    resolveArray<ProjectItem>(fetchProjects({ limit: 12 })),
     fetchProperties({ type: 'resale', limit: 8, sort: 'newest' })
-      .then((response) => response.data ?? [])
+      .then((response) => responseDataArray<PropertyListItem>(response))
       .catch(() => [] as PropertyListItem[]),
     fetchProperties({ type: 'rent', limit: 6, sort: 'newest' })
-      .then((response) => response.data ?? [])
+      .then((response) => responseDataArray<PropertyListItem>(response))
       .catch(() => [] as PropertyListItem[]),
-    resolveOrEmpty(fetchAreas()),
+    resolveArray<AreaItem>(fetchAreas()),
   ]);
 
   const projectCards = projects
