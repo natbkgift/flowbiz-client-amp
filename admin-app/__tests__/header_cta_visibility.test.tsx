@@ -77,4 +77,12 @@ describe('Header CTA visibility', () => {
     expect(sharedRender.container.querySelector('.header-cta-group')).toBeNull();
     expect(sharedRender.container.querySelector('.mobile-nav__cta')).toBeNull();
   });
+
+  it('suppresses the desktop shortlist CTA on the English preview route with trailing slash', () => {
+    mockedPathname = '/en/v2-preview/';
+
+    const { container } = render(<Header locale="en" dict={en} />);
+
+    expect(container.querySelector('.header-cta--utility')).toBeNull();
+  });
 });

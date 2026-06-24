@@ -157,6 +157,15 @@ function getShellCtaLabel(locale: Locale, item: PublicCtaItem): string {
   return locale === 'th' ? 'คุยกับที่ปรึกษาอสังหาฯ พัทยา' : 'Speak with a Pattaya Property Advisor';
 }
 
+function normalizePathForSurface(pathname: string): string {
+  const normalized = pathname.replace(/\/+$/, '');
+  return normalized || '/';
+}
+
+function isV2PreviewPath(pathname: string): boolean {
+  return normalizePathForSurface(pathname) === '/v2-preview';
+}
+
 export function SiteHeader({
   locale,
   dict: dictProp,
@@ -208,6 +217,7 @@ export function SiteHeader({
 
   /** Strip /<locale> prefix from pathname to compare with nav item hrefs */
   const pathWithoutLocale = pathname?.replace(new RegExp(`^/${locale}`), '') || '/';
+  const isV2PreviewSurface = isV2PreviewPath(pathWithoutLocale);
   function isActive(href: string): boolean {
     if (href === '/') return pathWithoutLocale === '/' || pathWithoutLocale === '';
     if (href === '/area-guide') {
@@ -288,7 +298,7 @@ export function SiteHeader({
           </nav>
 
           <div className="header-actions">
-            {shortlistCta ? (
+            {shortlistCta && !isV2PreviewSurface ? (
               <Link
                 href={resolveCtaHref(locale, shortlistCta)}
                 prefetch={false}

@@ -45,6 +45,15 @@ const AIChatWidget = dynamic(
   { ssr: false },
 );
 
+function normalizePathForSurface(pathname: string): string {
+  const normalized = pathname.replace(/\/+$/, '');
+  return normalized || '/';
+}
+
+function isV2PreviewPath(pathname: string): boolean {
+  return normalizePathForSurface(pathname) === '/v2-preview';
+}
+
 export function PublicClientEnhancements() {
   const pathname = usePathname() ?? '/';
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -53,7 +62,8 @@ export function PublicClientEnhancements() {
   const [showAiWidget, setShowAiWidget] = useState(false);
   const showFloatingWhatsApp = shouldRenderFloatingWhatsApp(pathname);
   const pathWithoutLocale = pathname.replace(/^\/(en|th)(?=\/|$)/, '') || '/';
-  const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects';
+  const isPreviewSurface = isV2PreviewPath(pathWithoutLocale);
+  const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects' || isPreviewSurface;
 
   useEffect(() => {
     const locale = localeFromPathname(pathname);
@@ -176,8 +186,8 @@ export function PublicClientEnhancements() {
           {showFloatingWhatsApp && !showAiWidget ? <FloatingWhatsAppCTA /> : null}
         </>
       ) : null}
-      <StickyMobileCTA />
-      {showAiWidget ? <AIChatWidget /> : null}
+      {isPreviewSurface ? null : <StickyMobileCTA />}
+      {showAiWidget && !isPreviewSurface ? <AIChatWidget /> : null}
       {showConsent ? <CookieConsent /> : null}
     </>
   );

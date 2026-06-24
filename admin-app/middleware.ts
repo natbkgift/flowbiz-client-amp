@@ -18,6 +18,7 @@ const NON_LOCALIZED_ROUTE_PREFIXES = [
   '/home-composer',
   '/telemetry',
 ] as const;
+const ENGLISH_ONLY_PREVIEW_BLOCKED_PATHS = new Set(['/th/v2-preview', '/th/v2-preview/']);
 
 function isLocale(value: string | undefined): value is Locale {
   return (LOCALES as readonly string[]).includes(value ?? '');
@@ -148,6 +149,16 @@ export function middleware(req: NextRequest) {
   // Ignore admin routes (keep existing URLs stable).
   if (NON_LOCALIZED_ROUTE_PREFIXES.some((prefix) => hasRoutePrefix(pathname, prefix))) {
     return NextResponse.next();
+  }
+
+  // AMP Public v2 Phase 1 is English-only. Force a real HTTP 404 for the Thai preview path.
+  if (ENGLISH_ONLY_PREVIEW_BLOCKED_PATHS.has(pathname)) {
+    const response = new NextResponse(null, { status: 404 });
+    response.headers.set('x-next-pathname', pathname);
+    response.headers.set('Cache-Control', 'no-store');
+    setSecurityHeaders(response);
+    persistLocaleCookie(response, req, 'th');
+    return response;
   }
 
   const segments = pathname.split('/').filter(Boolean);
