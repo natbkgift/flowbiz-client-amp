@@ -16,7 +16,7 @@ export type V3Project = {
   name: string;
   developer: string;
   from: string;
-  yield: string;
+  availability: string;
   quota: string;
   beach: string;
   image: string;
@@ -36,8 +36,13 @@ export type V3Area = {
 export type V3Advisor = {
   name: string;
   role: string;
-  rating: string;
   image: string;
+};
+
+export type V3ProcessNote = {
+  title: string;
+  body: string;
+  label: string;
 };
 
 export const previewRoutes = new Set([
@@ -75,108 +80,108 @@ export function resolveV3PreviewRoute(slug: string[] = []): V3PreviewRoute | nul
 
 export const projects: V3Project[] = [
   {
-    slug: 'skyharbor-residences',
-    badge: 'New launch',
+    slug: 'amp-skyharbor',
+    badge: 'Under construction',
     area: 'Wongamat',
     name: 'Skyharbor Residences',
-    developer: 'AMP Property Group · Q4 2026',
-    from: '฿6.9M',
-    yield: '6.8%',
-    quota: '32% of 49%',
-    beach: '80m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Wongamat',
     image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Oceanfront tower with a refined arrival sequence and investor-grade unit mix.',
+    tone: 'Gallery-first project detail direction for owner review, with price, availability, and project details to confirm.',
   },
   {
     slug: 'jomtien-bay-tower',
-    badge: 'Best yield',
+    badge: 'Availability to verify',
     area: 'Jomtien',
     name: 'Jomtien Bay Tower',
-    developer: 'Sansiri × AMP · Q2 2027',
-    from: '฿4.0M',
-    yield: '7.4%',
-    quota: '18% of 49%',
-    beach: '220m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Jomtien',
     image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80&auto=format&fit=crop',
-    tone: 'High-yield beach corridor with efficient plans and remote buyer support.',
+    tone: 'Project card treatment for visual review with commercial details to verify.',
   },
   {
     slug: 'pratumnak-villas',
-    badge: 'Move-in ready',
+    badge: 'Availability to verify',
     area: 'Pratumnak Hill',
     name: 'Pratumnak Villas',
-    developer: 'AMP Property Group · Ready to move',
-    from: '฿29M',
-    yield: '5.2%',
-    quota: '71% of 49%',
-    beach: '380m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Pratumnak Hill',
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Private hillside villas for buyers prioritizing space and quiet access.',
+    tone: 'Villa card treatment for visual review with commercial details to verify.',
   },
   {
     slug: 'na-jomtien-residence',
-    badge: 'Early bird -12%',
+    badge: 'Availability to verify',
     area: 'Na Jomtien',
     name: 'Na Jomtien Residence',
-    developer: 'Property Perfect · Q1 2028',
-    from: '฿4.5M',
-    yield: '6.9%',
-    quota: '8% of 49%',
-    beach: '50m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Na Jomtien',
     image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Quiet beachfront plan with a slower lifestyle and early allocation window.',
+    tone: 'Project card treatment for visual review with commercial details to verify.',
   },
   {
     slug: 'central-marina-suites',
-    badge: 'Highest yield',
+    badge: 'Availability to verify',
     area: 'Central Pattaya',
     name: 'Central Marina Suites',
-    developer: 'AP Thailand · Q3 2026',
-    from: '฿3.0M',
-    yield: '8.1%',
-    quota: '41% of 49%',
-    beach: '450m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Central Pattaya',
     image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Urban rental thesis near shopping, restaurants, and short-stay demand.',
+    tone: 'City project card treatment for visual review with commercial details to verify.',
   },
   {
     slug: 'bang-saray-view',
-    badge: 'Quiet zone',
+    badge: 'Availability to verify',
     area: 'Bang Saray',
     name: 'Bang Saray View',
-    developer: 'Origin Property · Q4 2027',
-    from: '฿3.2M',
-    yield: '6.4%',
-    quota: '4% of 49%',
-    beach: '120m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Bang Saray',
     image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Fishing-village atmosphere with lower density and long-hold positioning.',
+    tone: 'Coastal project card treatment for visual review with commercial details to verify.',
   },
   {
     slug: 'skyline-plaza-pattaya',
-    badge: 'Foreign quota full',
+    badge: 'Availability to verify',
     area: 'Central Pattaya',
     name: 'Skyline Plaza Pattaya',
-    developer: 'Sansiri · Ready to move',
-    from: '฿4.7M',
-    yield: '6%',
-    quota: '49% of 49%',
-    beach: '200m',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Central Pattaya',
     image: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Completed city project with strong walkability and limited foreign quota.',
+    tone: 'Resale-style card treatment for visual review with commercial details to verify.',
   },
   {
     slug: 'rayong-coast-villas',
-    badge: 'Beachfront villa',
+    badge: 'Availability to verify',
     area: 'Rayong',
     name: 'Rayong Coast Villas',
-    developer: 'AMP Property Group · Q2 2027',
-    from: '฿19M',
-    yield: '5.6%',
-    quota: '0% of 49%',
-    beach: 'Beachfront',
+    developer: 'Project details subject to confirmation',
+    from: 'Price on request',
+    availability: 'Availability to verify',
+    quota: 'Project details subject to confirmation',
+    beach: 'Rayong',
     image: 'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200&q=80&auto=format&fit=crop',
-    tone: 'Beachfront villa inventory for lifestyle-first buyers beyond central Pattaya.',
+    tone: 'Villa card treatment for visual review with commercial details to verify.',
   },
 ];
 
@@ -184,7 +189,7 @@ export const areas: V3Area[] = [
   {
     slug: 'wongamat',
     label: '5-star beaches',
-    listings: '14 listings',
+    listings: 'Availability to verify',
     title: 'Wongamat',
     summary: 'Quiet luxury, resort hotels, private condos',
     thesis: '5-star quiet luxury',
@@ -193,7 +198,7 @@ export const areas: V3Area[] = [
   {
     slug: 'pratumnak-hill',
     label: 'Cosy Beach',
-    listings: '22 listings',
+    listings: 'Availability to verify',
     title: 'Pratumnak Hill',
     summary: 'Hillside villas',
     thesis: 'Private hillside living',
@@ -202,16 +207,16 @@ export const areas: V3Area[] = [
   {
     slug: 'jomtien',
     label: 'Jomtien Beach',
-    listings: '38 listings',
+    listings: 'Availability to verify',
     title: 'Jomtien',
-    summary: 'High-yield investor',
+    summary: 'Buyer journey to verify',
     thesis: 'Income-first beach corridor',
     image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&q=80&auto=format&fit=crop',
   },
   {
     slug: 'central-pattaya',
     label: 'Pattaya Beach',
-    listings: '47 listings',
+    listings: 'Availability to verify',
     title: 'Central Pattaya',
     summary: 'Urban, walk-to-everything',
     thesis: 'Urban rental demand',
@@ -220,7 +225,7 @@ export const areas: V3Area[] = [
   {
     slug: 'na-jomtien',
     label: 'Na Jomtien',
-    listings: '19 listings',
+    listings: 'Availability to verify',
     title: 'Na Jomtien',
     summary: 'Quiet beachfront',
     thesis: 'Calm waterfront hold',
@@ -229,7 +234,7 @@ export const areas: V3Area[] = [
   {
     slug: 'bang-saray',
     label: 'Bang Saray',
-    listings: '11 listings',
+    listings: 'Availability to verify',
     title: 'Bang Saray',
     summary: 'Local fishing village',
     thesis: 'Low-density coastal life',
@@ -241,51 +246,50 @@ export const advisors: V3Advisor[] = [
   {
     name: 'Khun Apinya',
     role: 'Senior Advisor · TH · EN',
-    rating: '4.95',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80&auto=format&fit=crop',
   },
   {
     name: 'Marcus Lee',
     role: 'Investor Lead · EN · CN',
-    rating: '4.92',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&auto=format&fit=crop',
   },
   {
     name: 'Sasha Volkov',
     role: 'Russian-speaking · RU · EN',
-    rating: '4.88',
     image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80&auto=format&fit=crop',
   },
   {
     name: 'Nattapong S.',
     role: 'Property Manager · TH · EN',
-    rating: '4.97',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80&auto=format&fit=crop',
   },
   {
     name: 'Lin Wei',
     role: 'Mandarin lead · CN · EN',
-    rating: '4.85',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80&auto=format&fit=crop',
   },
 ];
 
-export const testimonials = [
+export const processNotes: V3ProcessNote[] = [
   {
-    quote: 'AMP walked me through foreign ownership rules in 20 minutes — and found a 7.2% net-yield 1BR three weeks later.',
-    author: 'Sven L. · Stockholm · 1BR Jomtien',
+    title: 'Discovery',
+    body: 'Capture buyer intent, preferred zones, budget range, and timing before any recommendation.',
+    label: 'Step one',
   },
   {
-    quote: "They're the only Pattaya brokerage that gave me a written rental-return forecast before I signed. Numbers held up after 12 months.",
-    author: 'David W. · Singapore · 2BR Wongamat',
+    title: 'Shortlist',
+    body: 'Prepare a project brief with price, availability, and project details marked for confirmation.',
+    label: 'Review pack',
   },
   {
-    quote: 'Sasha managed everything remotely. She filmed five viewings on FaceTime and helped my notary in Moscow.',
-    author: 'Anna M. · Moscow · Penthouse',
+    title: 'Viewing',
+    body: 'Coordinate questions, viewing notes, floor-plan requests, and advisor follow-up in one place.',
+    label: 'Advisor flow',
   },
   {
-    quote: '3 units, 2 years. Each one cash-flowing within 60 days of handover. The property management team is the real moat.',
-    author: 'James T. · Sydney · Portfolio investor',
+    title: 'Confirmation',
+    body: 'Confirm pricing, availability, ownership route, documents, and timelines before production use.',
+    label: 'Final check',
   },
 ];
 

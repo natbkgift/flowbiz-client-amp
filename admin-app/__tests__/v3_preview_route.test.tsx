@@ -52,14 +52,25 @@ describe('AMP Public v3 preview route', () => {
     expect(screen.getByText('Office & hours')).toBeInTheDocument();
     unmount();
 
-    render(
+    const calculatorRender = render(
       await AmpPublicV3PreviewSlugPage({
         params: Promise.resolve({ locale: 'en', slug: ['calculator'] }),
       }),
     );
 
-    expect(screen.getByRole('heading', { name: /total-cost & rental yield calculator/i })).toBeInTheDocument();
-    expect(screen.getByText('5-yr ROI: +211%')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /total-cost & availability planner/i })).toBeInTheDocument();
+    expect(screen.getByText('Owner review required')).toBeInTheDocument();
+    calculatorRender.unmount();
+
+    render(
+      await AmpPublicV3PreviewSlugPage({
+        params: Promise.resolve({ locale: 'en', slug: ['project', 'amp-skyharbor'] }),
+      }),
+    );
+
+    expect(screen.getByRole('link', { name: /all projects/i })).toHaveAttribute('href', '/en/v3-preview/listing');
+    expect(screen.getByRole('heading', { name: 'Skyharbor Residences' })).toBeInTheDocument();
+    expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0);
   });
 
   it('returns notFound for Thai and unknown v3 preview routes', async () => {

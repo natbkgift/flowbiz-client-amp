@@ -8,8 +8,8 @@ import {
   contactHeroImage,
   faqs,
   heroImage,
+  processNotes,
   projects,
-  testimonials,
   type V3PreviewRoute,
   type V3Project,
 } from '../_lib/v3-preview-data';
@@ -181,9 +181,9 @@ function ShellHeader({ route }: { route: V3PreviewRoute }) {
 
 function ShellFooter() {
   const groups = [
-    ['Browse', 'New projects', 'Resale condos', 'Pool villas', 'Off-plan deals', 'Recently reduced'],
-    ['Invest', 'Foreign ownership', 'Rental yields', 'Cost calculator', 'Capital gains', 'Tax & legal'],
-    ['Company', 'About AMP', 'Our team', 'Press', 'Privacy', 'Careers'],
+    ['Browse', 'New projects', 'Resale condos', 'Pool villas', 'Area guide', 'Compare'],
+    ['Plan', 'Price on request', 'Availability to verify', 'Cost planner', 'Viewing notes', 'Legal questions'],
+    ['Company', 'About AMP', 'Our team', 'Contact', 'Privacy', 'Disclosure'],
   ];
 
   return (
@@ -191,7 +191,7 @@ function ShellFooter() {
       <div className={styles.footerGrid}>
         <div className={styles.footerBrand}>
           <Logo />
-          <p>Pattaya&apos;s investor-grade property advisory. Licensed brokerage est. 2018. Member, Thai Real Estate Association.</p>
+          <p>Pattaya property advisory preview for owner review. Price, availability, and project details subject to confirmation.</p>
           <div className={styles.socials} aria-label="Contact shortcuts">
             <Link href={href('/contact')} aria-label="Chat">⌕</Link>
             <Link href={href('/contact')} aria-label="Email">✉</Link>
@@ -203,19 +203,19 @@ function ShellFooter() {
           <div key={title} className={styles.footerColumn}>
             <span>{title}</span>
             {links.map((label) => (
-              <Link key={label} href={href(label === 'Cost calculator' ? '/calculator' : '/listing')}>{label}</Link>
+              <Link key={label} href={href(label === 'Cost planner' ? '/calculator' : label === 'Contact' ? '/contact' : '/listing')}>{label}</Link>
             ))}
           </div>
         ))}
 
         <div className={styles.footerColumn}>
           <span>Office</span>
-          <p>333/12 Pratumnak Road<br />Banglamung, Chonburi 20150<br />Mon–Sat · 9:00–19:00 ICT</p>
-          <a href="tel:+66381234567">+66 38 123 4567</a>
+          <p>Office details subject to confirmation.<br />Viewing hours and advisor availability to verify.</p>
+          <Link href={href('/contact')}>Request contact details</Link>
         </div>
       </div>
       <div className={styles.footerBottom}>
-        <span>© 2026 AMP Pattaya Property Co., Ltd · License #BR-2018-0992</span>
+        <span>© 2026 AMP Pattaya · Design preview for owner review</span>
         <span>Terms&nbsp;&nbsp; Privacy&nbsp;&nbsp; Disclosure</span>
       </div>
     </footer>
@@ -224,10 +224,10 @@ function ShellFooter() {
 
 function StatStrip() {
   const stats = [
-    ['Curated', 'Pattaya projects'],
-    ['Freehold', 'Foreign ownership'],
-    ['Verified', 'Developer track record'],
-    ['Same-day', 'Advisor response'],
+    ['Price', 'Price on request'],
+    ['Availability', 'Availability to verify'],
+    ['Details', 'Project details subject to confirmation'],
+    ['Review', 'Owner review required'],
   ];
 
   return (
@@ -247,32 +247,32 @@ function LeadCard() {
     <aside className={styles.leadCard}>
       <span className={styles.mono}>Get price &amp; floor plan</span>
       <h3>Speak to an advisor</h3>
-      <p><span aria-hidden="true">●</span> Reply in 30 min</p>
+      <p><span aria-hidden="true">●</span> Response to verify</p>
       <input aria-label="Your name" placeholder="Your name *" />
       <div className={styles.leadFields}>
         <input aria-label="Phone with code" placeholder="Phone (with code)" />
         <input aria-label="Email" placeholder="Email" />
       </div>
       <div className={styles.leadFields}>
-        <select defaultValue="5-10M" aria-label="Budget">
-          <option>3-5M</option>
-          <option>5-10M</option>
-          <option>10-20M</option>
+        <select defaultValue="Price on request" aria-label="Budget">
+          <option>Price on request</option>
+          <option>Availability to verify</option>
+          <option>Project details subject to confirmation</option>
         </select>
-        <select defaultValue="1-2 BR" aria-label="Bedrooms">
-          <option>Studio</option>
-          <option>1-2 BR</option>
-          <option>3+ BR / Villa</option>
+        <select defaultValue="Availability to verify" aria-label="Bedrooms">
+          <option>Availability to verify</option>
+          <option>Price on request</option>
+          <option>Project details subject to confirmation</option>
         </select>
       </div>
-      <select defaultValue="Within 3 months" aria-label="Buying timeline">
-        <option>Within 1 month</option>
-        <option>Within 3 months</option>
-        <option>Just researching</option>
+      <select defaultValue="Availability to verify" aria-label="Buying timeline">
+        <option>Availability to verify</option>
+        <option>Project details subject to confirmation</option>
+        <option>Price on request</option>
       </select>
-      <small>✓ Contact me on WhatsApp · fastest reply</small>
-      <Link href={href('/contact')} className={styles.fullCoral}>Send &amp; get a same-day reply <ArrowIcon /></Link>
-      <em>No spam. Unsubscribe anytime.</em>
+      <small>✓ Preferred contact channel for advisor review</small>
+      <Link href={href('/contact')} className={styles.fullCoral}>Send &amp; request details <ArrowIcon /></Link>
+      <em>Project details subject to confirmation.</em>
     </aside>
   );
 }
@@ -280,9 +280,9 @@ function LeadCard() {
 function SearchBar() {
   const fields = [
     ['Location', 'Anywhere in Pattaya'],
-    ['Type', 'Condo, Villa, Pent…'],
-    ['Bedrooms', 'Studio – 4 BR'],
-    ['Budget', '฿3M – ฿20M'],
+    ['Type', 'Project details subject to confirmation'],
+    ['Bedrooms', 'Availability to verify'],
+    ['Budget', 'Price on request'],
   ];
 
   return (
@@ -317,10 +317,9 @@ function ProjectCard({ project, compact = false }: { project: V3Project; compact
         <h3>{project.name}</h3>
         <small>{project.developer}</small>
         <span className={styles.cardStats}>
-          <span><b>From</b>{project.from}</span>
-          <span><b>Yield</b>{project.yield}</span>
-          <span><b>Foreign quota</b>{project.quota}</span>
-          <span><b>Beach</b>{project.beach}</span>
+          <span><b>Price</b>{project.from}</span>
+          <span><b>Availability</b>{project.availability}</span>
+          <span><b>Details</b>{project.quota}</span>
         </span>
         {compact ? <span className={styles.compareChip}>Compare</span> : null}
       </span>
@@ -349,9 +348,9 @@ function HomePage() {
         <div className={styles.heroOverlay} />
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
-            <span className={styles.livePill}>Live · 142 units released this week</span>
+            <span className={styles.livePill}>Project details subject to confirmation</span>
             <h1>Pattaya, priced for<br /><em>investors who measure</em><br />in years, not weekends.</h1>
-            <p>A licensed brokerage matching foreign buyers and Thai investors with off-plan, resale and pool-villa inventory across Pattaya&apos;s Eastern Seaboard. Transparent yields. Verified foreign quota. Same-day reply.</p>
+            <p>Pattaya property advisory for foreign buyers and Thai investors. Price, availability, ownership details, and project information must be confirmed before production use.</p>
             <div className={styles.heroButtons}>
               <Link href={href('/listing')} className={styles.primaryHero}>View available units <ArrowIcon /></Link>
               <Link href={href('/finder')} className={styles.secondaryHero}>90-second Smart Finder</Link>
@@ -367,7 +366,7 @@ function HomePage() {
         <SectionIntro
           kicker="Hand-picked, this quarter"
           title={<>The <em>investor-grade</em> shortlist.</>}
-          body="Three projects we'd put our own money in. Verified developers, capital-protected payment terms, and clear exit liquidity."
+          body="A visual shortlist pattern for owner review. Price, availability, and project details remain subject to confirmation."
           action="Browse all projects"
           href={href('/listing')}
         />
@@ -380,15 +379,15 @@ function HomePage() {
         <div>
           <span className={styles.mono}>Why Pattaya · Why now</span>
           <h2>The Eastern Seaboard&apos;s next decade is being priced in now.</h2>
-          <p>The U-Tapao airport expansion, high-speed rail to Bangkok, and EEC industrial zone are re-shaping the south. Median condo values are up 14% YoY in Wongamat.</p>
-          <Link href={href('/calculator')} className={styles.primaryLight}>Run the yield calculator <ArrowIcon /></Link>
+          <p>Use this V3 preview to review the information architecture and advisory flow before market data, pricing, and project facts are confirmed.</p>
+          <Link href={href('/calculator')} className={styles.primaryLight}>Open cost planner <ArrowIcon /></Link>
         </div>
         <div className={styles.thesisGrid}>
           {[
-            ['Yield focus', 'Projects selected for rental income potential', 'Income-first curation'],
-            ['Capital growth', 'Eastern Seaboard infrastructure expansion', 'Long-term thesis'],
-            ['Foreign quota', 'Freehold units for non-Thai buyers up to 49%', 'Ownership support'],
-            ['Fast close', 'Remote purchase support, independent legal', 'Escrow every deal'],
+            ['Price', 'Price on request until owner-approved data is available', 'Safe label'],
+            ['Availability', 'Availability to verify before any lead handoff', 'Safe label'],
+            ['Details', 'Project details subject to confirmation', 'Safe label'],
+            ['Advisor flow', 'Questions and viewing notes are collected without changing submit contracts', 'Preview flow'],
           ].map(([title, body, label]) => (
             <article key={title}>
               <span>{title}</span>
@@ -403,7 +402,7 @@ function HomePage() {
         <SectionIntro
           kicker="Browse by area"
           title={<>Six zones. <em>Six investment theses.</em></>}
-          body="Pattaya is not one market. Each zone has different yield, tenant profile, and capital growth potential."
+          body="Area cards preserve the Figma visual structure while counts and commercial claims stay pending confirmation."
           action="Compare areas"
           href={href('/area-guide')}
         />
@@ -414,7 +413,7 @@ function HomePage() {
         <div className={styles.finderCopy}>
           <span className={styles.mono}>Smart Finder · 90 seconds</span>
           <h2>Tell us your budget,<br />we&apos;ll send a shortlist<br />by end of day.</h2>
-          <p>Six questions. No call required. Get a curated PDF brief with 3–5 projects matched to your budget, timeline, and exit strategy.</p>
+          <p>Six questions. No call required. Use the brief flow to review budget, timeline, and project-fit interaction states.</p>
           <div className={styles.heroButtons}>
             <Link href={href('/finder')} className={styles.primaryHero}>Start the brief <ArrowIcon /></Link>
             <Link href={href('/calculator')} className={styles.secondaryDark}>Cost calculator</Link>
@@ -427,7 +426,7 @@ function HomePage() {
             <div key={name} className={styles.matchRow}>
               <b>{index + 1}</b>
               <span>{name}</span>
-              <em>Match {index === 0 ? '94' : index === 1 ? '88' : '76'}%</em>
+            <em>To verify</em>
             </div>
           ))}
           <Link href={href('/finder')} className={styles.fullTeal}>Get your shortlist</Link>
@@ -461,16 +460,17 @@ function TrustSection() {
   return (
     <section className={styles.trustSection}>
       <SectionIntro
-        kicker="Trust · Track record"
-        title="International buyers trust our process."
-        body="Multilingual advisory. Independent legal. Escrow on every transaction."
+        kicker="Advisory flow"
+        title="A human review path for every enquiry."
+        body="The preview keeps the Figma card rhythm while avoiding unconfirmed public claims."
       />
       <div className={styles.trustGrid}>
         <div className={styles.testimonialGrid}>
-          {testimonials.map((item) => (
-            <blockquote key={item.author}>
-              <p>“{item.quote}”</p>
-              <cite>{item.author}</cite>
+          {processNotes.map((item) => (
+            <blockquote key={item.title}>
+              <p>{item.title}</p>
+              <cite>{item.body}</cite>
+              <small>{item.label}</small>
             </blockquote>
           ))}
         </div>
@@ -489,7 +489,7 @@ function AdvisorPanel() {
         <div key={advisor.name} className={styles.advisorRow}>
           <img src={advisor.image} alt={advisor.name} loading="eager" />
           <span><b>{advisor.name}</b><small>{advisor.role}</small></span>
-          <em>★ {advisor.rating}</em>
+          <em>Advisor</em>
         </div>
       ))}
       <Link href={href('/contact')} className={styles.fullTeal}>Book a free advisory call</Link>
@@ -505,7 +505,7 @@ function ContactAdvisorCard() {
         <div key={advisor.name} className={styles.advisorRow}>
           <img src={advisor.image} alt={advisor.name} loading="eager" />
           <span><b>{advisor.name}</b><small>{advisor.role}</small></span>
-          <em>★ {advisor.rating}</em>
+          <em>Advisor</em>
         </div>
       ))}
     </article>
@@ -554,7 +554,7 @@ function ListingPage() {
       <div className={styles.listingHeader}>
         <div>
           <span className={styles.mono}>Projects · New &amp; off-plan</span>
-          <h1>8 projects across <em>Pattaya</em></h1>
+          <h1>Projects across <em>Pattaya</em></h1>
           <button type="button" className={styles.filterToggle}>Filters</button>
         </div>
         <div className={styles.sortTabs}>
@@ -566,15 +566,15 @@ function ListingPage() {
             <option>Most relevant</option>
             <option>Price: low to high</option>
             <option>Price: high to low</option>
-            <option>Highest yield</option>
+            <option>Most complete</option>
           </select>
         </div>
       </div>
       <div className={styles.catalogue}>
         <aside className={styles.filters}>
           <PriceRange />
-          <FilterRows title="Area" rows={[['Wongamat', '14'], ['Pratumnak Hill', '22'], ['Central Pattaya', '47'], ['Jomtien', '38'], ['Na Jomtien', '19'], ['Bang Saray', '11']]} />
-          <FilterRows title="Status" rows={[['Pre-sale', '5'], ['Under construction', '2'], ['Ready to move', '2']]} />
+          <FilterRows title="Area" rows={[['Wongamat', ''], ['Pratumnak Hill', ''], ['Central Pattaya', ''], ['Jomtien', ''], ['Na Jomtien', ''], ['Bang Saray', '']]} />
+          <FilterRows title="Status" rows={[['Availability to verify', ''], ['Project details subject to confirmation', ''], ['Price on request', '']]} />
           <FilterRows title="Distance to beach" rows={[['Any distance', ''], ['Beachfront', ''], ['Under 100m', ''], ['Under 500m', '']]} radio />
           <button type="button" className={styles.resetButton}>Reset all filters</button>
         </aside>
@@ -589,10 +589,10 @@ function ListingPage() {
 function PriceRange() {
   return (
     <div className={styles.filterGroup}>
-      <button type="button">Price (฿M)<span aria-hidden="true">⌃</span></button>
+      <button type="button">Price<span aria-hidden="true">⌃</span></button>
       <div className={styles.priceRange}>
-        <span>0M</span>
-        <span>฿60M+</span>
+        <span>Price on request</span>
+        <span>Availability to verify</span>
       </div>
       <div className={styles.rangeTrack}><span /></div>
     </div>
@@ -643,22 +643,22 @@ function AreaGuidePage() {
           </div>
           <div className={styles.areaCopy}>
             <h3>{selected.thesis}</h3>
-            <p>Wongamat Beach is Pattaya&apos;s most prestigious address — calm, family-friendly, and flanked by luxury hotels. Foreign buyers dominate. Values have risen 14% YoY.</p>
+            <p>Wongamat is shown as the selected area pattern for visual review. Area facts, availability, and project details must be confirmed before production use.</p>
             <div className={styles.metricGrid}>
-              <span><b>Gross yield</b>5.8–6.8%</span>
-              <span><b>Price/m²</b>฿110–165k/m²</span>
-              <span><b>Buyer profile</b>78% foreign</span>
+              <span><b>Price</b>Price on request</span>
+              <span><b>Availability</b>Availability to verify</span>
+              <span><b>Details</b>Project details subject to confirmation</span>
             </div>
             <h4 className={styles.projectListTitle}>Projects in Wongamat</h4>
             <div className={styles.projectMini}>
               <img src={project.image} alt={project.name} loading="eager" />
-              <span><b>{project.name}</b><small>{project.developer.split(' · ')[1]} · {project.yield} yield</small></span>
-              <em>{project.from}<small>from</small></em>
+              <span><b>{project.name}</b><small>Availability to verify</small></span>
+              <em>{project.from}<small>price</small></em>
             </div>
             <div className={styles.areaCta}>
               <span className={styles.areaCtaLabel}><MapPinIcon /> Wongamat</span>
               <h4>Get projects in this area</h4>
-              <p>We&apos;ll send a curated brief of available units in Wongamat within 30 minutes.</p>
+              <p>Request a visual brief with price, availability, and project details marked for confirmation.</p>
               <Link href={href('/contact')} className={styles.fullCoral}>Request Wongamat brief</Link>
               <Link href={href('/listing')} className={styles.outlineAction}>Browse all listings</Link>
             </div>
@@ -671,47 +671,46 @@ function AreaGuidePage() {
 
 function CalculatorPage() {
   const breakdown = [
-    ['Down payment', '฿4,440,000'],
-    ['Transfer fee (2%)', '฿296,000'],
-    ['Sinking fund', '฿42,000'],
-    ['Legal & escrow', '฿35,000'],
-    ['Total upfront', '฿4,813,000'],
+    ['Price', 'Price on request'],
+    ['Availability', 'Availability to verify'],
+    ['Project details', 'Project details subject to confirmation'],
+    ['Advisor review', 'Required before production use'],
   ];
 
   return (
     <>
       <section className={`${styles.plainHero} ${styles.toolHero}`}>
         <span className={styles.mono}>Investor toolkit</span>
-        <h1><em>Total-cost &amp;</em> rental yield calculator</h1>
-        <p>Run the numbers before you fly out. Adjust inputs on the left, see the live cash-flow, yield, and 5-year ROI on the right.</p>
+        <h1><em>Total-cost &amp;</em> availability planner</h1>
+        <p>Review the calculator layout and interaction states without publishing unconfirmed commercial claims.</p>
       </section>
       <section className={styles.calculatorGrid}>
         <div className={styles.calcPanel}>
-          <CalcGroup title="Property" rows={[['Purchase price', '฿14,800,000']]} />
-          <CalcGroup title="Financing" rows={[['Down payment', '30%'], ['Mortgage term', '15 years'], ['Interest rate', '6.5%']]} />
-          <CalcGroup title="Rental income" rows={[['Avg. daily rate', '฿4,800'], ['Occupancy', '72%'], ['Management fee', '15%']]} />
-          <p className={styles.calcNote}><InfoIcon /> <span>Defaults reflect 2025 AMP-managed unit averages in Wongamat (2BR, sea view).</span></p>
+          <CalcGroup title="Property" rows={[['Purchase price', 'Price on request']]} />
+          <CalcGroup title="Availability" rows={[['Current availability', 'Availability to verify'], ['Project details', 'Subject to confirmation']]} />
+          <CalcGroup title="Review" rows={[['Owner review', 'Required'], ['Advisor follow-up', 'Requested']]} />
+          <p className={styles.calcNote}><InfoIcon /> <span>Values are intentionally gated until owner-approved pricing and availability are provided.</span></p>
         </div>
         <div className={styles.calcResults}>
           <div className={styles.resultCards}>
-            <span><b>Cash yield p.a.</b><strong>5.7%</strong><small>Net of fees, taxes, CAM</small></span>
-            <span><b>Total cash to close</b><strong>฿4.8M</strong><small>Down + fees + legal</small></span>
-            <span><b>Monthly cash flow</b><strong>+฿70k</strong><small>After mortgage: ฿-20435/mo</small></span>
+            <span><b>Price</b><strong>On request</strong><small>Price on request</small></span>
+            <span><b>Availability</b><strong>To verify</strong><small>Availability to verify</small></span>
+            <span><b>Details</b><strong>Confirm</strong><small>Project details subject to confirmation</small></span>
           </div>
           <div className={styles.breakdown}>
-            <h3>Upfront cost breakdown</h3>
+            <h3>Confirmation checklist</h3>
             {breakdown.map(([label, value]) => <div key={label}><span>{label}</span><b>{value}</b></div>)}
           </div>
           <div className={styles.chartPanel}>
-            <h3>5-year return projection</h3>
-            <p>Capital appreciation (7% YoY conservative) + cumulative net rental</p>
+            <h3>Review sequence</h3>
+            <p>Each step remains a visual state until commercial data is confirmed.</p>
             <div className={styles.chartBars}>{['Y1', 'Y2', 'Y3', 'Y4', 'Y5'].map((year, index) => <span key={year} style={{ height: `${42 + index * 18}%` }}>{year}</span>)}</div>
-            <strong>5-yr ROI: +211%</strong>
+            <strong>Owner review required</strong>
           </div>
         <div className={styles.reportCta}>
-            <span>Want a verified projection for a real unit?</span>
-            <p>We&apos;ll send a custom report based on actual comps in 24 hours.</p>
-          <Link href={href('/contact')} className={styles.coralPill}>Request projection</Link>
+            <span>Need owner-approved numbers?</span>
+            <p>Request confirmed price, availability, and project details before production use.</p>
+          <Link href={href('/contact')} className={styles.coralPill}>Request details</Link>
           </div>
         </div>
       </section>
@@ -757,7 +756,7 @@ function FinderPage() {
           <span className={styles.mono}>Smart Finder · 90-second brief</span>
           <h1>What&apos;s your primary goal?</h1>
           <p>This shapes everything — from zone to unit size.</p>
-          {['Investment — maximize yield & capital gain', 'Personal use — holiday home or primary residence', 'Both — I want to use it and earn income'].map((item) => (
+          {['Review price and availability', 'Compare project details', 'Plan a viewing request'].map((item) => (
             <button key={item} type="button"><span aria-hidden="true" />{item}</button>
           ))}
           <button type="button" className={`${styles.fullCoral} ${styles.finderContinue}`}>Continue <ArrowIcon /></button>
@@ -765,17 +764,17 @@ function FinderPage() {
         <div className={styles.liveMatches}>
           <span className={styles.mono}>Live matches · updates as you answer</span>
           <h2>Your shortlist is shaping up</h2>
-          <p>4 strong matches</p>
+          <p>Availability to verify</p>
           {[projects[0], projects[1], projects[3], projects[4]].map((project) => (
             <div key={project.slug} className={styles.matchCard}>
               <img src={project.image} alt={project.name} loading="eager" />
-              <span><b>{project.name}</b><small>{project.area} · From {project.from}</small></span>
-              <em>97%</em>
+              <span><b>{project.name}</b><small>{project.area} · {project.from}</small></span>
+              <em>Review</em>
             </div>
           ))}
           <div className={styles.matchHint}>
             <small>6 more questions</small>
-            <p>Answer the remaining questions to get your curated PDF brief within 30 minutes.</p>
+            <p>Answer the remaining questions to prepare a visual brief for owner review.</p>
           </div>
         </div>
       </div>
@@ -787,15 +786,15 @@ function ComparePage() {
   const selected = projects.slice(0, 3);
   const rows = [
     ['Starting price', ...selected.map((item) => item.from)],
-    ['Price per m²', '฿132,000', '฿98,000', '฿142,000'],
-    ['Bedrooms', 'Studio · 1BR · 2BR · Penthouse', 'Studio · 1BR · 2BR', '3BR Villa · 4BR Villa'],
-    ['Floors', '53 floors', '47 floors', '3 floors'],
-    ['Total units', '348', '412', '14'],
-    ['Completion', 'Q4 2026', 'Q2 2027', 'Ready to move'],
-    ['Status', 'Under construction', 'Pre-sale', 'Completed'],
-    ['Beach distance', '80m ✓ Best', '220m', '380m'],
+    ['Availability', ...selected.map((item) => item.availability)],
+    ['Project details', ...selected.map((item) => item.quota)],
+    ['Bedrooms', 'Project details subject to confirmation', 'Project details subject to confirmation', 'Project details subject to confirmation'],
+    ['Floors', 'Project details subject to confirmation', 'Project details subject to confirmation', 'Project details subject to confirmation'],
+    ['Completion', 'Project details subject to confirmation', 'Project details subject to confirmation', 'Project details subject to confirmation'],
+    ['Status', ...selected.map((item) => item.badge)],
+    ['Location', ...selected.map((item) => item.area)],
     ['Area', ...selected.map((item) => item.area)],
-    ['Developer', 'AMP Property Group', 'Sansiri × AMP', 'AMP Property Group'],
+    ['Developer', ...selected.map((item) => item.developer)],
   ];
 
   return (
@@ -803,10 +802,10 @@ function ComparePage() {
       <section className={`${styles.plainHero} ${styles.compareHero}`}>
         <span className={styles.mono}>Compare · Side-by-side</span>
         <div>
-          <h1>Compare 3 <em>investor-grade</em> projects</h1>
+          <h1>Compare 3 <em>project-review</em> cards</h1>
           <div className={styles.compareActions}>
             <button type="button">Clear all</button>
-            <button type="button"><DownloadIcon /> Export PDF</button>
+            <button type="button"><DownloadIcon /> Export brief</button>
             <Link href={href('/contact')} className={styles.coralPill}>Get advisor brief <ArrowIcon /></Link>
           </div>
         </div>
@@ -844,13 +843,13 @@ function ContactPage() {
         <div>
           <span className={styles.mono}>Contact · AMP Pattaya</span>
           <h1>Talk to a human. <em>No scripts. No bots.</em></h1>
-          <p>Our multilingual team covers Thai, English, Russian, Mandarin and German. Pick a channel and someone will respond — personally.</p>
+          <p>Choose a contact channel and request confirmed price, availability, and project details before production use.</p>
         </div>
       </section>
       <section className={styles.contactGrid}>
         <div className={styles.messageForm}>
           <h2>Send us a message</h2>
-          <p>We reply within 30 minutes during office hours.</p>
+          <p>Advisor response timing and office details are subject to confirmation.</p>
           <input placeholder="Your name *" />
           <div>
             <input placeholder="Email" />
@@ -869,9 +868,9 @@ function ContactPage() {
         <div className={styles.contactSide}>
           <article className={styles.infoCard}>
             <h3>Office &amp; hours</h3>
-            <p>⌖ 333/12 Pratumnak Road, Banglamung, Chonburi 20150</p>
-            <p>◷ Monday – Saturday, 9:00 – 19:00 ICT</p>
-            <p>☎ +66 38 123 4567</p>
+            <p>⌖ Office details subject to confirmation</p>
+            <p>◷ Viewing hours to verify</p>
+            <p>☎ Contact details subject to confirmation</p>
             <div>
               <Link href={href('/contact')}>💬 WhatsApp</Link>
               <Link href={href('/contact')}>LINE</Link>
@@ -886,36 +885,60 @@ function ContactPage() {
 
 function DetailPage({ kind }: { kind: 'project' | 'property' }) {
   const project = kind === 'property' ? projects[1] : projects[0];
+  const gallery = [project, projects[1], projects[2], projects[3], projects[4]];
 
   return (
     <>
-      <section className={styles.detailHero}>
-        <img src={project.image} alt={project.name} loading="eager" />
-        <div>
-          <span className={styles.mono}>{kind === 'property' ? 'Verified resale · Unit A1203' : `${project.badge} · ${project.area}`}</span>
-          <h1>{kind === 'property' ? 'Sea-view 2BR residence with managed rental upside.' : project.name}</h1>
-          <p>{project.tone}</p>
-          <div className={styles.heroButtons}>
-            <Link href={href('/contact')} className={styles.primaryHero}>Book a viewing <ArrowIcon /></Link>
-            <Link href={href('/compare')} className={styles.secondaryHero}>Compare shortlist</Link>
+      <section className={styles.detailGalleryPage}>
+        <Link href={href('/listing')} className={styles.backLink}>← All projects</Link>
+
+        <div className={styles.detailMainGallery}>
+          <img src={project.image} alt={project.name} loading="eager" />
+          <button type="button" className={styles.galleryArrowLeft} aria-label="Previous project image">‹</button>
+          <button type="button" className={styles.galleryArrowRight} aria-label="Next project image">›</button>
+          <button type="button" className={styles.favoriteButton} aria-label={`Save ${project.name}`}><HeartIcon /></button>
+          <div className={styles.galleryDots} aria-hidden="true">
+            {gallery.map((item, index) => <span key={item.slug} className={index === 0 ? styles.galleryDotActive : undefined} />)}
           </div>
         </div>
-      </section>
-      <section className={styles.detailBody}>
+
+        <div className={styles.detailThumbStrip}>
+          {gallery.map((item, index) => (
+            <button key={item.slug} type="button" className={index === 0 ? styles.thumbActive : undefined} aria-label={`View ${item.name}`}>
+              <img src={item.image} alt="" loading="eager" />
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.detailTitleRow}>
+          <div className={styles.detailTitleCopy}>
+            <p className={styles.detailMeta}>
+              <span>{project.badge}</span>
+              <em><MapPinIcon /> {project.area}</em>
+            </p>
+            <h1>{kind === 'property' ? 'Sea-view residence' : project.name}</h1>
+          </div>
+          <div className={styles.detailPriceBlock}>
+            <strong>{project.from}</strong>
+            <span>Starting from</span>
+          </div>
+          <LeadCard />
+        </div>
+
         <div className={styles.detailStats}>
-          <span><b>From</b>{project.from}</span>
-          <span><b>Yield</b>{project.yield}</span>
-          <span><b>Foreign quota</b>{project.quota}</span>
-          <span><b>Beach</b>{project.beach}</span>
+          <span><b>Price</b>{project.from}</span>
+          <span><b>Availability</b>{project.availability}</span>
+          <span><b>Details</b>{project.quota}</span>
         </div>
-        <div className={styles.galleryGrid}>
-          {projects.slice(0, 4).map((item) => <img key={item.slug} src={item.image} alt={item.name} loading="eager" />)}
-        </div>
+      </section>
+
+      <section className={styles.detailBody}>
         <div className={styles.detailColumns}>
           <article>
             <span className={styles.mono}>Advisor brief</span>
-            <h2>{kind === 'property' ? 'A ready unit for lifestyle plus rental management.' : 'Developer track record, quota, and exit liquidity in one view.'}</h2>
-            <p>The v3 preview follows the approved detail-page direction with a calm editorial hero, metric rail, image-led gallery, and advisor-first conversion path.</p>
+            <h2>{kind === 'property' ? 'A residence page structure for owner review.' : 'Gallery-led detail page with advisor-first conversion.'}</h2>
+            <p>{project.tone}</p>
+            <p>Price, availability, ownership details, developer information, completion timing, floor plans, and legal notes must be confirmed before this pattern replaces any production route.</p>
           </article>
           <AdvisorPanel />
         </div>
