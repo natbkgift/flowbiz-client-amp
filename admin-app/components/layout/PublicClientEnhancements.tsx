@@ -54,6 +54,15 @@ function isV2PreviewPath(pathname: string): boolean {
   return normalizePathForSurface(pathname) === '/v2-preview';
 }
 
+function isV3PreviewPath(pathname: string): boolean {
+  const normalized = normalizePathForSurface(pathname);
+  return normalized === '/v3-preview' || normalized.startsWith('/v3-preview/');
+}
+
+function isPreviewPath(pathname: string): boolean {
+  return isV2PreviewPath(pathname) || isV3PreviewPath(pathname);
+}
+
 export function PublicClientEnhancements() {
   const pathname = usePathname() ?? '/';
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -62,7 +71,7 @@ export function PublicClientEnhancements() {
   const [showAiWidget, setShowAiWidget] = useState(false);
   const showFloatingWhatsApp = shouldRenderFloatingWhatsApp(pathname);
   const pathWithoutLocale = pathname.replace(/^\/(en|th)(?=\/|$)/, '') || '/';
-  const isPreviewSurface = isV2PreviewPath(pathWithoutLocale);
+  const isPreviewSurface = isPreviewPath(pathWithoutLocale);
   const isCalmerSurface = pathWithoutLocale === '/' || pathWithoutLocale === '/projects' || isPreviewSurface;
 
   useEffect(() => {

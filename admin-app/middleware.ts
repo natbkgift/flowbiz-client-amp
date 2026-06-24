@@ -18,7 +18,10 @@ const NON_LOCALIZED_ROUTE_PREFIXES = [
   '/home-composer',
   '/telemetry',
 ] as const;
-const ENGLISH_ONLY_PREVIEW_BLOCKED_PATHS = new Set(['/th/v2-preview', '/th/v2-preview/']);
+const ENGLISH_ONLY_PREVIEW_BLOCKED_PREFIXES = [
+  '/th/v2-preview',
+  '/th/v3-preview',
+];
 
 function isLocale(value: string | undefined): value is Locale {
   return (LOCALES as readonly string[]).includes(value ?? '');
@@ -26,6 +29,10 @@ function isLocale(value: string | undefined): value is Locale {
 
 function hasRoutePrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+function isEnglishOnlyPreviewBlockedPath(pathname: string): boolean {
+  return ENGLISH_ONLY_PREVIEW_BLOCKED_PREFIXES.some((prefix) => hasRoutePrefix(pathname, prefix));
 }
 
 const PUBLIC_FILE = /\.[^/]+$/;
@@ -151,8 +158,8 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // AMP Public v2 Phase 1 is English-only. Force a real HTTP 404 for the Thai preview path.
-  if (ENGLISH_ONLY_PREVIEW_BLOCKED_PATHS.has(pathname)) {
+  // AMP public previews are English-only. Force a real HTTP 404 for Thai preview paths.
+  if (isEnglishOnlyPreviewBlockedPath(pathname)) {
     const response = new NextResponse(null, { status: 404 });
     response.headers.set('x-next-pathname', pathname);
     response.headers.set('Cache-Control', 'no-store');
