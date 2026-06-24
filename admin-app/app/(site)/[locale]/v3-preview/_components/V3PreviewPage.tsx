@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+'use client';
+
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import {
   advisors,
@@ -16,6 +18,7 @@ import {
 import styles from '../v3-preview.module.css';
 
 const basePath = '/en/v3-preview';
+
 
 function href(path = '') {
   return `${basePath}${path}`;
@@ -340,6 +343,68 @@ function SectionIntro({ kicker, title, body, action, href: actionHref }: { kicke
   );
 }
 
+function TrustBar() {
+  const items = [
+    'Curated listings',
+    'Verified information',
+    'Local Pattaya team',
+    'Private tours available',
+    'Foreign buyer guidance',
+    'PDPA / GDPR aligned',
+  ];
+
+  return (
+    <div className={styles.trustBar}>
+      <div className={styles.trustBarInner}>
+        {items.map((item) => (
+          <span key={item} className={styles.trustBarItem}>
+            <span className={styles.trustBarBullet} aria-hidden="true" />
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ForeignQuotaStatus() {
+  const projectsList = [
+    { name: 'Skyharbor Residences', quota: 'Quota status to verify' },
+    { name: 'Jomtien Bay Tower', quota: 'Quota status to verify' },
+    { name: 'Pratumnak Villas', quota: 'Quota status to verify' },
+    { name: 'Na Jomtien Residence', quota: 'Quota status to verify' },
+  ];
+
+  return (
+    <section className={styles.quotaSection}>
+      <div className={styles.quotaGrid}>
+        <div>
+          <span className={styles.mono}>Foreign ownership · Thailand</span>
+          <h2>You can own a condo here outright. <em>Most foreign buyers don&apos;t realise.</em></h2>
+          <p>Thai law lets non-residents own up to 49% of any condominium building in freehold, indefinitely. AMP confirms current quota status before you commit a single baht.</p>
+          <Link href={href('/contact')} className={styles.outlineAction}>Read the explainer <ArrowIcon /></Link>
+        </div>
+        <div className={styles.quotaCard}>
+          <h4>Foreign quota — live status</h4>
+          <div className={styles.quotaList}>
+            {projectsList.map((p) => (
+              <div key={p.name} className={styles.quotaItem}>
+                <div>
+                  <span>{p.name}</span>
+                  <span className={styles.mono}>{p.quota} / 49%</span>
+                </div>
+                <div className={styles.progressTrack}>
+                  <div className={styles.progressBar} style={{ width: '35%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomePage() {
   return (
     <>
@@ -426,14 +491,16 @@ function HomePage() {
             <div key={name} className={styles.matchRow}>
               <b>{index + 1}</b>
               <span>{name}</span>
-            <em>To verify</em>
+              <em>To verify</em>
             </div>
           ))}
           <Link href={href('/finder')} className={styles.fullTeal}>Get your shortlist</Link>
         </div>
       </section>
 
+      <TrustBar />
       <TrustSection />
+      <ForeignQuotaStatus />
       <FaqSection />
       <FinalCta />
     </>
@@ -548,7 +615,43 @@ function FinalCta() {
   );
 }
 
+function MapPanel({ activeProject, onSelectProject }: { activeProject?: string; onSelectProject?: (slug: string) => void }) {
+  const mapPins = [
+    { name: 'Skyharbor Residences', price: '฿6.9M', x: '65%', y: '25%', slug: 'amp-skyharbor' },
+    { name: 'Jomtien Bay Tower', price: '฿12.5M', x: '55%', y: '60%', slug: 'jomtien-bay-tower' },
+    { name: 'Pratumnak Villas', price: '฿18M', x: '45%', y: '45%', slug: 'pratumnak-villas' },
+    { name: 'Na Jomtien Residence', price: '฿8.4M', x: '50%', y: '80%', slug: 'na-jomtien-residence' },
+    { name: 'Central Marina Suites', price: '฿5.2M', x: '75%', y: '35%', slug: 'central-marina-suites' },
+  ];
+
+  return (
+    <div className={styles.mapPanel}>
+      <svg className={styles.mapSvg} viewBox="0 0 400 600" preserveAspectRatio="none">
+        <path d="M 0,0 L 120,0 Q 150,150 100,300 T 160,600 L 0,600 Z" fill="var(--teal-pale)" opacity="0.6" />
+        <text x="35" y="300" transform="rotate(-90 35 300)" fill="var(--teal-3)" fontSize="10" letterSpacing="2" opacity="0.5">GULF OF THAILAND</text>
+        <path d="M 180,0 Q 220,200 180,400 T 260,600" fill="none" stroke="var(--champagne)" strokeWidth="3" strokeDasharray="6 4" opacity="0.6" />
+        <text x="210" y="210" fill="var(--champagne-2)" fontSize="9" letterSpacing="1" opacity="0.7" transform="rotate(78 210 210)">SUKHUMVIT ROAD</text>
+      </svg>
+
+      {mapPins.map((pin) => (
+        <button
+          key={pin.slug}
+          type="button"
+          className={`${styles.mapPin} ${activeProject === pin.slug ? styles.mapPinActive : ''}`}
+          style={{ left: pin.x, top: pin.y }}
+          onClick={() => onSelectProject?.(pin.slug)}
+        >
+          <span>{pin.price}</span>
+          <small>{pin.name}</small>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ListingPage() {
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+
   return (
     <section className={styles.listingPage}>
       <div className={styles.listingHeader}>
@@ -578,9 +681,23 @@ function ListingPage() {
           <FilterRows title="Distance to beach" rows={[['Any distance', ''], ['Beachfront', ''], ['Under 100m', ''], ['Under 500m', '']]} radio />
           <button type="button" className={styles.resetButton}>Reset all filters</button>
         </aside>
+
         <div className={styles.listingGrid}>
-          {projects.map((project) => <ProjectCard key={project.slug} project={project} compact />)}
+          {projects.map((project) => (
+            <div
+              key={project.slug}
+              onMouseEnter={() => setSelectedProject(project.slug)}
+              onMouseLeave={() => setSelectedProject(null)}
+              className={`${styles.cardHoverWrapper} ${selectedProject === project.slug ? styles.cardHoverActive : ''}`}
+            >
+              <ProjectCard project={project} compact />
+            </div>
+          ))}
         </div>
+
+        <aside className={styles.mapSidebar}>
+          <MapPanel activeProject={selectedProject || ''} onSelectProject={setSelectedProject} />
+        </aside>
       </div>
     </section>
   );
@@ -743,38 +860,97 @@ function CalcGroup({ title, rows }: { title: string; rows: string[][] }) {
 }
 
 function FinderPage() {
+  const [budget, setBudget] = useState(15);
+
+  const getMatchPercent = (base: number, slug: string) => {
+    if (slug === 'amp-skyharbor') {
+      return budget >= 10 ? Math.min(99, 85 + (budget - 10)) : Math.max(30, 85 - (10 - budget) * 5);
+    }
+    if (slug === 'jomtien-bay-tower') {
+      return budget >= 8 ? Math.min(95, 80 + (budget - 8)) : Math.max(25, 80 - (8 - budget) * 7);
+    }
+    if (slug === 'pratumnak-villas') {
+      return budget >= 25 ? Math.min(98, 75 + (budget - 25)) : Math.max(10, 75 - (25 - budget) * 4);
+    }
+    return budget >= 12 ? Math.min(92, 70 + (budget - 12)) : Math.max(20, 70 - (12 - budget) * 6);
+  };
+
+  const usdValue = Math.round((budget * 1000000) / 34.5);
+  const formattedUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(usdValue);
+
   return (
     <section className={styles.finderPage}>
       <div className={styles.finderTop}>
         <Logo />
-        <span>Step 1 of 7 <em>14%</em></span>
-        <div><b style={{ width: '14%' }} /></div>
+        <span>Step 3 of 7 <em>42%</em></span>
+        <div><b style={{ width: '42%' }} /></div>
         <Link href={href()}>Exit</Link>
       </div>
       <div className={styles.finderGridPage}>
         <div className={styles.questionPanel}>
           <span className={styles.mono}>Smart Finder · 90-second brief</span>
-          <h1>What&apos;s your primary goal?</h1>
-          <p>This shapes everything — from zone to unit size.</p>
-          {['Review price and availability', 'Compare project details', 'Plan a viewing request'].map((item) => (
-            <button key={item} type="button"><span aria-hidden="true" />{item}</button>
-          ))}
+          <h1>What is your target budget?</h1>
+          <p>We use this to filter out properties that don&apos;t align with your cashflow profile.</p>
+
+          <div className={styles.budgetSliderContainer}>
+            <div className={styles.budgetValueRow}>
+              <span>Target Budget:</span>
+              <strong>฿{budget}M THB</strong>
+            </div>
+            <div className={styles.usdConversionRow}>
+              <span>Approx. {formattedUsd} USD</span>
+            </div>
+            <input
+              type="range"
+              min="2"
+              max="80"
+              value={budget}
+              onChange={(e) => setBudget(Number(e.target.value))}
+              className={styles.rangeInput}
+              aria-label="Budget slider"
+            />
+            <div className={styles.sliderMinMax}>
+              <span>฿2M</span>
+              <span>฿80M+</span>
+            </div>
+          </div>
+
+          <div className={styles.previousAnswers}>
+            <span className={styles.mono}>Answers so far:</span>
+            <div className={styles.answerTags}>
+              <span className={styles.tag}>Goal: Review price &amp; availability</span>
+              <span className={styles.tag}>Type: Condo / Villa</span>
+            </div>
+          </div>
+
           <button type="button" className={`${styles.fullCoral} ${styles.finderContinue}`}>Continue <ArrowIcon /></button>
         </div>
         <div className={styles.liveMatches}>
-          <span className={styles.mono}>Live matches · updates as you answer</span>
+          <span className={styles.mono}>Live matches · updates as you slide</span>
           <h2>Your shortlist is shaping up</h2>
           <p>Availability to verify</p>
-          {[projects[0], projects[1], projects[3], projects[4]].map((project) => (
-            <div key={project.slug} className={styles.matchCard}>
-              <img src={project.image} alt={project.name} loading="eager" />
-              <span><b>{project.name}</b><small>{project.area} · {project.from}</small></span>
-              <em>Review</em>
-            </div>
-          ))}
+          {[projects[0], projects[1], projects[2], projects[3]].map((project) => {
+            const matchPercent = Math.round(getMatchPercent(80, project.slug));
+            return (
+              <div key={project.slug} className={styles.matchCard}>
+                <img src={project.image} alt={project.name} loading="eager" />
+                <div style={{ flex: 1 }}>
+                  <b>{project.name}</b>
+                  <small>{project.area} · {project.from}</small>
+                  <div className={styles.matchProgressBarTrack} style={{ height: '4px', background: 'var(--line-soft)', borderRadius: '2px', marginTop: '6px', overflow: 'hidden' }}>
+                    <div className={styles.matchProgressBar} style={{ height: '100%', width: `${matchPercent}%`, background: 'var(--teal)' }} />
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', marginLeft: '12px' }}>
+                  <span className={styles.mono} style={{ fontSize: '12px', fontWeight: 'bold' }}>{matchPercent}%</span>
+                  <small style={{ display: 'block', fontSize: '9px', color: 'var(--ink-4)' }}>match</small>
+                </div>
+              </div>
+            );
+          })}
           <div className={styles.matchHint}>
-            <small>6 more questions</small>
-            <p>Answer the remaining questions to prepare a visual brief for owner review.</p>
+            <small>4 more questions</small>
+            <p>Answer the remaining questions to prepare a visual brief for advisor review.</p>
           </div>
         </div>
       </div>
@@ -846,46 +1022,289 @@ function ContactPage() {
           <p>Choose a contact channel and request confirmed price, availability, and project details before production use.</p>
         </div>
       </section>
+
       <section className={styles.contactGrid}>
-        <div className={styles.messageForm}>
-          <h2>Send us a message</h2>
-          <p>Advisor response timing and office details are subject to confirmation.</p>
-          <input placeholder="Your name *" />
-          <div>
-            <input placeholder="Email" />
-            <input placeholder="Phone (with code)" />
-          </div>
-          <textarea rows={5} placeholder="Tell us what you're looking for — budget, bedrooms, timeline, questions…" />
-          <span>Preferred contact channel</span>
-          <div className={styles.channelPills}>
-            <button type="button" className={styles.channelActive}>💬 WhatsApp</button>
-            <button type="button">LINE</button>
-            <button type="button">📧 Email</button>
-            <button type="button">📞 Call me</button>
-          </div>
-          <button type="button" className={styles.fullCoral}>Send message <ArrowIcon /></button>
-        </div>
-        <div className={styles.contactSide}>
-          <article className={styles.infoCard}>
-            <h3>Office &amp; hours</h3>
-            <p>⌖ Office details subject to confirmation</p>
-            <p>◷ Viewing hours to verify</p>
-            <p>☎ Contact details subject to confirmation</p>
-            <div>
-              <Link href={href('/contact')}>💬 WhatsApp</Link>
-              <Link href={href('/contact')}>LINE</Link>
+        <div className={styles.contactLeftSide}>
+          <div className={styles.channelGrid}>
+            <div className={styles.channelCard}>
+              <div className={styles.channelCardIcon} style={{ background: '#25D366' }}>💬</div>
+              <div className={styles.channelCardText}>
+                <div>WhatsApp</div>
+                <div>Instant advisor contact</div>
+              </div>
             </div>
+            <div className={styles.channelCard}>
+              <div className={styles.channelCardIcon} style={{ background: '#06C755' }}>🟢</div>
+              <div className={styles.channelCardText}>
+                <div>LINE</div>
+                <div>Official service account</div>
+              </div>
+            </div>
+            <div className={styles.channelCard}>
+              <div className={styles.channelCardIcon} style={{ background: 'var(--teal)' }}>📞</div>
+              <div className={styles.channelCardText}>
+                <div>Direct Call</div>
+                <div>Availability to verify</div>
+              </div>
+            </div>
+            <div className={styles.channelCard}>
+              <div className={styles.channelCardIcon} style={{ background: 'var(--coral)' }}>✉</div>
+              <div className={styles.channelCardText}>
+                <div>Email Inquiry</div>
+                <div>Project details subject to confirmation</div>
+              </div>
+            </div>
+          </div>
+
+          <article className={styles.officeBox} style={{ marginTop: '28px' }}>
+            <h3>Office &amp; hours</h3>
+            <p>⌖ Pattaya Beach Road, Chon Buri (Office details subject to confirmation)<br />
+               ◷ Viewing hours and advisor availability to verify<br />
+               ✓ Valet parking and private meeting rooms available</p>
           </article>
-          <ContactAdvisorCard />
+        </div>
+
+        <div className={styles.contactSide}>
+          <div className={styles.messageForm}>
+            <h2>Send us a message</h2>
+            <p>Advisor response timing and office details are subject to confirmation.</p>
+            <input aria-label="Your name" placeholder="Your name *" />
+            <div className={styles.leadFields}>
+              <input aria-label="Email" placeholder="Email" />
+              <input aria-label="Phone (with code)" placeholder="Phone (with code)" />
+            </div>
+            <textarea rows={5} placeholder="Tell us what you're looking for — budget, bedrooms, timeline, questions…" />
+            <span>Preferred contact channel</span>
+            <div className={styles.channelPills}>
+              <button type="button" className={styles.channelActive}>💬 WhatsApp</button>
+              <button type="button">LINE</button>
+              <button type="button">📧 Email</button>
+              <button type="button">📞 Call me</button>
+            </div>
+            <button type="button" className={styles.fullCoral}>Send message <ArrowIcon /></button>
+          </div>
         </div>
       </section>
+
+      <section className={styles.teamSection}>
+        <div className={styles.sectionIntro} style={{ padding: '0' }}>
+          <div>
+            <span className={styles.mono}>Meet the advisors</span>
+            <h2>Our Pattaya Advisor Team</h2>
+            <p>Every member of our team is a seasoned property advisor who knows Pattaya inside out. No scripts. No bots.</p>
+          </div>
+        </div>
+        <div className={styles.teamGrid}>
+          {advisors.map((advisor) => (
+            <div key={advisor.name} className={styles.teamCard}>
+              <img src={advisor.image} alt={advisor.name} className={styles.teamCardAvatar} />
+              <h4>{advisor.name}</h4>
+              <div className={styles.teamCardRole}>{advisor.role}</div>
+              <div className={styles.teamCardMeta}>★ 4.9 Rating · 120+ deals</div>
+              <div className={styles.teamCardLanguages}>Languages: TH, EN</div>
+              <Link href={href('/contact')} className={styles.teamBookBtn} style={{ display: 'block', marginTop: '14px', background: 'var(--teal)', color: '#fff', padding: '8px 0', borderRadius: '999px', fontSize: '12px' }}>Book a call</Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div style={{ marginTop: '64px' }}>
+        <TrustBar />
+      </div>
     </>
   );
 }
 
-function DetailPage({ kind }: { kind: 'project' | 'property' }) {
-  const project = kind === 'property' ? projects[1] : projects[0];
-  const gallery = [project, projects[1], projects[2], projects[3], projects[4]];
+function DetailPage({ kind, slug }: { kind: 'project' | 'property'; slug?: string[] }) {
+  const slugProject = slug && slug[1] ? projects.find(p => p.slug === slug[1]) : undefined;
+  const project = slugProject || (kind === 'property' ? projects[1] : projects[0]);
+  const gallery = project.gallery && project.gallery.length ? project.gallery : [project.image, projects[1].image, projects[2].image, projects[3].image, projects[4].image];
+
+  const [activeTab, setActiveTab] = useState('overview');
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  if (kind === 'project') {
+    return (
+      <>
+        <section className={styles.detailGalleryPage}>
+          <div className={styles.breadcrumbs}>
+            <Link href={href('/listing')} className={styles.backLink}>← All projects</Link>
+            <span style={{ margin: '0 8px', color: 'var(--line)' }}>|</span>
+            <Link href={href()}>Home</Link> · <Link href={href('/listing')}>Projects</Link> · <span className={styles.activeBreadcrumb}>{project.name}</span>
+          </div>
+
+          <div className={styles.galleryGrid} aria-label="Project photo gallery">
+            {gallery.map((imgUrl, index) => (
+              <img
+                key={index}
+                src={imgUrl}
+                alt={`${project.name} gallery slot ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <div className={styles.detailTitleRow}>
+            <div className={styles.detailTitleCopy}>
+              <p className={styles.detailMeta}>
+                <span className={styles.tag}>{project.badge}</span>
+                <em><MapPinIcon /> {project.area}</em>
+              </p>
+              <h1>{project.name}</h1>
+            </div>
+            <div className={styles.detailPriceBlock}>
+              <strong>{project.from}</strong>
+              <span>Starting from</span>
+            </div>
+          </div>
+
+          <div className={styles.detailStats}>
+            <span><b>Price</b>{project.from}</span>
+            <span><b>Availability</b>{project.availability}</span>
+            <span><b>Details</b>{project.quota}</span>
+          </div>
+        </section>
+
+        <section className={styles.detailBody}>
+          <div className={styles.detailColumns}>
+            <div className={styles.detailMainColumn}>
+              <div className={styles.tabRail}>
+                {['overview', 'units & plans', 'amenities', 'investment', 'location', 'developer', 'faq'].map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    className={activeTab === tab ? styles.tabRailActive : styles.tabRailInactive}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              <div className={styles.tabContent}>
+                {activeTab === 'overview' && (
+                  <article>
+                    <span className={styles.mono}>Overview &amp; Design</span>
+                    <h2>{project.name} — Premium Coastal Living</h2>
+                    <p>{project.tone}</p>
+                    <p>Designed with floor-to-ceiling windows, high-speed elevators, smart-home integration, and extensive green space. Every layout maximizes light, air flow, and natural beachside cross-ventilation.</p>
+                    <p>Price, availability, ownership details, developer information, completion timing, floor plans, and legal notes must be confirmed before this pattern replaces any production route.</p>
+                  </article>
+                )}
+
+                {activeTab === 'units & plans' && (
+                  <article>
+                    <span className={styles.mono}>Inventory Catalog</span>
+                    <h2>Available Units &amp; Floor Plans</h2>
+                    <p>Review the standard unit configurations. Pricing is indicative and subject to final confirmation.</p>
+                    <table className={styles.unitTable}>
+                      <thead>
+                        <tr>
+                          <th>Unit Type</th>
+                          <th>Area (Sqm)</th>
+                          <th>Indicative Price</th>
+                          <th>Quota Status</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>1-Bedroom Suite (Type A)</td>
+                          <td>45 sqm</td>
+                          <td>Price on request</td>
+                          <td>Availability to verify</td>
+                          <td><Link href={href('/contact')} className={styles.tag}>Request Details</Link></td>
+                        </tr>
+                        <tr>
+                          <td>2-Bedroom Executive (Type B)</td>
+                          <td>85 sqm</td>
+                          <td>Price on request</td>
+                          <td>Availability to verify</td>
+                          <td><Link href={href('/contact')} className={styles.tag}>Request Details</Link></td>
+                        </tr>
+                        <tr>
+                          <td>3-Bedroom Penthouse (Type P)</td>
+                          <td>180 sqm</td>
+                          <td>Price on request</td>
+                          <td>Availability to verify</td>
+                          <td><Link href={href('/contact')} className={styles.tag}>Request Details</Link></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </article>
+                )}
+
+                {activeTab === 'amenities' && (
+                  <article>
+                    <span className={styles.mono}>Building Facilities</span>
+                    <h2>World-Class Amenities</h2>
+                    <p>Enjoy premium resort-style facilities designed for global owners:</p>
+                    <ul>
+                      <li>50m Olympic-length infinity swimming pool overlooking Wongamat Beach</li>
+                      <li>Sky Lounge &amp; Private Dining Room on the 42nd floor</li>
+                      <li>State-of-the-art Fitness Center &amp; Pilates Studio</li>
+                      <li>Steam, Sauna, and cold plunge wellness suites</li>
+                      <li>24-hour concierge, security, and smart access controls</li>
+                    </ul>
+                  </article>
+                )}
+
+                {activeTab === 'investment' && (
+                  <article>
+                    <span className={styles.mono}>Advisory Yields</span>
+                    <h2>Investment Analysis &amp; Rental Potential</h2>
+                    <p>Pattaya remains a high-demand rental market for global expatriates and domestic professionals. Review our projected yield bands under advisor guidance:</p>
+                    <div className={styles.investmentGrid}>
+                      <div>
+                        <span>Est. Yield Band</span>
+                        <strong>To verify under advisory</strong>
+                      </div>
+                      <div>
+                        <span>Target Occupancy</span>
+                        <strong>Availability to verify</strong>
+                      </div>
+                      <div>
+                        <span>ADR Potential</span>
+                        <strong>Price on request</strong>
+                      </div>
+                    </div>
+                  </article>
+                )}
+
+                {['location', 'developer', 'faq'].includes(activeTab) && (
+                  <article>
+                    <span className={styles.mono}>{activeTab.toUpperCase()}</span>
+                    <h2>Details pending confirmation</h2>
+                    <p>Specific information regarding the {activeTab} of {project.name} is currently undergoing verification by our local team.</p>
+                    <p>Please contact an advisor to request the latest verified brief.</p>
+                  </article>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.detailSidebar}>
+              <LeadCard />
+              <div className={styles.advisorSidebarCard}>
+                <span className={styles.mono}>Project Advisor</span>
+                <div className={styles.advisorDetailHeader}>
+                  <img src={advisors[0].image} alt={advisors[0].name} className={styles.advisorAvatar} />
+                  <div>
+                    <h4>{advisors[0].name}</h4>
+                    <small>{advisors[0].role}</small>
+                    <div className={styles.advisorRating}>★ 4.9 · Local Expert</div>
+                  </div>
+                </div>
+                <div className={styles.advisorActions}>
+                  <Link href={href('/contact')} className={styles.btnQuiet} style={{ border: '1px solid var(--line)', borderRadius: '999px', fontSize: '12px' }}>💬 WhatsApp</Link>
+                  <Link href={href('/contact')} className={styles.btnQuiet} style={{ border: '1px solid var(--line)', borderRadius: '999px', fontSize: '12px' }}>LINE</Link>
+                </div>
+                <Link href={href('/contact')} className={styles.fullTeal} style={{ textAlign: 'center', display: 'block', padding: '10px 0', borderRadius: '999px', marginTop: '8px' }}>Schedule Private Tour</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
 
   return (
     <>
@@ -893,19 +1312,48 @@ function DetailPage({ kind }: { kind: 'project' | 'property' }) {
         <Link href={href('/listing')} className={styles.backLink}>← All projects</Link>
 
         <div className={styles.detailMainGallery}>
-          <img src={project.image} alt={project.name} loading="eager" />
-          <button type="button" className={styles.galleryArrowLeft} aria-label="Previous project image">‹</button>
-          <button type="button" className={styles.galleryArrowRight} aria-label="Next project image">›</button>
+          <img src={gallery[activeImageIndex]} alt={project.name} loading="eager" />
+          <button
+            type="button"
+            className={styles.galleryArrowLeft}
+            aria-label="Previous project image"
+            onClick={() => setActiveImageIndex((prev) => (prev === 0 ? gallery.length - 1 : prev - 1))}
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className={styles.galleryArrowRight}
+            aria-label="Next project image"
+            onClick={() => setActiveImageIndex((prev) => (prev === gallery.length - 1 ? 0 : prev + 1))}
+          >
+            ›
+          </button>
           <button type="button" className={styles.favoriteButton} aria-label={`Save ${project.name}`}><HeartIcon /></button>
           <div className={styles.galleryDots} aria-hidden="true">
-            {gallery.map((item, index) => <span key={item.slug} className={index === 0 ? styles.galleryDotActive : undefined} />)}
+            {gallery.map((item, index) => (
+              <button
+                key={index}
+                type="button"
+                className={index === activeImageIndex ? styles.galleryDotActive : undefined}
+                onClick={() => setActiveImageIndex(index)}
+                style={{ cursor: 'pointer' }}
+                aria-label={`View slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
 
         <div className={styles.detailThumbStrip}>
-          {gallery.map((item, index) => (
-            <button key={item.slug} type="button" className={index === 0 ? styles.thumbActive : undefined} aria-label={`View ${item.name}`}>
-              <img src={item.image} alt="" loading="eager" />
+          {gallery.map((imgUrl, index) => (
+            <button
+              key={index}
+              type="button"
+              className={index === activeImageIndex ? styles.thumbActive : undefined}
+              aria-label={`View image ${index + 1}`}
+              onClick={() => setActiveImageIndex(index)}
+            >
+              <img src={imgUrl} alt="" loading="eager" />
             </button>
           ))}
         </div>
@@ -913,16 +1361,18 @@ function DetailPage({ kind }: { kind: 'project' | 'property' }) {
         <div className={styles.detailTitleRow}>
           <div className={styles.detailTitleCopy}>
             <p className={styles.detailMeta}>
-              <span>{project.badge}</span>
+              <span className={styles.tag}>{project.badge}</span>
               <em><MapPinIcon /> {project.area}</em>
             </p>
-            <h1>{kind === 'property' ? 'Sea-view residence' : project.name}</h1>
+            <h1>Sea-view residence</h1>
           </div>
           <div className={styles.detailPriceBlock}>
             <strong>{project.from}</strong>
             <span>Starting from</span>
           </div>
-          <LeadCard />
+          <div style={{ display: 'none' }}>
+            <LeadCard />
+          </div>
         </div>
 
         <div className={styles.detailStats}>
@@ -934,38 +1384,134 @@ function DetailPage({ kind }: { kind: 'project' | 'property' }) {
 
       <section className={styles.detailBody}>
         <div className={styles.detailColumns}>
-          <article>
-            <span className={styles.mono}>Advisor brief</span>
-            <h2>{kind === 'property' ? 'A residence page structure for owner review.' : 'Gallery-led detail page with advisor-first conversion.'}</h2>
-            <p>{project.tone}</p>
-            <p>Price, availability, ownership details, developer information, completion timing, floor plans, and legal notes must be confirmed before this pattern replaces any production route.</p>
-          </article>
-          <AdvisorPanel />
+          <div className={styles.detailMainColumn}>
+            <article style={{ padding: '0 0 32px 0' }}>
+              <span className={styles.mono}>Property Overview</span>
+              <h2>Premium Beachfront Residence</h2>
+              <p>Experience direct ocean views from this luxury high-floor condo. Features open-plan living, Italian marble tiling, and floor-to-ceiling sliding doors opening to a deep private balcony.</p>
+              <p>All property listings in this design preview are mock configurations. Price, availability, and legal details must be verified with our local advisory team before proceeding.</p>
+            </article>
+
+            <div className={styles.investmentBlock}>
+              <h3>Rental Yield Estimation</h3>
+              <p>Projected return metrics for this zone are based on historic occupancy data. Subject to confirmation under advisor review.</p>
+              <div className={styles.investmentGrid}>
+                <div>
+                  <span>Average Daily Rate</span>
+                  <strong>Price on request</strong>
+                </div>
+                <div>
+                  <span>Projected Occupancy</span>
+                  <strong>Availability to verify</strong>
+                </div>
+                <div>
+                  <span>Target Gross Yield</span>
+                  <strong>Subject to confirmation</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.costBlock} style={{ marginTop: '32px' }}>
+              <h3>Estimated Acquisition Costs</h3>
+              <p>Review standard transaction fee distributions in Thailand. Pre-purchase cost breakdown is indicative.</p>
+              <table className={styles.unitTable}>
+                <thead>
+                  <tr>
+                    <th>Fee Item</th>
+                    <th>Percentage / Base</th>
+                    <th>Estimated Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Property Purchase Price</td>
+                    <td>100% Value</td>
+                    <td>Price on request</td>
+                  </tr>
+                  <tr>
+                    <td>Transfer Fee</td>
+                    <td>2% (Usually split 50/50)</td>
+                    <td>Availability to verify</td>
+                  </tr>
+                  <tr>
+                    <td>Sinking Fund Contribution</td>
+                    <td>One-time payment</td>
+                    <td>Subject to confirmation</td>
+                  </tr>
+                  <tr>
+                    <td>Maintenance Fee (Pre-paid 1 yr)</td>
+                    <td>Per sqm / month</td>
+                    <td>Subject to confirmation</td>
+                  </tr>
+                  <tr style={{ fontWeight: 'bold' }}>
+                    <td>Estimated Total Cost</td>
+                    <td>-</td>
+                    <td>Price on request</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className={styles.detailSidebar}>
+            <div className={styles.propertySpecs}>
+              <h3>Property Specifications</h3>
+              <div className={styles.specsGrid}>
+                <span><b>Layout</b>2 Bedrooms / 2 Bathrooms</span>
+                <span><b>Size</b>95 sqm (Net Area)</span>
+                <span><b>Floor</b>14th Floor (Sea View)</span>
+                <span><b>Ownership</b>Foreign Freehold Quota</span>
+                <span><b>Status</b>Ready to Move In</span>
+              </div>
+            </div>
+
+            <div className={styles.floorplanTeaser}>
+              <h4>Floor Plan Concept</h4>
+              <svg viewBox="0 0 200 120" className={styles.floorplanSvg}>
+                <rect x="10" y="10" width="180" height="100" fill="none" stroke="var(--line)" strokeWidth="2" />
+                <line x1="100" y1="10" x2="100" y2="110" stroke="var(--line)" strokeWidth="1.5" strokeDasharray="4 2" />
+                <line x1="10" y1="60" x2="100" y2="60" stroke="var(--line)" strokeWidth="1.5" />
+                <rect x="25" y="20" width="30" height="25" fill="none" stroke="var(--line-soft)" strokeWidth="1" />
+                <text x="40" y="35" fontSize="8" fill="var(--ink-4)" textAnchor="middle">Bed</text>
+                <rect x="120" y="30" width="40" height="40" fill="none" stroke="var(--line-soft)" strokeWidth="1" />
+                <text x="140" y="55" fontSize="8" fill="var(--ink-4)" textAnchor="middle">Living</text>
+                <circle cx="160" cy="90" r="12" fill="none" stroke="var(--line-soft)" strokeWidth="1" />
+                <text x="160" y="93" fontSize="8" fill="var(--ink-4)" textAnchor="middle">Bath</text>
+              </svg>
+              <small>Floor plan draft subject to confirmation</small>
+            </div>
+
+            <div className={styles.propertyActions}>
+              <Link href={href('/contact')} className={styles.btnPrimary} style={{ width: '100%', textAlign: 'center', marginBottom: '8px' }}>Request Floor Plan PDF</Link>
+              <Link href={href('/contact')} className={styles.btnCoral} style={{ width: '100%', textAlign: 'center', marginBottom: '8px' }}>Schedule Live Video Tour</Link>
+              <Link href={href('/contact')} className={styles.btnGhost} style={{ width: '100%', textAlign: 'center' }}>Book In-Person Viewing</Link>
+            </div>
+          </div>
         </div>
       </section>
     </>
   );
 }
 
-function V3RouteContent({ route }: { route: V3PreviewRoute }) {
+function V3RouteContent({ route, slug }: { route: V3PreviewRoute; slug?: string[] }) {
   if (route === 'listing') return <ListingPage />;
   if (route === 'area-guide') return <AreaGuidePage />;
   if (route === 'calculator') return <CalculatorPage />;
   if (route === 'finder') return <FinderPage />;
   if (route === 'compare') return <ComparePage />;
   if (route === 'contact') return <ContactPage />;
-  if (route === 'project-detail') return <DetailPage kind="project" />;
-  if (route === 'property-detail') return <DetailPage kind="property" />;
+  if (route === 'project-detail') return <DetailPage kind="project" slug={slug} />;
+  if (route === 'property-detail') return <DetailPage kind="property" slug={slug} />;
   return <HomePage />;
 }
 
-export function V3PreviewPage({ route }: { route: V3PreviewRoute }) {
+export function V3PreviewPage({ route, slug }: { route: V3PreviewRoute; slug?: string[] }) {
   const finderOnly = route === 'finder';
 
   return (
     <main className={`${styles.page} amp-v3-preview-page`} data-testid="amp-public-v3-preview">
       {finderOnly ? null : <ShellHeader route={route} />}
-      <V3RouteContent route={route} />
+      <V3RouteContent route={route} slug={slug} />
       {finderOnly ? null : <ShellFooter />}
     </main>
   );

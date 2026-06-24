@@ -20,6 +20,7 @@ export type V3Project = {
   quota: string;
   beach: string;
   image: string;
+  gallery: string[];
   tone: string;
 };
 
@@ -90,6 +91,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Wongamat',
     image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Gallery-first project detail direction for owner review, with price, availability, and project details to confirm.',
   },
   {
@@ -103,6 +111,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Jomtien',
     image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Project card treatment for visual review with commercial details to verify.',
   },
   {
@@ -116,6 +131,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Pratumnak Hill',
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Villa card treatment for visual review with commercial details to verify.',
   },
   {
@@ -129,6 +151,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Na Jomtien',
     image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Project card treatment for visual review with commercial details to verify.',
   },
   {
@@ -142,6 +171,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Central Pattaya',
     image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'City project card treatment for visual review with commercial details to verify.',
   },
   {
@@ -155,6 +191,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Bang Saray',
     image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1582610116397-edb318620f90?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Coastal project card treatment for visual review with commercial details to verify.',
   },
   {
@@ -168,6 +211,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Central Pattaya',
     image: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Resale-style card treatment for visual review with commercial details to verify.',
   },
   {
@@ -181,6 +231,13 @@ export const projects: V3Project[] = [
     quota: 'Project details subject to confirmation',
     beach: 'Rayong',
     image: 'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200&q=80&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1200&q=80&auto=format&fit=crop',
+    ],
     tone: 'Villa card treatment for visual review with commercial details to verify.',
   },
 ];
