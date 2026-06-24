@@ -47,6 +47,7 @@ export default async function SiteLayout(
     return <>{children}</>;
   }
   const currentPath = await detectCurrentPathWithoutLocale(locale);
+  const isV3PreviewLayout = currentPath === '/v3-preview' || currentPath.startsWith('/v3-preview/');
   const useFallbackLayoutCms = currentPath === '/' || currentPath === '/projects';
   const layoutCmsRow = useFallbackLayoutCms
     ? null
@@ -82,9 +83,9 @@ export default async function SiteLayout(
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="public-site-shell" data-locale={locale}>
-        <SiteHeader locale={locale} cms={layoutCms.header} />
+        {isV3PreviewLayout ? null : <SiteHeader locale={locale} cms={layoutCms.header} />}
         {children}
-        <SiteFooter locale={locale} cms={layoutCms.footer} />
+        {isV3PreviewLayout ? null : <SiteFooter locale={locale} cms={layoutCms.footer} />}
         <div aria-live="polite" aria-atomic="true" id="amp-live-region" className="sr-only" />
         <Suspense fallback={null}>
           <PublicClientEnhancements />

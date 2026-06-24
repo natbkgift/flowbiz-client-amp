@@ -197,7 +197,8 @@ describe('AMP Public v2 preview route', () => {
     expect(enhancementsSource).toContain('isV2PreviewPath');
     expect(enhancementsSource).toContain('{isPreviewSurface ? null : <StickyMobileCTA />}');
     expect(headerSource).toContain('isV2PreviewPath');
-    expect(headerSource).toContain('shortlistCta && !isV2PreviewSurface');
+    expect(headerSource).toContain('isPreviewPath');
+    expect(headerSource).toContain('shortlistCta && !isPreviewSurface');
     expect(read('app/(site)/[locale]/page.tsx')).not.toContain('v2-preview');
     expect(read('app/(site)/[locale]/projects/page.tsx')).not.toContain('v2-preview');
     expect(read('app/(site)/[locale]/buy/page.tsx')).not.toContain('v2-preview');

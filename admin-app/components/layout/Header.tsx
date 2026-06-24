@@ -166,6 +166,15 @@ function isV2PreviewPath(pathname: string): boolean {
   return normalizePathForSurface(pathname) === '/v2-preview';
 }
 
+function isV3PreviewPath(pathname: string): boolean {
+  const normalized = normalizePathForSurface(pathname);
+  return normalized === '/v3-preview' || normalized.startsWith('/v3-preview/');
+}
+
+function isPreviewPath(pathname: string): boolean {
+  return isV2PreviewPath(pathname) || isV3PreviewPath(pathname);
+}
+
 export function SiteHeader({
   locale,
   dict: dictProp,
@@ -217,7 +226,7 @@ export function SiteHeader({
 
   /** Strip /<locale> prefix from pathname to compare with nav item hrefs */
   const pathWithoutLocale = pathname?.replace(new RegExp(`^/${locale}`), '') || '/';
-  const isV2PreviewSurface = isV2PreviewPath(pathWithoutLocale);
+  const isPreviewSurface = isPreviewPath(pathWithoutLocale);
   function isActive(href: string): boolean {
     if (href === '/') return pathWithoutLocale === '/' || pathWithoutLocale === '';
     if (href === '/area-guide') {
@@ -298,7 +307,7 @@ export function SiteHeader({
           </nav>
 
           <div className="header-actions">
-            {shortlistCta && !isV2PreviewSurface ? (
+            {shortlistCta && !isPreviewSurface ? (
               <Link
                 href={resolveCtaHref(locale, shortlistCta)}
                 prefetch={false}
